@@ -524,3 +524,26 @@ export const RASI_OWNERS_FOR_EKADHIPATYA: (number | [number, number])[] = [
   [CAPRICORN, AQUARIUS]  // Saturn's signs
 ];
 
+/**
+ * Signs owned by each planet (for Graha Arudha calculations)
+ * Maps planet ID to array of signs they rule
+ * Used for finding which sign a planet owns when calculating Graha Padhas
+ */
+export const HOUSE_LORDS_DICT: Record<number, number[]> = {
+  [SUN]: [LEO],
+  [MOON]: [CANCER],
+  [MARS]: [ARIES, SCORPIO],
+  [MERCURY]: [GEMINI, VIRGO],
+  [JUPITER]: [SAGITTARIUS, PISCES],
+  [VENUS]: [TAURUS, LIBRA],
+  [SATURN]: [CAPRICORN, AQUARIUS],
+  [RAHU]: [AQUARIUS],  // Co-ruler
+  [KETU]: [SCORPIO]    // Co-ruler
+};
+
+/** Count of planet positions up to and including Ketu (Lagna + 9 planets) */
+export const PP_COUNT_UPTO_KETU = 10;
+
+/** Count of planets from Sun to Ketu (not including Lagna) */
+export const PLANETS_UPTO_KETU = 9;
+
