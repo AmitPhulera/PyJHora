@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Ref: https://vedanshcraft.com/en-us/blogs/news/types-of-ekadashi
+
 from itertools import combinations
 from jhora.panchanga import drik as panchanga
 from jhora.horoscope.chart import charts
@@ -87,17 +89,18 @@ special_vratha_map = { 'pradosham':'pradosham_dates',
                       }
 _vinayaka_chathurthi_tithis = {'vinayaka_chathurthi':(4,5)}
 """ 14 - Manvaadhi / Manvantra tithis - tithi/tamil-month combinations """
-_manvaadhi_tithis = {'Swayambhuva Manvadi':(3,1),'Swarochisha Manvadi':(15,1),'Uttama Manvadi':(15,8),
-                     'Tamasa Manvadi':(12,8),'Raivata Manvadi':(10,4),'Chakshusha Manvadi':(15,4),
-                     'Vaivaswata Manvadi':(15,3),'Savarni Manvadi':(15,12),'Daksha Savarni Manvadi':(9,7),
-                     'Brahma Savarni Manvadi':(7,11),'Dharma Savarni Manvadi':(11,10),'Rudra Savarni Manvadi':(3,6),
-                     'Daiva Savarni Manvadi':(30,5),'Indra Savarni Manvadi':(23,5)}
+_manvaadhi_tithis = {'swayambhuva_manvadhi':(3,1),'swarochisha_manvadhi':(15,1),'uttama_manvadhi':(15,8),
+                     'tamasa_manvadhi':(12,8),'raivata_manvadhi':(10,4),'chakshusha_manvadhi':(15,4),
+                     'vaivaswata_manvadhi':(15,3),'savarni_manvadhi':(15,12),'daksha_savarni_manvadhi':(9,7),
+                     'brahma_savarni_manvadhi':(7,11),'dharma_savarni_manvadhi':(11,10),
+                     'rudra_savarni_manvadhi':(3,6), 'daiva_savarni_manvadhi':(30,5),
+                     'indra_savarni_manvadhi':(23,5)}
 """ 15 - Purvedyu/Ashtaka/Anvashtaka tithis - tithi/tamil-month combinations """
-_ashtaka_tithis = {'purvedyu-1':(22,6),'Purvedyu-2':(22,9),'Purvedyu-3':(22,10),'Purvedyu-4':(22,11),'Purvedyu-5':(22,12),
-                   'Ashtaka-1':(23,6),'Ashtaka-2':(23,9),'Ashtaka-3':(23,10),'Ashtaka-4':(23,11),'Ashtaka-5':(23,12),
-                   'Anuvashtaka -1':(24,6),'Anuvashtaka-2':(24,9),'Anuvashtaka-3':(24,10),'Anuvashtaka-4':(24,11),'Anuvashtaka-5':(24,12)}
+_ashtaka_tithis = {'purvedyu':[(22,6),(22,9),(22,10),(22,11),(22,12)],
+                   'ashtaka':[(23,6),(23,9),(23,10),(23,11),(23,12)],
+                   'anuvashtaka':[(24,6),(24,9),(24,10),(24,11),(24,12)]}
 """ 4 Yugaadhi tithis  - tithi/tamil-month combinations  """
-_yugadhi_tithis = {'Dwapara Yuga':(30,11),'Tretha Yuga':(3,2),'Kali Yuga':(28,6),'Sathya Yuga':(9,8)}
+_yugadhi_tithis = {'dwapara_yuga':(30,11),'tretha_yuga':(3,2),'kali_yuga':(28,6),'sathya_yuga':(9,8)}
 ashtaka_dates = lambda panchanga_place,panchanga_start_date,panchanga_end_date=None: _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_date,_ashtaka_tithis,tag='ashtaka')
 manvaadhi_dates = lambda panchanga_place,panchanga_start_date,panchanga_end_date=None: _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_date,_manvaadhi_tithis,tag='manvaadhi')
 yugadhi_dates = lambda panchanga_place,panchanga_start_date,panchanga_end_date=None: _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_date,_yugadhi_tithis,tag='yugadhi')
@@ -108,17 +111,22 @@ def _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_
     tag_t = res[tag+'_str']
     _debug_print = False
     results = []
-    for key,(tithi_index,tamil_month_index) in tithi_tamil_month_tuples.items():
-        mr = search(panchanga_place, panchanga_start_date, panchanga_end_date, tithi_index=tithi_index, tamil_month_index=tamil_month_index,description=key)
-        if mr != None and len(mr) > 0:
-            for m,_ in enumerate(mr):
-                mrl = list(mr[m]); mrl[-1] += ' / '+ tag_t
-                mr[m] = tuple(mrl)
-            results.append(mr)
+    for key,value in tithi_tamil_month_tuples.items():
+        if not isinstance(value, list): value = [value] 
+        for tithi_index,tamil_month_index in value:
+            key_translated = utils.resource_strings[key+'_str']
+            mr = search(panchanga_place, panchanga_start_date, panchanga_end_date, tithi_index=tithi_index, 
+                        tamil_month_index=tamil_month_index,description=key_translated)
+            if mr is not None and len(mr) > 0:
+                for m,_ in enumerate(mr):
+                    mrl = list(mr[m]); mrl[-1] += ' / '+ tag_t
+                    mr[m] = tuple(mrl)
+                results.append(mr)
+    if len(results)==0: return
     results = utils.flatten_list(results)
     results = sorted(results)
     if _debug_print: print('_ashtaka_manvaadhi_dates before sorting',results)
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         results = results[:1]
     results = sorted([results], key=lambda x:x[0])
     results = utils.flatten_list(results)
@@ -127,7 +135,7 @@ def _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_
 def special_vratha_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,vratha_type=None,vratha_index_list=None):
     """
         Find vratha dates between dates
-        If panchanga_end_date==None - find next vratha date
+        If panchanga_end_date is None  - find next vratha date
         Available vratha keys are:
         'pradosham','sankranti','amavasya','pournami','ekadhashi','sashti','sankatahara chathurthi','vinayaka chathurthi',
         'shivarathri','chandra dharshan','moondraam pirai','srartha','tithi':,'nakshathra','ashtaka','manvaadhi','yugadhi'
@@ -157,7 +165,7 @@ def pradosham_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None
         pradosham_end = (sunset - jd_utc) * 24 + _tz+pradosham_sunset_offset[1]
         day = panchanga.vaara(cur_jd); tag = _pradosha_list[day]+' '+res['pradosham_str']+' / '+tag_t
         special_vratha_dates.append((pdate,pradosham_start,pradosham_end,tag))
-        if panchanga_end_date==None:
+        if panchanga_end_date is None :
             return special_vratha_dates
     return special_vratha_dates
 def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_index_list=None,tag_t=''):
@@ -167,7 +175,7 @@ def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tit
     res = utils.resource_strings
     if tag_t != '': tag_t = ' / '+ res[tag_t+'_str']
     _start_date = panchanga.Date(panchanga_start_date.year,panchanga_start_date.month,panchanga_start_date.day)
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         _end_date = utils.next_panchanga_day(_start_date, 365)
     else:
         _end_date = panchanga.Date(panchanga_end_date.year,panchanga_end_date.month,panchanga_end_date.day)
@@ -189,7 +197,7 @@ def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tit
             tag = utils.PAKSHA_LIST[paksha]+' / '+utils.TITHI_LIST[cur_tithi[0]-1]
             if tag_t not in tag: tag += tag_t
             special_vratha_dates.append((cur_date,starts_at,ends_at,tag))
-            if panchanga_end_date==None:
+            if panchanga_end_date is None :
                 return special_vratha_dates
             cur_jd += skip_days
         elif len(cur_tithi) > 3 and cur_tithi[3] in tithi_index_list:
@@ -200,7 +208,7 @@ def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tit
             tag = utils.PAKSHA_LIST[paksha]+' / '+utils.TITHI_LIST[cur_tithi[3]-1]
             if tag_t not in tag: tag += tag_t
             special_vratha_dates.append((cur_date,starts_at,ends_at,tag))
-            if panchanga_end_date==None:
+            if panchanga_end_date is None :
                 return special_vratha_dates
             cur_jd += skip_days
         cur_jd += 1 
@@ -208,7 +216,7 @@ def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tit
 def nakshathra_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,nakshathra_index_list=None):
     res = utils.resource_strings
     _start_date = panchanga.Date(panchanga_start_date.year,panchanga_start_date.month,panchanga_start_date.day)
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         _end_date = utils.next_panchanga_day(_start_date, 365)
     else:
         _end_date = panchanga.Date(panchanga_end_date.year,panchanga_end_date.month,panchanga_end_date.day)
@@ -232,7 +240,7 @@ def nakshathra_dates(panchanga_place,panchanga_start_date,panchanga_end_date=Non
                 new_ends_at = abs(ends_at)%24
                 new_cur_date = utils.previous_panchanga_day(panchanga.Date(cur_date[0],cur_date[1],cur_date[2]), minus_days=days)
                 special_vratha_dates[-1]= (new_cur_date,starts_at,new_ends_at,tag)
-            if panchanga_end_date==None:
+            if panchanga_end_date is None :
                 return special_vratha_dates
             cur_jd += skip_days
         cur_jd += 1 
@@ -241,7 +249,7 @@ def yoga_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,yoga
     res = utils.resource_strings
     if tag_y != '': tag_y = ' / '+ res[tag_y+'_str']
     _start_date = panchanga.Date(panchanga_start_date.year,panchanga_start_date.month,panchanga_start_date.day)
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         _end_date = utils.next_panchanga_day(_start_date, 365)
     else:
         _end_date = panchanga.Date(panchanga_end_date.year,panchanga_end_date.month,panchanga_end_date.day)
@@ -259,7 +267,7 @@ def yoga_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,yoga
             ends_at = cur_yoga[1]; tag = utils.YOGAM_LIST[cur_yoga[0]-1] +' '+res['yogam_str']
             if tag_y not in tag: tag += tag_y
             special_vratha_dates.append((cur_date,ends_at,tag))
-            if panchanga_end_date==None:
+            if panchanga_end_date is None :
                 return special_vratha_dates
             cur_jd += skip_days
         cur_jd += 1 
@@ -354,27 +362,34 @@ def _get_conjunction_time(jd,place,p1,p2):
     print(long_diff)
     y = long_diff; x= offsets;
     ya = utils.inverse_lagrange(x, y, 0.0)
-    #cjd = utils.julian_day_number((yjd,mjd,djd), (ya,0,0))
-    #ya = _get_conjunction_time_1(cjd, place, p1, p2)
-    #print('lagrange',ya)
-    #ya = utils.newton_polynomial(y, x, 0.0)
-    #print('newton',ya)
-    #print(offsets, long_diff,ya)
     vt = (rise + ya -jd_utc) * 24 + tz
     print(utils.to_dms(vt,as_string=True))
     return ya# vt
-def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_index=None,nakshathra_index=None,yoga_index=None,tamil_month_index=None,description=''):
+def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_index=None,nakshathra_index=None,
+           yoga_index=None,tamil_month_index=None,description='',festival_name_contains=None):
     _special_vratha_dates = []
     tithi_results = []
     nakshathra_results = []
     yoga_results = []
     tm_results = []
     _debug_print = False
+    start_time = datetime.datetime.now()
     if _debug_print: print('search',panchanga_place,panchanga_start_date,panchanga_end_date,tithi_index,nakshathra_index,yoga_index,tamil_month_index,description)
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         _panchanga_end_date = utils.next_panchanga_day(panchanga_start_date, 365)
     else:
         _panchanga_end_date = panchanga.Date(panchanga_end_date.year,panchanga_end_date.month,panchanga_end_date.day)
+    # Search for all festivals if all panchanga indices are None
+    if all(x is None for x in (tithi_index, nakshathra_index, yoga_index, tamil_month_index)):
+        if _debug_print: print('search for festival from csv')
+        fest_data = get_festivals_between_the_dates(panchanga_start_date, panchanga_end_date, panchanga_place,festival_name_contains=festival_name_contains)
+        if len(fest_data)>0:
+            for fdate,fest in fest_data:
+                if _debug_print: print(fdate,fest)
+                jd = utils.julian_day_number(panchanga.Date(fdate[0],fdate[1],fdate[2]), (fdate[3],0,0))
+                sunrise_hours = panchanga.sunrise(jd,panchanga_place)[0]
+                if len(fest)!=0:
+                    _special_vratha_dates.append([(fdate,sunrise_hours,f['Festival_'+const._DEFAULT_LANGUAGE]) for f in fest][0])
     # Tithi search
     if tithi_index !=None:
         tithi_results = tithi_dates(panchanga_place, panchanga_start_date, _panchanga_end_date, [tithi_index])
@@ -383,7 +398,7 @@ def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_in
         _special_vratha_dates = tithi_results
     #print('_special_vratha_dates',_special_vratha_dates)
     # Nakshathra search
-    if nakshathra_index != None:
+    if nakshathra_index is not None:
         if _debug_print: print('finding nakshathra dates ')
         if len(_special_vratha_dates)==0:
             nakshathra_results = nakshathra_dates(panchanga_place, panchanga_start_date, panchanga_end_date, [nakshathra_index])
@@ -405,7 +420,7 @@ def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_in
             if len(nakshathra_results) == 0: return []
             _special_vratha_dates = nakshathra_results
     # yoga search
-    if yoga_index != None:
+    if yoga_index is not None:
         if _debug_print: print('finding yoga dates')
         if len(_special_vratha_dates)==0:
             yoga_results = yoga_dates(panchanga_place, panchanga_start_date, panchanga_end_date, [yoga_index])
@@ -432,7 +447,7 @@ def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_in
             if len(yoga_results) == 0: return []
             _special_vratha_dates = yoga_results
     # Tamil month search
-    if tamil_month_index != None:
+    if tamil_month_index is not None:
         if _debug_print: print('finding also tamil month dates', _special_vratha_dates)
         for sv_result in _special_vratha_dates: #V2.3.0
             t_date = sv_result[0]; ts_time = sv_result[1]; te_time = sv_result[2]
@@ -449,16 +464,19 @@ def search(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_in
         if _debug_print: print('tamil month dates',tm_results)
         if len(tm_results) == 0: return []
         _special_vratha_dates = tm_results
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         _special_vratha_dates = _special_vratha_dates[:1]
     if _debug_print: print(tithi_index,nakshathra_index,yoga_index,tamil_month_index,_special_vratha_dates)
+    if _debug_print: print('_special_vratha_dates',_special_vratha_dates)
     _special_vratha_dates = [tup[:-1] + (tup[-1]+' / '+description,) for tup in _special_vratha_dates]
+    end_time = datetime.datetime.now()
+    if _debug_print: print('search cpu time elapsed',end_time-start_time,' seconds')
     return _special_vratha_dates
 def sankranti_dates(place,start_date,end_date=None):
     res = utils.resource_strings
     results = []
     jd_start = swe.julday(start_date.year,start_date.month,start_date.day,9.0)# get around cur_sunrise
-    if end_date==None:
+    if end_date is None :
         _end_date = utils.next_panchanga_day(start_date, 365)
     else:
         _end_date = panchanga.Date(end_date.year,end_date.month,end_date.day)
@@ -471,7 +489,7 @@ def sankranti_dates(place,start_date,end_date=None):
         sd = panchanga.next_sankranti_date(p_date, place)
         sank_tag = utils.RAASI_LIST[sd[2]] +' '+res['sankranti_str']
         results.append(((sd[0][0],sd[0][1],sd[0][2]),sd[1],sank_tag))
-        if end_date==None:
+        if end_date is None :
             return results
         jd_inc +=  day_inc
     return results
@@ -486,20 +504,20 @@ def kaalashtami_dates(panchanga_place,panchanga_start_date,panchanga_end_date=No
                   description=utils.resource_strings['kaalashtami_str'])
 def mahalaya_paksha_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     res = utils.resource_strings
-    mpds = search(panchanga_place,panchanga_start_date,panchanga_end_date,tithi_index=_pournami_tithi[0],tamil_month_index=_purattaasi)
-    #print('mahalaya_paksha_dates',mpds)
+    mpds = search(panchanga_place,panchanga_start_date,panchanga_end_date,tithi_index=_amavasya_tithi[0],tamil_month_index=_purattaasi)
     if len(mpds) > 0:
         mpds = mpds[0]
     else:
         return []
     jd = utils.gregorian_to_jd(panchanga.Date(mpds[0][0],mpds[0][1],mpds[0][2]))
-    mpd = []
+    mpd = []; mpd.append(mpds)
     for d in range(1,_mahalaya_paksha_days):
-        cur_tithi = panchanga.tithi(jd+d, panchanga_place)
-        mpd.append((panchanga.jd_to_gregorian(jd+d),cur_tithi[1],cur_tithi[2],res['mahalaya_paksha_str']+' / '+utils.TITHI_LIST[cur_tithi[0]-1])) #V2.3.0
-        if panchanga_end_date==None:
+        cur_tithi = panchanga.tithi(jd-d, panchanga_place)
+        mpd.append((panchanga.jd_to_gregorian(jd-d),cur_tithi[1],cur_tithi[2],res['mahalaya_paksha_str']+' / '+utils.TITHI_LIST[cur_tithi[0]-1])) #V2.3.0
+        if panchanga_end_date is None  or cur_tithi[0]==_pournami_tithi[0] or (len(cur_tithi)>3 and cur_tithi[3]==_pournami_tithi[0]):
+            mpd = sorted(mpd)
             return mpd
-    #print('mahalaya_paksha_dates',mpd)
+    mpd = sorted(mpd)
     return mpd
 def srartha_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     res = utils.resource_strings
@@ -523,7 +541,7 @@ def srartha_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     if _debug_print: print('srartha dates results',results)
     results = utils.flatten_list(results)
     results = sorted(results, key=lambda x:x[0])
-    if panchanga_end_date==None:
+    if panchanga_end_date is None :
         return results[:1]
     return results
 def chandra_dharshan_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
@@ -536,7 +554,7 @@ def chandra_dharshan_dates(panchanga_place,panchanga_start_date,panchanga_end_da
         moonset = panchanga.moonset(jd, panchanga_place)[0]
         tag = res['chandra_dharshan_str']+' / '+tag_t
         results.append((c_date,sunset,moonset,tag))
-        if panchanga_end_date==None:
+        if panchanga_end_date is None :
             return results
     return results
 def moondraam_pirai_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
@@ -549,7 +567,7 @@ def moondraam_pirai_dates(panchanga_place,panchanga_start_date,panchanga_end_dat
         moonset = panchanga.moonset(jd, panchanga_place)[0]
         tag = res['moondraam_pirai_str']+' / '+tag_t
         results.append((c_date,sunset,moonset,tag))
-        if panchanga_end_date==None:
+        if panchanga_end_date is None :
             return results
     return results
 def _sankalpa_mantra(panchanga_date,panchanga_place,ritu_per_solar_tamil_month=const.ritu_per_solar_tamil_month):  #V2.3.0
@@ -598,7 +616,7 @@ def tithi_pravesha(birth_date:panchanga.Date=None,birth_time:tuple=None,birth_pl
         print("Tithi Pravesha can be calculated only years greater than birth_year")
         return []
     """
-    if year_number == None or year_number <= birth_date.year:
+    if year_number is None or year_number <= birth_date.year:
         year_number = current_year
     cds = list(birth_date)
     current_date_start = panchanga.Date(year_number,cds[1],cds[2])
@@ -620,13 +638,135 @@ def tithi_pravesha(birth_date:panchanga.Date=None,birth_time:tuple=None,birth_pl
         t_time = s_end - t_frac*t_len
         tp.append((s_date,t_time,s_end,s_desc))
     return tp
-    
+
+import csv
+
+# Global variable to store festival data
+festival_data = []
+
+# Function to load festival data from CSV file
+def load_festival_data(file_path=const._FESTIVAL_FILE):
+    global festival_data
+    with open(file_path, mode='r', encoding='utf-8-sig') as file:
+        reader = csv.DictReader(file)
+        festival_data = [row for row in reader]
+def _get_criteria_for_the_day(jd,place,use_purnimanta_system=None):
+    y,m,d,_ = utils.jd_to_gregorian(jd); date_in = panchanga.Date(y,m,d)
+    _tithi_returned = panchanga.tithi(jd, place)
+    _tithis = [_tithi_returned[0],_tithi_returned[3]] if len(_tithi_returned)>3 else [_tithi_returned[0]]
+    _naks = panchanga.nakshatra(jd, place)
+    _nak_ids = [_naks[0],_naks[3]] if len(_naks)>3 else [_naks[0]]
+    tm = None; td = None; adhik_maasa = None; _vaara = panchanga.vaara(jd)+1
+    day_id = panchanga.vaara(jd)
+    if use_purnimanta_system is None:
+        tm,td = panchanga.tamil_solar_month_and_date(date_in, place)
+    else:
+        tm,td,_,adhik_maasa,_ = panchanga.lunar_month_date(jd,place,
+                                                use_purnimanta_system=use_purnimanta_system)
+        tm -= 1
+    criteria = {
+        'Tithi': _tithis,
+        'Nakshatra': _nak_ids,
+        'tamil_month': tm+1,
+        'tamil_day': td,
+        'vaara':day_id+1,
+        'adhik_maasa':adhik_maasa,
+    }
+    return criteria
+def get_festivals_between_the_dates(start_date:panchanga.Date, end_date:panchanga.Date, place:panchanga.Place,
+                                    festival_name_contains=None):
+    #global festival_data
+    #if len(festival_data) == 0: load_festival_data(const._FESTIVAL_FILE)
+    start_jd = utils.julian_day_number(start_date, (12,0,0))
+    end_jd = utils.julian_day_number(end_date, (12,0,0))
+    matching_festivals = []
+    while start_jd <= end_jd:
+        mfd = get_festivals_of_the_day(start_jd, place,festival_name_contains=festival_name_contains)
+        matching_festivals.append((utils.jd_to_gregorian(start_jd),mfd))
+        start_jd += 1
+    return matching_festivals
+def get_festivals_of_the_day(jd,place,festival_name_contains=None):
+    global festival_data
+    if len(festival_data) == 0: load_festival_data(const._FESTIVAL_FILE)
+    matching_festivals = []
+    criteria_list = [_get_criteria_for_the_day(jd, place, use_purnimanta_system=c) for c in [None,False,True]]
+    check_rows = festival_data if festival_name_contains is None \
+        else [row for row in festival_data if festival_name_contains.casefold() in row['Festival_en'].casefold()]
+    for row in check_rows:#festival_data:
+        criteria = criteria_list[int(row['calendar_type'])]
+        #print(row['Festival_name'],utils.jd_to_gregorian(jd),criteria)
+        match = True
+        for key, value in criteria.items():
+            if row.get(key):
+                try:
+                    # Convert both to float for comparison (handles empty strings gracefully)
+                    if isinstance(value,list):
+                        match = match and any([float(row[key]) ==float(v) for v in value])# == float(value)
+                    else:
+                        match = match and float(row[key]) == float(value)
+                    if festival_name_contains is not None:
+                        match = match and festival_name_contains.casefold() in row['Festival_en'].casefold()
+                        #print(row['Festival_en'],festival_name_contains,match)
+                except:
+                    match = False
+                    break
+        if match:
+            matching_festivals.append(row)
+    return matching_festivals
+# Function to get festival row based on input parameters
+def get_festival(tithi=None, nakshatra=None, tamil_month=None, tamil_day=None,vaara=None,adhik_maasa=None):
+    """
+        TODO: Mahalaya Paksha dates cannot be checked directly.
+        It has to be checked first getting mahalaya amavasya date on purattasi.
+        And comparing current tithi if in between
+        TODO: Some festival dates have to be calculated not directly associated with tithi/nak/etc combinations
+    """
+    criteria = {
+        'Tithi': tithi,
+        'Nakshatra': nakshatra,
+        'tamil_month': tamil_month,
+        'tamil_day': tamil_day,
+        'vaara':vaara,
+        'adhik_maasa':adhik_maasa,
+    }
+    matching_festivals = []
+    for row in festival_data:
+        match = True
+        for key, value in criteria.items():
+            if row.get(key):
+                try:
+                    # Convert both to float for comparison (handles empty strings gracefully)
+                    match = match and float(row[key]) == float(value)
+                except:
+                    match = False
+                    break
+        if match:
+            matching_festivals.append(row)
+    return matching_festivals
+
 if __name__ == "__main__":
+    utils.set_language('en')
     from jhora.tests import pvr_tests
-    utils.set_language('ta')
     place = panchanga.Place('Chennai,India',13.0878,80.2785,5.5)
-    start_date = panchanga.Date(2024,1,1); end_date = panchanga.Date(2024,12,31)#end_date=None #
-    dob = (1996,12,7) ; tob = (10,34,0); place = panchanga.Place('Chennai',13.0878,80.2785,5.5)
+    start_date = panchanga.Date(2025,1,1); end_date = panchanga.Date(2025,12,31)
+    start_time = datetime.datetime.now()
+    fest_data = search(place,start_date,end_date,festival_name_contains='pongal')
+    for fdate,ftime,fest in fest_data:
+        print('fdate,fest',fdate,ftime,fest)
+    end_time = datetime.datetime.now()
+    print('cpu time ',end_time-start_time,' seconds')
+    exit()
+    dob = (1996,12,7) ; tob = (5,34,0); place = panchanga.Place('Chennai',13.0878,80.2785,5.5)
+    const.use_planet_speed_for_panchangam_end_timings = False
+    jd = utils.julian_day_number(start_date, tob)
+    print(panchanga.tithi(jd,place))
+    _festival_file = const._DATA_DIR +const._sep+'hindu_festivals_multilingual_unicode_bom.csv'
+    load_festival_data(_festival_file)
+    print(get_festivals_of_the_day(jd,place))
+    exit()
+    mp_dates = mahalaya_paksha_dates(place, start_date, end_date)
+    print('mahalaya dates',mp_dates)
+    exit()
     p_date = panchanga.Date(dob[0],dob[1],dob[2])    
     sr_dates = sathyanarayana_puja_dates(place, start_date, end_date)
     print(sr_dates)

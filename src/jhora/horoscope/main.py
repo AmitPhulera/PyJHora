@@ -58,8 +58,8 @@ class Horoscope():
         #self.ayanamsa_mode = ayanamsa_mode
         #self.ayanamsa_value = ayanamsa_value
         #print(self.place_name,self.latitude,self.longitude,self.timezone_offset)
-        if self.place_name == None:
-            if self.latitude==None or self.longitude==None or self.timezone_offset==None:
+        if self.place_name is None:
+            if self.latitude is None or self.longitude is None or self.timezone_offset is None:
                 print('Please provide either place_with_country_code or combination of latitude and longitude ...\n Aborting script')
                 exit()
             else:
@@ -68,12 +68,12 @@ class Horoscope():
                 self.longitude = longitude
                 self.timezone_offset = timezone_offset                
         else:
-            if self.latitude==None or self.longitude==None or self.timezone_offset==None:
+            if self.latitude is None or self.longitude is None or self.timezone_offset is None:
                 [_,self.latitude,self.longitude,self.timezone_offset] = \
                     utils.get_location_using_nominatim(place_with_country_code)
                 
                 
-        if date_in==None:
+        if date_in is None :
             self.Date = drik.Date(date.today().year,date.today().month,date.today().day)
         else:
             self.Date = drik.Date(date_in.year,date_in.month,date_in.day)
@@ -206,12 +206,13 @@ class Horoscope():
         calendar_info[cal_key_list['yamagandam_str']] = yamagandam[0] + ' '+ cal_key_list['starts_at_str']+\
                         ' '+ yamagandam[1]+' '+cal_key_list['ends_at_str']
         yogam = drik.yogam(self.julian_day,place)
+        frac_left = 100*utils.get_fraction(yogam[1], yogam[2], birth_time_hrs)
         yoga_lord = ' ('+utils.PLANET_SHORT_NAMES[const.yogam_lords_and_avayogis[yogam[0]-1][0]]+'/'+\
                         utils.PLANET_SHORT_NAMES[const.yogam_lords_and_avayogis[yogam[0]-1][1]]+') '
         calendar_info[cal_key_list['yogam_str']] = utils.YOGAM_LIST[yogam[0]-1] + yoga_lord + \
                         '  '+utils.to_dms(yogam[1])+ ' ' +\
                         cal_key_list['starts_at_str'] + ' ' + utils.to_dms(yogam[2])+ ' ' + \
-                        cal_key_list['ends_at_str']+' ('+"{0:.2f}".format(yogam[3]*100)+'% ' + cal_key_list['balance_str']+' )'
+                        cal_key_list['ends_at_str']+' ('+"{0:.2f}".format(frac_left)+'% ' + cal_key_list['balance_str']+' )'
         karanam = drik.karana(jd,place); frac_left= 100*utils.get_fraction(karanam[1], karanam[2], birth_time_hrs)
         karana_lord = utils.PLANET_SHORT_NAMES[utils.karana_lord(karanam[0])]
         calendar_info[cal_key_list['karanam_str']] = utils.KARANA_LIST[karanam[0]-1]+' ('+ karana_lord +') '+\
@@ -301,7 +302,7 @@ class Horoscope():
                          108:cal_key_list['ashtotharamsa_str'],
                          144:cal_key_list['dwadas_dwadasamsa_str'],
         }
-        if divisional_chart_factor==None:
+        if divisional_chart_factor is None :
             if chart_index == len(const.division_chart_factors):
                 dhasavarga_factor = const.DEFAULT_CUSTOM_VARGA_FACTOR
             else:

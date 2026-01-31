@@ -352,8 +352,6 @@ PLANET_NAMES=സൂര്യൻ☉,ചന്ദ്രൻ☾,ചൊവ്വ♂,�
 RAASI_LIST=♈︎മേടം,♉︎ഋഷഭം,♊︎മിഥുനം,♋︎കർക്കിടകം,♌︎സിംഹം,♍︎കന്നി,♎︎തുലാം,♏︎വൃശ്ചികം,♐︎ധനുസ്സ്,♑︎മകരം,♒︎കുംഭം,♓︎മീനങ്ങൾ
 ###2. List of nakshatra names
 NAKSHATRA_LIST=അശ്വതി,ഭരണി,കാർത്തിക,രോഹിണി,മകയിരം,തിരുവാതിര,പുണർതം,പൂയം,ആയില്യം,മകം,പൂരം,ഉത്രം,അത്തം,ചിത്തിര,സ്വാതി,വിശാഖം,അനിഴം,കേട്ട,മൂലം,പൂരാടം,ഉത്രാടം,തിരുവോണം,അവിട്ടം,ചതയം,പൂരുരുട്ടാതി,ഉത്രട്ടാതി,രേവതി,അഭിജിത്
-###2. List of short nakshatra names
-NAKSHATRA_SHORT_LIST=അശ്,ഭര,കാർ,രോഹി,മക,തിരു,പുണർ,പൂ,ആയി,മക,പൂ,ഉത്ര,അത്,ചിത്,സ്വാതി,വിശാ,അനു,കേട്ട്,മൂല,പൂരാ,ഉത്രാ,തിരുവോ,അവി,ചത്,പൂരട,ഉത്രഡ്,രേവ,അഭി
 ###3. List of tithi names
 TITHI_LIST=പ്രഥമ,ദ്വിതീയ,തൃതീയ,ചതുര്‍ത്ഥി,പഞ്ചമി,ഷഷ്ടി,സപ്തമി,അഷ്ടമി,നവമി,ദശമി,ഏകാദശി,ദ്വാദശി,ത്രയോദശി,ചതുര്ദശി,പൗർണ്ണമി,പ്രഥമ,ദ്വിതീയ,തൃതീയ,ചതുര്‍ത്ഥി,പഞ്ചമി,ഷഷ്ടി,സപ്തമി,അഷ്ടമി,നവമി,ദശമി,ഏകാദശി,ദ്വാദശി,ത്രയോദശി,ചതുര്ദശി,അമാവാസ്യ
 ###5. List of karana names
@@ -1066,3 +1064,32 @@ purnimantha_month_str=പൂർണിമന്ത മാസം
 select_one_of_options_from_str=ഇതിൽ നിന്ന് ഒരു ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:
 lunar_month_year_str=ചന്ദ്ര/സൗര മാസം/വർഷം
 cycle_str=ചക്രം
+todays_festivals_str=ഇന്നത്തെ ഉത്സവങ്ങൾ:
+please_wait_calculations_done_str=കണക്കുകൂട്ടലുകൾ പൂർത്തിയാകുന്നതുവരെ കാത്തിരിക്കുക...
+matching_dates_found_str=പൊരുത്തപ്പെടുന്ന തീയതികൾ കണ്ടെത്തി
+no_matching_dates_found_str=പൊരുത്തപ്പെടുന്ന തീയതികളൊന്നും കണ്ടെത്തിയില്ല.
+show_all_festivals_str=എല്ലാ ഉത്സവങ്ങളും കാണിക്കുക
+search_festival_str=ഉത്സവത്തിനായി തിരയുക
+search_festival_by_combination_str=കോമ്പിനേഷൻ അനുസരിച്ച് തിരയുക
+swayambhuva_manvadhi_str=സ്വായംഭുവ മന്വധി
+swarochisha_manvadhi_str=സ്വാരോചിഷ മന്വധി
+uttama_manvadhi_str=ഉത്തമ മന്വധി
+tamasa_manvadhi_str=തമസ മന്വധി
+raivata_manvadhi_str=രൈവത മന്വധി
+chakshusha_manvadhi_str=ചാക്ഷുഷ മന്വധി
+vaivaswata_manvadhi_str=വൈവസ്വത മന്വധി
+savarni_manvadhi_str=സാവർണി മന്വധി
+daksha_savarni_manvadhi_str=ദക്ഷ സാവർണി മന്വധി
+brahma_savarni_manvadhi_str=ബ്രഹ്മ സാവർണി മന്വധി
+dharma_savarni_manvadhi_str=ധർമ സാവർണി മന്വധി
+rudra_savarni_manvadhi_str=രുദ്ര സാവർണി മന്വധി
+daiva_savarni_manvadhi_str=ദൈവ സാവർണി മന്വധി
+indra_savarni_manvadhi_str=ഇന്ദ്ര സാവർണി മന്വധി
+purvedyu_str=പൂർവേദ്യു
+ashtaka_str=അഷ്ടക
+anuvashtaka_str=അനുവഷ്ടക
+dwapara_yuga_str=ദ്വാപര യുഗ
+tretha_yuga_str=ത്രേതാ യുഗ
+kali_yuga_str=കലി യുഗ
+sathya_yuga_str=സത്യ യുഗ
+input_str=വിവരങ്ങൾ
