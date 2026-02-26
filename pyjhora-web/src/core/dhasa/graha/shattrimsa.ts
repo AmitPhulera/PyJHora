@@ -158,8 +158,8 @@ export function getShattrimsaDashaBhukti(
     startingPlanet?: number;
     includeBhuktis?: boolean;
     antardashaOption?: number;
-    cycles?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
   } = {}
 ): ShattrimsaResult {
   const {
@@ -168,20 +168,27 @@ export function getShattrimsaDashaBhukti(
     startingPlanet = MOON,
     includeBhuktis = true,
     antardashaOption = 1,
-    cycles = 3,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
-  let [currentLord, startJd] = shattrimsaDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
-  
+
+  // Tribhagi variation: divide each dasha by 3, multiply cycles by 3
+  // Python: base _dhasa_cycles = 3, with tribhagi: int(3 / (1/3)) = 9
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 9 : 3;
+
+  const [initialLord, initialStartJd] = shattrimsaDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
+  let currentLord = initialLord;
+  let startJd = initialStartJd;
+
   const mahadashas: ShattrimsaDashaPeriod[] = [];
   const bhuktis: ShattrimsaBhuktiPeriod[] = [];
-  
-  for (let cycle = 0; cycle < cycles; cycle++) {
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
     for (let i = 0; i < 8; i++) {
-      const durationYears = SHATTRIMSA_YEARS[currentLord] ?? 1;
+      const durationYears = Math.round((SHATTRIMSA_YEARS[currentLord] ?? 1) * tribhagiFactor * 100) / 100;
       const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
-      
+
       mahadashas.push({
         lord: currentLord,
         lordName,
@@ -189,7 +196,7 @@ export function getShattrimsaDashaBhukti(
         startDate: formatJdAsDate(startJd),
         durationYears
       });
-      
+
       if (includeBhuktis) {
         let bhuktiLord = currentLord;
         if (antardashaOption === 3 || antardashaOption === 4) {
@@ -197,11 +204,11 @@ export function getShattrimsaDashaBhukti(
         } else if (antardashaOption === 5 || antardashaOption === 6) {
           bhuktiLord = getNextShattrimsaLord(bhuktiLord, -1);
         }
-        
+
         const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
         const bhuktiDuration = durationYears / 8;
         let bhuktiStartJd = startJd;
-        
+
         for (let j = 0; j < 8; j++) {
           const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
           bhuktis.push({
@@ -216,11 +223,11 @@ export function getShattrimsaDashaBhukti(
           bhuktiLord = getNextShattrimsaLord(bhuktiLord, direction);
         }
       }
-      
+
       startJd += durationYears * YEAR_DURATION;
       currentLord = getNextShattrimsaLord(currentLord);
     }
   }
-  
+
   return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
 }
