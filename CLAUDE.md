@@ -82,6 +82,15 @@ Switch with `utils.set_language('ta')`
 - **PyQt6**: GUI framework
 - **geopy/timezonefinder**: Geolocation and timezone detection
 
+## Pull Requests
+
+PRs should be created against the `main` branch on GitHub: `https://github.com/AmitPhulera/PyJHora`
+
+```bash
+# Create a PR
+gh pr create --repo AmitPhulera/PyJHora --base main --title "PR title" --body "PR description"
+```
+
 ## Important Notes
 
 - Tests assume `const._DEFAULT_AYANAMSA_MODE='LAHIRI'`
