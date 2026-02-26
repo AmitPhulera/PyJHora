@@ -5,7 +5,8 @@
 
 # Gas Town
 .runtime/
-.claude/
+.claude/*
+!.claude/skills/
 .beads/
 .logs/
 node_modules/
