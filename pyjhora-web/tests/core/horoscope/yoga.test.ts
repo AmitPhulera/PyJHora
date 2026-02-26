@@ -1812,6 +1812,51 @@ describe('Python Parity - Chennai 1996-12-07 D-1 Chart', () => {
       expect(nalaYoga(chart)).toBe(false);
     });
   });
+
+  // ==========================================================================
+  // ADDITIONAL PYTHON PARITY YOGAS for Chennai chart
+  // ==========================================================================
+
+  describe('Additional Python Parity Yogas (Chennai chart)', () => {
+    it('parijathaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.parijatha_yoga(chart) == True
+      expect(parijathaYoga(chart)).toBe(true);
+    });
+
+    it('anthyaVayasiDhanaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.anthya_vayasi_dhana_yoga(chart) == True
+      expect(anthyaVayasiDhanaYoga(chart)).toBe(true);
+    });
+
+    it('rogagrasthaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.rogagrastha_yoga(chart) == True
+      expect(rogagrasthaYoga(chart)).toBe(true);
+    });
+
+    it('sareeraSoukhyaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.sareera_soukhya_yoga(chart) == True
+      expect(sareeraSoukhyaYoga(chart)).toBe(true);
+    });
+
+    it('matrumooladdhanaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.matrumooladdhana_yoga(chart) == True
+      expect(matrumooladdhanaYoga(chart)).toBe(true);
+    });
+
+    it('sraddhannabhukthaYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.sraddhannabhuktha_yoga(chart) == True
+      expect(sraddhannabhukthaYoga(chart)).toBe(true);
+    });
+
+    it('maalavyaYoga should be true (already tested, Python confirms)', () => {
+      expect(maalavyaYoga(chart)).toBe(true);
+    });
+
+    it('vanchanaChoraYoga should be true (Python parity)', () => {
+      // Verified against Python: yoga.vanchana_chora_bheethi_yoga(chart) == True
+      expect(vanchanaChoraBheethiYoga(chart)).toBe(true);
+    });
+  });
 });
 
 // ============================================================================
