@@ -16,6 +16,12 @@ export * from './shodasottari';
 export * from './vimsottari';
 export * from './yogini';
 
+// Applicability checks
+export * from './applicability';
+
+// Longevity
+export * from './aayu';
+
 // Special systems
 export * from './naisargika';
 export * from './tara';
