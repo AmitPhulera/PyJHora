@@ -17,11 +17,12 @@ import {
     SIDEREAL_YEAR,
     SUN
 } from '../../constants';
-import { getDivisionalChart, PlanetPosition } from '../../horoscope/charts';
-import { getPlanetLongitude } from '../../panchanga/drik';
 import type { Place } from '../../types';
-import { normalizeDegrees } from '../../utils/angle';
 import { julianDayToGregorian } from '../../utils/julian';
+import {
+    resolveStartingPlanetLongitude,
+    resolveStartingPlanetLongitudeSync
+} from './special-planet-helper';
 
 // ============================================================================
 // TYPES
@@ -126,33 +127,52 @@ export function dwadasottariDashaStart(
   place: Place,
   starPositionFromMoon = 1,
   seedStar = 27,
-  startingPlanet = MOON,
+  startingPlanet: number | string = MOON,
   divisionalChartFactor = 1
 ): [number, number, number] {
   const oneStar = 360 / 27;
-  let planetLong = getPlanetLongitude(jd, place, startingPlanet);
-  
-  if (divisionalChartFactor > 1) {
-    const d1Pos: PlanetPosition = { planet: startingPlanet, rasi: Math.floor(planetLong / 30), longitude: planetLong % 30 };
-    const vargaPos = getDivisionalChart([d1Pos], divisionalChartFactor)[0];
-    if (vargaPos) {
-      planetLong = vargaPos.rasi * 30 + vargaPos.longitude;
-    }
-  }
 
-  if (startingPlanet === MOON) {
-    planetLong += (starPositionFromMoon - 1) * oneStar;
-    planetLong = normalizeDegrees(planetLong);
-  }
-  
+  const planetLong = resolveStartingPlanetLongitudeSync(
+    startingPlanet, jd, place, divisionalChartFactor, 1, starPositionFromMoon
+  );
+
   const nakIndex = Math.floor(planetLong / oneStar);
   const nakNumber = nakIndex + 1;
   const remainder = planetLong % oneStar;
-  
+
   const [lord, duration] = getDwadasottariDhasaLord(nakNumber, seedStar);
   const periodElapsedDays = (remainder / oneStar) * duration * YEAR_DURATION;
   const startDate = jd - periodElapsedDays;
-  
+
+  return [lord, startDate, duration];
+}
+
+/**
+ * Async version: supports special starting planets (M/G/B/I/P/T)
+ */
+export async function dwadasottariDashaStartAsync(
+  jd: number,
+  place: Place,
+  starPositionFromMoon = 1,
+  seedStar = 27,
+  startingPlanet: number | string = MOON,
+  divisionalChartFactor = 1,
+  chartMethod = 1
+): Promise<[number, number, number]> {
+  const oneStar = 360 / 27;
+
+  const planetLong = await resolveStartingPlanetLongitude(
+    startingPlanet, jd, place, divisionalChartFactor, chartMethod, starPositionFromMoon
+  );
+
+  const nakIndex = Math.floor(planetLong / oneStar);
+  const nakNumber = nakIndex + 1;
+  const remainder = planetLong % oneStar;
+
+  const [lord, duration] = getDwadasottariDhasaLord(nakNumber, seedStar);
+  const periodElapsedDays = (remainder / oneStar) * duration * YEAR_DURATION;
+  const startDate = jd - periodElapsedDays;
+
   return [lord, startDate, duration];
 }
 
@@ -162,68 +182,163 @@ export function getDwadasottariDashaBhukti(
   options: {
     starPositionFromMoon?: number;
     seedStar?: number;
-    startingPlanet?: number;
+    startingPlanet?: number | string;
     includeBhuktis?: boolean;
     antardashaOption?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
+    dhasaStartingPlanet?: number | string;
   } = {}
 ): DwadasottariResult {
   const {
     starPositionFromMoon = 1,
     seedStar = 27,
-    startingPlanet = MOON,
     includeBhuktis = true,
     antardashaOption = 1,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
-  let [currentLord, startJd] = dwadasottariDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
-  
+  const startingPlanet: number | string = options.dhasaStartingPlanet ?? options.startingPlanet ?? MOON;
+
+  // Tribhagi variation: divide each dasha by 3, run 3 cycles
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
+  const [initialLord, initialStartJd] = dwadasottariDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
+
+  let currentLord = initialLord;
+  let startJd = initialStartJd;
+
   const mahadashas: DwadasottariDashaPeriod[] = [];
   const bhuktis: DwadasottariBhuktiPeriod[] = [];
-  
-  for (let i = 0; i < 8; i++) {
-    const durationYears = DWADASOTTARI_YEARS[currentLord] ?? 7;
-    const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
-    
-    mahadashas.push({
-      lord: currentLord,
-      lordName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears
-    });
-    
-    if (includeBhuktis) {
-      let bhuktiLord = currentLord;
-      if (antardashaOption === 3 || antardashaOption === 4) {
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, 1);
-      } else if (antardashaOption === 5 || antardashaOption === 6) {
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, -1);
-      }
-      
-      const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
-      const bhuktiDuration = durationYears / 8;
-      let bhuktiStartJd = startJd;
-      
-      for (let j = 0; j < 8; j++) {
-        const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
-        bhuktis.push({
-          dashaLord: currentLord,
-          bhuktiLord,
-          bhuktiLordName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, direction);
-      }
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0) {
+      currentLord = initialLord;
     }
-    
-    startJd += durationYears * YEAR_DURATION;
-    currentLord = getNextDwadasottariLord(currentLord);
+    for (let i = 0; i < 8; i++) {
+      const durationYears = Math.round((DWADASOTTARI_YEARS[currentLord] ?? 7) * tribhagiFactor * 100) / 100;
+      const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
+
+      mahadashas.push({
+        lord: currentLord,
+        lordName,
+        startJd,
+        startDate: formatJdAsDate(startJd),
+        durationYears
+      });
+
+      if (includeBhuktis) {
+        let bhuktiLord = currentLord;
+        if (antardashaOption === 3 || antardashaOption === 4) {
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, 1);
+        } else if (antardashaOption === 5 || antardashaOption === 6) {
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, -1);
+        }
+
+        const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+        const bhuktiDuration = durationYears / 8;
+        let bhuktiStartJd = startJd;
+
+        for (let j = 0; j < 8; j++) {
+          const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
+          bhuktis.push({
+            dashaLord: currentLord,
+            bhuktiLord,
+            bhuktiLordName,
+            startJd: bhuktiStartJd,
+            startDate: formatJdAsDate(bhuktiStartJd),
+            durationYears: bhuktiDuration
+          });
+          bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, direction);
+        }
+      }
+
+      startJd += durationYears * YEAR_DURATION;
+      currentLord = getNextDwadasottariLord(currentLord);
+    }
   }
-  
+
+  return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
+}
+
+/**
+ * Async version: supports special starting planets (M/G/B/I/P/T)
+ */
+export async function getDwadasottariDashaBhuktiAsync(
+  jd: number,
+  place: Place,
+  options: {
+    starPositionFromMoon?: number;
+    seedStar?: number;
+    startingPlanet?: number | string;
+    includeBhuktis?: boolean;
+    antardashaOption?: number;
+    divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
+    dhasaStartingPlanet?: number | string;
+    chartMethod?: number;
+  } = {}
+): Promise<DwadasottariResult> {
+  const {
+    starPositionFromMoon = 1,
+    seedStar = 27,
+    includeBhuktis = true,
+    antardashaOption = 1,
+    divisionalChartFactor = 1,
+    chartMethod = 1,
+    useTribhagiVariation = false
+  } = options;
+  const startingPlanet: number | string = options.dhasaStartingPlanet ?? options.startingPlanet ?? MOON;
+
+  const [initialLord, initialStartJd] = await dwadasottariDashaStartAsync(
+    jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor, chartMethod
+  );
+
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
+  let currentLord = initialLord;
+  let startJd = initialStartJd;
+  const mahadashas: DwadasottariDashaPeriod[] = [];
+  const bhuktis: DwadasottariBhuktiPeriod[] = [];
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0) currentLord = initialLord;
+    for (let i = 0; i < 8; i++) {
+      const durationYears = Math.round((DWADASOTTARI_YEARS[currentLord] ?? 7) * tribhagiFactor * 100) / 100;
+      mahadashas.push({
+        lord: currentLord,
+        lordName: PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`,
+        startJd,
+        startDate: formatJdAsDate(startJd),
+        durationYears
+      });
+      if (includeBhuktis) {
+        let bhuktiLord = currentLord;
+        if (antardashaOption === 3 || antardashaOption === 4) bhuktiLord = getNextDwadasottariLord(bhuktiLord, 1);
+        else if (antardashaOption === 5 || antardashaOption === 6) bhuktiLord = getNextDwadasottariLord(bhuktiLord, -1);
+        const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+        const bhuktiDuration = durationYears / 8;
+        let bhuktiStartJd = startJd;
+        for (let j = 0; j < 8; j++) {
+          bhuktis.push({
+            dashaLord: currentLord,
+            bhuktiLord,
+            bhuktiLordName: PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`,
+            startJd: bhuktiStartJd,
+            startDate: formatJdAsDate(bhuktiStartJd),
+            durationYears: bhuktiDuration
+          });
+          bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, direction);
+        }
+      }
+      startJd += durationYears * YEAR_DURATION;
+      currentLord = getNextDwadasottariLord(currentLord);
+    }
+  }
+
   return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
 }
