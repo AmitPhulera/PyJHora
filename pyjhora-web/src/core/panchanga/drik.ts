@@ -126,6 +126,7 @@ export interface YogaResult {
 export interface KaranaResult {
   number: number;
   name: string;
+  startTime: number;
   endTime: number;
 }
 
@@ -366,35 +367,46 @@ const KARANA_NAMES = [
  * @returns Karana information
  */
 export function calculateKarana(jd: number, place: Place): KaranaResult {
-  const jdUtc = toUtc(jd, place.timezone);
-  const sunriseData = sunrise(jd, place);
-  
-  const phase = tithiPhase(jdUtc);
-  
-  // Each karana spans 6 degrees (half a tithi)
-  const karanaNumber = Math.ceil(phase / 6);
-  const adjustedNumber = karanaNumber === 0 ? 60 : karanaNumber;
-  
+  // Match Python's drik.karana(): derive karana start/end from tithi start/end
+  const { time } = julianDayToGregorian(jd);
+  const birthTimeHrs = time.hour + time.minute / 60 + time.second / 3600;
+
+  const tithiResult = calculateTithi(jd, place);
+  const tStart = tithiResult.startTime;
+  const tEnd = tithiResult.endTime;
+  const tMid = 0.5 * (tStart + tEnd);
+
+  // Python: _karana = _tithi[0]*2 - 1
+  let karanaNumber = tithiResult.number * 2 - 1;
+  let kStart: number;
+  let kEnd: number;
+
+  if (birthTimeHrs > tMid) {
+    // Second half of tithi
+    karanaNumber += 1;
+    kStart = tMid;
+    kEnd = tEnd;
+  } else {
+    // First half of tithi
+    kStart = tStart;
+    kEnd = tMid;
+  }
+
   // Karana cycle: 7 repeating karanas (Bava to Vishti) + 4 fixed
   let name: string;
-  if (adjustedNumber === 1) {
+  if (karanaNumber === 1) {
     name = 'Kimstughna';
-  } else if (adjustedNumber >= 58) {
-    name = KARANA_NAMES[adjustedNumber - 58 + 7] ?? `Karana ${adjustedNumber}`;
+  } else if (karanaNumber >= 58) {
+    name = KARANA_NAMES[karanaNumber - 58 + 7] ?? `Karana ${karanaNumber}`;
   } else {
-    name = KARANA_NAMES[(adjustedNumber - 2) % 7] ?? `Karana ${adjustedNumber}`;
+    name = KARANA_NAMES[(karanaNumber - 2) % 7] ?? `Karana ${karanaNumber}`;
   }
-  
-  // Calculate approximate end time
-  const degreesLeft = adjustedNumber * 6 - phase;
-  const relativeDailyMotion = 13.176 - 0.986;
-  const hoursToEnd = (degreesLeft / relativeDailyMotion) * 24;
-  const endTime = sunriseData.localTime + hoursToEnd;
-  
+
   return {
-    number: adjustedNumber,
+    number: karanaNumber,
     name,
-    endTime
+    startTime: kStart,
+    endTime: kEnd
   };
 }
 
