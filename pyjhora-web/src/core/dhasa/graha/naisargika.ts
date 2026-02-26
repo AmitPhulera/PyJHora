@@ -141,7 +141,7 @@ export function getNaisargikaDashaBhukti(
   } = {}
 ): NaisargikaResult {
   const {
-    includeBhuktis = false,
+    includeBhuktis = true,
     mahadhasaLordHasNoAntardhasa = true,
     antardhasaOption1 = false,
     antardhasaOption2 = false,
