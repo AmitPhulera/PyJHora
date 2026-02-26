@@ -115,10 +115,20 @@ export function isInitialized(): boolean {
 // ============================================================================
 
 /**
- * Set the ayanamsa mode
+ * Get the cached SweModule for synchronous calls.
+ * Returns null if the ephemeris hasn't been initialized yet.
+ */
+function getSweModuleSync(): any | null {
+  if (!_sweInstance || !_isInitialized) return null;
+  return (_sweInstance as any).SweModule ?? null;
+}
+
+/**
+ * Set the ayanamsa mode.
+ * Matching Python: set_ayanamsa_mode(ayanamsa_mode, ayanamsa_value, jd)
  * @param mode - Ayanamsa mode name (LAHIRI, RAMAN, KP, etc.)
  * @param value - Custom value for SIDM_USER mode
- * @param jd - Julian day for time-dependent modes
+ * @param jd - Julian day for time-dependent modes (SENTHIL, SUNDAR_SS)
  */
 export function setAyanamsaMode(
   mode: string = DEFAULT_AYANAMSA_MODE,
@@ -129,12 +139,19 @@ export function setAyanamsaMode(
 
   if (key === 'SIDM_USER' && value !== undefined) {
     _ayanamsaValue = value;
+    // Set SWE mode if instance available (matching Python: swe.set_sid_mode(swe.SIDM_USER, value))
+    if (_sweInstance) _sweInstance.set_sid_mode(255, value, 0);
   } else if (key === 'SENTHIL' && jd !== undefined) {
     _ayanamsaValue = calculateAyanamsaSenthil(jd);
   } else if (key === 'SUNDAR_SS' && jd !== undefined) {
     _ayanamsaValue = calculateAyanamsaSuryaSiddhanta(jd);
-  } else if (key in AYANAMSA_MODES) {
+  } else {
     _ayanamsaValue = null; // Use SWE built-in
+    // Set SWE mode immediately if instance available (matching Python behavior)
+    const modeId = AYANAMSA_MODES[key as keyof typeof AYANAMSA_MODES];
+    if (_sweInstance && modeId !== undefined) {
+      _sweInstance.set_sid_mode(modeId, 0, 0);
+    }
   }
 
   _ayanamsaMode = key;
@@ -161,8 +178,8 @@ export async function getAyanamsaValueAsync(jd: number): Promise<number> {
 }
 
 /**
- * Synchronous version - uses cached/approximate value
- * For backwards compatibility
+ * Synchronous version — uses WASM when available, falls back to approximation.
+ * Matching Python: get_ayanamsa_value(jd) which calls swe.get_ayanamsa(jd)
  */
 export function getAyanamsaValue(jd: number): number {
   const key = _ayanamsaMode.toLowerCase();
@@ -171,7 +188,14 @@ export function getAyanamsaValue(jd: number): number {
     return _ayanamsaValue ?? 0;
   }
 
-  // Approximate Lahiri calculation for sync calls
+  // Use accurate WASM calculation when available
+  if (_sweInstance) {
+    const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
+    _sweInstance.set_sid_mode(modeId, 0, 0);
+    return _sweInstance.get_ayanamsa(jd);
+  }
+
+  // Fallback: approximate Lahiri calculation (only before WASM init)
   return calculateLahiriAyanamsa(jd);
 }
 
@@ -278,10 +302,49 @@ export async function siderealLongitudeAsync(jdUtc: number, planet: number): Pro
 }
 
 /**
- * Synchronous version - uses approximation for backwards compatibility
+ * Synchronous version — uses WASM when available, falls back to approximation.
+ * Matching Python: sidereal_longitude(jd_utc, planet)
  */
 export function siderealLongitude(jdUtc: number, planet: number): number {
-  // For sync calls, use approximation
+  // Handle Ketu specially
+  if (planet === 8) {
+    const rahuLong = siderealLongitude(jdUtc, 7);
+    return normalizeDegrees(rahuLong + 180);
+  }
+
+  const SweModule = getSweModuleSync();
+  if (SweModule) {
+    // Accurate WASM calculation
+    const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
+    _sweInstance!.set_sid_mode(modeId, 0, 0);
+    const ayanamsa = _sweInstance!.get_ayanamsa(jdUtc);
+
+    const sweIndex = PYJHORA_TO_SWE[planet];
+    if (sweIndex === undefined || sweIndex === -1) {
+      throw new Error(`Unknown planet index: ${planet}`);
+    }
+
+    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+    const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+    const serrPtr = SweModule._malloc(256);
+
+    try {
+      SweModule.ccall(
+        'swe_calc_ut',
+        'number',
+        ['number', 'number', 'number', 'number', 'number'],
+        [jdUtc, sweIndex, flags, xxPtr, serrPtr]
+      );
+      const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
+      const tropical = normalizeDegrees(xx[0]);
+      return normalizeDegrees(tropical - ayanamsa);
+    } finally {
+      SweModule._free(xxPtr);
+      SweModule._free(serrPtr);
+    }
+  }
+
+  // Fallback: approximation (only before WASM init)
   const tropicalLong = calculateTropicalLongitudeApprox(jdUtc, planet);
   const ayanamsa = getAyanamsaValue(jdUtc);
   return normalizeDegrees(tropicalLong - ayanamsa);
@@ -654,61 +717,140 @@ export async function sunriseAsync(jd: number, place: Place): Promise<{
  * Calculate sunset time using swe_rise_trans (async - uses WASM)
  * @param jd - Julian Day Number (local time)
  * @param place - Place data
+ * @param gauriChoghadiyaSetting - When true, recalculate jd from local time (Python compat)
  * @returns Object with local time (float hours), formatted time string, and JD
  */
-export async function sunsetAsync(jd: number, place: Place): Promise<{
+export async function sunsetAsync(jd: number, place: Place, gauriChoghadiyaSetting: boolean = false): Promise<{
   localTime: number;
   timeString: string;
   jd: number;
   jdUt: number;
 }> {
-  return riseTransHelper(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_SET);
+  const result = await riseTransHelper(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_SET);
+
+  if (gauriChoghadiyaSetting) {
+    const { date } = julianDayToGregorian(jd);
+    const h = Math.floor(result.localTime);
+    const remMin = (result.localTime - h) * 60;
+    const m = Math.floor(remMin);
+    const s = Math.floor((remMin - m) * 60);
+    const recalcJd = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+    return { ...result, jd: recalcJd };
+  }
+
+  return result;
 }
 
 /**
- * Synchronous sunrise (approximate)
+ * Synchronous rise/set helper — uses WASM when available, falls back to approximation.
+ */
+function riseTransHelperSync(
+  jd: number,
+  place: Place,
+  planet: number,
+  riseOrSet: number
+): { localTime: number; timeString: string; jd: number } {
+  const SweModule = getSweModuleSync();
+  if (SweModule) {
+    // Accurate WASM calculation
+    const { date } = julianDayToGregorian(jd);
+    const jdMidnight = gregorianToJulianDay(date, { hour: 0, minute: 0, second: 0 });
+    const jdStart = jdMidnight - place.timezone / 24;
+
+    const epheflag = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SPEED;
+    const rsmi = RISE_FLAGS | riseOrSet;
+
+    const geoposPtr = SweModule._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+    const tretPtr = SweModule._malloc(Float64Array.BYTES_PER_ELEMENT);
+
+    try {
+      const geopos = new Float64Array(SweModule.HEAPF64.buffer, geoposPtr, 3);
+      geopos[0] = place.longitude;
+      geopos[1] = place.latitude;
+      geopos[2] = 0.0;
+
+      const retFlag = SweModule.ccall(
+        'swe_rise_trans',
+        'number',
+        ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
+        [jdStart, planet, 0, epheflag, rsmi, geoposPtr, 0.0, 0.0, tretPtr, 0]
+      );
+
+      if (retFlag >= 0) {
+        const tret = new Float64Array(SweModule.HEAPF64.buffer, tretPtr, 1);
+        const eventJdUt = tret[0];
+        const localTime = (eventJdUt - jdMidnight) * 24 + place.timezone;
+
+        const h = Math.floor(localTime);
+        const remMin = (localTime - h) * 60;
+        const m = Math.floor(remMin);
+        const s = Math.floor((remMin - m) * 60);
+        const eventJdLocal = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+
+        return {
+          localTime,
+          timeString: formatHoursToTime(localTime),
+          jd: eventJdLocal,
+        };
+      }
+    } finally {
+      SweModule._free(geoposPtr);
+      SweModule._free(tretPtr);
+    }
+  }
+
+  // Fallback: crude approximation (only before WASM init)
+  const jdMidnight = Math.floor(jd);
+  const dayOfYear = (jd - 2451545) % 365.25;
+  const latEffect = (place.latitude / 90) * 2;
+  const seasonalEffect = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365.25) * 1.5;
+  const baseHour = riseOrSet === SWE_FLAGS.CALC_RISE ? 6.0 : 18.0;
+  const sign = riseOrSet === SWE_FLAGS.CALC_RISE ? 1 : -1;
+  const localTime = baseHour + sign * latEffect * seasonalEffect;
+
+  return {
+    localTime,
+    timeString: formatHoursToTime(localTime),
+    jd: jdMidnight + (localTime - 12) / 24
+  };
+}
+
+/**
+ * Synchronous sunrise — uses WASM when available.
+ * Matching Python: sunrise(jd, place)
  */
 export function sunrise(jd: number, place: Place): {
   localTime: number;
   timeString: string;
   jd: number
 } {
-  // Approximate based on latitude and time of year
-  const jdMidnight = Math.floor(jd);
-  const dayOfYear = (jd - 2451545) % 365.25; // Days since J2000
-
-  // Basic approximation with seasonal variation
-  const latEffect = (place.latitude / 90) * 2; // Up to 2 hours effect
-  const seasonalEffect = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365.25) * 1.5;
-  const localTime = 6.0 + latEffect * seasonalEffect;
-
-  return {
-    localTime,
-    timeString: formatHoursToTime(localTime),
-    jd: jdMidnight + (localTime - 12) / 24
-  };
+  return riseTransHelperSync(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_RISE);
 }
 
 /**
- * Synchronous sunset (approximate)
+ * Synchronous sunset — uses WASM when available.
+ * Matching Python: sunset(jd, place)
+ * @param gauriChoghadiyaSetting - When true, recalculate jd from local time (Python compat)
  */
-export function sunset(jd: number, place: Place): {
+export function sunset(jd: number, place: Place, gauriChoghadiyaSetting: boolean = false): {
   localTime: number;
   timeString: string;
   jd: number
 } {
-  const jdMidnight = Math.floor(jd);
-  const dayOfYear = (jd - 2451545) % 365.25;
+  const result = riseTransHelperSync(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_SET);
 
-  const latEffect = (place.latitude / 90) * 2;
-  const seasonalEffect = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365.25) * 1.5;
-  const localTime = 18.0 - latEffect * seasonalEffect;
+  if (gauriChoghadiyaSetting) {
+    // Matching Python: recalculate set_jd via julian_day_number(dob, tob)
+    const { date } = julianDayToGregorian(jd);
+    const h = Math.floor(result.localTime);
+    const remMin = (result.localTime - h) * 60;
+    const m = Math.floor(remMin);
+    const s = Math.floor((remMin - m) * 60);
+    const recalcJd = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+    return { ...result, jd: recalcJd };
+  }
 
-  return {
-    localTime,
-    timeString: formatHoursToTime(localTime),
-    jd: jdMidnight + (localTime - 12) / 24
-  };
+  return result;
 }
 
 /**
@@ -742,35 +884,27 @@ export async function moonsetAsync(jd: number, place: Place): Promise<{
 }
 
 /**
- * Synchronous moonrise (approximate)
+ * Synchronous moonrise — uses WASM when available.
+ * Matching Python: moonrise(jd, place)
  */
 export function moonrise(jd: number, place: Place): {
   localTime: number;
   timeString: string;
   jd: number
 } {
-  const approximateHour = 8.0;
-  return {
-    localTime: approximateHour,
-    timeString: formatHoursToTime(approximateHour),
-    jd: jd + (approximateHour - 12) / 24
-  };
+  return riseTransHelperSync(jd, place, SWE_PLANETS.MOON, SWE_FLAGS.CALC_RISE);
 }
 
 /**
- * Synchronous moonset (approximate)
+ * Synchronous moonset — uses WASM when available.
+ * Matching Python: moonset(jd, place)
  */
 export function moonset(jd: number, place: Place): {
   localTime: number;
   timeString: string;
   jd: number
 } {
-  const approximateHour = 20.0;
-  return {
-    localTime: approximateHour,
-    timeString: formatHoursToTime(approximateHour),
-    jd: jd + (approximateHour - 12) / 24
-  };
+  return riseTransHelperSync(jd, place, SWE_PLANETS.MOON, SWE_FLAGS.CALC_SET);
 }
 
 // ============================================================================
@@ -845,7 +979,8 @@ export async function planetSpeedInfoAsync(jd: number, place: Place, planet: num
 }
 
 /**
- * Synchronous planet speed info (approximate)
+ * Synchronous planet speed info — uses WASM when available.
+ * Matching Python: _planet_speed_info(jd, place, planet)
  */
 export function planetSpeedInfo(jd: number, place: Place, planet: number): {
   longitude: number;
@@ -856,27 +991,64 @@ export function planetSpeedInfo(jd: number, place: Place, planet: number): {
   distanceSpeed: number;
 } {
   const jdUtc = toUtc(jd, place.timezone);
+
+  // Handle Ketu specially
+  if (planet === 8) {
+    const rahuInfo = planetSpeedInfo(jd, place, 7);
+    return {
+      longitude: normalizeDegrees(rahuInfo.longitude + 180),
+      latitude: -rahuInfo.latitude,
+      distance: rahuInfo.distance,
+      longitudeSpeed: rahuInfo.longitudeSpeed,
+      latitudeSpeed: -rahuInfo.latitudeSpeed,
+      distanceSpeed: rahuInfo.distanceSpeed,
+    };
+  }
+
+  const SweModule = getSweModuleSync();
+  if (SweModule) {
+    const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
+    _sweInstance!.set_sid_mode(modeId, 0, 0);
+    const ayanamsa = _sweInstance!.get_ayanamsa(jdUtc);
+
+    const sweIndex = PYJHORA_TO_SWE[planet];
+    if (sweIndex === undefined || sweIndex === -1) {
+      return { longitude: 0, latitude: 0, distance: 1, longitudeSpeed: 0, latitudeSpeed: 0, distanceSpeed: 0 };
+    }
+
+    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+    const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+    const serrPtr = SweModule._malloc(256);
+
+    try {
+      SweModule.ccall(
+        'swe_calc_ut', 'number',
+        ['number', 'number', 'number', 'number', 'number'],
+        [jdUtc, sweIndex, flags, xxPtr, serrPtr]
+      );
+      const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
+      return {
+        longitude: normalizeDegrees(xx[0] - ayanamsa),
+        latitude: xx[1],
+        distance: xx[2],
+        longitudeSpeed: xx[3],
+        latitudeSpeed: xx[4],
+        distanceSpeed: xx[5],
+      };
+    } finally {
+      SweModule._free(xxPtr);
+      SweModule._free(serrPtr);
+    }
+  }
+
+  // Fallback approximation
   const longitude = siderealLongitude(jdUtc, planet);
-
   const dailyMotions: Record<number, number> = {
-    0: 0.9856,   // Sun
-    1: 13.1764,  // Moon
-    2: 0.5240,   // Mars
-    3: 1.3833,   // Mercury
-    4: 0.0831,   // Jupiter
-    5: 1.6021,   // Venus
-    6: 0.0335,   // Saturn
-    7: -0.0529,  // Rahu
-    8: -0.0529   // Ketu
+    0: 0.9856, 1: 13.1764, 2: 0.5240, 3: 1.3833, 4: 0.0831, 5: 1.6021, 6: 0.0335, 7: -0.0529
   };
-
   return {
-    longitude,
-    latitude: 0,
-    distance: 1,
-    longitudeSpeed: dailyMotions[planet] ?? 0,
-    latitudeSpeed: 0,
-    distanceSpeed: 0
+    longitude, latitude: 0, distance: 1,
+    longitudeSpeed: dailyMotions[planet] ?? 0, latitudeSpeed: 0, distanceSpeed: 0
   };
 }
 
@@ -889,12 +1061,39 @@ export async function planetsInRetrogradeAsync(jd: number, place: Place): Promis
 }
 
 /**
- * Check if planets are in retrograde (sync - returns empty for now)
+ * Check if planets are in retrograde (sync — uses WASM when available).
+ * Matching Python: planets_in_retrograde(jd, place)
  */
 export function planetsInRetrograde(jd: number, place: Place): number[] {
-  // Would need async call to properly determine
-  // Return empty for backwards compatibility
-  return [];
+  const jdUtc = toUtc(jd, place.timezone);
+  const retro: number[] = [];
+
+  const SweModule = getSweModuleSync();
+  if (SweModule) {
+    const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
+    _sweInstance!.set_sid_mode(modeId, 0, 0);
+    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+    const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+    const serrPtr = SweModule._malloc(256);
+
+    try {
+      for (let p = 2; p <= 6; p++) { // Mars through Saturn
+        const sweIndex = PYJHORA_TO_SWE[p]!;
+        SweModule.ccall(
+          'swe_calc_ut', 'number',
+          ['number', 'number', 'number', 'number', 'number'],
+          [jdUtc, sweIndex, flags, xxPtr, serrPtr]
+        );
+        const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
+        if (xx[3] < 0) retro.push(p);
+      }
+    } finally {
+      SweModule._free(xxPtr);
+      SweModule._free(serrPtr);
+    }
+  }
+
+  return retro;
 }
 
 // ============================================================================
