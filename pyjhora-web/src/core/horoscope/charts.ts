@@ -75,9 +75,19 @@ import {
   VIMSOTTARI_ADHIPATI_LIST,
   PAACHAKAADI_SAMBHANDHA,
   LATTA_STARS_OF_PLANETS,
+  ODD_SIGNS,
 } from '../constants';
 
 import { PRASNA_KP_249_DICT } from '../kp-data';
+
+import { JhoraDate, JhoraTime, Place } from '../types';
+import { julianDayNumber } from '../utils/julian';
+import { countRasis } from '../utils/angle';
+import {
+  horaLagnaAsync, horaLagnaMixedChart,
+  dasavargaFromLong as drikDasavargaFromLong,
+  ascendant as drikAscendant, planetaryPositions as drikPlanetaryPositions
+} from '../panchanga/drik';
 
 import { nakshatraPada, cyclicCountOfStarsWithAbhijit } from '../panchanga/drik';
 
@@ -1205,3 +1215,431 @@ export const mixedChartFromRasiPositions = (
   const pp1 = getDivisionalChart(d1Positions, vargaFactor1);
   return getDivisionalChart(pp1, vargaFactor2);
 };
+
+// ============================================================================
+// VARNADA LAGNA — 4 methods + mixed chart variants
+// ============================================================================
+
+/**
+ * Varnada Lagna — BV Raman method (mixed chart variant).
+ * Lagna decides last step direction; count based on lagnas.
+ *
+ * Python: _varnada_lagna_bv_raman_mixed_chart()
+ */
+function varnadaLagnaBvRamanMixedChart(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1
+): [number, number] {
+  const jd = julianDayNumber(dob, tob);
+  const planetPositions = getMixedDivisionalChart(
+    buildD1PositionsFromJd(jd, place), vargaFactor1, chartMethod1, vargaFactor2, chartMethod2
+  );
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLong = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSign] = horaLagnaMixedChart(jd, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2);
+  const horaLagna = (horaSign + houseIndex - 1) % 12;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (horaLagnaIsOdd === lagnaIsOdd)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+
+  let vl = lagnaIsOdd ? countRasis(1, count, 1) : countRasis(12, count, -1);
+  vl -= 1; // Keep in 0..11 range
+  return [vl, ascLong];
+}
+
+/**
+ * Varnada Lagna — BV Raman method (async, divisional chart).
+ * Lagna decides last step direction; count based on lagnas.
+ *
+ * Python: _varnada_lagna_bv_raman()
+ */
+async function varnadaLagnaBvRaman(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  divisionalChartFactor: number = 1, chartMethod: number = 1,
+  baseRasi?: number, countFromEndOfSign?: number
+): Promise<[number, number]> {
+  const jd = julianDayNumber(dob, tob);
+  const d1Pos = buildD1PositionsFromJd(jd, place);
+  const planetPositions = getDivisionalChart(d1Pos, divisionalChartFactor, chartMethod);
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLong = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSign] = await horaLagnaAsync(jd, place, divisionalChartFactor, chartMethod);
+  const horaLagna = (horaSign + houseIndex - 1) % 12;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (horaLagnaIsOdd === lagnaIsOdd)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+
+  let vl = lagnaIsOdd ? countRasis(1, count, 1) : countRasis(12, count, -1);
+  vl -= 1; // Keep in 0..11 range
+  return [vl, ascLong];
+}
+
+/**
+ * Varnada Lagna — Sharma/Santhanam method (mixed chart variant).
+ * Count decides last step direction; count based on lagnas.
+ *
+ * Python: _varnada_lagna_sharma_mixed_chart()
+ */
+function varnadaLagnaSharmaMixedChart(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1
+): [number, number] {
+  const jd = julianDayNumber(dob, tob);
+  const planetPositions = getMixedDivisionalChart(
+    buildD1PositionsFromJd(jd, place), vargaFactor1, chartMethod1, vargaFactor2, chartMethod2
+  );
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLong = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSign] = horaLagnaMixedChart(jd, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2);
+  const horaLagna = (horaSign + houseIndex - 1) % 12;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (count1 % 2 === count2 % 2)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+  const countIsOdd = count % 2 !== 0;
+
+  let vl = countIsOdd ? countRasis(1, count, 1) : countRasis(12, count, -1);
+  vl -= 1; // Keep in 0..11 range
+  return [vl, ascLong];
+}
+
+/**
+ * Varnada Lagna — Sharma/Santhanam method (async, divisional chart).
+ * Count decides last step direction; count based on lagnas.
+ *
+ * Python: _varnada_lagna_sharma()
+ */
+async function varnadaLagnaSharma(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  divisionalChartFactor: number = 1, chartMethod: number = 1,
+  baseRasi?: number, countFromEndOfSign?: number
+): Promise<[number, number]> {
+  const jd = julianDayNumber(dob, tob);
+  const d1Pos = buildD1PositionsFromJd(jd, place);
+  const planetPositions = getDivisionalChart(d1Pos, divisionalChartFactor, chartMethod);
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLong = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSign] = await horaLagnaAsync(jd, place, divisionalChartFactor, chartMethod);
+  const horaLagna = (horaSign + houseIndex - 1) % 12;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (count1 % 2 === count2 % 2)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+  const countIsOdd = count % 2 !== 0;
+
+  let vl = countIsOdd ? countRasis(1, count, 1) : countRasis(12, count, -1);
+  vl -= 1; // Keep in 0..11 range
+  return [vl, ascLong];
+}
+
+/**
+ * Varnada Lagna — Sanjay Rath method (mixed chart variant).
+ * Lagna decides last step direction; count based on longitudes of lagnas.
+ *
+ * Python: _varnada_lagna_sanjay_rath_mixed_chart()
+ */
+function varnadaLagnaSanjayRathMixedChart(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1
+): [number, number] {
+  const jd = julianDayNumber(dob, tob);
+  const planetPositions = getMixedDivisionalChart(
+    buildD1PositionsFromJd(jd, place), vargaFactor1, chartMethod1, vargaFactor2, chartMethod2
+  );
+  let ascSign = planetPositions[0]!.rasi;
+  const ascLongInSign = planetPositions[0]!.longitude;
+  ascSign = (ascSign + houseIndex - 1) % 12;
+  let ascLong = ascSign * 30 + ascLongInSign;
+
+  const [horaSignRaw, horaLongInSign] = horaLagnaMixedChart(jd, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2);
+  const horaSign = (horaSignRaw + houseIndex - 1) % 12;
+  let horaLong = horaSign * 30 + horaLongInSign;
+
+  const ascIsOdd = ODD_SIGNS.includes(ascSign);
+  if (!ascIsOdd) ascLong = 360.0 - ascLong;
+
+  const horaIsOdd = ODD_SIGNS.includes(horaSign);
+  if (!horaIsOdd) horaLong = 360.0 - horaLong;
+
+  let vl: number;
+  if (horaIsOdd === ascIsOdd) {
+    vl = (ascLong + horaLong) % 360;
+  } else {
+    vl = (Math.max(ascLong, horaLong) - Math.min(ascLong, horaLong)) % 360;
+  }
+
+  if (!ascIsOdd) vl = 360 - vl;
+
+  return drikDasavargaFromLong(vl, 1);
+}
+
+/**
+ * Varnada Lagna — Sanjay Rath method (async, divisional chart).
+ * Lagna decides last step direction; count based on longitudes of lagnas.
+ *
+ * Python: _varnada_lagna_sanjay_rath()
+ */
+async function varnadaLagnaSanjayRath(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  divisionalChartFactor: number = 1, chartMethod: number = 1,
+  baseRasi?: number, countFromEndOfSign?: number
+): Promise<[number, number]> {
+  const jd = julianDayNumber(dob, tob);
+  const d1Pos = buildD1PositionsFromJd(jd, place);
+  const planetPositions = getDivisionalChart(d1Pos, divisionalChartFactor, chartMethod);
+  let ascSign = planetPositions[0]!.rasi;
+  const ascLongInSign = planetPositions[0]!.longitude;
+  ascSign = (ascSign + houseIndex - 1) % 12;
+  let ascLong = ascSign * 30 + ascLongInSign;
+
+  const [horaSignRaw, horaLongInSign] = await horaLagnaAsync(jd, place, divisionalChartFactor, chartMethod);
+  const horaSign = (horaSignRaw + houseIndex - 1) % 12;
+  let horaLong = horaSign * 30 + horaLongInSign;
+
+  const ascIsOdd = ODD_SIGNS.includes(ascSign);
+  if (!ascIsOdd) ascLong = 360.0 - ascLong;
+
+  const horaIsOdd = ODD_SIGNS.includes(horaSign);
+  if (!horaIsOdd) horaLong = 360.0 - horaLong;
+
+  let vl: number;
+  if (horaIsOdd === ascIsOdd) {
+    vl = (ascLong + horaLong) % 360;
+  } else {
+    vl = (Math.max(ascLong, horaLong) - Math.min(ascLong, horaLong)) % 360;
+  }
+
+  if (!ascIsOdd) vl = 360 - vl;
+
+  return drikDasavargaFromLong(vl, 1);
+}
+
+/**
+ * Varnada Lagna — Jha/Pandey method (mixed chart variant).
+ * Last count decides last step direction; count based on longitudes.
+ *
+ * Python: _varnada_lagna_jha_pandey_mixed_chart()
+ */
+function varnadaLagnaJhaPandeyMixedChart(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1
+): [number, number] {
+  const jd = julianDayNumber(dob, tob);
+  const planetPositions = getMixedDivisionalChart(
+    buildD1PositionsFromJd(jd, place), vargaFactor1, chartMethod1, vargaFactor2, chartMethod2
+  );
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLongInSign = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  let ascLong = lagna * 30 + ascLongInSign;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  if (!lagnaIsOdd) ascLong = 360.0 - ascLong;
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSignRaw, horaLongInSign] = horaLagnaMixedChart(jd, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2);
+  const horaLagna = (horaSignRaw + houseIndex - 1) % 12;
+  let horaLong = horaLagna * 30 + horaLongInSign;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  if (!lagnaIsOdd) horaLong = 360.0 - horaLong; // Note: Python uses lagna_is_odd, not hora_lagna_is_odd
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (count1 % 2 === count2 % 2)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+  const countIsOdd = count % 2 !== 0;
+
+  const vl = countIsOdd
+    ? (ascLong + horaLong) % 360
+    : (Math.max(ascLong, horaLong) - Math.min(ascLong, horaLong)) % 360;
+
+  return drikDasavargaFromLong(vl, 1);
+}
+
+/**
+ * Varnada Lagna — Jha/Pandey method (async, divisional chart).
+ * Last count decides last step direction; count based on longitudes.
+ *
+ * Python: _varnada_lagna_jha_pandey()
+ */
+async function varnadaLagnaJhaPandey(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  divisionalChartFactor: number = 1, chartMethod: number = 1,
+  baseRasi?: number, countFromEndOfSign?: number
+): Promise<[number, number]> {
+  const jd = julianDayNumber(dob, tob);
+  const d1Pos = buildD1PositionsFromJd(jd, place);
+  const planetPositions = getDivisionalChart(d1Pos, divisionalChartFactor, chartMethod);
+  const ascSign = planetPositions[0]!.rasi;
+  const ascLongInSign = planetPositions[0]!.longitude;
+  const lagna = (ascSign + houseIndex - 1) % 12;
+  let ascLong = lagna * 30 + ascLongInSign;
+  const lagnaIsOdd = ODD_SIGNS.includes(lagna);
+  if (!lagnaIsOdd) ascLong = 360.0 - ascLong;
+  const count1 = lagnaIsOdd ? countRasis(0, lagna, 1) : countRasis(11, lagna, -1);
+
+  const [horaSignRaw, horaLongInSign] = await horaLagnaAsync(jd, place, divisionalChartFactor, chartMethod);
+  const horaLagna = (horaSignRaw + houseIndex - 1) % 12;
+  let horaLong = horaLagna * 30 + horaLongInSign;
+  const horaLagnaIsOdd = ODD_SIGNS.includes(horaLagna);
+  if (!lagnaIsOdd) horaLong = 360.0 - horaLong; // Note: Python uses lagna_is_odd, not hora_lagna_is_odd
+  const count2 = horaLagnaIsOdd ? countRasis(0, horaLagna, 1) : countRasis(11, horaLagna, -1);
+
+  const count = (count1 % 2 === count2 % 2)
+    ? (count1 + count2) % 12
+    : (Math.max(count1, count2) - Math.min(count1, count2)) % 12;
+  const countIsOdd = count % 2 !== 0;
+
+  const vl = countIsOdd
+    ? (ascLong + horaLong) % 360
+    : (Math.max(ascLong, horaLong) - Math.min(ascLong, horaLong)) % 360;
+
+  return drikDasavargaFromLong(vl, 1);
+}
+
+/**
+ * Build D1 (Rasi) positions from JD and place (sync helper).
+ * Mirrors drik.ts internal buildD1Positions — uses sync ascendant + planetaryPositions.
+ */
+function buildD1PositionsFromJd(jd: number, place: Place): PlanetPosition[] {
+  const asc = drikAscendant(jd, place);
+  const pp = drikPlanetaryPositions(jd, place);
+  const positions: PlanetPosition[] = [
+    { planet: -1, rasi: asc[0], longitude: asc[1] }, // Ascendant as planet -1
+  ];
+  for (const [pid, [rasi, long]] of pp) {
+    positions.push({ planet: pid, rasi, longitude: long });
+  }
+  return positions;
+}
+
+/**
+ * Varnada Lagna (mixed chart) — dispatcher for all 4 methods.
+ *
+ * Python: varnada_lagna_mixed_chart()
+ *
+ * @param dob - Date of birth
+ * @param tob - Time of birth
+ * @param place - Place of birth
+ * @param houseIndex - 1..12 (1=Lagna, 2=2nd house, etc.)
+ * @param vargaFactor1 - First varga factor
+ * @param chartMethod1 - First chart method
+ * @param vargaFactor2 - Second varga factor
+ * @param chartMethod2 - Second chart method
+ * @param varnadaMethod - 1=BV Raman, 2=Sharma/Santhanam, 3=Sanjay Rath, 4=Jha/Pandey
+ * @returns [varnada_lagna_rasi (0-11), varnada_lagna_longitude]
+ */
+export function varnadaLagnaMixedChart(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  houseIndex: number = 1,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1,
+  varnadaMethod: number = 1
+): [number, number] {
+  // Note: Python passes chart_method_1=chart_method_2 (not chart_method_1) in all branches.
+  // This appears to be a Python bug but we replicate it for parity.
+  switch (varnadaMethod) {
+    case 1:
+      return varnadaLagnaBvRamanMixedChart(dob, tob, place, houseIndex,
+        vargaFactor1, chartMethod2, vargaFactor2, chartMethod2);
+    case 2:
+      return varnadaLagnaSharmaMixedChart(dob, tob, place, houseIndex,
+        vargaFactor1, chartMethod2, vargaFactor2, chartMethod2);
+    case 3:
+      return varnadaLagnaSanjayRathMixedChart(dob, tob, place, houseIndex,
+        vargaFactor1, chartMethod2, vargaFactor2, chartMethod2);
+    case 4:
+      return varnadaLagnaJhaPandeyMixedChart(dob, tob, place, houseIndex,
+        vargaFactor1, chartMethod2, vargaFactor2, chartMethod2);
+    default:
+      return varnadaLagnaBvRamanMixedChart(dob, tob, place, houseIndex,
+        vargaFactor1, chartMethod2, vargaFactor2, chartMethod2);
+  }
+}
+
+/**
+ * Varnada Lagna — async dispatcher for all 4 methods.
+ *
+ * Python: varnada_lagna()
+ *
+ * Ref: https://saptarishisshop.com/a-look-at-the-calculation-of-varnada-lagna-by-abhishekha/
+ *
+ * Methods are based on combination of two factors:
+ *   (1) last direction decided by odd/even of Lagna/hora or odd/even of count values
+ *   (2) count is decided by count between lagna & hora lagna or sum/diff of longitudes
+ *
+ * @param dob - Date of birth
+ * @param tob - Time of birth
+ * @param place - Place of birth
+ * @param divisionalChartFactor - D-Chart index (1=D1, 9=D9, etc.)
+ * @param chartMethod - Chart method
+ * @param houseIndex - 1..12 (1=Lagna, 2=2nd house, etc.)
+ * @param varnadaMethod - 1=BV Raman, 2=Sharma/Santhanam, 3=Sanjay Rath, 4=Jha/Pandey
+ * @param baseRasi - Optional base rasi
+ * @param countFromEndOfSign - Optional count direction
+ * @returns [varnada_lagna_rasi (0-11), varnada_lagna_longitude]
+ */
+export async function varnadaLagnaAsync(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  divisionalChartFactor: number = 1,
+  chartMethod: number = 1,
+  houseIndex: number = 1,
+  varnadaMethod: number = 1,
+  baseRasi?: number,
+  countFromEndOfSign?: number
+): Promise<[number, number]> {
+  switch (varnadaMethod) {
+    case 1:
+      return varnadaLagnaBvRaman(dob, tob, place, houseIndex,
+        divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign);
+    case 2:
+      return varnadaLagnaSharma(dob, tob, place, houseIndex,
+        divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign);
+    case 3:
+      return varnadaLagnaSanjayRath(dob, tob, place, houseIndex,
+        divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign);
+    case 4:
+      return varnadaLagnaJhaPandey(dob, tob, place, houseIndex,
+        divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign);
+    default:
+      return varnadaLagnaBvRaman(dob, tob, place, houseIndex,
+        divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign);
+  }
+}
