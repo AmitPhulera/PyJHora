@@ -6,7 +6,7 @@
  * Seed based on time of birth (dawn/day/dusk/night)
  */
 
-import { RASI_NAMES_EN, SIDEREAL_YEAR } from '../../constants';
+import { RASI_NAMES_EN, SIDEREAL_YEAR, TROPICAL_YEAR } from '../../constants';
 import { PlanetPosition, getDivisionalChart } from '../../horoscope/charts';
 import { getHouseOwnerFromPlanetPositions } from '../../horoscope/house';
 import { getPlanetLongitude } from '../../panchanga/drik';
@@ -80,6 +80,24 @@ function formatJdAsDate(jd: number): string {
 }
 
 /**
+ * Approximate next_solar_date from Python drik.py.
+ * When years=1, months=1, sixtyHours=1 (defaults), returns jd unchanged (matching Python).
+ * Otherwise advances JD by tropical year fraction.
+ */
+function nextSolarDateApprox(
+  jd: number,
+  years: number = 1,
+  months: number = 1,
+  sixtyHours: number = 1
+): number {
+  if (years === 1 && months === 1 && sixtyHours === 1) return jd;
+  const jdExtra = Math.floor(
+    ((years - 1) + (months - 1) / 12 + (sixtyHours - 1) / 144) * TROPICAL_YEAR
+  );
+  return jd + jdExtra;
+}
+
+/**
  * Determine dasha seed based on time of birth relative to dawn/day/dusk/night.
  * Ports Python chakra._dhasa_seed().
  *
@@ -143,6 +161,14 @@ function getDhasaSeed(
 /**
  * Get Chakra Dasha periods
  * Fixed 10-year duration per sign
+ *
+ * @param jd - Julian day number at birth
+ * @param place - Birth place
+ * @param options.divisionalChartFactor - Divisional chart factor (default 1)
+ * @param options.includeBhuktis - Whether to include sub-periods (default true)
+ * @param options.years - Solar return years (default 1, no advancement)
+ * @param options.months - Solar return months (default 1, no advancement)
+ * @param options.sixtyHours - Solar return 60-hour count (default 1, no advancement)
  */
 export function getChakraDashaBhukti(
   jd: number,
@@ -150,28 +176,37 @@ export function getChakraDashaBhukti(
   options: {
     divisionalChartFactor?: number;
     includeBhuktis?: boolean;
+    years?: number;
+    months?: number;
+    sixtyHours?: number;
   } = {}
 ): ChakraResult {
   const {
     divisionalChartFactor = 1,
-    includeBhuktis = true
+    includeBhuktis = true,
+    years = 1,
+    months = 1,
+    sixtyHours = 1
   } = options;
-  
-  const planetPositions = getPlanetPositionsArray(jd, place, divisionalChartFactor);
+
+  // Advance JD by solar date (Python: drik.next_solar_date) before seed calculation
+  const jdYears = nextSolarDateApprox(jd, years, months, sixtyHours);
+
+  const planetPositions = getPlanetPositionsArray(jdYears, place, divisionalChartFactor);
 
   // Get lagna house (Sun as proxy) and lagna lord's house
   const lagnaHouse = planetPositions[0]?.rasi ?? 0;
   const lagnaLord = getHouseOwnerFromPlanetPositions(planetPositions, lagnaHouse, false);
   const lagnaLordHouse = planetPositions.find(p => p.planet === lagnaLord)?.rasi ?? 0;
 
-  const dhasaSeed = getDhasaSeed(jd, place, lagnaHouse, lagnaLordHouse);
-  
+  const dhasaSeed = getDhasaSeed(jdYears, place, lagnaHouse, lagnaLordHouse);
+
   // Build progression from seed
   const dhasaLords = Array.from({ length: 12 }, (_, h) => (dhasaSeed + h) % 12);
-  
+
   const mahadashas: ChakraDashaPeriod[] = [];
   const bhuktis: ChakraBhuktiPeriod[] = [];
-  let startJd = jd;
+  let startJd = jdYears;
   
   for (const dhasaLord of dhasaLords) {
     const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;

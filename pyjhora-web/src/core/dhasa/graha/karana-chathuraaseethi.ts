@@ -110,35 +110,17 @@ function getKaranaLord(karanaNumber: number): number {
 }
 
 /**
- * Calculate fraction of karana elapsed
- * Using approximate calculation since karana endTime is available
+ * Calculate fraction of karana remaining.
+ * Matches Python's utils.get_fraction(start_time_hrs, end_time_hrs, birth_time_hrs).
+ * Returns (end - birth) / (end - start), i.e. the fraction remaining.
  */
-function getKaranaFraction(endTime: number, birthTimeHrs: number): number {
-  // Karana spans about 6 degrees of moon-sun elongation
-  // Approximate duration is about 12 hours
-  const approxDuration = 12; // hours
-  const startTime = endTime - approxDuration;
-
-  let adjustedEnd = endTime;
-  let adjustedStart = startTime;
-  let adjustedBirth = birthTimeHrs;
-
-  // Handle midnight crossings
-  if (adjustedStart < 0) {
-    adjustedStart += 24;
-    if (birthTimeHrs > adjustedStart || birthTimeHrs < adjustedEnd) {
-      if (birthTimeHrs > adjustedStart) {
-        adjustedBirth = birthTimeHrs;
-        adjustedEnd += 24;
-      }
-    }
+function getFraction(startTimeHrs: number, endTimeHrs: number, birthTimeHrs: number): number {
+  let tl = endTimeHrs - startTimeHrs;
+  if (startTimeHrs < 0) {
+    tl = Math.floor(Math.abs(startTimeHrs) / 24 + 1) * 24 + endTimeHrs - Math.abs(startTimeHrs);
   }
-
-  const total = approxDuration;
-  const elapsed = adjustedBirth - adjustedStart;
-
-  if (total <= 0) return 0.5;
-  return Math.max(0, Math.min(1, elapsed / total));
+  if (tl <= 0) return 0.5;
+  return Math.min((endTimeHrs - birthTimeHrs) / tl, 1.0);
 }
 
 // ============================================================================
@@ -167,7 +149,7 @@ export function getKaranaChathuraaseethiDashaBhukti(
     useTribhagiVariation = false
   } = options;
 
-  // Get karana information
+  // Get karana information — matches Python's _dhasa_start()
   const karanaResult = calculateKarana(jd, place);
   const karanaNumber = karanaResult.number;
   const karanaName = karanaResult.name;
@@ -176,19 +158,19 @@ export function getKaranaChathuraaseethiDashaBhukti(
   const { time } = julianDayToGregorian(jd);
   const birthTimeHrs = time.hour + time.minute / 60 + time.second / 3600;
 
-  // Calculate karana fraction
-  const karanaFraction = getKaranaFraction(karanaResult.endTime, birthTimeHrs);
+  // Calculate karana fraction using actual start/end times (matches Python)
+  // Python: k_frac = utils.get_fraction(_kar[1], _kar[2], birth_time_hrs)
+  const karanaFraction = getFraction(karanaResult.startTime, karanaResult.endTime, birthTimeHrs);
 
   // Get starting lord
   const startingLord = getKaranaLord(karanaNumber);
 
-  // Calculate dasha start
-  const fractionRemaining = 1 - karanaFraction;
-  const periodElapsed = fractionRemaining * DASHA_DURATION * YEAR_DURATION;
+  // Calculate dasha start — Python: period_elapsed = (1-k_frac)*res*year_duration
+  const periodElapsed = (1 - karanaFraction) * DASHA_DURATION * YEAR_DURATION;
   let startJd = jd - periodElapsed;
 
-  // Calculate dasha balance
-  const dashaBalance = fractionRemaining * DASHA_DURATION;
+  // Calculate dasha balance (remaining years in current period)
+  const dashaBalance = karanaFraction * DASHA_DURATION;
 
   // Tribhagi variation
   const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
