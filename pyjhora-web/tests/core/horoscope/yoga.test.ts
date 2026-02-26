@@ -1460,20 +1460,16 @@ describe('Python Parity - Chennai 1996-12-07 D-1 Chart', () => {
       expect(vesiYoga(chart)).toBe(true);
     });
 
-    it('vosiYoga should be true (Venus in 12th from Sun)', () => {
-      // 12th from Sun (Scorpio) = Libra: Moon and Venus present
-      // TS filters out Moon, Venus remains -> true
-      // Note: Python returns False for this chart. The disagreement may be due to
-      // Python's vosiYoga implementation excluding Rahu/Ketu or using different
-      // house counting. This is a known parity gap to investigate.
-      expect(vosiYoga(chart)).toBe(true);
+    it('vosiYoga should be false (Python parity: Moon present in 12th from Sun disqualifies)', () => {
+      // 12th from Sun (Scorpio) = Libra: Moon(1) and Venus(5) present
+      // Python logic: at least 1 planet AND excluded planet (Moon) NOT among them
+      // Moon IS in the house -> excluded_planet in planet_ids -> False
+      expect(vosiYoga(chart)).toBe(false);
     });
 
-    it('ubhayacharaYoga should be true (vesi && vosi both true in TS)', () => {
-      // TS: vesiYoga=true AND vosiYoga=true -> true
-      // Note: Python returns False because Python's vosiYoga is False.
-      // Known parity gap carried from vosiYoga difference.
-      expect(ubhayacharaYoga(chart)).toBe(true);
+    it('ubhayacharaYoga should be false (Python parity: vosiYoga is false)', () => {
+      // ubhayachara = vesi AND vosi. vesi=true but vosi=false -> false
+      expect(ubhayacharaYoga(chart)).toBe(false);
     });
 
     it('nipunaYoga/budhaAadityaYoga should be false (Sun and Mercury in different houses)', () => {
@@ -1747,8 +1743,13 @@ describe('Python Parity - Chennai 1996-12-07 D-1 Chart', () => {
       expect(dhanaYoga(chart)).toBe(false);
     });
 
-    it('vasumathiYoga should be false', () => {
-      expect(vasumathiYoga(chart)).toBe(false);
+    it('vasumathiYoga should be true (Python parity: all benefics in upachayas from Lagna or Moon)', () => {
+      // Lagna=Capricorn(9), Moon=Libra(6)
+      // Upachayas from Lagna: [Pisces(11), Gemini(2), Libra(6), Scorpio(7)]
+      // Upachayas from Moon: [Sagittarius(8), Pisces(11), Cancer(3), Leo(4)]
+      // Jupiter in Sag(8) -> in Moon upachaya. Venus in Libra(6) -> in Lagna upachaya.
+      // Mercury in Sag(8) -> in Moon upachaya. All benefics covered -> true
+      expect(vasumathiYoga(chart)).toBe(true);
     });
 
     it('kahalaYoga should be false', () => {

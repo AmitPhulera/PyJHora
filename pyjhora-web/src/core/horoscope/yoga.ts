@@ -276,9 +276,8 @@ export const vesiYoga = (chart: HouseChart): boolean => {
   const sunHouse = h(pToH, SUN);
   const yogaHouse = (sunHouse + HOUSE_2) % 12;
   const planetsInHouse = getPlanetsInHouse(chart, yogaHouse);
-  // Exclude Moon
-  const validPlanets = planetsInHouse.filter((p) => p !== MOON);
-  return validPlanets.length >= 1;
+  // Python: at least 1 planet exists AND excluded planet (Moon) is NOT among them
+  return planetsInHouse.length >= 1 && !planetsInHouse.includes(MOON);
 };
 
 /**
@@ -289,8 +288,8 @@ export const vosiYoga = (chart: HouseChart): boolean => {
   const sunHouse = h(pToH, SUN);
   const yogaHouse = (sunHouse + HOUSE_12) % 12;
   const planetsInHouse = getPlanetsInHouse(chart, yogaHouse);
-  const validPlanets = planetsInHouse.filter((p) => p !== MOON);
-  return validPlanets.length >= 1;
+  // Python: at least 1 planet exists AND excluded planet (Moon) is NOT among them
+  return planetsInHouse.length >= 1 && !planetsInHouse.includes(MOON);
 };
 
 /**
@@ -321,8 +320,8 @@ export const sunaphaaYoga = (chart: HouseChart): boolean => {
   const moonHouse = h(pToH, MOON);
   const yogaHouse = (moonHouse + HOUSE_2) % 12;
   const planetsInHouse = getPlanetsInHouse(chart, yogaHouse);
-  const validPlanets = planetsInHouse.filter((p) => p !== SUN);
-  return validPlanets.length >= 1;
+  // Python: at least 1 planet exists AND excluded planet (Sun) is NOT among them
+  return planetsInHouse.length >= 1 && !planetsInHouse.includes(SUN);
 };
 
 /**
@@ -333,8 +332,8 @@ export const anaphaaYoga = (chart: HouseChart): boolean => {
   const moonHouse = h(pToH, MOON);
   const yogaHouse = (moonHouse + HOUSE_12) % 12;
   const planetsInHouse = getPlanetsInHouse(chart, yogaHouse);
-  const validPlanets = planetsInHouse.filter((p) => p !== SUN);
-  return validPlanets.length >= 1;
+  // Python: at least 1 planet exists AND excluded planet (Sun) is NOT among them
+  return planetsInHouse.length >= 1 && !planetsInHouse.includes(SUN);
 };
 
 /**
@@ -1707,23 +1706,22 @@ export const dhanaYoga = (chart: HouseChart): boolean => {
 };
 
 /**
- * Vasumathi Yoga: Benefics in upachayas (3, 6, 10, 11) from Moon
+ * Vasumathi Yoga: ALL benefics occupy upachaya houses (3, 6, 10, 11)
+ * from Lagna OR Moon.
  */
 export const vasumathiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
+  const ascHouse = h(pToH, ASCENDANT_SYMBOL);
   const moonHouse = h(pToH, MOON);
-  const upachayas = [
-    (moonHouse + HOUSE_3) % 12,
-    (moonHouse + HOUSE_6) % 12,
-    (moonHouse + HOUSE_10) % 12,
-    (moonHouse + HOUSE_11) % 12,
-  ];
+  const upachayasFromLagna = getUpachayasOfRaasi(ascHouse);
+  const upachayasFromMoon = getUpachayasOfRaasi(moonHouse);
   const naturalBenefics = getNaturalBenefics(chart);
 
-  // At least one benefic in each upachaya
-  return upachayas.every((u) =>
-    naturalBenefics.some((b) => h(pToH, b) === u)
-  );
+  // ALL benefics must be in upachayas from either Lagna or Moon
+  return naturalBenefics.every((pid) => {
+    const pHouse = h(pToH, pid);
+    return upachayasFromLagna.includes(pHouse) || upachayasFromMoon.includes(pHouse);
+  });
 };
 
 // ============================================================================
