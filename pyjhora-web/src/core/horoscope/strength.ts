@@ -75,7 +75,7 @@ const HADDA_LORDS: Array<Array<[number, number]>> = [
   [[2, 7], [5, 11], [3, 19], [4, 24], [6, 30]], // Scorpio
   [[4, 12], [5, 17], [3, 21], [2, 26], [6, 30]], // Sagittarius
   [[3, 7], [4, 14], [5, 22], [6, 26], [2, 30]], // Capricorn
-  [[3, 7], [5, 13], [4, 20], [2, 25], [6, 30]], // Aquarius (note: original has 50, likely typo, using 30)
+  [[3, 7], [5, 13], [4, 20], [2, 25], [6, 30]], // Aquarius (Python has [6,50] which is a bug; corrected to [6,30])
   [[5, 12], [4, 16], [3, 19], [2, 28], [6, 30]]  // Pisces
 ];
 
@@ -1591,4 +1591,155 @@ export const calculatePlanetAspectRelationshipTable = (
 
   // Transpose
   return dk[0].map((_, colIndex) => dk.map(row => row[colIndex]));
+};
+
+// ============================================================================
+// UCCHA RASHMI
+// ============================================================================
+
+/**
+ * Calculate Uccha Rashmi (exaltation rays) for all planets.
+ * Ported from Python _uccha_rashmi.
+ *
+ * @param d1Positions - D-1 chart planet positions
+ * @returns Array of uccha rashmi values for Sun to Saturn (7 elements)
+ */
+export const calculateUcchaRashmi = (d1Positions: PlanetPosition[]): number[] => {
+  const ub: number[] = [];
+
+  for (let p = 0; p < 7; p++) {
+    const pos = d1Positions.find(pp => pp.planet === p);
+    if (!pos) {
+      ub.push(0);
+      continue;
+    }
+
+    const pLong = pos.rasi * 30 + pos.longitude;
+    let pd = (PLANET_DEEP_DEBILITATION_LONGITUDES[p] + 360 - pLong) % 360;
+
+    if (pd > 180) pd = 360 - pd;
+
+    pd += 30;
+    ub.push(roundTo((pd * 2) / 30, 1));
+  }
+
+  return ub;
+};
+
+// ============================================================================
+// CHESHTA RASHMI
+// ============================================================================
+
+/**
+ * Calculate Cheshta Rashmi (motional rays) for all planets.
+ * Ported from Python _cheshta_rashmi.
+ * NOTE: Marked as experimental in Python ("STILL UNDER EXPERIMENT - Exact Algorithm unknown").
+ *
+ * @param jd - Julian Day number
+ * @param place - Place with latitude, longitude, timezone
+ * @param d1Positions - D-1 chart planet positions
+ * @returns Array of cheshta rashmi values for Sun to Saturn (7 elements)
+ */
+export const calculateCheshtaRashmi = (
+  jd: number,
+  place: Place,
+  d1Positions: PlanetPosition[]
+): number[] => {
+  const cb = calculateCheshtaBala(jd, place, d1Positions).map(c => c * 3.0);
+
+  const sunPos = d1Positions.find(p => p.planet === SUN);
+  const moonPos = d1Positions.find(p => p.planet === MOON);
+
+  const sunLong = sunPos ? sunPos.rasi * 30 + sunPos.longitude : 0;
+  const moonLong = moonPos ? moonPos.rasi * 30 + moonPos.longitude : 0;
+
+  cb[0] = (sunLong + 90) % 360; // Add 3 rasis to sun longitude
+  cb[1] = (moonLong - sunLong + 360) % 360;
+
+  for (let p = 0; p < 7; p++) {
+    if (cb[p] > 180) cb[p] = 360 - cb[p];
+    cb[p] = ((cb[p] + 30) * 2) / 30;
+  }
+
+  return cb;
+};
+
+// ============================================================================
+// SUBHA RASHMI
+// ============================================================================
+
+/**
+ * Calculate Subha Rashmi (benefic rays) for all planets.
+ * Ported from Python _subha_rashmi.
+ * Subha Rashmi = 0.25 * (Cheshta Rashmi + Uccha Rashmi)
+ *
+ * @param jd - Julian Day number
+ * @param place - Place with latitude, longitude, timezone
+ * @param d1Positions - D-1 chart planet positions
+ * @returns Array of subha rashmi values for Sun to Saturn (7 elements)
+ */
+export const calculateSubhaRashmi = (
+  jd: number,
+  place: Place,
+  d1Positions: PlanetPosition[]
+): number[] => {
+  const cr = calculateCheshtaRashmi(jd, place, d1Positions);
+  const ur = calculateUcchaRashmi(d1Positions);
+
+  return cr.map((c, i) => 0.25 * (c + ur[i]));
+};
+
+// ============================================================================
+// ISHTA PHALA
+// ============================================================================
+
+/**
+ * Calculate Ishta Phala (desired result strength) for all planets.
+ * Ported from Python _ishta_phala.
+ *
+ * Scoring:
+ * - Exalted: 60
+ * - Moola Trikona: 45
+ * - Own Sign: 30
+ * - Great Friend: 22
+ * - Friend: 15
+ * - Neutral: 8
+ * - Enemy: 2
+ * - Great Enemy: 4
+ *
+ * @param d1Positions - D-1 chart planet positions
+ * @returns Array of ishta phala values for Sun to Saturn (7 elements)
+ */
+export const calculateIshtaPhala = (d1Positions: PlanetPosition[]): number[] => {
+  const ipScore: Record<number, number> = {
+    [ADHIMITRA_GREATFRIEND]: 22,
+    [MITHRA_FRIEND]: 15,
+    [SAMAM_NEUTRAL]: 8,
+    [ADHISATHRU_GREATENEMY]: 4,
+    [SATHRU_ENEMY]: 2
+  };
+
+  const ip: number[] = new Array(7).fill(0);
+
+  for (let p = 0; p < 7; p++) {
+    const pos = d1Positions.find(pp => pp.planet === p);
+    if (!pos) continue;
+
+    const h = pos.rasi;
+    const owner = HOUSE_OWNERS_LIST[h];
+    const strength = HOUSE_STRENGTHS_OF_PLANETS[p]?.[h] ?? 0;
+
+    if (strength === STRENGTH_EXALTED) {
+      ip[p] = 60;
+    } else if (h === MOOLA_TRIKONA_OF_PLANETS[p]) {
+      ip[p] = 45;
+    } else if (strength === STRENGTH_OWN_SIGN) {
+      ip[p] = 30;
+    } else {
+      const relation = COMPOUND_PLANET_RELATIONS[p]?.[owner] ?? SAMAM_NEUTRAL;
+      ip[p] = ipScore[relation] ?? 8;
+    }
+  }
+
+  return ip;
 };
