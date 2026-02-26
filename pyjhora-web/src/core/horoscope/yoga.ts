@@ -48,6 +48,7 @@ import {
   STRENGTH_EXALTED,
   STRENGTH_FRIEND,
   STRENGTH_DEBILITATED,
+  STRENGTH_ENEMY,
   ASCENDANT_SYMBOL,
   MOOLA_TRIKONA_OF_PLANETS,
   GRAHA_DRISHTI,
@@ -71,6 +72,7 @@ import {
   getAspectedPlanetsOfRaasi,
   getUpachayasOfRaasi,
   getHouseOwnerFromChart,
+  getRelativeHouseOfPlanet,
 } from './house';
 
 // Derived constants matching Python
@@ -3711,6 +3713,625 @@ export const balyaDhanaYoga = (chart: HouseChart): boolean => {
 export const balyaDhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   balyaDhanaYoga(planetPositionsToChart(positions));
 
+// ============================================================================
+// DARIDRA (POVERTY) YOGAS #144-152 (BV Raman)
+// ============================================================================
+
+/**
+ * Daridra Yoga #144: Lords of 12th and Lagna exchange positions and are
+ * conjoined with or aspected by the lord of the 7th.
+ */
+export const daridraYoga144 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h12 = (ascH + 11) % 12;
+  const h7 = (ascH + 6) % 12;
+
+  const l1 = getLordOfSign(ascH);
+  const l12 = getLordOfSign(h12);
+  const l7 = getLordOfSign(h7);
+
+  // Exchange: L1 in 12th AND L12 in Lagna
+  const exchange = h(pToH, l1) === h12 && h(pToH, l12) === ascH;
+  if (!exchange) return false;
+
+  const l7H = h(pToH, l7);
+  const conjoined = l7H === h(pToH, l1) || l7H === h(pToH, l12);
+
+  const grahaAspects = getGrahaDrishtiPlanetsOfPlanet(chart, l7);
+  const raasiAspects = getAspectedPlanetsOfRaasi(chart, l7H);
+
+  const aspected =
+    grahaAspects.includes(l1) ||
+    grahaAspects.includes(l12) ||
+    raasiAspects.includes(l1) ||
+    raasiAspects.includes(l12);
+
+  return exchange && (conjoined || aspected);
+};
+
+/**
+ * Daridra Yoga #145: Lords of 6th and Lagna interchange positions and
+ * the Moon is aspected by the 2nd or 7th lord.
+ */
+export const daridraYoga145 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h6 = (ascH + HOUSE_6) % 12;
+  const h2 = (ascH + HOUSE_2) % 12;
+  const h7 = (ascH + HOUSE_7) % 12;
+
+  const l1 = getLordOfSign(ascH);
+  const l6 = getLordOfSign(h6);
+  const l2 = getLordOfSign(h2);
+  const l7 = getLordOfSign(h7);
+
+  const exchange = h(pToH, l1) === h6 && h(pToH, l6) === ascH;
+  if (!exchange) return false;
+
+  // Moon aspected by L2 or L7
+  const aspByL2 =
+    getGrahaDrishtiPlanetsOfPlanet(chart, l2).includes(MOON) ||
+    getAspectedPlanetsOfRaasi(chart, h(pToH, l2)).includes(MOON);
+  const aspByL7 =
+    getGrahaDrishtiPlanetsOfPlanet(chart, l7).includes(MOON) ||
+    getAspectedPlanetsOfRaasi(chart, h(pToH, l7)).includes(MOON);
+
+  return exchange && (aspByL2 || aspByL7);
+};
+
+/**
+ * Daridra Yoga #146: Ketu and Moon in Lagna.
+ */
+export const daridraYoga146 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  return h(pToH, KETU) === ascH && h(pToH, MOON) === ascH;
+};
+
+/**
+ * Daridra Yoga #147: Lord of Lagna in the 8th aspected by or in conjunction
+ * with the 2nd or 7th lord.
+ */
+export const daridraYoga147 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h8 = (ascH + HOUSE_8) % 12;
+  const h2 = (ascH + HOUSE_2) % 12;
+  const h7 = (ascH + HOUSE_7) % 12;
+
+  const l1 = getLordOfSign(ascH);
+  const l2 = getLordOfSign(h2);
+  const l7 = getLordOfSign(h7);
+
+  // L1 must be in 8th
+  if (h(pToH, l1) !== h8) return false;
+
+  // Conjunction or aspect with L2 or L7
+  for (const maraka of [l2, l7]) {
+    if (
+      h(pToH, maraka) === h8 ||
+      getGrahaDrishtiPlanetsOfPlanet(chart, maraka).includes(l1) ||
+      getAspectedPlanetsOfRaasi(chart, h(pToH, maraka)).includes(l1)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Daridra Yoga #148: Lord of Lagna in 6, 8, or 12 with a malefic,
+ * aspected by or combined with the 2nd or 7th lord.
+ */
+export const daridraYoga148 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const trikHouses = [
+    (ascH + HOUSE_6) % 12,
+    (ascH + HOUSE_8) % 12,
+    (ascH + HOUSE_12) % 12,
+  ];
+  const malefics = getNaturalMalefics();
+
+  const l1 = getLordOfSign(ascH);
+  const l2 = getLordOfSign((ascH + HOUSE_2) % 12);
+  const l7 = getLordOfSign((ascH + HOUSE_7) % 12);
+
+  const l1House = h(pToH, l1);
+  if (!trikHouses.includes(l1House)) return false;
+
+  // Malefic in same house as L1
+  const maleficWithL1 = malefics.some(
+    (m) => m !== l1 && h(pToH, m) === l1House
+  );
+  if (!maleficWithL1) return false;
+
+  // Influenced by L2 or L7
+  for (const maraka of [l2, l7]) {
+    if (
+      h(pToH, maraka) === l1House ||
+      getGrahaDrishtiPlanetsOfPlanet(chart, maraka).includes(l1) ||
+      getAspectedPlanetsOfRaasi(chart, h(pToH, maraka)).includes(l1)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Daridra Yoga #149: Lord of Lagna associated with 6th, 8th, or 12th lord
+ * and subjected to malefic aspects.
+ */
+export const daridraYoga149 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const malefics = getNaturalMalefics();
+
+  const l1 = getLordOfSign(ascH);
+  const trikLords = [HOUSE_6, HOUSE_8, HOUSE_12].map((offset) =>
+    getLordOfSign((ascH + offset) % 12)
+  );
+
+  // Association with trik lord (conjunction or mutual aspect)
+  const l1H = h(pToH, l1);
+  let associated = false;
+  for (const tl of trikLords) {
+    if (
+      h(pToH, tl) === l1H ||
+      getGrahaDrishtiPlanetsOfPlanet(chart, tl).includes(l1)
+    ) {
+      associated = true;
+      break;
+    }
+  }
+  if (!associated) return false;
+
+  // Subjected to malefic aspects
+  for (const m of malefics) {
+    if (m !== l1 && getGrahaDrishtiPlanetsOfPlanet(chart, m).includes(l1)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Daridra Yoga #150: Lord of 5th joins lord of 6, 8, or 12 without
+ * beneficial aspects/conjunctions.
+ */
+export const daridraYoga150 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const benefics = getNaturalBenefics(chart);
+
+  const l5 = getLordOfSign((ascH + HOUSE_5) % 12);
+  const trikLords = [HOUSE_6, HOUSE_8, HOUSE_12].map((offset) =>
+    getLordOfSign((ascH + offset) % 12)
+  );
+
+  const l5H = h(pToH, l5);
+  const joined = trikLords.some((tl) => h(pToH, tl) === l5H);
+  if (!joined) return false;
+
+  // Check for beneficial aspects or conjunctions
+  for (const b of benefics) {
+    if (
+      h(pToH, b) === l5H ||
+      getGrahaDrishtiPlanetsOfPlanet(chart, b).includes(l5)
+    ) {
+      return false; // Has beneficial influence
+    }
+  }
+  return true;
+};
+
+/**
+ * Daridra Yoga #151: Lord of 5th in 6th or 10th aspected by lords of 2, 6, 7, 8, or 12.
+ */
+export const daridraYoga151 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+
+  const l5 = getLordOfSign((ascH + HOUSE_5) % 12);
+  const targetLords = [HOUSE_2, HOUSE_6, HOUSE_7, HOUSE_8, HOUSE_12].map(
+    (offset) => getLordOfSign((ascH + offset) % 12)
+  );
+
+  const l5H = h(pToH, l5);
+  if (
+    l5H !== (ascH + HOUSE_6) % 12 &&
+    l5H !== (ascH + HOUSE_10) % 12
+  ) {
+    return false;
+  }
+
+  // Aspected by any target lord
+  for (const tl of targetLords) {
+    if (
+      getGrahaDrishtiPlanetsOfPlanet(chart, tl).includes(l5) ||
+      getAspectedPlanetsOfRaasi(chart, h(pToH, tl)).includes(l5)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Daridra Yoga #152: Natural malefics (not owning 9th or 10th) in Lagna
+ * associated with or aspected by maraka lords (L2/L7).
+ */
+export const daridraYoga152 = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h9 = (ascH + HOUSE_9) % 12;
+  const h10 = (ascH + HOUSE_10) % 12;
+  const h2 = (ascH + HOUSE_2) % 12;
+  const h7 = (ascH + HOUSE_7) % 12;
+
+  const malefics = getNaturalMalefics();
+  const l9 = getLordOfSign(h9);
+  const l10 = getLordOfSign(h10);
+  const l2 = getLordOfSign(h2);
+  const l7 = getLordOfSign(h7);
+
+  const maleficsInLagna = malefics.filter((m) => h(pToH, m) === ascH);
+  const validMalefics = maleficsInLagna.filter((m) => m !== l9 && m !== l10);
+
+  if (validMalefics.length === 0) return false;
+
+  for (const m of validMalefics) {
+    for (const maraka of [l2, l7]) {
+      if (
+        h(pToH, m) === h(pToH, maraka) ||
+        getGrahaDrishtiPlanetsOfPlanet(chart, maraka).includes(m) ||
+        getAspectedPlanetsOfRaasi(chart, h(pToH, maraka)).includes(m)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+/** FromPlanetPositions wrappers for Daridra Yogas 144-152 */
+export const daridraYoga144FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga144(planetPositionsToChart(positions));
+export const daridraYoga145FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga145(planetPositionsToChart(positions));
+export const daridraYoga146FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga146(planetPositionsToChart(positions));
+export const daridraYoga147FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga147(planetPositionsToChart(positions));
+export const daridraYoga148FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga148(planetPositionsToChart(positions));
+export const daridraYoga149FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga149(planetPositionsToChart(positions));
+export const daridraYoga150FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga150(planetPositionsToChart(positions));
+export const daridraYoga151FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga151(planetPositionsToChart(positions));
+export const daridraYoga152FromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  daridraYoga152(planetPositionsToChart(positions));
+
+/**
+ * Dharidhra Yoga (BV Raman aggregated) - Method 2: Any of daridra yogas 144-152.
+ */
+export const dharidhraYogaBvRaman = (chart: HouseChart): boolean => {
+  return (
+    daridraYoga144(chart) ||
+    daridraYoga145(chart) ||
+    daridraYoga146(chart) ||
+    daridraYoga147(chart) ||
+    daridraYoga148(chart) ||
+    daridraYoga149(chart) ||
+    daridraYoga150(chart) ||
+    daridraYoga151(chart) ||
+    daridraYoga152(chart)
+  );
+};
+export const dharidhraYogaBvRamanFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
+  dharidhraYogaBvRaman(planetPositionsToChart(positions));
+
+// ============================================================================
+// YUKTHI SAMANWITHAVAGMI YOGA #154 (Speech Yoga)
+// ============================================================================
+
+/**
+ * Yukthi Samanwithavagmi Yoga (BV Raman #154):
+ * The 2nd lord should join a benefic in a kendra or thrikona,
+ * or be exalted and combined with Jupiter.
+ */
+export const yukthiSamanwithavagmiYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + HOUSE_2) % 12;
+  const l2 = getLordOfSign(h2);
+  const benefics = getNaturalBenefics(chart);
+  const l2H = h(pToH, l2);
+
+  const kendras = getQuadrantsOfRaasi(ascH);
+  const trikonas = getTrinesOfRaasi(ascH);
+  const auspicious = new Set([...kendras, ...trikonas]);
+
+  // Condition A: L2 joins a benefic in kendra or thrikona
+  let condA = false;
+  if (auspicious.has(l2H)) {
+    condA = benefics.some((b) => b !== l2 && h(pToH, b) === l2H);
+  }
+
+  // Condition B: L2 is exalted and combined with Jupiter
+  const isExalted =
+    (HOUSE_STRENGTHS_OF_PLANETS[l2]?.[l2H] ?? 0) >= STRENGTH_EXALTED;
+  const combinedWithJupiter = h(pToH, JUPITER) === l2H;
+  const condB = isExalted && combinedWithJupiter;
+
+  return condA || condB;
+};
+export const yukthiSamanwithavagmiYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => yukthiSamanwithavagmiYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// VAKCHALANA YOGA #175 (Speech Defect)
+// ============================================================================
+
+/**
+ * Vakchalana Yoga (BV Raman #175):
+ * 1. A natural malefic owns the 2nd house.
+ * 2. The 2nd lord joins a cruel Navamsa (owned by a malefic) -- skipped without navamsa data.
+ * 3. The 2nd house is devoid of benefic aspect or association.
+ * Note: Simplified version without navamsa data, checks conditions 1 and 3 only.
+ */
+export const vakchalanaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const malefics = getNaturalMalefics();
+  const benefics = getNaturalBenefics(chart);
+  const lordOf2 = getLordOfSign(h2);
+
+  // 1. Malefic owns the 2nd house
+  const isMaleficLord = malefics.includes(lordOf2);
+
+  // 3. 2nd house devoid of benefic aspect or association
+  const planetsIn2 = getPlanetsInHouse(chart, h2);
+  const hasBeneficAssoc = planetsIn2.some((p) => benefics.includes(p));
+  const aspectedBy = getAspectedPlanetsOfRaasi(chart, h2);
+  const hasBeneficAspect = aspectedBy.some((p) => benefics.includes(p));
+
+  // Without navamsa, we require condition 1 and 3 only
+  return isMaleficLord && !(hasBeneficAssoc || hasBeneficAspect);
+};
+export const vakchalanaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => vakchalanaYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// VISHAPRAYOGA YOGA #176 (Poison)
+// ============================================================================
+
+/**
+ * Vishaprayoga Yoga (BV Raman #176):
+ * 1. 2nd house joined AND aspected by malefics.
+ * 2. 2nd lord in a cruel Navamsa (owned by malefic) -- skipped without navamsa data.
+ * 3. 2nd lord aspected by a malefic.
+ * Simplified: Without navamsa, checks conditions 1 and 3 only.
+ */
+export const vishaprayogaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const malefics = getNaturalMalefics();
+  const lordOf2 = getLordOfSign(h2);
+
+  // Joined by malefic
+  const planetsIn2 = getPlanetsInHouse(chart, h2);
+  const joinedByMalefic = planetsIn2.some((p) => malefics.includes(p));
+
+  // Aspected by malefic (house aspect)
+  const aspectedBy = getAspectedPlanetsOfRaasi(chart, h2);
+  const houseAspectedByMalefic = aspectedBy.some((p) => malefics.includes(p));
+
+  // Lord aspected by malefic (graha drishti)
+  const lordAspectedBy = getGrahaDrishtiOnPlanet(chart, lordOf2);
+  const lordAspectedByMalefic = lordAspectedBy.some((p) =>
+    malefics.includes(p)
+  );
+
+  // Without navamsa, skip cruel navamsa check, require the other three conditions
+  return joinedByMalefic && houseAspectedByMalefic && lordAspectedByMalefic;
+};
+export const vishaprayogaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => vishaprayogaYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// BHRATRUVRIDDHI YOGA #177 (Sibling Prosperity)
+// ============================================================================
+
+/**
+ * Bhratruvriddhi Yoga (BV Raman #177):
+ * 3rd lord, Mars, or 3rd house joined/aspected by benefics and strong.
+ */
+export const bhratruvridddhiYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h3 = (ascH + 2) % 12;
+  const benefics = getNaturalBenefics(chart);
+  const lordOf3 = getLordOfSign(h3);
+
+  const checkStrengthAndBenefic = (pId: number): boolean => {
+    const pHouse = h(pToH, pId);
+    // Strong: exalted, own, or friend
+    const isStrong = isPlanetStrong(pId, pHouse, false);
+    // Benefic link
+    const joined = getPlanetsInHouse(chart, pHouse).some(
+      (b) => benefics.includes(b) && b !== pId
+    );
+    const aspected = getGrahaDrishtiOnPlanet(chart, pId).some((b) =>
+      benefics.includes(b)
+    );
+    return isStrong && (joined || aspected);
+  };
+
+  // Influence on house 3
+  const houseJoined = getPlanetsInHouse(chart, h3).some((p) =>
+    benefics.includes(p)
+  );
+  const houseAspected = getAspectedPlanetsOfRaasi(chart, h3).some((p) =>
+    benefics.includes(p)
+  );
+
+  return (
+    checkStrengthAndBenefic(lordOf3) ||
+    checkStrengthAndBenefic(MARS) ||
+    houseJoined ||
+    houseAspected
+  );
+};
+export const bhratruvridddhiYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => bhratruvridddhiYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// SUMUKHA YOGA #166 (Good Face - Method 1 only, no vaiseshikamsa)
+// ============================================================================
+
+/**
+ * Sumukha Yoga (BV Raman #166):
+ * Lord of 2nd in a kendra aspected by benefics, OR benefics join the 2nd house.
+ */
+export const sumukhaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const benefics = getNaturalBenefics(chart);
+  const kendras = getQuadrantsOfRaasi(ascH);
+  const lordOf2 = getLordOfSign(h2);
+
+  // Condition A: Lord of 2nd in kendra aspected by benefics
+  let condA = false;
+  if (kendras.includes(h(pToH, lordOf2))) {
+    const aspected = getAspectedPlanetsOfRaasi(chart, h(pToH, lordOf2));
+    condA = aspected.some((b) => benefics.includes(b));
+  }
+
+  // Condition B: Benefics join the 2nd house
+  const planetsIn2 = getPlanetsInHouse(chart, h2);
+  const condB = planetsIn2.some((p) => benefics.includes(p));
+
+  return condA || condB;
+};
+export const sumukhaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => sumukhaYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// DURMUKHA YOGA #168 (Bad Face)
+// ============================================================================
+
+/**
+ * Durmukha Yoga (BV Raman #168):
+ * Malefics in the 2nd AND its lord joins an evil planet or is in debilitation.
+ */
+export const durmukhaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const malefics = getNaturalMalefics();
+  const lordOf2 = getLordOfSign(h2);
+
+  // Malefics occupy the 2nd
+  const planetsIn2 = getPlanetsInHouse(chart, h2);
+  const hasMaleficIn2 = planetsIn2.some((p) => malefics.includes(p));
+
+  // Lord joins an evil planet
+  const houseOfLord = h(pToH, lordOf2);
+  const planetsWithLord = getPlanetsInHouse(chart, houseOfLord);
+  const joinsEvil = planetsWithLord.some(
+    (p) => malefics.includes(p) && p !== lordOf2
+  );
+
+  // Or lord is in debilitation
+  const isDebilitated =
+    (HOUSE_STRENGTHS_OF_PLANETS[lordOf2]?.[houseOfLord] ?? 0) ===
+    STRENGTH_DEBILITATED;
+
+  return hasMaleficIn2 && (joinsEvil || isDebilitated);
+};
+export const durmukhaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => durmukhaYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// PARANNABHOJANA YOGA (Eating others' food)
+// ============================================================================
+// Note: Already exists above. Skipping duplicate.
+
+// ============================================================================
+// BHOJANA SOUKHYA YOGA (Food Enjoyment) - Simplified
+// ============================================================================
+
+/**
+ * Bhojana Soukhya Yoga (simplified without vaiseshikamsa):
+ * Lord of 2nd is strong (exalted/own/friend) and aspected by Jupiter or Venus.
+ */
+export const bhojanaSoukhyaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const lordOf2 = getLordOfSign(h2);
+  const lordHouse = h(pToH, lordOf2);
+
+  // Strong lord
+  const isStrong = isPlanetStrong(lordOf2, lordHouse, false);
+
+  // Aspected by Jupiter or Venus
+  const aspectedBy = getGrahaDrishtiOnPlanet(chart, lordOf2);
+  const hasAspect =
+    aspectedBy.includes(JUPITER) || aspectedBy.includes(VENUS);
+
+  return isStrong && hasAspect;
+};
+export const bhojanaSoukhyaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => bhojanaSoukhyaYoga(planetPositionsToChart(positions));
+
+// ============================================================================
+// ANNADANA YOGA (Food Giving)
+// ============================================================================
+
+/**
+ * Annadana Yoga (simplified without vaiseshikamsa):
+ * Lord of 2nd is strong and in conjunction with or aspected by Jupiter AND Mercury.
+ */
+export const annadanaYoga = (chart: HouseChart): boolean => {
+  const pToH = getPlanetToHouseDict(chart);
+  const ascH = h(pToH, ASCENDANT_SYMBOL);
+  const h2 = (ascH + 1) % 12;
+  const lordOf2 = getLordOfSign(h2);
+  const lordHouse = h(pToH, lordOf2);
+
+  // Strong lord
+  const isStrong = isPlanetStrong(lordOf2, lordHouse, true);
+
+  // Conjunction with or aspected by Jupiter
+  const aspectedBy = getGrahaDrishtiOnPlanet(chart, lordOf2);
+  const planetsInHouse = getPlanetsInHouse(chart, lordHouse);
+  const hasJupLink =
+    planetsInHouse.includes(JUPITER) || aspectedBy.includes(JUPITER);
+  const hasMercLink =
+    planetsInHouse.includes(MERCURY) || aspectedBy.includes(MERCURY);
+
+  return isStrong && hasJupLink && hasMercLink;
+};
+export const annadanaYogaFromPlanetPositions = (
+  positions: PlanetPosition[]
+): boolean => annadanaYoga(planetPositionsToChart(positions));
+
 // Aliases for naming variants
 // ============================================================================
 // UTILITY: Lord Exchange Check
@@ -3968,6 +4589,28 @@ export const detectAllYogas = (chart: HouseChart): YogaResult[] => {
   results.push({ name: 'Sarpaganda Yoga', isPresent: sarpagandaYoga(chart) });
   results.push({ name: 'Balya Dhana Yoga', isPresent: balyaDhanaYoga(chart) });
 
+  // Daridra Yogas (BV Raman #144-152)
+  results.push({ name: 'Daridra Yoga #144', isPresent: daridraYoga144(chart) });
+  results.push({ name: 'Daridra Yoga #145', isPresent: daridraYoga145(chart) });
+  results.push({ name: 'Daridra Yoga #146', isPresent: daridraYoga146(chart) });
+  results.push({ name: 'Daridra Yoga #147', isPresent: daridraYoga147(chart) });
+  results.push({ name: 'Daridra Yoga #148', isPresent: daridraYoga148(chart) });
+  results.push({ name: 'Daridra Yoga #149', isPresent: daridraYoga149(chart) });
+  results.push({ name: 'Daridra Yoga #150', isPresent: daridraYoga150(chart) });
+  results.push({ name: 'Daridra Yoga #151', isPresent: daridraYoga151(chart) });
+  results.push({ name: 'Daridra Yoga #152', isPresent: daridraYoga152(chart) });
+  results.push({ name: 'Dharidhra Yoga (BV Raman)', isPresent: dharidhraYogaBvRaman(chart) });
+
+  // Speech/Physical Yogas
+  results.push({ name: 'Yukthi Samanwithavagmi Yoga', isPresent: yukthiSamanwithavagmiYoga(chart) });
+  results.push({ name: 'Vakchalana Yoga', isPresent: vakchalanaYoga(chart) });
+  results.push({ name: 'Vishaprayoga Yoga', isPresent: vishaprayogaYoga(chart) });
+  results.push({ name: 'Bhratruvriddhi Yoga', isPresent: bhratruvridddhiYoga(chart) });
+  results.push({ name: 'Sumukha Yoga', isPresent: sumukhaYoga(chart) });
+  results.push({ name: 'Durmukha Yoga', isPresent: durmukhaYoga(chart) });
+  results.push({ name: 'Bhojana Soukhya Yoga', isPresent: bhojanaSoukhyaYoga(chart) });
+  results.push({ name: 'Annadana Yoga', isPresent: annadanaYoga(chart) });
+
   // Malika Yogas
   results.push({ name: 'Lagna Malika Yoga', isPresent: lagnaMalikaYoga(chart) });
   results.push({ name: 'Dhana Malika Yoga', isPresent: dhanaMalikaYoga(chart) });
@@ -4201,6 +4844,28 @@ export default {
   sarpagandaYoga,
   balyaDhanaYoga,
 
+  // Daridra Yogas (BV Raman #144-152)
+  daridraYoga144,
+  daridraYoga145,
+  daridraYoga146,
+  daridraYoga147,
+  daridraYoga148,
+  daridraYoga149,
+  daridraYoga150,
+  daridraYoga151,
+  daridraYoga152,
+  dharidhraYogaBvRaman,
+
+  // Speech/Physical Yogas
+  yukthiSamanwithavagmiYoga,
+  vakchalanaYoga,
+  vishaprayogaYoga,
+  bhratruvridddhiYoga,
+  sumukhaYoga,
+  durmukhaYoga,
+  bhojanaSoukhyaYoga,
+  annadanaYoga,
+
   // Aliases
   lagnaadhiYoga,
   sreenaathaYoga,
@@ -4385,6 +5050,24 @@ export default {
   sraddhannabhukthaYogaFromPlanetPositions,
   sarpagandaYogaFromPlanetPositions,
   balyaDhanaYogaFromPlanetPositions,
+  daridraYoga144FromPlanetPositions,
+  daridraYoga145FromPlanetPositions,
+  daridraYoga146FromPlanetPositions,
+  daridraYoga147FromPlanetPositions,
+  daridraYoga148FromPlanetPositions,
+  daridraYoga149FromPlanetPositions,
+  daridraYoga150FromPlanetPositions,
+  daridraYoga151FromPlanetPositions,
+  daridraYoga152FromPlanetPositions,
+  dharidhraYogaBvRamanFromPlanetPositions,
+  yukthiSamanwithavagmiYogaFromPlanetPositions,
+  vakchalanaYogaFromPlanetPositions,
+  vishaprayogaYogaFromPlanetPositions,
+  bhratruvridddhiYogaFromPlanetPositions,
+  sumukhaYogaFromPlanetPositions,
+  durmukhaYogaFromPlanetPositions,
+  bhojanaSoukhyaYogaFromPlanetPositions,
+  annadanaYogaFromPlanetPositions,
   lagnaadhiYogaFromPlanetPositions,
   sreenaathaYogaFromPlanetPositions,
   sreenathaYogaFromPlanetPositions,
