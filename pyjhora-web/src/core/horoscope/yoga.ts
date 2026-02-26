@@ -1659,26 +1659,30 @@ export const vyayaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]):
  * Lakshmi Yoga: 9th lord strong and in quadrant/trine, Venus strong in own/exaltation
  */
 export const lakshmiYoga = (chart: HouseChart): boolean => {
+  // Method 1 (PVR, default): L9 in own/exalted sign that is a kendra, L1 powerful
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
-  const ninthSign = (ascHouse + HOUSE_9) % 12;
-  const ninthLord = getLordOfSign(ninthSign);
-  const ninthLordHouse = pToH[ninthLord];
+  const h9Idx = (ascHouse + HOUSE_9) % 12;
+  const l1 = getLordOfSign(ascHouse);
+  const l9 = getLordOfSign(h9Idx);
+  const l1Pos = h(pToH, l1);
+  const l9Pos = h(pToH, l9);
 
-  const quadrantsAndTrines = new Set([
-    ...getQuadrants(ascHouse),
-    ...getTrines(ascHouse),
-  ]);
+  // L9 must be in own/exalted sign (strength >= EXALTED)
+  const l9Strength = HOUSE_STRENGTHS_OF_PLANETS[l9]?.[l9Pos] ?? 0;
+  if (l9Strength < STRENGTH_EXALTED) return false;
 
-  // 9th lord in quadrant/trine and strong
-  if (!quadrantsAndTrines.has(ninthLordHouse)) return false;
-  if (!isPlanetStrong(ninthLord, ninthLordHouse)) return false;
+  // L9 must be in a kendra from Lagna
+  const quadrants = getQuadrants(ascHouse);
+  if (!quadrants.includes(l9Pos)) return false;
 
-  // Venus strong
-  const venusHouse = h(pToH, VENUS);
-  if (!isPlanetStrong(VENUS, venusHouse)) return false;
-
-  return true;
+  // L1 must be powerful (exalted/own OR in kendra/trine)
+  const l1Strength = HOUSE_STRENGTHS_OF_PLANETS[l1]?.[l1Pos] ?? 0;
+  const trines = getTrines(ascHouse);
+  const l1Powerful = l1Strength >= STRENGTH_EXALTED ||
+                     quadrants.includes(l1Pos) ||
+                     trines.includes(l1Pos);
+  return l1Powerful;
 };
 
 /**
@@ -3382,9 +3386,9 @@ export const matsyaYoga = (chart: HouseChart): boolean => {
   const occFourth = new Set(occupants(fourthAbs));
   const occEighth = new Set(occupants(eighthAbs));
 
-  // Method 2 (Parashara): benefics in lagna and 9th
-  const lagnaOk = [...occLagna].some(p => benefics.has(p)) && [...occLagna].every(p => benefics.has(p));
-  const ninthOk = [...occNinth].some(p => benefics.has(p)) && [...occNinth].every(p => benefics.has(p));
+  // Method 1 (BV Raman, default): malefics in lagna and 9th (strict_exclusive=True)
+  const lagnaOk = [...occLagna].some(p => malefics.has(p)) && [...occLagna].every(p => malefics.has(p));
+  const ninthOk = [...occNinth].some(p => malefics.has(p)) && [...occNinth].every(p => malefics.has(p));
   const cond1 = lagnaOk && ninthOk;
 
   // 5th must contain BOTH benefic and malefic
