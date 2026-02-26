@@ -77,18 +77,24 @@ const DWADASOTTARI_YEARS: Record<number, number> = {
 // HELPER FUNCTIONS
 // ============================================================================
 
+/**
+ * Build nakshatra-to-lord mapping, matching Python's _get_dhasa_dict().
+ * Uses 0-indexed nakshatra internally (nak = seed_star - 1),
+ * stores 1-indexed keys in the map (nak + 1).
+ * count_direction = -1 (anti-zodiac stepping).
+ */
 function buildNakshatraDict(seedStar = 27): Map<number, number> {
+  const COUNT_DIRECTION = -1;
   const nakToLord = new Map<number, number>();
-  let nak = seedStar;
+  let nak = seedStar - 1; // 0-indexed, matches Python: nak = seed_star - 1
   let lordIndex = 0;
-  
-  // Count direction is -1 (anti-zodiac) for this system
+
   for (let i = 0; i < 27; i++) {
-    nakToLord.set(nak, DWADASOTTARI_LORDS[lordIndex]!);
-    nak = ((nak - 2 + 27) % 27) + 1; // Move backwards
-    lordIndex = (lordIndex + 1) % 8;
+    nakToLord.set(nak + 1, DWADASOTTARI_LORDS[lordIndex]!); // store 1-indexed
+    nak = ((nak + COUNT_DIRECTION) % 27 + 27) % 27; // Python: (nak + 1*count_direction) % 27
+    lordIndex = (lordIndex + 1) % DWADASOTTARI_LORDS.length;
   }
-  
+
   return nakToLord;
 }
 
