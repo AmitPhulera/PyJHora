@@ -2683,6 +2683,72 @@ async function nextSolarJdAsync(jd: number, place: Place, sunLong: number): Prom
   });
 }
 
+/**
+ * Sync helper: iteratively find JD when Sun reaches target longitude.
+ * Python: __next_solar_jd(jd, place, sun_long)
+ * Uses sync solarLongitude() and sunrise() via WASM ccall.
+ */
+function nextSolarJd(jd: number, place: Place, sunLong: number): number {
+  let jdNext = jd;
+  let sl = solarLongitude(jdNext - place.timezone / 24);
+  let maxIter = 400;
+  while (maxIter-- > 0) {
+    if (sl < sunLong + 1 && sl > sunLong) {
+      jdNext -= 1;
+      break;
+    }
+    jdNext += 1;
+    sl = solarLongitude(jdNext - place.timezone / 24);
+  }
+
+  const sr = sunrise(jdNext, place);
+  const sankSunrise = sr.jd;
+  const offsets = [0.0, 0.25, 0.5, 0.75, 1.0];
+  const solarLongs = offsets.map(t => solarLongitude(sankSunrise + t));
+  const solarHour = inverseLagrange(offsets, solarLongs, sunLong);
+  const { date } = julianDayToGregorian(jdNext);
+  const sankJdUtc = gregorianToJulianDay(date, { hour: 0, minute: 0, second: 0 });
+  const solarHour1 = (sankSunrise + solarHour - sankJdUtc) * 24 + place.timezone;
+  return gregorianToJulianDay(date, {
+    hour: Math.floor(solarHour1),
+    minute: Math.floor((solarHour1 % 1) * 60),
+    second: Math.round(((solarHour1 % 1) * 60 % 1) * 60),
+  });
+}
+
+/**
+ * Sync version: Find the JD when Sun returns to the same longitude after N years/months/sixty_hours.
+ * Python: next_solar_date(jd_at_dob, place, years, months, sixty_hours)
+ *
+ * Uses actual solar longitude search with iterative refinement (matching Python).
+ * This replaces the tropical-year approximation used in kaala.ts and other modules.
+ *
+ * @param jdAtDob - Julian Day Number at birth (local-encoded)
+ * @param place - Place struct
+ * @param years - Number of years since birth (1 = birth year itself)
+ * @param months - Number of months from birth month (1 = same month)
+ * @param sixtyHours - Number of 60-hour periods (1 = first period)
+ * @returns Julian Day Number when Sun reaches the target longitude
+ */
+export function nextSolarDate(
+  jdAtDob: number, place: Place, years: number = 1, months: number = 1, sixtyHours: number = 1
+): number {
+  if (years === 1 && months === 1 && sixtyHours === 1) return jdAtDob;
+
+  // Get Sun's sidereal longitude at DOB (matching Python: dhasavarga(jd, place, 1)[0][1])
+  // dhasavarga internally does jd_utc = jd - tz/24, then sidereal_longitude(jd_utc, SUN)
+  const jdUtc = jdAtDob - place.timezone / 24;
+  const sunLongAtDob = solarLongitude(jdUtc);
+
+  // Calculate target longitude offset and approximate JD offset
+  const sunLongExtra = ((years - 1) * 360 + (months - 1) * 30 + (sixtyHours - 1) * 2.5) % 360;
+  const jdExtra = Math.floor(((years - 1) + (months - 1) / 12 + (sixtyHours - 1) / 144) * TROPICAL_YEAR);
+  const jdNext = jdAtDob + jdExtra;
+  const sunLongNext = (sunLongAtDob + sunLongExtra) % 360;
+
+  return nextSolarJd(jdNext, place, sunLongNext);
+}
+
 // ============================================================================
 // CONJUNCTION OF PLANET PAIRS
 // ============================================================================
