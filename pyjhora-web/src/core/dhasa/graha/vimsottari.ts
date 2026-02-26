@@ -13,11 +13,12 @@ import {
   VIMSOTTARI_TOTAL_YEARS,
   VIMSOTTARI_YEARS
 } from '../../constants';
-import { getDivisionalChart, PlanetPosition } from '../../horoscope/charts';
-import { getPlanetLongitude } from '../../panchanga/drik';
 import type { Place } from '../../types';
-import { normalizeDegrees } from '../../utils/angle';
 import { daysToYMD, julianDayToGregorian } from '../../utils/julian';
+import {
+  resolveStartingPlanetLongitude,
+  resolveStartingPlanetLongitudeSync
+} from './special-planet-helper';
 
 // ============================================================================
 // TYPES
@@ -139,7 +140,10 @@ function formatJdAsDate(jd: number): string {
  * @param place - Place data
  * @param starPositionFromMoon - Which nakshatra to use (1=moon, 4=kshema, 5=utpanna, 8=adhana)
  * @param seedStar - Seed star for calculation (default 3)
- * @param startingPlanet - Planet to calculate from (default Moon)
+ * @param startingPlanet - Planet to calculate from (default Moon). 0-8 for planets, 'L' for Lagna.
+ * @param divisionalChartFactor - Divisional chart factor (default 1 = Rasi)
+ * @param dhasaStartingPlanet - Extended starting planet: 0-8, 'L', 'M', 'G', 'B', 'I', 'P', 'T'
+ *   If provided, overrides startingPlanet. For M/G/B/I/P/T use the async version.
  * @returns [lord, startDate JD]
  */
 export function vimsottariDashaStartDate(
@@ -147,46 +151,62 @@ export function vimsottariDashaStartDate(
   place: Place,
   starPositionFromMoon = 1,
   seedStar = 3,
-  startingPlanet = MOON,
+  startingPlanet: number | string = MOON,
   divisionalChartFactor = 1
 ): [number, number] {
   const oneStar = 360 / 27; // 13°20'
-  
-  // Get the planet longitude
-  let planetLong = getPlanetLongitude(jd, place, startingPlanet);
-  
-  // Apply Varga correction if divisional chart specified
-  if (divisionalChartFactor > 1) {
-    const d1Pos: PlanetPosition = { planet: startingPlanet, rasi: Math.floor(planetLong / 30), longitude: planetLong % 30 };
-    const vargaPos = getDivisionalChart([d1Pos], divisionalChartFactor)[0];
-    if (vargaPos) {
-      planetLong = vargaPos.rasi * 30 + vargaPos.longitude;
-    }
-  }
 
-  // Adjust for star position from moon
-  if (startingPlanet === MOON) {
-    planetLong += (starPositionFromMoon - 1) * oneStar;
-    planetLong = normalizeDegrees(planetLong);
-  }
-  
+  // Use the sync helper to resolve planet longitude
+  const planetLong = resolveStartingPlanetLongitudeSync(
+    startingPlanet, jd, place, divisionalChartFactor, 1, starPositionFromMoon
+  );
+
   // Calculate nakshatra and position within it
   const nakIndex = Math.floor(planetLong / oneStar);
   const remainder = planetLong % oneStar;
-  
+
   // Get the lord of this nakshatra
   const lord = getVimsottariAdhipati(nakIndex, seedStar);
-  
+
   // Get the total period for this lord
   const period = DASHA_YEARS[lord] ?? 0;
-  
+
   // Calculate how much of the period has elapsed
   const periodElapsedYears = (remainder / oneStar) * period;
   const periodElapsedDays = periodElapsedYears * YEAR_DURATION;
-  
+
   // Start date is that many days before birth
   const startDate = jd - periodElapsedDays;
-  
+
+  return [lord, startDate];
+}
+
+/**
+ * Async version of vimsottariDashaStartDate that supports special starting planets (M/G/B/I/P/T)
+ */
+export async function vimsottariDashaStartDateAsync(
+  jd: number,
+  place: Place,
+  starPositionFromMoon = 1,
+  seedStar = 3,
+  startingPlanet: number | string = MOON,
+  divisionalChartFactor = 1,
+  chartMethod = 1
+): Promise<[number, number]> {
+  const oneStar = 360 / 27;
+
+  const planetLong = await resolveStartingPlanetLongitude(
+    startingPlanet, jd, place, divisionalChartFactor, chartMethod, starPositionFromMoon
+  );
+
+  const nakIndex = Math.floor(planetLong / oneStar);
+  const remainder = planetLong % oneStar;
+  const lord = getVimsottariAdhipati(nakIndex, seedStar);
+  const period = DASHA_YEARS[lord] ?? 0;
+  const periodElapsedYears = (remainder / oneStar) * period;
+  const periodElapsedDays = periodElapsedYears * YEAR_DURATION;
+  const startDate = jd - periodElapsedDays;
+
   return [lord, startDate];
 }
 
@@ -208,7 +228,7 @@ export function vimsottariMahadasha(
   place: Place,
   starPositionFromMoon = 1,
   seedStar = 3,
-  startingPlanet = MOON,
+  startingPlanet: number | string = MOON,
   divisionalChartFactor = 1
 ): Map<number, number> {
   let [lord, startDate] = vimsottariDashaStartDate(
@@ -384,19 +404,19 @@ export function getVimsottariDashaBhukti(
   options: {
     starPositionFromMoon?: number;
     seedStar?: number;
-    startingPlanet?: number;
+    startingPlanet?: number | string;
     includeBhuktis?: boolean;
     includeAntardashas?: boolean;
     includePratyantardashas?: boolean;
     antardashaOption?: number;
     divisionalChartFactor?: number;
     useTribhagiVariation?: boolean;
+    dhasaStartingPlanet?: number | string;
   } = {}
 ): VimsottariResult {
   const {
     starPositionFromMoon = 1,
     seedStar = 3,
-    startingPlanet = MOON,
     includeBhuktis = true,
     includeAntardashas = false,
     includePratyantardashas = false,
@@ -404,6 +424,8 @@ export function getVimsottariDashaBhukti(
     divisionalChartFactor = 1,
     useTribhagiVariation = false
   } = options;
+  // dhasaStartingPlanet takes precedence over startingPlanet
+  const startingPlanet: number | string = options.dhasaStartingPlanet ?? options.startingPlanet ?? MOON;
 
   // Tribhagi variation: divide each dasha by 3, run 3 cycles
   const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
@@ -553,6 +575,170 @@ export function getVimsottariDashaBhukti(
   if (includeAntardashas) result.antardashas = antardashas;
   if (includePratyantardashas) result.pratyantardashas = pratyantardashas;
 
+  return result;
+}
+
+// ============================================================================
+// ASYNC VERSION (supports M/G/B/I/P/T special starting planets)
+// ============================================================================
+
+/**
+ * Async version of getVimsottariDashaBhukti that supports special starting planets.
+ * Use this when dhasaStartingPlanet is 'M', 'G', 'B', 'I', 'P', or 'T'.
+ */
+export async function getVimsottariDashaBhuktiAsync(
+  jd: number,
+  place: Place,
+  options: {
+    starPositionFromMoon?: number;
+    seedStar?: number;
+    startingPlanet?: number | string;
+    includeBhuktis?: boolean;
+    includeAntardashas?: boolean;
+    includePratyantardashas?: boolean;
+    antardashaOption?: number;
+    divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
+    dhasaStartingPlanet?: number | string;
+    chartMethod?: number;
+  } = {}
+): Promise<VimsottariResult> {
+  const {
+    starPositionFromMoon = 1,
+    seedStar = 3,
+    divisionalChartFactor = 1,
+    chartMethod = 1
+  } = options;
+  const startingPlanet: number | string = options.dhasaStartingPlanet ?? options.startingPlanet ?? MOON;
+
+  // Get initial lord and start date via async (supports special planets)
+  const [initialLord, initialStartJd] = await vimsottariDashaStartDateAsync(
+    jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor, chartMethod
+  );
+
+  // Delegate to the sync function with the resolved start data
+  // Build a temporary options object that uses a regular planet
+  // since we already resolved the start date
+  return _buildVimsottariResult(jd, initialLord, initialStartJd, options);
+}
+
+/**
+ * Internal helper: build VimsottariResult from resolved initial lord and start date.
+ * Shared between sync and async paths.
+ */
+function _buildVimsottariResult(
+  jd: number,
+  initialLord: number,
+  initialStartJd: number,
+  options: {
+    includeBhuktis?: boolean;
+    includeAntardashas?: boolean;
+    includePratyantardashas?: boolean;
+    antardashaOption?: number;
+    useTribhagiVariation?: boolean;
+  }
+): VimsottariResult {
+  const {
+    includeBhuktis = true,
+    includeAntardashas = false,
+    includePratyantardashas = false,
+    antardashaOption = 1,
+    useTribhagiVariation = false
+  } = options;
+
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
+  const mahadashas: DashaPeriod[] = [];
+  let currentLord = initialLord;
+  let currentStartJd = initialStartJd;
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0) currentLord = initialLord;
+    for (let i = 0; i < 9; i++) {
+      const periodYears = (DASHA_YEARS[currentLord] ?? 0) * tribhagiFactor;
+      const endJd = currentStartJd + periodYears * YEAR_DURATION;
+      mahadashas.push({
+        lord: currentLord,
+        lordName: PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`,
+        startJd: currentStartJd,
+        startDate: formatJdAsDate(currentStartJd),
+        endJd,
+        endDate: formatJdAsDate(endJd),
+        durationYears: periodYears
+      });
+      currentStartJd = endJd;
+      currentLord = getNextAdhipati(currentLord);
+    }
+  }
+
+  const firstDasha = mahadashas[0]!;
+  const secondDashaStart = mahadashas[1]?.startJd ?? (firstDasha.startJd + firstDasha.durationYears * YEAR_DURATION);
+  const balance = daysToYMD(secondDashaStart - jd);
+
+  if (!includeBhuktis) return { balance, mahadashas };
+
+  const bhuktis: BhuktiPeriod[] = [];
+  const antardashas: AntardhasaPeriod[] = [];
+  const pratyantardashas: PratyantardashaPeriod[] = [];
+
+  for (const dasha of mahadashas) {
+    let bhuktiLord = dasha.lord;
+    if (antardashaOption === 3 || antardashaOption === 4) bhuktiLord = getNextAdhipati(bhuktiLord, 1);
+    else if (antardashaOption === 5 || antardashaOption === 6) bhuktiLord = getNextAdhipati(bhuktiLord, -1);
+    const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+    let bhuktiStartJd = dasha.startJd;
+
+    for (let j = 0; j < 9; j++) {
+      const mahaYears = DASHA_YEARS[dasha.lord] ?? 0;
+      const bhuktiYears = DASHA_YEARS[bhuktiLord] ?? 0;
+      const factor = (mahaYears * bhuktiYears) / VIMSOTTARI_TOTAL_YEARS * tribhagiFactor;
+      bhuktis.push({
+        dashaLord: dasha.lord, bhuktiLord,
+        bhuktiLordName: PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`,
+        startJd: bhuktiStartJd, startDate: formatJdAsDate(bhuktiStartJd)
+      });
+
+      if (includeAntardashas || includePratyantardashas) {
+        let antaraLord = bhuktiLord;
+        let antaraStartJd = bhuktiStartJd;
+        for (let k = 0; k < 9; k++) {
+          const antaraYears = DASHA_YEARS[antaraLord] ?? 0;
+          const antaraFactor = (mahaYears * bhuktiYears * antaraYears) /
+            (VIMSOTTARI_TOTAL_YEARS * VIMSOTTARI_TOTAL_YEARS) * tribhagiFactor;
+          antardashas.push({
+            dashaLord: dasha.lord, bhuktiLord, antaraLord,
+            antaraLordName: PLANET_NAMES_EN[antaraLord] ?? `Planet ${antaraLord}`,
+            startJd: antaraStartJd, startDate: formatJdAsDate(antaraStartJd)
+          });
+          if (includePratyantardashas) {
+            let pratyantaraLord = antaraLord;
+            let pratyantaraStartJd = antaraStartJd;
+            for (let l = 0; l < 9; l++) {
+              const pratyantaraYears = DASHA_YEARS[pratyantaraLord] ?? 0;
+              const pratyantaraFactor = (mahaYears * bhuktiYears * antaraYears * pratyantaraYears) /
+                Math.pow(VIMSOTTARI_TOTAL_YEARS, 3) * tribhagiFactor;
+              pratyantardashas.push({
+                dashaLord: dasha.lord, bhuktiLord, antaraLord, pratyantaraLord,
+                pratyantaraLordName: PLANET_NAMES_EN[pratyantaraLord] ?? `Planet ${pratyantaraLord}`,
+                startJd: pratyantaraStartJd, startDate: formatJdAsDate(pratyantaraStartJd)
+              });
+              pratyantaraStartJd += pratyantaraFactor * YEAR_DURATION;
+              pratyantaraLord = getNextAdhipati(pratyantaraLord, direction);
+            }
+          }
+          antaraStartJd += antaraFactor * YEAR_DURATION;
+          antaraLord = getNextAdhipati(antaraLord, direction);
+        }
+      }
+      bhuktiStartJd += factor * YEAR_DURATION;
+      bhuktiLord = getNextAdhipati(bhuktiLord, direction);
+    }
+  }
+
+  const result: VimsottariResult = { balance, mahadashas, bhuktis };
+  if (includeAntardashas) result.antardashas = antardashas;
+  if (includePratyantardashas) result.pratyantardashas = pratyantardashas;
   return result;
 }
 
