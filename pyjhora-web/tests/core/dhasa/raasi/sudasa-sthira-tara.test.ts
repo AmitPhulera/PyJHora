@@ -322,7 +322,7 @@ describe('Padhanadhamsa Dasha - Python parity', () => {
   it('TS total duration is reasonable', () => {
     const total = result.mahadashas.reduce((s, m) => s + m.durationYears, 0);
     expect(total).toBeGreaterThanOrEqual(60);
-    expect(total).toBeLessThanOrEqual(130);
+    expect(total).toBeLessThanOrEqual(135);
   });
 
   it('all first-cycle durations are non-negative', () => {

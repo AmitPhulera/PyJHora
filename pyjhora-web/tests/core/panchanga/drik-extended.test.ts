@@ -111,6 +111,15 @@ import {
   nishekaTime1Async,
   calculateNakshatra,
   lunarMonthAsync,
+  rahu,
+  ketu,
+  rahuLongitude,
+  ketuLongitude,
+  midday,
+  midnight,
+  trikalam,
+  abhijitMuhurta,
+  durmuhurtam,
 } from '@core/panchanga/drik';
 import { julianDayToGregorian } from '@core/utils/julian';
 import type { Place } from '@core/types';
@@ -1900,5 +1909,101 @@ describe('Extended drik.ts Tests', () => {
       expect(result[0]).toBe(6);
       expect(result[1]).toBe(true); // adhik masa
     }, 60000);
+  });
+
+  // ========================================================================
+  // RAHU/KETU — Python-compatible longitude transformers
+  // ========================================================================
+  describe('rahu/ketu longitude transformers', () => {
+    it('ketu(rahuLong) = (rahuLong + 180) % 360', () => {
+      expect(ketu(0)).toBe(180);
+      expect(ketu(90)).toBe(270);
+      expect(ketu(200)).toBe(20);
+      expect(ketu(350)).toBe(170);
+    });
+
+    it('rahu(ketuLong) = (ketuLong + 180) % 360', () => {
+      expect(rahu(180)).toBe(0);
+      expect(rahu(270)).toBe(90);
+      expect(rahu(20)).toBe(200);
+    });
+
+    it('rahu and ketu are inverses', () => {
+      expect(ketu(rahu(123.45))).toBeCloseTo(123.45, 8);
+      expect(rahu(ketu(256.78))).toBeCloseTo(256.78, 8);
+    });
+  });
+
+  describe('rahuLongitude/ketuLongitude from JD', () => {
+    it('rahuLongitude returns sidereal Rahu longitude', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const jdUtc = jd - 5.5 / 24;
+      const rl = rahuLongitude(jdUtc);
+      expect(rl).toBeGreaterThanOrEqual(0);
+      expect(rl).toBeLessThan(360);
+    });
+
+    it('ketuLongitude = rahuLongitude + 180', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const jdUtc = jd - 5.5 / 24;
+      const rl = rahuLongitude(jdUtc);
+      const kl = ketuLongitude(jdUtc);
+      expect(kl).toBeCloseTo((rl + 180) % 360, 6);
+    });
+  });
+
+  // ========================================================================
+  // SYNC PANCHANGA WRAPPERS
+  // ========================================================================
+  describe('Sync panchanga wrappers', () => {
+    it('midday returns time near noon', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const result = midday(jd, bangalore);
+      expect(result.localTime).toBeGreaterThan(11.5);
+      expect(result.localTime).toBeLessThan(13.0);
+    });
+
+    it('midnight returns time near 0', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const result = midnight(jd, bangalore);
+      expect(result).toBeGreaterThanOrEqual(0);
+      expect(result).toBeLessThan(2);
+    });
+
+    it('trikalam returns valid raahu kaalam period', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const [start, end] = trikalam(jd, bangalore, 'raahu kaalam');
+      expect(start).toBeGreaterThan(5);
+      expect(start).toBeLessThan(20);
+      expect(end).toBeGreaterThan(start);
+      expect(end - start).toBeCloseTo((sunset(jd, bangalore).localTime - sunrise(jd, bangalore).localTime) / 8, 1);
+    });
+
+    it('trikalam matches async version', async () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const syncResult = trikalam(jd, bangalore, 'yamagandam');
+      const { trikalamAsync: trikalamA } = await import('@core/panchanga/drik');
+      const asyncResult = await trikalamA(jd, bangalore, 'yamagandam');
+      expect(syncResult[0]).toBeCloseTo(asyncResult[0], 1);
+      expect(syncResult[1]).toBeCloseTo(asyncResult[1], 1);
+    });
+
+    it('abhijitMuhurta returns period around midday', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const [start, end] = abhijitMuhurta(jd, bangalore);
+      expect(start).toBeGreaterThan(11);
+      expect(start).toBeLessThan(13);
+      expect(end).toBeGreaterThan(start);
+    });
+
+    it('durmuhurtam returns 1 or 2 periods', () => {
+      const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      const result = durmuhurtam(jd, bangalore);
+      expect(result.length).toBeGreaterThanOrEqual(1);
+      expect(result.length).toBeLessThanOrEqual(2);
+      for (const [start, end] of result) {
+        expect(end).toBeGreaterThan(start);
+      }
+    });
   });
 });

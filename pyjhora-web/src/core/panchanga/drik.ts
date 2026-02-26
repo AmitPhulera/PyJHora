@@ -130,6 +130,51 @@ export interface KaranaResult {
 }
 
 // ============================================================================
+// HELPER UTILITIES
+// ============================================================================
+
+/**
+ * Convert time that may be outside [0,24) range to a proper date + time.
+ * If time > 24 or < 0, adjusts the date accordingly.
+ * Matching Python: utils._convert_to_tamil_date_and_time(panchanga_date, time_of_day_in_hours, place)
+ */
+function convertToTamilDateAndTime(
+  dateObj: { year: number; month: number; day: number },
+  timeOfDay: number,
+  place?: Place
+): [{ year: number; month: number; day: number }, number] {
+  let extraDays = 0;
+  let sign = 1;
+  if (timeOfDay < 0) {
+    extraDays = Math.floor(Math.abs(timeOfDay / 24)) + 1;
+    sign = -1;
+  } else if (timeOfDay > 24) {
+    extraDays = Math.floor(Math.abs(timeOfDay / 24));
+    sign = 1;
+  }
+  timeOfDay += -sign * extraDays * 24;
+
+  let resultDate = dateObj;
+  if (extraDays !== 0) {
+    // Adjust date by sign * extraDays
+    const d = new Date(dateObj.year, dateObj.month - 1, dateObj.day + sign * extraDays);
+    resultDate = { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+  }
+
+  if (place) {
+    // If solar time > sunset time, move to next day
+    const jd = gregorianToJulianDay(resultDate, { hour: 0, minute: 0, second: 0 });
+    const ss = sunset(jd, place);
+    if (ss.localTime < timeOfDay) {
+      const d = new Date(resultDate.year, resultDate.month - 1, resultDate.day + 1);
+      resultDate = { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+    }
+  }
+
+  return [resultDate, timeOfDay];
+}
+
+// ============================================================================
 // NAKSHATRA PADA
 // ============================================================================
 
@@ -388,30 +433,8 @@ export function calculateVara(jd: number): { number: number; name: string; lord:
  */
 export function getPlanetLongitude(jd: number, place: Place, planet: number): number {
   const jdUtc = toUtc(jd, place.timezone);
-  
-  // Map our planet indices to SWE constants
-  const planetMap: Record<number, number> = {
-    [SUN]: SWE_PLANETS.SUN,
-    [MOON]: SWE_PLANETS.MOON,
-    [MARS]: SWE_PLANETS.MARS,
-    [MERCURY]: SWE_PLANETS.MERCURY,
-    [JUPITER]: SWE_PLANETS.JUPITER,
-    [VENUS]: SWE_PLANETS.VENUS,
-    [SATURN]: SWE_PLANETS.SATURN,
-    [RAHU]: SWE_PLANETS.MEAN_NODE
-  };
-  
-  if (planet === KETU) {
-    const rahuLong = siderealLongitude(jdUtc, SWE_PLANETS.MEAN_NODE);
-    return ketuFromRahu(rahuLong);
-  }
-  
-  const swePlanet = planetMap[planet];
-  if (swePlanet === undefined) {
-    throw new Error(`Unknown planet index: ${planet}`);
-  }
-  
-  return siderealLongitude(jdUtc, swePlanet);
+  // siderealLongitude accepts PyJHora planet indices (0-8) and handles mapping internally
+  return siderealLongitude(jdUtc, planet);
 }
 
 /**
@@ -512,6 +535,134 @@ export async function midnightAsync(
     mnhl -= 12;
   }
   return mnhl;
+}
+
+/**
+ * Calculate midday (sync) — midpoint of sunrise and sunset.
+ * Python: drik.midday(jd, place) — returns [float_hours, jd]
+ * Uses WASM sync sunrise/sunset when available.
+ */
+export function midday(
+  jd: number,
+  place: Place
+): { localTime: number; jd: number } {
+  const sr = sunrise(jd, place);
+  const ss = sunset(jd, place);
+  const localTime = 0.5 * (sr.localTime + ss.localTime);
+  const midJd = 0.5 * (sr.jd + ss.jd);
+  return { localTime, jd: midJd };
+}
+
+/**
+ * Calculate midnight (sync) — midpoint of previous sunset and current sunrise.
+ * Python: drik.midnight(jd, place)
+ * Uses WASM sync sunrise/sunset when available.
+ */
+export function midnight(
+  jd: number,
+  place: Place
+): number {
+  const sr = sunrise(jd, place);
+  const prevSs = sunset(jd - 1, place);
+  let mnhl = 0.5 * (sr.localTime + prevSs.localTime);
+  if (mnhl < 12) {
+    mnhl = 12 - mnhl;
+  } else {
+    mnhl -= 12;
+  }
+  return mnhl;
+}
+
+/**
+ * Calculate trikalam (sync) — Raahu kaalam, Yamagandam, Gulikai.
+ * Python: drik.trikalam(jd, place, option)
+ * Uses WASM sync sunrise/sunset when available.
+ */
+export function trikalam(
+  jd: number,
+  place: Place,
+  option: 'raahu kaalam' | 'yamagandam' | 'gulikai' = 'raahu kaalam'
+): [number, number] {
+  const srise = sunrise(jd, place);
+  const sset = sunset(jd, place);
+  const dayDur = sset.localTime - srise.localTime;
+  const weekday = calculateVara(jd).number;
+
+  const offsets: Record<string, number[]> = {
+    'raahu kaalam': [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25],
+    'gulikai':      [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0],
+    'yamagandam':   [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625],
+  };
+
+  const offset = offsets[option]?.[weekday] ?? 0;
+  const startTime = srise.localTime + dayDur * offset;
+  const endTime = startTime + 0.125 * dayDur;
+
+  return [startTime, endTime];
+}
+
+/**
+ * Calculate Abhijit Muhurta (sync) — the auspicious mid-day period.
+ * Python: abhijit_muhurta(jd, place)
+ * Uses WASM sync sunrise/sunset when available.
+ */
+export function abhijitMuhurta(
+  jd: number,
+  place: Place
+): [number, number] {
+  const srise = sunrise(jd, place);
+  const sset = sunset(jd, place);
+  const dayDur = sset.localTime - srise.localTime;
+
+  const startTime = srise.localTime + (7 / 15) * dayDur;
+  const endTime = srise.localTime + (8 / 15) * dayDur;
+
+  return [startTime, endTime];
+}
+
+/**
+ * Calculate Durmuhurtam (sync) — inauspicious periods.
+ * Python: durmuhurtam(jd, place)
+ * Uses WASM sync sunrise/sunset when available.
+ */
+export function durmuhurtam(
+  jd: number,
+  place: Place
+): [number, number][] {
+  const srise = sunrise(jd, place);
+  const sset = sunset(jd, place);
+  const dayDur = sset.localTime - srise.localTime;
+
+  const nextSr = sunrise(jd + 1, place);
+  const nightDur = 24.0 + nextSr.localTime - sset.localTime;
+
+  const weekday = calculateVara(jd).number;
+
+  const durOffsets: [number, number][] = [
+    [10.4, 0.0],  // Sunday
+    [6.4, 8.8],   // Monday
+    [2.4, 4.8],   // Tuesday (2nd uses night_dur)
+    [5.6, 0.0],   // Wednesday
+    [4.0, 8.8],   // Thursday
+    [2.4, 6.4],   // Friday
+    [1.6, 0.0],   // Saturday
+  ];
+
+  const answer: [number, number][] = [];
+  const offPair = durOffsets[weekday]!;
+
+  for (let i = 0; i < 2; i++) {
+    const offset = offPair[i]!;
+    if (offset !== 0.0) {
+      const dur = (weekday === 2 && i === 1) ? nightDur : dayDur;
+      const base = (weekday === 2 && i === 1) ? sset.localTime : srise.localTime;
+      const startTime = base + dur * offset / 12;
+      const endTime = startTime + dayDur * 0.8 / 12;
+      answer.push([startTime, endTime]);
+    }
+  }
+
+  return answer;
 }
 
 // ============================================================================
@@ -720,10 +871,20 @@ async function _getYogamGenericAsync(
  */
 export async function calculateTithiAsync(
   jd: number,
-  place: Place
+  place: Place,
+  tithiIndex: number = 1,
+  planet1: number = 1,  // Moon
+  planet2: number = 0,  // Sun
+  cycle: number = 1
 ): Promise<number[]> {
-  const _tithi = await _getTithiAsync(jd, place);
-  const _tithiPrev = await _getTithiAsync(jd - 1, place);
+  // Use generic version when non-default params are provided
+  const isCustom = tithiIndex !== 1 || planet1 !== 1 || planet2 !== 0 || cycle !== 1;
+  const getTithi = isCustom
+    ? (j: number) => _getTithiGenericAsync(j, place, planet1, planet2, tithiIndex, cycle)
+    : (j: number) => _getTithiAsync(j, place);
+
+  const _tithi = await getTithi(jd);
+  const _tithiPrev = await getTithi(jd - 1);
 
   const tithiNo = _tithi[0]!;
   let tithiStart = _tithiPrev[1]!;
@@ -739,7 +900,7 @@ export async function calculateTithiAsync(
 
   // Check if next tithi also falls on same day (end < 24)
   if (tithiEnd < 24.0) {
-    const _tithi1 = await _getTithiAsync(jd + tithiEnd / 24, place);
+    const _tithi1 = await getTithi(jd + tithiEnd / 24);
     const nextTithiNo = (tithiNo % 30) + 1;
     const nextTithiStart = tithiEnd;
     const nextTithiEnd = tithiEnd + _tithi1[1]!;
@@ -885,10 +1046,20 @@ async function _getYogamAsync(
  */
 export async function calculateYogaAsync(
   jd: number,
-  place: Place
+  place: Place,
+  tithiIndex: number = 1,
+  planet1: number = 1,  // Moon
+  planet2: number = 0,  // Sun
+  cycle: number = 1
 ): Promise<number[]> {
-  const _yoga = await _getYogamAsync(jd, place);
-  const _yogaPrev = await _getYogamAsync(jd - 1, place);
+  // Use generic version when non-default params are provided
+  const isCustom = tithiIndex !== 1 || planet1 !== 1 || planet2 !== 0 || cycle !== 1;
+  const getYogam = isCustom
+    ? (j: number) => _getYogamGenericAsync(j, place, planet1, planet2, tithiIndex, cycle)
+    : (j: number) => _getYogamAsync(j, place);
+
+  const _yoga = await getYogam(jd);
+  const _yogaPrev = await getYogam(jd - 1);
 
   const yogaNo = _yoga[0]!;
   let yogaStart = _yogaPrev[1]!;
@@ -900,7 +1071,9 @@ export async function calculateYogaAsync(
     yogaStart -= 24.0;
   }
 
-  const result: number[] = [yogaNo, yogaStart, yogaEnd];
+  // Python: result = [_yoga_no, _yoga_start, _yoga_end] + _yoga[2:]
+  // _yoga[2:] contains skipped yoga data if any
+  const result: number[] = [yogaNo, yogaStart, yogaEnd, ..._yoga.slice(2)];
   return result;
 }
 
@@ -1447,12 +1620,16 @@ export async function nextPlanetRetrogradeChangeDateAsync(
  * @param jd - Julian Day Number (local time, including birth time)
  * @param place - Place data
  * @param lagnaRateFactor - Rate factor: 0.25=Bhava, 0.5=Hora, 1.25=Ghati, 15.0=Vighati
+ * @param divisionalChartFactor - Varga chart factor (1=D-1, 9=D-9, etc.)
+ * @param chartMethod - Chart calculation method (default 1)
  * @returns [constellation (0-11), longitude_within_sign]
  */
 export async function specialAscendantAsync(
   jd: number,
   place: Place,
-  lagnaRateFactor: number = 1.0
+  lagnaRateFactor: number = 1.0,
+  divisionalChartFactor: number = 1,
+  chartMethod: number = 1
 ): Promise<[number, number]> {
   const { time } = julianDayToGregorian(jd);
   const timeOfBirthInHours = time.hour + time.minute / 60 + time.second / 3600;
@@ -1461,60 +1638,74 @@ export async function specialAscendantAsync(
   const sunRiseHours = srise.localTime;
   const timeDiffMins = (timeOfBirthInHours - sunRiseHours) * 60;
 
-  // Get Sun's position at sunrise (using local-time JD + tz for charts convention)
+  // Python: jd_at_sunrise = srise[2] + place.timezone/24
+  // Then pp = charts.divisional_chart(jd_at_sunrise, place, divisional_chart_factor=...)
   const jdAtSunrise = srise.jd + place.timezone / 24;
-  const jdUtcSunrise = jdAtSunrise - place.timezone / 24;
-  const sunLong = await siderealLongitudeAsync(jdUtcSunrise, 0);
+  let sunLong: number;
+  if (divisionalChartFactor > 1) {
+    const pp = getDivisionalChart(jdAtSunrise, place, divisionalChartFactor, chartMethod);
+    const sunPos = pp[1]!; // Sun: [planet, [rasi, long_within_sign]]
+    sunLong = sunPos[1][0] * 30 + sunPos[1][1];
+  } else {
+    const jdUtcSunrise = jdAtSunrise - place.timezone / 24;
+    sunLong = await siderealLongitudeAsync(jdUtcSunrise, 0);
+  }
 
   const splLong = (sunLong + timeDiffMins * lagnaRateFactor) % 360;
-  return dasavargaFromLong(splLong, 1);
+  return dasavargaFromLong(splLong, divisionalChartFactor);
 }
 
 /** Bhava Lagna (rate = 0.25) */
 export async function bhavaLagnaAsync(
-  jd: number, place: Place
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1, chartMethod: number = 1
 ): Promise<[number, number]> {
-  return specialAscendantAsync(jd, place, 0.25);
+  return specialAscendantAsync(jd, place, 0.25, divisionalChartFactor, chartMethod);
 }
 
 /** Hora Lagna (rate = 0.5) */
 export async function horaLagnaAsync(
-  jd: number, place: Place
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1, chartMethod: number = 1
 ): Promise<[number, number]> {
-  return specialAscendantAsync(jd, place, 0.5);
+  return specialAscendantAsync(jd, place, 0.5, divisionalChartFactor, chartMethod);
 }
 
 /** Ghati Lagna (rate = 1.25) */
 export async function ghatiLagnaAsync(
-  jd: number, place: Place
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1, chartMethod: number = 1
 ): Promise<[number, number]> {
-  return specialAscendantAsync(jd, place, 1.25);
+  return specialAscendantAsync(jd, place, 1.25, divisionalChartFactor, chartMethod);
 }
 
 /** Vighati Lagna (rate = 15.0) */
 export async function vighatiLagnaAsync(
-  jd: number, place: Place
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1, chartMethod: number = 1
 ): Promise<[number, number]> {
-  return specialAscendantAsync(jd, place, 15.0);
+  return specialAscendantAsync(jd, place, 15.0, divisionalChartFactor, chartMethod);
 }
 
 /**
  * Calculate Kunda Lagna — async.
- * Python: kunda_lagna(jd, place)
+ * Python: kunda_lagna(jd, place, divisional_chart_factor=1, chart_method=1)
  * Formula: (ascendant_full_longitude * 81) % 360
  *
  * @param jd - Julian Day Number (local time)
  * @param place - Place data
+ * @param divisionalChartFactor - Varga chart factor (1=D-1, 9=D-9, etc.)
  * @returns [constellation (0-11), longitude_within_sign]
  */
 export async function kundaLagnaAsync(
   jd: number,
-  place: Place
+  place: Place,
+  divisionalChartFactor: number = 1
 ): Promise<[number, number]> {
   const [ascConst, ascLong] = await ascendantFullAsync(jd, place);
   const al = ascConst * 30 + ascLong;
   const al1 = (al * 81) % 360;
-  return dasavargaFromLong(al1, 1);
+  return dasavargaFromLong(al1, divisionalChartFactor);
 }
 
 // ============================================================================
@@ -2161,18 +2352,14 @@ export function declinationOfPlanets(jd: number, place: Place): number[] {
 }
 
 // Helper to get all planet positions sync (rasi, longitude pairs)
+// Uses PyJHora planet indices (0-8) which siderealLongitude maps to SWE internally.
 function getAllPlanetPositionsSync(jd: number, place: Place): Array<[number, number]> {
   const jdUtc = jd - place.timezone / 24;
   const result: Array<[number, number]> = [];
   const planets = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN, RAHU, KETU];
   for (const p of planets) {
-    let long: number;
-    if (p === KETU) {
-      long = ketuFromRahu(siderealLongitude(jdUtc, SWE_PLANETS.RAHU));
-    } else {
-      const sweP = p <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p]! : SWE_PLANETS.RAHU;
-      long = siderealLongitude(jdUtc, sweP);
-    }
+    // siderealLongitude accepts PyJHora indices (0-8) and handles Ketu internally
+    const long = siderealLongitude(jdUtc, p);
     const rasi = Math.floor(long / 30);
     const longInSign = long % 30;
     result.push([rasi, longInSign]);
@@ -2403,7 +2590,8 @@ export async function maandiLongitudeAsync(
  * Python: pranapada_lagna(jd, place, ...)
  */
 export async function pranapadaLagnaAsync(
-  jd: number, place: Place, divisionalChartFactor: number = 1
+  jd: number, place: Place, divisionalChartFactor: number = 1,
+  chartMethod: number = 1
 ): Promise<[number, number]> {
   // birth_long = (udhayadhi_nazhikai(jd, place)[1]*4)%12
   const sr = await sunriseAsync(jd, place);
@@ -2413,9 +2601,17 @@ export async function pranapadaLagnaAsync(
   const vighati = ghatiSinceSunrise * 60;
   const birthLong = (vighati * 4) % 12;
 
+  // Python: pp = charts.divisional_chart(jd, place, divisional_chart_factor=...)
   // Sun longitude at birth time (not sunrise)
-  const jdUtc = jd - place.timezone / 24;
-  const sunLong = await solarLongitudeAsync(jdUtc);
+  let sunLong: number;
+  if (divisionalChartFactor > 1) {
+    const pp = getDivisionalChart(jd, place, divisionalChartFactor, chartMethod);
+    const sunPos = pp[1]!; // Sun: [planet, [rasi, long_within_sign]]
+    sunLong = sunPos[1][0] * 30 + sunPos[1][1];
+  } else {
+    const jdUtc = jd - place.timezone / 24;
+    sunLong = await solarLongitudeAsync(jdUtc);
+  }
 
   const pl1Base = birthLong * 30 + sunLong;
   const sl = dasavargaFromLong(sunLong, divisionalChartFactor);
@@ -2497,77 +2693,52 @@ async function nextSolarJdAsync(jd: number, place: Place, sunLong: number): Prom
  */
 export async function nextConjunctionOfPlanetPairAsync(
   jd: number, place: Place, p1: number, p2: number,
-  direction: number = 1, separationAngle: number = 0
+  direction: number = 1, separationAngle: number = 0,
+  incrementSpeedFactor: number = 0.25
 ): Promise<[number, number, number] | null> {
   if ((p1 === RAHU && p2 === KETU) || (p1 === KETU && p2 === RAHU)) {
     return null; // Rahu and Ketu never conjoin
   }
 
-  const incrementSpeedFactor = 0.25;
-  // Simplified version - use fixed increment
-  let incrementDays = 0.25 * direction;
-  const maxDaysToSearch = 100000;
+  // Helper to get planet longitude at a given local JD
+  async function getPlanetLong(planet: number, localJd: number): Promise<number> {
+    const utcJd = localJd - place.timezone / 24;
+    return siderealLongitudeAsync(utcJd, planet);
+  }
+
+  // Adaptive step: use planet speeds to determine increment_days
+  // Python: increment_days = increment_speed_factor / max(p1_speed, p2_speed)
+  const speedInfo = planetsSpeedInfo(jd, place);
+  const p1Speed = speedInfo[p1] ? Math.abs(speedInfo[p1]![3]!) : 1;
+  const p2Speed = speedInfo[p2] ? Math.abs(speedInfo[p2]![3]!) : 1;
+  const fasterSpeed = Math.max(p1Speed, p2Speed) || 1;
+  const incrementDays = (incrementSpeedFactor / fasterSpeed) * direction;
+
+  const maxDaysToSearch = 1000000;
   let curJd = jd;
   let searchCounter = 0;
 
   while (searchCounter < maxDaysToSearch) {
     curJd += incrementDays;
-    const curJdUtc = curJd - place.timezone / 24;
-
-    let p1Long: number, p2Long: number;
-
-    if (p1 === KETU) {
-      p1Long = ketuFromRahu(await siderealLongitudeAsync(curJdUtc, SWE_PLANETS.RAHU));
-    } else {
-      const sweP1 = p1 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p1]! : SWE_PLANETS.RAHU;
-      p1Long = await siderealLongitudeAsync(curJdUtc, sweP1);
-    }
-    if (p2 === KETU) {
-      p2Long = ketuFromRahu(await siderealLongitudeAsync(curJdUtc, SWE_PLANETS.RAHU));
-    } else {
-      const sweP2 = p2 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p2]! : SWE_PLANETS.RAHU;
-      p2Long = await siderealLongitudeAsync(curJdUtc, sweP2);
-    }
-
+    const p1Long = await getPlanetLong(p1, curJd);
+    const p2Long = await getPlanetLong(p2, curJd);
     const longDiff = (360 + p1Long - p2Long - separationAngle) % 360;
+
     if (longDiff < 0.5) {
       // Fine-tune with inverse Lagrange
       const jdList = Array.from({ length: 20 }, (_, i) => curJd + (i - 10) * incrementDays);
       const longDiffList: number[] = [];
       for (const jdt of jdList) {
-        const jutc = jdt - place.timezone / 24;
-        let pl1: number, pl2: number;
-        if (p1 === KETU) {
-          pl1 = ketuFromRahu(await siderealLongitudeAsync(jutc, SWE_PLANETS.RAHU));
-        } else {
-          const sp1 = p1 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p1]! : SWE_PLANETS.RAHU;
-          pl1 = await siderealLongitudeAsync(jutc, sp1);
-        }
-        if (p2 === KETU) {
-          pl2 = ketuFromRahu(await siderealLongitudeAsync(jutc, SWE_PLANETS.RAHU));
-        } else {
-          const sp2 = p2 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p2]! : SWE_PLANETS.RAHU;
-          pl2 = await siderealLongitudeAsync(jutc, sp2);
-        }
+        const pl1 = await getPlanetLong(p1, jdt);
+        const pl2 = await getPlanetLong(p2, jdt);
         longDiffList.push((360 + pl1 - pl2 - separationAngle) % 360);
       }
       try {
         const conjJd = inverseLagrange(jdList, longDiffList, 0.0);
-        const cjdUtc = conjJd - place.timezone / 24;
-        let fp1: number, fp2: number;
-        if (p1 === KETU) fp1 = ketuFromRahu(await siderealLongitudeAsync(cjdUtc, SWE_PLANETS.RAHU));
-        else {
-          const sp = p1 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p1]! : SWE_PLANETS.RAHU;
-          fp1 = await siderealLongitudeAsync(cjdUtc, sp);
-        }
-        if (p2 === KETU) fp2 = ketuFromRahu(await siderealLongitudeAsync(cjdUtc, SWE_PLANETS.RAHU));
-        else {
-          const sp = p2 <= 6 ? [SWE_PLANETS.SUN, SWE_PLANETS.MOON, SWE_PLANETS.MARS, SWE_PLANETS.MERCURY, SWE_PLANETS.JUPITER, SWE_PLANETS.VENUS, SWE_PLANETS.SATURN][p2]! : SWE_PLANETS.RAHU;
-          fp2 = await siderealLongitudeAsync(cjdUtc, sp);
-        }
+        const fp1 = await getPlanetLong(p1, conjJd);
+        const fp2 = await getPlanetLong(p2, conjJd);
         return [conjJd, normalizeDegrees(fp1), normalizeDegrees(fp2)];
       } catch {
-        // Fallback
         return [curJd, normalizeDegrees(p1Long), normalizeDegrees(p2Long)];
       }
     }
@@ -3575,45 +3746,24 @@ export async function previousLunarYearAsync(
  * Python: tamil_solar_month_and_date(panchanga_date, place, tamil_month_method, base_time, use_utc)
  * @returns [tamil_month (0-11), day_count]
  */
+/**
+ * Tamil solar month and date with method dispatch.
+ * Python: tamil_solar_month_and_date(panchanga_date, place, tamil_month_method, base_time, use_utc)
+ * @param tamilMonthMethod - 0: RaviAnnaswamy, 1: V4.3.5, 2: V4.3.8, 3+: new (default)
+ */
 export function tamilSolarMonthAndDate(
-  jd: number, place: Place, baseTime: number = 0, useUtc: boolean = true
+  jd: number, place: Place, tamilMonthMethod: number = 3,
+  baseTime: number = 0, useUtc: boolean = true
 ): [number, number] {
-  let jdBase: number;
-  if (baseTime === 0) {
-    jdBase = sunset(jd, place).jd;
-  } else if (baseTime === 1) {
-    jdBase = sunrise(jd, place).jd;
+  if (tamilMonthMethod === 0) {
+    return tamilSolarMonthAndDateRaviAnnaswamy(jd, place);
+  } else if (tamilMonthMethod === 1) {
+    return tamilSolarMonthAndDateV435(jd, place);
+  } else if (tamilMonthMethod === 2) {
+    return tamilSolarMonthAndDateV438(jd, place);
   } else {
-    // midday
-    const sr = sunrise(jd, place);
-    const ss = sunset(jd, place);
-    jdBase = (sr.jd + ss.jd) / 2;
+    return tamilSolarMonthAndDateNew(jd, place, baseTime, useUtc);
   }
-  const jdUtc = useUtc ? jdBase - place.timezone / 24 : jdBase;
-  let sr = solarLongitude(jdUtc);
-  const tamilMonth = Math.floor(sr / 30);
-  let daycount = 1;
-  let curJd = jd;
-
-  while (true) {
-    if (sr % 30 < 1 && sr % 30 > 0) break;
-    curJd -= 1;
-    let jdB: number;
-    if (baseTime === 0) {
-      jdB = sunset(curJd, place).jd;
-    } else if (baseTime === 1) {
-      jdB = sunrise(curJd, place).jd;
-    } else {
-      const srise = sunrise(curJd, place);
-      const sset = sunset(curJd, place);
-      jdB = (srise.jd + sset.jd) / 2;
-    }
-    const ju = useUtc ? jdB - place.timezone / 24 : jdB;
-    sr = solarLongitude(ju);
-    daycount++;
-    if (daycount > 40) break; // Safety
-  }
-  return [tamilMonth, daycount];
 }
 
 /**
@@ -3670,8 +3820,10 @@ export function previousSankrantiDate(
   const sankJdUtc = gregorianToJulianDay(sankDate, { hour: 0, minute: 0, second: 0 });
   const solarHour1 = (srJd + solarHour - sankJdUtc) * 24 + place.timezone;
   const [tMonth, tDay] = tamilSolarMonthAndDate(sankJd, place);
+  // Apply Tamil date/time conversion (matching Python: _convert_to_tamil_date_and_time)
+  const [finalDate, finalHour] = convertToTamilDateAndTime(sankDate, solarHour1, place);
 
-  return [sankDate, solarHour1, tMonth, tDay];
+  return [finalDate, finalHour, tMonth, tDay];
 }
 
 // ============================================================================
@@ -3863,12 +4015,19 @@ export function ascendant(jd: number, place: Place): [number, number, number, nu
  * Python: vedic_date(jd, place, calendar_type, tamil_month_method, base_time, use_utc)
  * @param calendarType 0=Solar, 1=Amantha Lunar, 2=Purnimantha Lunar
  */
+/**
+ * Vedic date (solar or lunar calendar).
+ * Python: vedic_date(jd, place, calendar_type, tamil_month_method, base_time, use_utc)
+ * @param calendarType - 0: Solar, 1: Amanta lunar, 2: Purnimanta lunar
+ * @param tamilMonthMethod - 0: RaviAnnaswamy, 1: V4.3.5, 2: V4.3.8, 3+: new (default)
+ */
 export async function vedicDateAsync(
   jd: number, place: Place, calendarType: number = 0,
+  tamilMonthMethod: number = 3,
   baseTime: number = 0, useUtc: boolean = true
 ): Promise<[number, number, number, boolean, boolean]> {
   if (calendarType === 0) {
-    const [month, day] = tamilSolarMonthAndDate(jd, place, baseTime, useUtc);
+    const [month, day] = tamilSolarMonthAndDate(jd, place, tamilMonthMethod, baseTime, useUtc);
     const year = samvatsara(jd, place, 0);
     return [month + 1, day, year, false, false];
   }
@@ -3934,12 +4093,23 @@ export function nextAnnualSolarDateApproximate(
  * Python: sree_lagna(jd, place, ...)
  */
 export async function sreeLagnaAsync(
-  jd: number, place: Place, divisionalChartFactor: number = 1
+  jd: number, place: Place, divisionalChartFactor: number = 1,
+  chartMethod: number = 1
 ): Promise<[number, number]> {
-  const jdUtc = jd - place.timezone / 24;
-  const moonLong = await lunarLongitudeAsync(jdUtc);
-  const asc = await ascendantFullAsync(jd, place);
-  const ascLong = asc.constellation * 30 + asc.longitude;
+  let moonLong: number;
+  let ascLong: number;
+  if (divisionalChartFactor > 1) {
+    const pp = getDivisionalChart(jd, place, divisionalChartFactor, chartMethod);
+    const ascPos = pp[0]!; // Ascendant: [planet, [rasi, long_within_sign]]
+    const moonPos = pp[2]!; // Moon
+    moonLong = moonPos[1][0] * 30 + moonPos[1][1];
+    ascLong = ascPos[1][0] * 30 + ascPos[1][1];
+  } else {
+    const jdUtc = jd - place.timezone / 24;
+    moonLong = await lunarLongitudeAsync(jdUtc);
+    const asc = await ascendantFullAsync(jd, place);
+    ascLong = asc.constellation * 30 + asc.longitude;
+  }
   return sreeLagnaFromLongitudes(moonLong, ascLong, divisionalChartFactor);
 }
 
@@ -3952,23 +4122,39 @@ export async function sreeLagnaAsync(
  * Python: indu_lagna(jd, place, ...)
  */
 export async function induLagnaAsync(
-  jd: number, place: Place, divisionalChartFactor: number = 1
+  jd: number, place: Place, divisionalChartFactor: number = 1,
+  chartMethod: number = 1
 ): Promise<[number, number]> {
-  const positions = getAllPlanetPositionsSync(jd, place);
-  const moonPos = positions[1]!;
-  const moonRasi = moonPos[0];
+  let moonRasi: number;
+  let moonLongInSign: number;
+  let ascRasi: number;
+  if (divisionalChartFactor > 1) {
+    const pp = getDivisionalChart(jd, place, divisionalChartFactor, chartMethod);
+    const moonPos = pp[2]!; // Moon
+    const ascPos = pp[0]!; // Ascendant
+    moonRasi = moonPos[1][0];
+    moonLongInSign = moonPos[1][1];
+    ascRasi = ascPos[1][0];
+  } else {
+    const positions = getAllPlanetPositionsSync(jd, place);
+    const moonPos = positions[1]!;
+    moonRasi = moonPos[0];
+    moonLongInSign = moonPos[1];
+    const asc = await ascendantFullAsync(jd, place);
+    ascRasi = asc.constellation;
+  }
+
   const ninthFromMoon = (moonRasi + 8) % 12;
   const ninthLord = HOUSE_OWNERS[ninthFromMoon]![0]!;
-  const asc = await ascendantFullAsync(jd, place);
-  const ascRasi = asc.constellation;
   const ninthFromAsc = (ascRasi + 8) % 12;
   const ninthLordAsc = HOUSE_OWNERS[ninthFromAsc]![0]!;
 
   const il9thMoon = IL_FACTORS[ninthLord] ?? 0;
   const il9thAsc = IL_FACTORS[ninthLordAsc] ?? 0;
-  const ilSum = il9thMoon + il9thAsc;
-  const ilRasi = (ilSum % 12 + moonRasi) % 12;
-  const ilLong = ilRasi * 30 + moonPos[1];
+  let ilSum = (il9thMoon + il9thAsc) % 12;
+  if (ilSum === 0) ilSum = 12;
+  const ilRasi = (moonRasi + ilSum - 1) % 12;
+  const ilLong = ilRasi * 30 + moonLongInSign;
   return dasavargaFromLong(normalizeDegrees(ilLong), divisionalChartFactor);
 }
 
@@ -3981,13 +4167,24 @@ export async function induLagnaAsync(
  * Python: bhrigu_bindhu_lagna(jd, place, ...)
  */
 export async function bhriguBindhuAsync(
-  jd: number, place: Place, divisionalChartFactor: number = 1
+  jd: number, place: Place, divisionalChartFactor: number = 1,
+  chartMethod: number = 1
 ): Promise<[number, number]> {
-  const positions = getAllPlanetPositionsSync(jd, place);
-  const moonPos = positions[1]!;
-  const rahuPos = positions[7]!;
-  const moonLong = moonPos[0] * 30 + moonPos[1];
-  const rahuLong = rahuPos[0] * 30 + rahuPos[1];
+  let moonLong: number;
+  let rahuLong: number;
+  if (divisionalChartFactor > 1) {
+    const pp = getDivisionalChart(jd, place, divisionalChartFactor, chartMethod);
+    const moonPos = pp[2]!; // Moon
+    const rahuPos = pp[8]!; // Rahu
+    moonLong = moonPos[1][0] * 30 + moonPos[1][1];
+    rahuLong = rahuPos[1][0] * 30 + rahuPos[1][1];
+  } else {
+    const positions = getAllPlanetPositionsSync(jd, place);
+    const moonPos = positions[1]!;
+    const rahuPos = positions[7]!;
+    moonLong = moonPos[0] * 30 + moonPos[1];
+    rahuLong = rahuPos[0] * 30 + rahuPos[1];
+  }
   const bb = (moonLong + rahuLong) / 2;
   return dasavargaFromLong(normalizeDegrees(bb), divisionalChartFactor);
 }
@@ -4009,9 +4206,28 @@ export const moonriseAsync = _moonriseAsync;
 export const moonset = _moonset;
 export const moonsetAsync = _moonsetAsync;
 
+/** Re-export jd_to_gregorian (Python: jd_to_gregorian = lambda jd: swe.revjul(jd, swe.GREG_CAL)) */
+export const jdToGregorian = julianDayToGregorian;
+
 /** Reset ayanamsa mode to default (Lahiri) */
 export function resetAyanamsaMode(): void {
   setAyanamsaMode('LAHIRI');
+}
+
+/**
+ * bhaava_madhya — simple wrapper dispatching to KP vs Sripathi.
+ * Python: bhaava_madhya(jd, place, bhava_method)
+ * @param bhavaMethod - 1: KP/Placidus, 2: Sripathi (default from constants)
+ * @returns Array of 12 house cusp longitudes
+ */
+export async function bhaavaMadhya(
+  jd: number, place: Place, bhavaMethod: number = BHAAVA_MADHYA_METHOD
+): Promise<number[]> {
+  if (bhavaMethod === 1) {
+    return bhaavaMadhyaKP(jd, place);
+  } else {
+    return bhaavaMadhyaSripathi(jd, place);
+  }
 }
 
 // ============================================================================
@@ -4032,15 +4248,30 @@ export function navamsaFromLongOld(longitude: number): number {
   return Math.floor(fractionLeft * 12);
 }
 
-/** Get Rahu longitude (alias for siderealLongitude with RAHU) */
-export function rahu(jd: number): number {
-  const jdUtc = jd; // caller handles UTC
-  return siderealLongitude(jdUtc, RAHU);
+/**
+ * Python-compatible: ketu = (rahu_longitude + 180) % 360
+ * Ketu is always 180° from Rahu; takes Rahu longitude, returns Ketu longitude.
+ */
+export function ketu(rahuLongitude: number): number {
+  return (rahuLongitude + 180) % 360;
 }
 
-/** Get Ketu longitude (180 degrees from Rahu) */
-export function ketu(jd: number): number {
-  return normalizeDegrees(rahu(jd) + 180);
+/**
+ * Python-compatible: rahu = (ketu_longitude + 180) % 360
+ * Rahu is always 180° from Ketu; takes Ketu longitude, returns Rahu longitude.
+ */
+export function rahu(ketuLongitude: number): number {
+  return (ketuLongitude + 180) % 360;
+}
+
+/** Get Rahu longitude at a given JD via sidereal_longitude */
+export function rahuLongitude(jd: number): number {
+  return siderealLongitude(jd, RAHU);
+}
+
+/** Get Ketu longitude at a given JD (180° from Rahu) */
+export function ketuLongitude(jd: number): number {
+  return normalizeDegrees(rahuLongitude(jd) + 180);
 }
 
 /** Map planet constant to Swiss Ephemeris planet index */
@@ -4064,6 +4295,47 @@ export async function gulikaiKaalamAsync(jd: number, place: Place): Promise<[num
 }
 
 /** next_sankranti_date — find next sun entry to a rasi */
+/**
+ * Next sankranti date (sun entry to next rasi).
+ * Python: next_sankranti_date(panchanga_date, place)
+ * @returns [Date, solarHour, tamilMonth, tamilDay] matching Python format
+ */
+export function nextSankrantiDate(
+  jd: number, place: Place
+): [{ year: number; month: number; day: number }, number, number, number] {
+  const [tMonth] = tamilSolarMonthAndDate(jd - 1, place);
+  const multiple = ((tMonth + 1) % 12) * 30;
+
+  let sunsetJd = sunset(jd - 1, place).jd;
+  let sl = solarLongitude(sunsetJd - place.timezone / 24);
+
+  // Walk forward to find sankranti
+  let maxIter = 60;
+  while (maxIter-- > 0) {
+    const rem = sl % 30;
+    if (rem < 1 && rem > 0) break;
+    sunsetJd += 1;
+    sl = solarLongitude(sunsetJd - place.timezone / 24);
+  }
+
+  const sankDate = julianDayToGregorian(sunsetJd).date;
+  const srJd = sunrise(sunsetJd, place).jd;
+  const offsets = [0.0, 0.25, 0.5, 0.75, 1.0];
+  const solarLongs = offsets.map(t => solarLongitude(srJd + t) % 360);
+  const solarHour = inverseLagrange(offsets, solarLongs, multiple % 360);
+  const sankJdUtc = gregorianToJulianDay(sankDate, { hour: 0, minute: 0, second: 0 });
+  let solarHour1 = (srJd + solarHour - sankJdUtc) * 24 + place.timezone;
+
+  const [tamilMonth, tamilDay] = tamilSolarMonthAndDate(sunsetJd, place);
+  const [finalDate, finalHour] = convertToTamilDateAndTime(sankDate, solarHour1, place);
+
+  return [finalDate, finalHour, tamilMonth, tamilDay];
+}
+
+/**
+ * Next sankranti date (async, simple — returns JD and rasi).
+ * Kept for backwards compatibility.
+ */
 export async function nextSankrantiDateAsync(
   jd: number, place: Place
 ): Promise<{ jd: number; rasi: number }> {
@@ -4298,7 +4570,7 @@ export function tithiUsingPlanetSpeed(
     // Compute tithi phase using planet longitudes
     const p1Long = siderealLongitude(jdUtc, planet1);
     const p2Long = siderealLongitude(jdUtc, planet2);
-    const totalPhase = ((p1Long - p2Long) * tithiIndex * cycle % 360 + 360) % 360;
+    const totalPhase = ((tithiIndex * (p1Long - p2Long) + (cycle - 1) * 180) % 360 + 360) % 360;
     const oneTithi = 360 / 30;
     const tit = Math.ceil(totalPhase / oneTithi);
     let tithiNo = tit;
@@ -4339,26 +4611,48 @@ export function yogamOld(
   planet1: number = MOON, planet2: number = SUN,
   tithiIndex: number = 1, cycle: number = 1
 ): number[] {
-  // Internal _get_yogam equivalent
+  // Internal _get_yogam equivalent — matches Python _get_yogam(jd, place, planet1, planet2, tithi_index, cycle)
   function getYogam(jd_: number, place_: Place): number[] {
     const tz = place_.timezone;
     const { date } = julianDayToGregorian(jd_);
     const jdUtc = gregorianToJulianDay(date, { hour: 0, minute: 0, second: 0 });
     const rise = sunrise(jd_, place_).jd;
-    const offsets = [0.0, 0.25, 0.5, 0.75, 1.0];
-    const longitudes: number[] = [];
-    for (const t of offsets) {
-      const p1 = siderealLongitude(rise + t, planet1);
-      const p2 = siderealLongitude(rise + t, planet2);
-      longitudes.push(((p1 + p2) * tithiIndex * cycle) % 360);
-    }
-    const y = unwrapAngles(longitudes);
-    const totalNow = longitudes[0]!;
     const oneYoga = 360 / 27;
-    const yogaNo = Math.floor(totalNow / oneYoga) + 1;
-    const approxEnd = inverseLagrange(offsets, y, yogaNo * oneYoga);
-    const ends = (rise - jdUtc + approxEnd) * 24 + tz;
-    return [yogaNo, ends];
+
+    // Use lunar_longitude/solar_longitude like Python _get_yogam
+    const moonAtRise = siderealLongitude(rise, MOON);
+    const sunAtRise = siderealLongitude(rise, SUN);
+    const total = ((tithiIndex * (moonAtRise + sunAtRise) + (cycle - 1) * 180) % 360 + 360) % 360;
+    const yog = Math.ceil(total / oneYoga) || 27;
+    const degreesLeft = yog * oneYoga - total;
+
+    const offsets = [0.0, 0.25, 0.5, 0.75, 1.0];
+    const totalMotion: number[] = [];
+    for (const t of offsets) {
+      const moonDiff = ((siderealLongitude(rise + t, MOON) - moonAtRise) % 360 + 360) % 360;
+      const sunDiff = ((siderealLongitude(rise + t, SUN) - sunAtRise) % 360 + 360) % 360;
+      totalMotion.push(((tithiIndex * (moonDiff + sunDiff) + (cycle - 1) * 180) % 360 + 360) % 360);
+    }
+
+    const approxEnd = inverseLagrange(offsets, totalMotion, degreesLeft);
+    const ends = (rise + approxEnd - jdUtc) * 24 + tz;
+    const answer: number[] = [yog, ends];
+
+    // Check for skipped yoga
+    const moonTmrw = siderealLongitude(rise + 1, MOON);
+    const sunTmrw = siderealLongitude(rise + 1, SUN);
+    const totalTmrw = ((tithiIndex * (moonTmrw + sunTmrw) + (cycle - 1) * 180) % 360 + 360) % 360;
+    const tomorrow = Math.ceil(totalTmrw / oneYoga) || 27;
+    const isSkipped = ((tomorrow - yog) % 27 + 27) % 27 > 1;
+    if (isSkipped) {
+      const leapYog = yog + 1;
+      const leapDegreesLeft = leapYog * oneYoga - total;
+      const leapApproxEnd = inverseLagrange(offsets, totalMotion, leapDegreesLeft);
+      const leapEnds = (rise + leapApproxEnd - jdUtc) * 24 + tz;
+      answer.push(leapYog === 28 ? 1 : leapYog, leapEnds);
+    }
+
+    return answer;
   }
 
   const yoga = getYogam(jd, place);
@@ -4373,7 +4667,8 @@ export function yogamOld(
     yogaStart -= 24.0;
   }
 
-  return [yogaNo, yogaStart, yogaEnd];
+  // Python: result = [_yoga_no, _yoga_start, _yoga_end] + _yoga[2:]
+  return [yogaNo, yogaStart, yogaEnd, ...yoga.slice(2)];
 }
 
 // ============================================================================
