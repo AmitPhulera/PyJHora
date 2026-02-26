@@ -289,6 +289,9 @@ function getDhasaProgression(planetLongitude: number): {
  * @param options.divisionalChartFactor - Divisional chart factor (default 1 for D-1)
  * @param options.includeBhuktis - Whether to include sub-periods (default true)
  * @param options.startingPlanet - Planet to use for longitude (default Moon = 1)
+ * @param options.starPositionFromMoon - Nakshatra offset from Moon (default 1 = Moon itself).
+ *   Use 4 for Kshema Star, 5 for Utpanna Star, 8 for Adhana Star.
+ *   Only applied when startingPlanet is Moon (1).
  */
 export function getKalachakraDashaBhukti(
   jd: number,
@@ -297,19 +300,28 @@ export function getKalachakraDashaBhukti(
     divisionalChartFactor?: number;
     includeBhuktis?: boolean;
     startingPlanet?: number;
+    starPositionFromMoon?: number;
   } = {}
 ): KalachakraResult {
   const {
     divisionalChartFactor = 1,
     includeBhuktis = true,
-    startingPlanet = MOON
+    startingPlanet = MOON,
+    starPositionFromMoon = 1
   } = options;
 
   const planetPositions = getPlanetPositionsArray(jd, place, divisionalChartFactor);
 
   // Get starting planet's longitude
   const planetPosition = planetPositions.find(p => p.planet === startingPlanet);
-  const planetLongitude = (planetPosition?.rasi ?? 0) * 30 + (planetPosition?.longitude ?? 0);
+  let planetLongitude = (planetPosition?.rasi ?? 0) * 30 + (planetPosition?.longitude ?? 0);
+
+  // Apply star position offset for Moon (Python: star_position_from_moon)
+  // Shifts Moon longitude by N nakshatras for Kshema/Utpanna/Adhana star variants
+  if (startingPlanet === MOON) {
+    const ONE_STAR = 360 / 27;
+    planetLongitude += (starPositionFromMoon - 1) * ONE_STAR;
+  }
 
   // Get dasha progression
   const {
