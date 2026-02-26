@@ -150,6 +150,7 @@ export function getDwisatpathiDashaBhukti(
     antardashaOption?: number;
     cycles?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
   } = {}
 ): DwisatpathiResult {
   const {
@@ -159,19 +160,31 @@ export function getDwisatpathiDashaBhukti(
     includeBhuktis = true,
     antardashaOption = 1,
     cycles = 2,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
-  let [currentLord, startJd] = dwisatpathiDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
-  
+
+  // Tribhagi variation: divide each dasha by 3, multiply cycles by 3
+  // Python: _dhasa_cycles = 2 (default); if tribhagi: _dhasa_cycles = int(2 / (1/3)) = 6
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? Math.floor(cycles / (1 / 3)) : cycles;
+
+  const [initialLord, initialStartJd] = dwisatpathiDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
+
+  let currentLord = initialLord;
+  let startJd = initialStartJd;
+
   const mahadashas: DwisatpathiDashaPeriod[] = [];
   const bhuktis: DwisatpathiBhuktiPeriod[] = [];
-  
-  for (let cycle = 0; cycle < cycles; cycle++) {
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0 && cycle % (useTribhagiVariation ? 3 : 1) === 0) {
+      // At the start of each original cycle boundary, we continue with next lord (no reset needed)
+    }
     for (let i = 0; i < 8; i++) {
-      const durationYears = DWISATPATHI_YEARS;
+      const durationYears = Math.round(DWISATPATHI_YEARS * tribhagiFactor * 100) / 100;
       const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
-      
+
       mahadashas.push({
         lord: currentLord,
         lordName,
@@ -179,7 +192,7 @@ export function getDwisatpathiDashaBhukti(
         startDate: formatJdAsDate(startJd),
         durationYears
       });
-      
+
       if (includeBhuktis) {
         let bhuktiLord = currentLord;
         if (antardashaOption === 3 || antardashaOption === 4) {
@@ -187,11 +200,11 @@ export function getDwisatpathiDashaBhukti(
         } else if (antardashaOption === 5 || antardashaOption === 6) {
           bhuktiLord = getNextDwisatpathiLord(bhuktiLord, -1);
         }
-        
+
         const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
         const bhuktiDuration = durationYears / 8;
         let bhuktiStartJd = startJd;
-        
+
         for (let j = 0; j < 8; j++) {
           const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
           bhuktis.push({
@@ -206,11 +219,11 @@ export function getDwisatpathiDashaBhukti(
           bhuktiLord = getNextDwisatpathiLord(bhuktiLord, direction);
         }
       }
-      
+
       startJd += durationYears * YEAR_DURATION;
       currentLord = getNextDwisatpathiLord(currentLord);
     }
   }
-  
+
   return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
 }

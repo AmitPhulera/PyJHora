@@ -166,6 +166,7 @@ export function getDwadasottariDashaBhukti(
     includeBhuktis?: boolean;
     antardashaOption?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
   } = {}
 ): DwadasottariResult {
   const {
@@ -174,56 +175,69 @@ export function getDwadasottariDashaBhukti(
     startingPlanet = MOON,
     includeBhuktis = true,
     antardashaOption = 1,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
-  let [currentLord, startJd] = dwadasottariDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
-  
+
+  // Tribhagi variation: divide each dasha by 3, run 3 cycles
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
+  const [initialLord, initialStartJd] = dwadasottariDashaStart(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
+
+  let currentLord = initialLord;
+  let startJd = initialStartJd;
+
   const mahadashas: DwadasottariDashaPeriod[] = [];
   const bhuktis: DwadasottariBhuktiPeriod[] = [];
-  
-  for (let i = 0; i < 8; i++) {
-    const durationYears = DWADASOTTARI_YEARS[currentLord] ?? 7;
-    const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
-    
-    mahadashas.push({
-      lord: currentLord,
-      lordName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears
-    });
-    
-    if (includeBhuktis) {
-      let bhuktiLord = currentLord;
-      if (antardashaOption === 3 || antardashaOption === 4) {
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, 1);
-      } else if (antardashaOption === 5 || antardashaOption === 6) {
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, -1);
-      }
-      
-      const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
-      const bhuktiDuration = durationYears / 8;
-      let bhuktiStartJd = startJd;
-      
-      for (let j = 0; j < 8; j++) {
-        const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
-        bhuktis.push({
-          dashaLord: currentLord,
-          bhuktiLord,
-          bhuktiLordName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-        bhuktiLord = getNextDwadasottariLord(bhuktiLord, direction);
-      }
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0) {
+      currentLord = initialLord;
     }
-    
-    startJd += durationYears * YEAR_DURATION;
-    currentLord = getNextDwadasottariLord(currentLord);
+    for (let i = 0; i < 8; i++) {
+      const durationYears = Math.round((DWADASOTTARI_YEARS[currentLord] ?? 7) * tribhagiFactor * 100) / 100;
+      const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
+
+      mahadashas.push({
+        lord: currentLord,
+        lordName,
+        startJd,
+        startDate: formatJdAsDate(startJd),
+        durationYears
+      });
+
+      if (includeBhuktis) {
+        let bhuktiLord = currentLord;
+        if (antardashaOption === 3 || antardashaOption === 4) {
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, 1);
+        } else if (antardashaOption === 5 || antardashaOption === 6) {
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, -1);
+        }
+
+        const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+        const bhuktiDuration = durationYears / 8;
+        let bhuktiStartJd = startJd;
+
+        for (let j = 0; j < 8; j++) {
+          const bhuktiLordName = PLANET_NAMES_EN[bhuktiLord] ?? `Planet ${bhuktiLord}`;
+          bhuktis.push({
+            dashaLord: currentLord,
+            bhuktiLord,
+            bhuktiLordName,
+            startJd: bhuktiStartJd,
+            startDate: formatJdAsDate(bhuktiStartJd),
+            durationYears: bhuktiDuration
+          });
+          bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+          bhuktiLord = getNextDwadasottariLord(bhuktiLord, direction);
+        }
+      }
+
+      startJd += durationYears * YEAR_DURATION;
+      currentLord = getNextDwadasottariLord(currentLord);
+    }
   }
-  
+
   return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
 }

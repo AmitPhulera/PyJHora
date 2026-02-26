@@ -390,6 +390,7 @@ export function getVimsottariDashaBhukti(
     includePratyantardashas?: boolean;
     antardashaOption?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
   } = {}
 ): VimsottariResult {
   const {
@@ -400,37 +401,54 @@ export function getVimsottariDashaBhukti(
     includeAntardashas = false,
     includePratyantardashas = false,
     antardashaOption = 1,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
-  // Get all mahadashas
-  const dashaMap = vimsottariMahadasha(jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor);
-  
-  // Convert to array and add end dates
-  const dashaEntries = Array.from(dashaMap.entries());
-  const mahadashas: DashaPeriod[] = dashaEntries.map((entry) => {
-    const [lord, startJd] = entry;
-    const periodYears = DASHA_YEARS[lord] ?? 0;
-    const endJd = startJd + periodYears * YEAR_DURATION;
-    
-    return {
-      lord,
-      lordName: PLANET_NAMES_EN[lord] ?? `Planet ${lord}`,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      endJd,
-      endDate: formatJdAsDate(endJd),
-      durationYears: periodYears
-    };
-  });
-  
+
+  // Tribhagi variation: divide each dasha by 3, run 3 cycles
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
+  // Get initial dasha lord and start date
+  let [initialLord, initialStartJd] = vimsottariDashaStartDate(
+    jd, place, starPositionFromMoon, seedStar, startingPlanet, divisionalChartFactor
+  );
+
+  // Build mahadashas with tribhagi support (multiple cycles)
+  const mahadashas: DashaPeriod[] = [];
+  let currentLord = initialLord;
+  let currentStartJd = initialStartJd;
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    if (cycle > 0) {
+      // Reset lord to initial lord for subsequent cycles
+      currentLord = initialLord;
+    }
+    for (let i = 0; i < 9; i++) {
+      const periodYears = (DASHA_YEARS[currentLord] ?? 0) * tribhagiFactor;
+      const endJd = currentStartJd + periodYears * YEAR_DURATION;
+
+      mahadashas.push({
+        lord: currentLord,
+        lordName: PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`,
+        startJd: currentStartJd,
+        startDate: formatJdAsDate(currentStartJd),
+        endJd,
+        endDate: formatJdAsDate(endJd),
+        durationYears: periodYears
+      });
+
+      currentStartJd = endJd;
+      currentLord = getNextAdhipati(currentLord);
+    }
+  }
+
   // Calculate balance at birth
-  // Find the dasha running at birth
   const firstDasha = mahadashas[0]!;
   const secondDashaStart = mahadashas[1]?.startJd ?? (firstDasha.startJd + firstDasha.durationYears * YEAR_DURATION);
   const daysToSecondDasha = secondDashaStart - jd;
   const balance = daysToYMD(daysToSecondDasha);
-  
+
   if (!includeBhuktis) {
     return {
       balance,
@@ -438,15 +456,33 @@ export function getVimsottariDashaBhukti(
     };
   }
 
+  // Adjusted life span for tribhagi (used in bhukti calculation)
+  const adjustedLifeSpan = VIMSOTTARI_TOTAL_YEARS * tribhagiFactor;
+
   // Calculate bhuktis and deeper levels
   const bhuktis: BhuktiPeriod[] = [];
   const antardashas: AntardhasaPeriod[] = [];
   const pratyantardashas: PratyantardashaPeriod[] = [];
-  
+
   for (const dasha of mahadashas) {
-    const bhuktiMap = vimsottariBhukti(dasha.lord, dasha.startJd, antardashaOption);
-    
-    for (const [bhuktiLord, bhuktiStartJd] of bhuktiMap) {
+    // Compute bhuktis manually with tribhagi-adjusted durations
+    let bhuktiLord = dasha.lord;
+
+    // Adjust starting lord based on antardasha option
+    if (antardashaOption === 3 || antardashaOption === 4) {
+      bhuktiLord = getNextAdhipati(bhuktiLord, 1);
+    } else if (antardashaOption === 5 || antardashaOption === 6) {
+      bhuktiLord = getNextAdhipati(bhuktiLord, -1);
+    }
+
+    const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+    let bhuktiStartJd = dasha.startJd;
+
+    for (let j = 0; j < 9; j++) {
+      const mahaYears = DASHA_YEARS[dasha.lord] ?? 0;
+      const bhuktiYears = DASHA_YEARS[bhuktiLord] ?? 0;
+      const factor = (mahaYears * bhuktiYears) / VIMSOTTARI_TOTAL_YEARS * tribhagiFactor;
+
       bhuktis.push({
         dashaLord: dasha.lord,
         bhuktiLord,
@@ -456,9 +492,15 @@ export function getVimsottariDashaBhukti(
       });
 
       if (includeAntardashas || includePratyantardashas) {
-        const antaraMap = vimsottariAntardasha(dasha.lord, bhuktiLord, bhuktiStartJd, antardashaOption);
+        // Antardasha calculation with tribhagi factor
+        let antaraLord = bhuktiLord;
+        let antaraStartJd = bhuktiStartJd;
 
-        for (const [antaraLord, antaraStartJd] of antaraMap) {
+        for (let k = 0; k < 9; k++) {
+          const antaraYears = DASHA_YEARS[antaraLord] ?? 0;
+          const antaraFactor = (mahaYears * bhuktiYears * antaraYears) /
+            (VIMSOTTARI_TOTAL_YEARS * VIMSOTTARI_TOTAL_YEARS) * tribhagiFactor;
+
           antardashas.push({
             dashaLord: dasha.lord,
             bhuktiLord,
@@ -469,9 +511,14 @@ export function getVimsottariDashaBhukti(
           });
 
           if (includePratyantardashas) {
-            const pratyantaraMap = vimsottariPratyantardasha(dasha.lord, bhuktiLord, antaraLord, antaraStartJd, antardashaOption);
+            let pratyantaraLord = antaraLord;
+            let pratyantaraStartJd = antaraStartJd;
 
-            for (const [pratyantaraLord, pratyantaraStartJd] of pratyantaraMap) {
+            for (let l = 0; l < 9; l++) {
+              const pratyantaraYears = DASHA_YEARS[pratyantaraLord] ?? 0;
+              const pratyantaraFactor = (mahaYears * bhuktiYears * antaraYears * pratyantaraYears) /
+                Math.pow(VIMSOTTARI_TOTAL_YEARS, 3) * tribhagiFactor;
+
               pratyantardashas.push({
                 dashaLord: dasha.lord,
                 bhuktiLord,
@@ -481,13 +528,22 @@ export function getVimsottariDashaBhukti(
                 startJd: pratyantaraStartJd,
                 startDate: formatJdAsDate(pratyantaraStartJd)
               });
+
+              pratyantaraStartJd += pratyantaraFactor * YEAR_DURATION;
+              pratyantaraLord = getNextAdhipati(pratyantaraLord, direction);
             }
           }
+
+          antaraStartJd += antaraFactor * YEAR_DURATION;
+          antaraLord = getNextAdhipati(antaraLord, direction);
         }
       }
+
+      bhuktiStartJd += factor * YEAR_DURATION;
+      bhuktiLord = getNextAdhipati(bhuktiLord, direction);
     }
   }
-  
+
   const result: VimsottariResult = {
     balance,
     mahadashas,
