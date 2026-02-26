@@ -16,7 +16,9 @@ export const MAX_SCORE_NORTH = 36;
 export const MAX_SCORE_SOUTH = 10;
 
 // --- Varna ---
-const VARNA_FROM_RASI = [3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0]; // Shudra=3, Vaishya=2, Kshathirya=1, Brahmin=0
+// Python: vasiya_raasi_list = [1,3,2,0,1,3,2,0,1,3,2,0]
+// 0=Brahmin, 1=Kshathirya, 2=Vaishya, 3=Shudra
+const VARNA_FROM_RASI = [1, 3, 2, 0, 1, 3, 2, 0, 1, 3, 2, 0];
 const VARNA_ARRAY = [
   [1, 0, 0, 0],
   [1, 1, 0, 0],
@@ -28,12 +30,13 @@ const VARNA_MAX = 1;
 // --- Vasiya ---
 const VASIYA_RASI_LIST = [1, 3, 2, 0, 1, 3, 2, 0, 1, 3, 2, 0];
 // Saravali method: [Chathushpadha, Manava, Jalachara, Vanachara, Keeta]
+// Python: VasiyaArray from Saravali.de — indexed as [girl][boy]
 const VASIYA_ARRAY = [
-  [2.0, 0.5, 0.5, 0.0, 1.0],
-  [0.5, 2.0, 1.0, 0.5, 0.0],
-  [0.5, 1.0, 2.0, 0.0, 0.5],
-  [0.0, 0.5, 0.0, 2.0, 0.5],
-  [1.0, 0.0, 0.5, 0.5, 2.0],
+  [2.0, 0.5, 1.0, 0.0, 2.0],
+  [0.5, 2.0, 0.0, 0.0, 0.0],
+  [1.0, 0.0, 2.0, 2.0, 2.0],
+  [0.0, 0.0, 2.0, 2.0, 0.0],
+  [1.0, 0.0, 1.0, 0.0, 2.0],
 ];
 const VASIYA_MAX = 2.0;
 
@@ -58,69 +61,76 @@ const NAKSHATRA_MAX = 3.0;
 
 // --- Yoni ---
 const YONI_MAPPINGS = [0, 1, 2, 3, 3, 4, 5, 2, 5, 6, 6, 7, 8, 9, 8, 9, 10, 10, 4, 11, 12, 11, 13, 0, 13, 7, 1];
+// Python: YoniArray — indexed as [girl_yoni][boy_yoni]
 const YONI_ARRAY = [
-  [4, 2, 2, 3, 2, 2, 2, 1, 0, 2, 1, 3, 2, 1],
-  [2, 4, 3, 2, 2, 2, 2, 2, 3, 1, 2, 2, 0, 2],
-  [2, 3, 4, 2, 1, 2, 0, 2, 2, 3, 2, 2, 2, 1],
-  [3, 2, 2, 4, 2, 1, 2, 2, 2, 0, 1, 2, 3, 2],
-  [2, 2, 1, 2, 4, 0, 2, 2, 3, 2, 3, 2, 2, 1],
-  [2, 2, 2, 1, 0, 4, 2, 3, 2, 2, 2, 2, 1, 3],
-  [2, 2, 0, 2, 2, 2, 4, 2, 2, 2, 3, 1, 2, 3],
-  [1, 2, 2, 2, 2, 3, 2, 4, 2, 2, 0, 3, 2, 2],
-  [0, 3, 2, 2, 3, 2, 2, 2, 4, 2, 1, 2, 2, 2],
-  [2, 1, 3, 0, 2, 2, 2, 2, 2, 4, 2, 2, 2, 3],
-  [1, 2, 2, 1, 3, 2, 3, 0, 1, 2, 4, 2, 2, 2],
-  [3, 2, 2, 2, 2, 2, 1, 3, 2, 2, 2, 4, 0, 2],
-  [2, 0, 2, 3, 2, 1, 2, 2, 2, 2, 2, 0, 4, 3],
-  [1, 2, 1, 2, 1, 3, 3, 2, 2, 3, 2, 2, 3, 4],
+  [4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 1, 3, 2, 1],
+  [2, 4, 3, 3, 2, 2, 2, 2, 3, 1, 2, 3, 2, 0],
+  [2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 1],
+  [3, 3, 2, 4, 2, 1, 1, 1, 1, 2, 2, 2, 0, 2],
+  [2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 0, 2, 1, 1],
+  [2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 3, 2, 1],
+  [2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 1, 2],
+  [1, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 2, 2, 1],
+  [0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 1],
+  [1, 1, 1, 2, 1, 1, 2, 0, 1, 4, 1, 1, 2, 1],
+  [1, 2, 2, 2, 0, 3, 2, 3, 2, 1, 4, 2, 2, 1],
+  [3, 3, 0, 2, 2, 3, 2, 2, 2, 1, 2, 4, 3, 2],
+  [2, 2, 3, 0, 1, 2, 1, 2, 2, 2, 2, 3, 4, 2],
+  [1, 0, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 2, 4],
 ];
 const YONI_MAX = 4;
 
-const YONI_ENEMIES_SOUTH = [
-  [0, 13], [1, 12], [2, 6], [3, 9], [4, 5], [7, 10], [8, 0],
+// Python: yoni_enemies_south — 16 directed pairs (not symmetric; checked as exact match)
+const YONI_ENEMIES_SOUTH: [number, number][] = [
+  [0, 8], [1, 13], [2, 11], [3, 12], [3, 6], [4, 10], [5, 6],
+  [6, 3], [6, 5], [7, 9], [8, 0], [9, 7], [10, 4], [11, 2], [12, 3], [13, 1],
 ];
 
 // --- Raasi Adhipathi / Maitri ---
 const RAASI_ADHIPATHI_MAPPINGS = [2, 5, 3, 1, 0, 3, 5, 2, 4, 6, 6, 4];
+// Python: raasi_adhipathi_array — indexed as [girl_lord][boy_lord]
 const RAASI_ADHIPATHI_ARRAY = [
-  [5.0, 5.0, 4.0, 1.0, 0.5, 0.5, 0.0],
-  [5.0, 5.0, 5.0, 2.5, 1.0, 4.0, 0.5],
-  [4.0, 5.0, 5.0, 0.5, 4.0, 0.5, 2.5],
-  [1.0, 2.5, 0.5, 5.0, 3.0, 0.5, 5.0],
-  [0.5, 1.0, 4.0, 3.0, 5.0, 5.0, 5.0],
-  [0.5, 4.0, 0.5, 0.5, 5.0, 5.0, 5.0],
-  [0.0, 0.5, 2.5, 5.0, 5.0, 5.0, 5.0],
+  [5.0, 5.0, 5.0, 4.0, 5.0, 0.0, 0.0],
+  [5.0, 5.0, 4.0, 1.0, 4.0, 0.5, 0.5],
+  [5.0, 4.0, 5.0, 0.5, 5.0, 3.0, 0.5],
+  [4.0, 1.0, 0.5, 5.0, 0.5, 5.0, 4.0],
+  [5.0, 4.0, 5.0, 0.5, 5.0, 0.5, 3.0],
+  [0.0, 0.5, 3.0, 5.0, 0.5, 5.0, 5.0],
+  [0.0, 0.5, 0.5, 4.0, 3.0, 5.0, 5.0],
 ];
+// Python: raasi_adhipathi_array_south — indexed as [girl_lord][boy_lord]
 const RAASI_ADHIPATHI_ARRAY_SOUTH = [
-  [1, 1, 1, 0, 0, 0, 0],
-  [1, 1, 1, 0, 0, 1, 0],
-  [1, 1, 1, 0, 1, 0, 0],
-  [0, 0, 0, 1, 1, 0, 1],
-  [0, 0, 1, 1, 1, 1, 1],
-  [0, 1, 0, 0, 1, 1, 1],
-  [0, 0, 0, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 0, 0], // Sun has Jupiter as friend(s)
+  [0, 0, 0, 1, 1, 0, 0], // Moon => Mercury and Jupiter
+  [0, 0, 0, 1, 0, 1, 0], // Mars => Mercury, Venus
+  [0, 1, 1, 0, 1, 1, 1], // Mercury => All but Sun
+  [1, 1, 0, 1, 0, 1, 1], // Jupiter => All but Mars
+  [0, 0, 1, 1, 1, 0, 1], // Venus => All but Sun/Moon
+  [0, 0, 0, 1, 1, 1, 0], // Saturn => Mercury, Jupiter and Venus
 ];
 const RAASI_ADHIPATHI_MAX = 5.0;
 
 // --- Raasi ---
+// Python: raasi_array — indexed as [girl_rasi][boy_rasi]
 const RAASI_ARRAY = [
-  [0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0],
-  [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0],
-  [7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7],
-  [0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0],
+  [7, 0, 7, 7, 0, 0, 7, 0, 0, 7, 7, 0],
+  [0, 7, 0, 7, 7, 0, 0, 7, 0, 0, 7, 7],
+  [7, 0, 7, 0, 7, 7, 0, 0, 7, 0, 0, 7],
+  [7, 7, 0, 7, 0, 7, 7, 0, 0, 7, 0, 0],
+  [0, 7, 7, 0, 7, 0, 7, 7, 0, 0, 7, 0],
+  [0, 0, 7, 7, 0, 7, 0, 7, 7, 0, 0, 7],
+  [7, 0, 0, 7, 7, 0, 7, 0, 7, 7, 0, 0],
+  [0, 7, 0, 0, 7, 7, 0, 7, 0, 7, 7, 0],
+  [0, 0, 7, 0, 0, 7, 7, 0, 7, 0, 7, 7],
+  [7, 0, 0, 7, 0, 0, 7, 7, 0, 7, 0, 7],
+  [7, 7, 0, 7, 7, 0, 0, 7, 7, 0, 7, 0],
+  [0, 7, 7, 0, 0, 7, 0, 0, 7, 7, 0, 7],
 ];
 const RAASI_MAX = 7;
 
 // --- Naadi ---
-const NAADI_FROM_NAKSHATRA = [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2];
+// Python: bvk = [0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1,2]
+const NAADI_FROM_NAKSHATRA = [0, 1, 2, 2, 1, 0, 0, 1, 2, 2, 1, 0, 0, 1, 2, 2, 1, 0, 0, 1, 2, 2, 1, 0, 0, 1, 2];
 const NAADI_ARRAY = [
   [0, 8, 8],
   [8, 0, 8],
@@ -187,9 +197,11 @@ export function varnaPorutham(
   girlRasi: number,
   method: Method = 'North',
 ): number | boolean {
+  // Python: bvk = vasiya_raasi_list[boy_raasi-1]; gvk = vasiya_raasi_list[girl_raasi-1]
+  // Python: VarnaArray[gvk][bvk] — girl row, boy column
   const boyVarna = VARNA_FROM_RASI[boyRasi % 12]!;
   const girlVarna = VARNA_FROM_RASI[girlRasi % 12]!;
-  const score = VARNA_ARRAY[boyVarna]![girlVarna]!;
+  const score = VARNA_ARRAY[girlVarna]![boyVarna]!;
   if (method === 'South') return score === 1;
   return score * VARNA_MAX;
 }
@@ -202,9 +214,10 @@ export function vasiyaPorutham(
   girlRasi: number,
   method: Method = 'North',
 ): number | boolean {
+  // Python: VasiyaArray[Gvkpoint][Bvkpoint] — girl row, boy column
   const boyVasiya = VASIYA_RASI_LIST[boyRasi % 12]!;
   const girlVasiya = VASIYA_RASI_LIST[girlRasi % 12]!;
-  const score = VASIYA_ARRAY[boyVasiya]![girlVasiya]!;
+  const score = VASIYA_ARRAY[girlVasiya]![boyVasiya]!;
   if (method === 'South') return score >= 1.0;
   return score;
 }
@@ -217,32 +230,43 @@ export function ganaPorutham(
   girlNakshatra: number,
   method: Method = 'North',
 ): number | boolean {
+  // Python: gana_array[girl_gana][boy_gana] — girl row, boy column
   const boyGana = getGanaType(boyNakshatra);
   const girlGana = getGanaType(girlNakshatra);
-  const score = GANA_ARRAY[boyGana]![girlGana]!;
+  const score = GANA_ARRAY[girlGana]![boyGana]!;
   if (method === 'South') return score >= 5;
   return score;
 }
 
 /**
  * Nakshatra/Tara/Dina Porutham (3 points max).
- * Checks both directions and takes the better score.
+ * Checks both directions and sums the scores.
+ * Python: positions 3, 5, 7 (Kshem, Sadhak, Mitra) give 1.5 each.
+ * Other positions give 0. Max = 1.5 + 1.5 = 3.0.
  */
 export function nakshatraPorutham(
   boyNakshatra: number,
   girlNakshatra: number,
 ): number {
+  let res = 0.0;
+
   // Count from girl's star to boy's
-  const countFromGirl = ((boyNakshatra - girlNakshatra + 27) % 27) || 27;
-  const posFromGirl = (countFromGirl % 9) || 9;
-  const scoreFromGirl = NAKSHATRA_POSITIONS_SCORE[posFromGirl] ?? NAKSHATRA_MAX;
+  let countFromGirl = ((boyNakshatra - girlNakshatra + 27) % 27) || 27;
+  if (countFromGirl <= 0) countFromGirl += 27;
+  const posFromGirl = countFromGirl % 9;
+  if ([3, 5, 7].includes(posFromGirl)) {
+    res += 1.5;
+  }
 
   // Count from boy's star to girl's
-  const countFromBoy = ((girlNakshatra - boyNakshatra + 27) % 27) || 27;
-  const posFromBoy = (countFromBoy % 9) || 9;
-  const scoreFromBoy = NAKSHATRA_POSITIONS_SCORE[posFromBoy] ?? NAKSHATRA_MAX;
+  let countFromBoy = ((girlNakshatra - boyNakshatra + 27) % 27) || 27;
+  if (countFromBoy <= 0) countFromBoy += 27;
+  const posFromBoy = countFromBoy % 9;
+  if ([3, 5, 7].includes(posFromBoy)) {
+    res += 1.5;
+  }
 
-  return Math.min(scoreFromGirl, scoreFromBoy);
+  return res;
 }
 
 /**
@@ -253,19 +277,22 @@ export function yoniPorutham(
   girlNakshatra: number,
   method: Method = 'North',
 ): number | boolean {
+  // Python: YoniArray[yoni_mappings[girl-1]][yoni_mappings[boy-1]] — girl row, boy column
   const boyYoni = YONI_MAPPINGS[(boyNakshatra - 1) % 27]!;
   const girlYoni = YONI_MAPPINGS[(girlNakshatra - 1) % 27]!;
 
   if (method === 'South') {
-    for (const [a, b] of YONI_ENEMIES_SOUTH) {
-      if ((boyYoni === a && girlYoni === b) || (boyYoni === b && girlYoni === a)) {
+    // Python: not any([(ga,ba)==(a,e) for a,e in yoni_enemies_south])
+    // ga = girl yoni, ba = boy yoni — exact directional match, not symmetric
+    for (const [a, e] of YONI_ENEMIES_SOUTH) {
+      if (girlYoni === a && boyYoni === e) {
         return false;
       }
     }
     return true;
   }
 
-  return YONI_ARRAY[boyYoni]![girlYoni]!;
+  return YONI_ARRAY[girlYoni]![boyYoni]!;
 }
 
 /**
@@ -276,14 +303,15 @@ export function rasiAdhipathiPorutham(
   girlRasi: number,
   method: Method = 'North',
 ): number | boolean {
+  // Python: raasi_adhipathi_array[girl_lord][boy_lord] — girl row, boy column
   const boyLord = RAASI_ADHIPATHI_MAPPINGS[boyRasi % 12]!;
   const girlLord = RAASI_ADHIPATHI_MAPPINGS[girlRasi % 12]!;
 
   if (method === 'South') {
-    return RAASI_ADHIPATHI_ARRAY_SOUTH[boyLord]![girlLord]! === 1;
+    return RAASI_ADHIPATHI_ARRAY_SOUTH[girlLord]![boyLord]! === 1;
   }
 
-  return RAASI_ADHIPATHI_ARRAY[boyLord]![girlLord]!;
+  return RAASI_ADHIPATHI_ARRAY[girlLord]![boyLord]!;
 }
 
 /** Alias for rasiAdhipathiPorutham */
@@ -297,7 +325,8 @@ export function rasiPorutham(
   girlRasi: number,
   method: Method = 'North',
 ): number | boolean {
-  const score = RAASI_ARRAY[boyRasi % 12]![girlRasi % 12]!;
+  // Python: raasi_array[girl_raasi-1][boy_raasi-1] — girl row, boy column
+  const score = RAASI_ARRAY[girlRasi % 12]![boyRasi % 12]!;
   if (method === 'South') return score > 0;
   return score;
 }

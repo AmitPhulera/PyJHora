@@ -63,12 +63,11 @@ describe('Compatibility / Ashtakoota', () => {
       expect(varnaPorutham(0, 0, 'North')).toBe(1);
     });
 
-    it('should return 0 when boy varna < girl varna', () => {
-      // Boy=Aries(0)=Shudra(3), Girl=Taurus(1)=Vaishya(2)
-      // VarnaArray[3][2] = 1 (Shudra can match Vaishya)
-      // Boy=Pisces(11)=Brahmin(0), Girl=Aries(0)=Shudra(3)
-      // VarnaArray[0][3] = 0
-      expect(varnaPorutham(11, 0, 'North')).toBe(0);
+    it('should return 0 when girl varna is higher than boy', () => {
+      // Python uses vasiya_raasi_list: Aries(0)→1(Kshathirya), Pisces(11)→0(Brahmin)
+      // Boy=Aries(0)→varna 1(Kshathirya), Girl=Cancer(3)→varna 0(Brahmin)
+      // VarnaArray[girl=0][boy=1] = 0 (Brahmin girl can't match Kshathirya boy)
+      expect(varnaPorutham(0, 3, 'North')).toBe(0);
     });
 
     it('should return boolean for South method', () => {
@@ -109,9 +108,12 @@ describe('Compatibility / Ashtakoota', () => {
       expect(ganaPorutham(1, 5, 'North')).toBe(6);
     });
 
-    it('should return 0 for Deva-Rakshasa mismatch', () => {
-      // Ashwini(1)=Deva, Bharani(3)=Rakshasa → GanaArray[0][2] = 0
-      expect(ganaPorutham(1, 3, 'North')).toBe(0);
+    it('should return 0 for Rakshasa boy / Deva girl mismatch', () => {
+      // Python: gana_array[girl_gana][boy_gana]
+      // Krittika(3, 0-idx=2)=Rakshasa, Ashwini(1, 0-idx=0)=Deva
+      // boy=Krittika(3)=Rakshasa(2), girl=Ashwini(1)=Deva(0)
+      // gana_array[girl=0][boy=2] = 0
+      expect(ganaPorutham(3, 1, 'North')).toBe(0);
     });
 
     it('should return boolean for South method', () => {
@@ -135,9 +137,10 @@ describe('Compatibility / Ashtakoota', () => {
       expect(score).toBeLessThanOrEqual(3);
     });
 
-    it('should return 3 for same nakshatra', () => {
-      // Same star: count=27, 27%9=0→9, position 9 (Athi-Mithra) → 3.0
-      expect(nakshatraPorutham(1, 1)).toBe(3);
+    it('should return 0 for same nakshatra (Janma position)', () => {
+      // Same star: count=27, 27%9=0 → position 0 (Janma), not in [3,5,7] → 0
+      // Both directions same → 0 + 0 = 0
+      expect(nakshatraPorutham(1, 1)).toBe(0);
     });
 
     it('should return 1.5 for unfavorable position', () => {
@@ -230,9 +233,10 @@ describe('Compatibility / Ashtakoota', () => {
     });
 
     it('should return 0 for same naadi', () => {
-      // Ashwini(1) → naadi 0, Bharani(2) → naadi 1 → different → 8
-      // Same naadi: Ashwini(1)→0, Magha(10)→0 → NadiArray[0][0] = 0
-      expect(naadiPorutham(1, 10)).toBe(0);
+      // Python naadi mapping: [0,1,2,2,1,0,0,1,2,2,1,0,...]
+      // Ashwini(1)→idx 0→naadi 0, Punarvasu(7)→idx 6→naadi 0
+      // Same naadi → NadiArray[0][0] = 0
+      expect(naadiPorutham(1, 7)).toBe(0);
     });
 
     it('should return 8 for different naadi', () => {
