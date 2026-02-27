@@ -5,15 +5,25 @@ import { describe, expect, it } from 'vitest';
 import {
   astangataHarana,
   shatruKshetraHarana,
+  shatruKshetraHaranaSanthanam,
   chakrapataHarana,
+  chakrapataHaranaSanthanam,
   krurodayaHarana,
+  krurodayaHaranaSanthanam,
   bharana,
   pindayu,
   nisargayu,
   amsayu,
   lagnaLongevity,
+  lagnaLongevitySanthanam,
+  strongerOfLagnaSunMoon,
   getAayurType,
   getAayuDhasa,
+  getDhasaAnterdhasa,
+  pindayuDhasaBhukthi,
+  nisargayuDhasaBhukthi,
+  amsayuDhasaBhukthi,
+  longevity,
 } from '../../../../src/core/dhasa/graha/aayu';
 import type { PlanetPosition } from '../../../../src/core/horoscope/charts';
 import {
@@ -302,8 +312,8 @@ describe('Aayu (Longevity) Dhasa', () => {
       expect(result.aayurType).toBe(1);
     });
 
-    it('should produce Amsayu when type -1 is forced', () => {
-      const result = getAayuDhasa(mockPositions, jd, -1);
+    it('should produce Amsayu when type 2 is forced', () => {
+      const result = getAayuDhasa(mockPositions, jd, 2);
       expect(result.aayurTypeName).toBe('Amsayu');
       expect(result.aayurType).toBe(2);
     });
@@ -359,6 +369,205 @@ describe('Aayu (Longevity) Dhasa', () => {
       const resultWithHarana = getAayuDhasa(mockPositions, jd, 0, false, true);
       expect(resultNoHarana.totalLongevity).toBeGreaterThanOrEqual(0);
       expect(resultWithHarana.totalLongevity).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  // =====================================================
+  // Santhanam Variants
+  // =====================================================
+  describe('shatruKshetraHaranaSanthanam', () => {
+    it('should return factors matching shatruKshetraHarana with method=1', () => {
+      const santhanam = shatruKshetraHaranaSanthanam(mockPositions);
+      const generic = shatruKshetraHarana(mockPositions, false, 1);
+      for (let p = 0; p < 7; p++) {
+        expect(santhanam[p]).toBe(generic[p]);
+      }
+    });
+  });
+
+  describe('chakrapataHaranaSanthanam', () => {
+    it('should return factors for 7 planets + Lagna', () => {
+      const bhavaHouses: Record<number | string, number> = {};
+      const ascHouse = mockPositions[0]!.rasi;
+      for (const pos of mockPositions) {
+        const key = pos.planet === -1 ? ASCENDANT_SYMBOL : pos.planet;
+        const relHouse = ((pos.rasi - ascHouse + 12) % 12) + 1;
+        bhavaHouses[key] = relHouse;
+      }
+      const factors = chakrapataHaranaSanthanam(mockPositions, bhavaHouses);
+      expect(factors[ASCENDANT_SYMBOL]).toBeDefined();
+      for (let p = 0; p < 7; p++) {
+        expect(factors[p]).toBeDefined();
+        expect(factors[p]).toBeLessThanOrEqual(1.0);
+      }
+    });
+  });
+
+  describe('krurodayaHaranaSanthanam', () => {
+    it('should return factors for all planets', () => {
+      const factors = krurodayaHaranaSanthanam(mockPositions, [4, 5], [0, 2, 6]);
+      expect(factors[ASCENDANT_SYMBOL]).toBe(1.0);
+      for (let p = 0; p < 7; p++) {
+        expect(factors[p]).toBeDefined();
+      }
+    });
+  });
+
+  describe('lagnaLongevitySanthanam', () => {
+    it('should return a positive number', () => {
+      const result = lagnaLongevitySanthanam(mockPositions);
+      expect(result).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should return a value less than 12', () => {
+      const result = lagnaLongevitySanthanam(mockPositions);
+      expect(result).toBeLessThan(12);
+    });
+  });
+
+  // =====================================================
+  // Aayur Type (Python-compatible)
+  // =====================================================
+  describe('strongerOfLagnaSunMoon', () => {
+    it('should return 0, 1, or ASCENDANT_SYMBOL', () => {
+      const result = strongerOfLagnaSunMoon(mockPositions);
+      expect([0, 1, ASCENDANT_SYMBOL]).toContain(result);
+    });
+  });
+
+  // =====================================================
+  // Python-compatible API: getDhasaAnterdhasa
+  // =====================================================
+  describe('getDhasaAnterdhasa', () => {
+    it('should return [dhasaType, dhasas] tuple', () => {
+      const [dhasaType, dhasas] = getDhasaAnterdhasa(mockPositions, jd);
+      expect([0, 1, 2]).toContain(dhasaType);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should produce Pindayu when aayurType=0', () => {
+      const [dhasaType, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 0);
+      expect(dhasaType).toBe(0);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should produce Nisargayu when aayurType=1', () => {
+      const [dhasaType, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 1);
+      expect(dhasaType).toBe(1);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should produce Amsayu when aayurType=2', () => {
+      const [dhasaType, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 2);
+      expect(dhasaType).toBe(2);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should return tuples with 4 elements when includeAntardhasa=true', () => {
+      const [, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 0, true);
+      for (const entry of dhasas) {
+        expect(entry.length).toBe(4);
+      }
+    });
+
+    it('should return tuples with 3 elements when includeAntardhasa=false', () => {
+      const [, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 0, false);
+      for (const entry of dhasas) {
+        expect(entry.length).toBe(3);
+      }
+    });
+
+    it('should have valid date strings in dhasas', () => {
+      const [, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 0, false);
+      for (const entry of dhasas) {
+        // entry[1] is the date string for no-antardhasa format
+        expect(entry[1] as string).toMatch(/^\d{4}-\d{2}-\d{2}/);
+      }
+    });
+
+    it('should have non-negative durations', () => {
+      const [, dhasas] = getDhasaAnterdhasa(mockPositions, jd, 0, false);
+      for (const entry of dhasas) {
+        // entry[2] is the duration for no-antardhasa format
+        expect(entry[2] as number).toBeGreaterThanOrEqual(0);
+      }
+    });
+  });
+
+  // =====================================================
+  // Specific Dhasa Bhukthi Functions
+  // =====================================================
+  describe('pindayuDhasaBhukthi', () => {
+    it('should return dhasas array', () => {
+      const dhasas = pindayuDhasaBhukthi(mockPositions, jd);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should work without antardhasa', () => {
+      const dhasas = pindayuDhasaBhukthi(mockPositions, jd, false);
+      expect(dhasas.length).toBeGreaterThan(0);
+      for (const entry of dhasas) {
+        expect(entry.length).toBe(3); // [lord, date, duration]
+      }
+    });
+  });
+
+  describe('nisargayuDhasaBhukthi', () => {
+    it('should return dhasas array', () => {
+      const dhasas = nisargayuDhasaBhukthi(mockPositions, jd);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should work without antardhasa', () => {
+      const dhasas = nisargayuDhasaBhukthi(mockPositions, jd, false);
+      expect(dhasas.length).toBeGreaterThan(0);
+      for (const entry of dhasas) {
+        expect(entry.length).toBe(3);
+      }
+    });
+  });
+
+  describe('amsayuDhasaBhukthi', () => {
+    it('should return dhasas array', () => {
+      const dhasas = amsayuDhasaBhukthi(mockPositions, jd);
+      expect(dhasas.length).toBeGreaterThan(0);
+    });
+
+    it('should work without antardhasa', () => {
+      const dhasas = amsayuDhasaBhukthi(mockPositions, jd, false);
+      expect(dhasas.length).toBeGreaterThan(0);
+      for (const entry of dhasas) {
+        expect(entry.length).toBe(3);
+      }
+    });
+  });
+
+  // =====================================================
+  // Longevity Function
+  // =====================================================
+  describe('longevity', () => {
+    it('should return [totalLongevity, dhasaType] tuple', () => {
+      const [totalLongevity, dhasaType] = longevity(mockPositions, jd);
+      expect(totalLongevity).toBeGreaterThan(0);
+      expect([0, 1, 2]).toContain(dhasaType);
+    });
+
+    it('should return Pindayu total when forced to type 0', () => {
+      const [totalLongevity, dhasaType] = longevity(mockPositions, jd, 0);
+      expect(totalLongevity).toBeGreaterThan(0);
+      expect(dhasaType).toBe(0);
+    });
+
+    it('should return Nisargayu total when forced to type 1', () => {
+      const [totalLongevity, dhasaType] = longevity(mockPositions, jd, 1);
+      expect(totalLongevity).toBeGreaterThan(0);
+      expect(dhasaType).toBe(1);
+    });
+
+    it('should return Amsayu total when forced to type 2', () => {
+      const [totalLongevity, dhasaType] = longevity(mockPositions, jd, 2);
+      expect(totalLongevity).toBeGreaterThanOrEqual(0);
+      expect(dhasaType).toBe(2);
     });
   });
 });
