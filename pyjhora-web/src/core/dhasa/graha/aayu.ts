@@ -16,6 +16,7 @@ import {
   HOUSE_STRENGTHS_OF_PLANETS,
   STRENGTH_EXALTED,
   STRENGTH_DEBILITATED,
+  STRENGTH_OWN_SIGN,
   SIDEREAL_YEAR,
   PLANET_NAMES_EN,
   ASCENDANT_SYMBOL,
@@ -46,7 +47,7 @@ import { normalizeDegrees } from '../../utils/angle';
 // CONSTANTS
 // ============================================================================
 
-const STRENGTH_OWNER = 3; // friend/own sign in house_strengths
+const STRENGTH_OWNER = STRENGTH_OWN_SIGN; // Python: const._OWNER_RULER = 5
 const STRENGTH_ENEMY = 1;
 const TOTAL_PINDAYU = PINDAYU_FULL_LONGEVITY.reduce((a, b) => a + b, 0);  // 127
 const TOTAL_NISARGAYU = NISARGAYU_FULL_LONGEVITY.reduce((a, b) => a + b, 0); // 120
