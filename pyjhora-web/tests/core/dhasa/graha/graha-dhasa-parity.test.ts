@@ -210,12 +210,12 @@ describe('Graha Dhasa Structural Tests', () => {
         });
     });
 
-    describe('Shastihayani Dasha (60-year cycle)', () => {
-        it('should produce 8 periods totaling 60 years', () => {
+    describe('Shastihayani Dasha (180-year span, 3 × 60-year cycles)', () => {
+        it('should produce 24 periods totaling 180 years', () => {
             const result = getShastihayaniDashaBhukti(jd, place, { includeBhuktis: false });
-            expect(result.mahadashas.length).toBe(8);
+            expect(result.mahadashas.length).toBe(24);
             const total = result.mahadashas.reduce((sum, d) => sum + d.durationYears, 0);
-            expect(total).toBe(60);
+            expect(total).toBe(180);
         });
 
         it('should have correct lord-duration cycle', () => {

@@ -217,9 +217,11 @@ export function getShastihayaniDashaBhukti(
     useTribhagiVariation = false
   } = options;
 
-  // Tribhagi variation: divide each dasha by 3, run 3x cycles
+  // Tribhagi variation: divide each dasha by 3, multiply cycles by 3
+  // Base cycles = 3 (180-year span = 60 years × 3 cycles)
+  // With tribhagi: 3 / (1/3) = 9 cycles
   const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
-  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 9 : 3;
 
   // Get starting dasha
   const [initialLord, initialStartJd] = shastihayaniDashaStart(

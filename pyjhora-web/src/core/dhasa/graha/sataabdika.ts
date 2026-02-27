@@ -182,10 +182,8 @@ export function getSataabdikaDashaBhukti(
   const bhuktis: SataabdikaBhuktiPeriod[] = [];
 
   for (let cycle = 0; cycle < dhasaCycles; cycle++) {
-    if (cycle > 0) {
-      // Reset lord to initial lord for subsequent cycles (Python resets via _next_adhipati sequence)
-      currentLord = initialLord;
-    }
+    // No reset of currentLord between cycles — it continues from where the previous cycle ended
+    // (matching Python behavior where dhasa_lord is never reset between cycles)
     for (let i = 0; i < 7; i++) {
       const durationYears = Math.round((SATAABDIKA_YEARS[currentLord] ?? 5) * tribhagiFactor * 100) / 100;
       const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
