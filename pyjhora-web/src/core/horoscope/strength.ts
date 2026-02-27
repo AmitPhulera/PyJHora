@@ -47,7 +47,7 @@ import {
   siderealLongitude,
   getAllPlanetPositionsAsync
 } from '../ephemeris/swe-adapter';
-import { calculateTithi, calculateVara, dayLength, nightLength, declinationOfPlanets } from '../panchanga/drik';
+import { calculateTithi, calculateVara, dayLength, nightLength, declinationOfPlanets, midnight } from '../panchanga/drik';
 import {
   getHouseOwnerFromPlanetPositions,
   getHouseToPlanetList,
@@ -646,29 +646,34 @@ export const calculateSthanaBala = (
 
 /**
  * Calculate Nathonnath Bala (day/night strength)
+ * Python: _nathonnath_bala(jd, place)
+ *
+ * Uses actual midnight time from sunrise/sunset calculations.
  */
 export const calculateNathonnathBala = (jd: number, place: Place): number[] => {
   const nbp: number[] = new Array(7).fill(0);
 
-  const { date, time } = julianDayToGregorian(jd);
+  const { time } = julianDayToGregorian(jd);
   const tobh = time.hour + time.minute / 60 + time.second / 3600;
 
-  // Approximate midnight
-  const mnhl = 0;
-  const tDiff = tobh < 12 ? (tobh - mnhl) * 60 / 12 : (24 + mnhl - tobh) * 60 / 12;
+  // Use actual midnight calculation
+  const mnhl = midnight(jd, place);
+  const tDiff = tobh < 12
+    ? (tobh - mnhl) * 60 / 12
+    : (24 + mnhl - tobh) * 60 / 12;
 
   // Diurnal planets (Sun, Jupiter, Venus) get strength during day
-  for (const p of [0, 4, 5]) {
+  for (const p of [SUN, JUPITER, VENUS]) {
     nbp[p] = roundTo(tDiff, 2);
   }
 
   // Nocturnal planets (Moon, Mars, Saturn) get strength during night
-  for (const p of [1, 2, 6]) {
+  for (const p of [MOON, MARS, SATURN]) {
     nbp[p] = roundTo(60 - tDiff, 2);
   }
 
   // Mercury always gets 60
-  nbp[3] = 60;
+  nbp[MERCURY] = 60;
 
   return nbp;
 };
