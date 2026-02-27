@@ -243,9 +243,8 @@ export function getShodasottariDashaBhukti(
   const bhuktis: ShodasottariBhuktiPeriod[] = [];
 
   for (let cycle = 0; cycle < dhasaCycles; cycle++) {
-    if (cycle > 0) {
-      currentLord = initialLord;
-    }
+    // No reset of currentLord between cycles — it continues from where the previous cycle ended
+    // (matching Python behavior where dhasa_lord is never reset between cycles)
     for (let i = 0; i < 8; i++) {
       const durationYears = Math.round((SHODASOTTARI_YEARS[currentLord] ?? 11) * tribhagiFactor * 100) / 100;
       const lordName = PLANET_NAMES_EN[currentLord] ?? `Planet ${currentLord}`;
@@ -335,7 +334,7 @@ export async function getShodasottariDashaBhuktiAsync(
   const bhuktis: ShodasottariBhuktiPeriod[] = [];
 
   for (let cycle = 0; cycle < dhasaCycles; cycle++) {
-    if (cycle > 0) currentLord = initialLord;
+    // No reset of currentLord between cycles (matching Python behavior)
     for (let i = 0; i < 8; i++) {
       const durationYears = Math.round((SHODASOTTARI_YEARS[currentLord] ?? 11) * tribhagiFactor * 100) / 100;
       mahadashas.push({

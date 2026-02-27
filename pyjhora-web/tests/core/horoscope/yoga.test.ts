@@ -242,6 +242,8 @@ import {
   mahabhagyaYogaFromPlanetPositions,
   detectAllYogasFromPlanetPositions,
   getPresentYogasFromPlanetPositions,
+  getYogaDetails,
+  getYogaDetailsForAllCharts,
   type HouseChart,
 } from '@core/horoscope/yoga';
 import type { PlanetPosition } from '@core/types';
@@ -3517,6 +3519,151 @@ describe('Speech and Physical Yogas', () => {
         [RAHU]: AQUARIUS, [KETU]: LEO,
       });
       expect(typeof vishaprayogaYoga(chart)).toBe('boolean');
+    });
+  });
+
+  // ==========================================================================
+  // getYogaDetails / getYogaDetailsForAllCharts
+  // ==========================================================================
+
+  describe('getYogaDetails', () => {
+    it('should return YogaDetailsResult structure with correct counts', () => {
+      // Build positions that should trigger nipuna yoga (Sun + Mercury together)
+      const positions: PlanetPosition[] = [
+        { planet: 'L', rasi: ARIES, longitude: 15.0 },
+        { planet: SUN, rasi: LEO, longitude: 10.0 },
+        { planet: MOON, rasi: CANCER, longitude: 20.0 },
+        { planet: MARS, rasi: ARIES, longitude: 5.0 },
+        { planet: MERCURY, rasi: LEO, longitude: 12.0 }, // With Sun -> nipuna yoga
+        { planet: JUPITER, rasi: SAGITTARIUS, longitude: 8.0 },
+        { planet: VENUS, rasi: LIBRA, longitude: 15.0 },
+        { planet: SATURN, rasi: CAPRICORN, longitude: 22.0 },
+        { planet: RAHU, rasi: GEMINI, longitude: 10.0 },
+        { planet: KETU, rasi: SAGITTARIUS, longitude: 10.0 },
+      ];
+
+      const result = getYogaDetails(positions, 1);
+      expect(result).toHaveProperty('yogaResults');
+      expect(result).toHaveProperty('foundCount');
+      expect(result).toHaveProperty('totalCount');
+      expect(result.totalCount).toBeGreaterThan(0);
+      expect(result.foundCount).toBeGreaterThanOrEqual(0);
+      expect(result.foundCount).toBeLessThanOrEqual(result.totalCount);
+
+      // nipuna_yoga should be detected (Sun + Mercury in same sign)
+      expect(result.yogaResults).toHaveProperty('nipuna_yoga');
+      expect(result.yogaResults['nipuna_yoga'][0]).toBe('D1');
+    });
+
+    it('should include yoga messages when provided', () => {
+      const positions: PlanetPosition[] = [
+        { planet: 'L', rasi: ARIES, longitude: 15.0 },
+        { planet: SUN, rasi: LEO, longitude: 10.0 },
+        { planet: MOON, rasi: CANCER, longitude: 20.0 },
+        { planet: MARS, rasi: ARIES, longitude: 5.0 },
+        { planet: MERCURY, rasi: LEO, longitude: 12.0 },
+        { planet: JUPITER, rasi: SAGITTARIUS, longitude: 8.0 },
+        { planet: VENUS, rasi: LIBRA, longitude: 15.0 },
+        { planet: SATURN, rasi: CAPRICORN, longitude: 22.0 },
+        { planet: RAHU, rasi: GEMINI, longitude: 10.0 },
+        { planet: KETU, rasi: SAGITTARIUS, longitude: 10.0 },
+      ];
+
+      const msgs: Record<string, string[]> = {
+        nipuna_yoga: ['Nipuna Yoga', 'Sun and Mercury together', 'Skillful person'],
+        vesi_yoga: ['Vesi Yoga', 'Planet in 2nd from Sun', 'Balanced outlook'],
+      };
+
+      const result = getYogaDetails(positions, 9, msgs);
+      // Only checks yogas from msgs keys
+      expect(result.totalCount).toBe(2);
+      // If nipuna found, details should include chart label + original msg
+      if (result.yogaResults['nipuna_yoga']) {
+        expect(result.yogaResults['nipuna_yoga'][0]).toBe('D9');
+        expect(result.yogaResults['nipuna_yoga'][1]).toBe('Nipuna Yoga');
+      }
+    });
+
+    it('should detect multiple yogas from same chart', () => {
+      // Chart with Sun in Leo quadrant -> ruchaka conditions or similar
+      const positions: PlanetPosition[] = [
+        { planet: 'L', rasi: ARIES, longitude: 15.0 },
+        { planet: SUN, rasi: LEO, longitude: 10.0 },
+        { planet: MOON, rasi: TAURUS, longitude: 20.0 },
+        { planet: MARS, rasi: CAPRICORN, longitude: 5.0 }, // Mars in Capricorn (exalted) in 10th from Aries -> ruchaka
+        { planet: MERCURY, rasi: LEO, longitude: 12.0 },
+        { planet: JUPITER, rasi: SAGITTARIUS, longitude: 8.0 },
+        { planet: VENUS, rasi: LIBRA, longitude: 15.0 },
+        { planet: SATURN, rasi: CAPRICORN, longitude: 22.0 },
+        { planet: RAHU, rasi: GEMINI, longitude: 10.0 },
+        { planet: KETU, rasi: SAGITTARIUS, longitude: 10.0 },
+      ];
+
+      const result = getYogaDetails(positions);
+      expect(result.foundCount).toBeGreaterThan(1);
+    });
+  });
+
+  describe('getYogaDetailsForAllCharts', () => {
+    it('should combine results from multiple charts', () => {
+      const positions1: PlanetPosition[] = [
+        { planet: 'L', rasi: ARIES, longitude: 15.0 },
+        { planet: SUN, rasi: LEO, longitude: 10.0 },
+        { planet: MOON, rasi: CANCER, longitude: 20.0 },
+        { planet: MARS, rasi: ARIES, longitude: 5.0 },
+        { planet: MERCURY, rasi: LEO, longitude: 12.0 },
+        { planet: JUPITER, rasi: SAGITTARIUS, longitude: 8.0 },
+        { planet: VENUS, rasi: LIBRA, longitude: 15.0 },
+        { planet: SATURN, rasi: CAPRICORN, longitude: 22.0 },
+        { planet: RAHU, rasi: GEMINI, longitude: 10.0 },
+        { planet: KETU, rasi: SAGITTARIUS, longitude: 10.0 },
+      ];
+
+      // Simple test: use same positions for all charts
+      const getPositions = (_factor: number) => positions1;
+
+      // Test with specific chart factor
+      const result1 = getYogaDetailsForAllCharts(getPositions, 1);
+      expect(result1).toHaveProperty('yogaResults');
+      expect(result1).toHaveProperty('foundCount');
+      expect(result1.foundCount).toBeGreaterThan(0);
+
+      // Test with null (all charts)
+      const resultAll = getYogaDetailsForAllCharts(getPositions, null);
+      // All charts should find at least as many as single chart
+      expect(resultAll.foundCount).toBeGreaterThanOrEqual(result1.foundCount);
+      expect(resultAll.totalCount).toBeGreaterThan(result1.totalCount);
+    });
+
+    it('should preserve earlier chart results when same yoga appears in multiple charts', () => {
+      const msgs: Record<string, string[]> = {
+        nipuna_yoga: ['Nipuna Yoga', 'Sun and Mercury together', 'Skillful person'],
+      };
+
+      let callCount = 0;
+      const getPositions = (_factor: number): PlanetPosition[] => {
+        callCount++;
+        return [
+          { planet: 'L', rasi: ARIES, longitude: 15.0 },
+          { planet: SUN, rasi: LEO, longitude: 10.0 },
+          { planet: MOON, rasi: CANCER, longitude: 20.0 },
+          { planet: MARS, rasi: ARIES, longitude: 5.0 },
+          { planet: MERCURY, rasi: LEO, longitude: 12.0 },
+          { planet: JUPITER, rasi: SAGITTARIUS, longitude: 8.0 },
+          { planet: VENUS, rasi: LIBRA, longitude: 15.0 },
+          { planet: SATURN, rasi: CAPRICORN, longitude: 22.0 },
+          { planet: RAHU, rasi: GEMINI, longitude: 10.0 },
+          { planet: KETU, rasi: SAGITTARIUS, longitude: 10.0 },
+        ];
+      };
+
+      const result = getYogaDetailsForAllCharts(getPositions, null, msgs);
+      // Should have called getPositions for each chart factor
+      expect(callCount).toBeGreaterThan(1);
+      // nipuna_yoga found in first chart (D1) should be preserved
+      if (result.yogaResults['nipuna_yoga']) {
+        expect(result.yogaResults['nipuna_yoga'][0]).toBe('D1');
+      }
     });
   });
 });

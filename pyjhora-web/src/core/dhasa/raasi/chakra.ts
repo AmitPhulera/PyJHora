@@ -6,10 +6,10 @@
  * Seed based on time of birth (dawn/day/dusk/night)
  */
 
-import { RASI_NAMES_EN, SIDEREAL_YEAR, TROPICAL_YEAR } from '../../constants';
+import { RASI_NAMES_EN, SIDEREAL_YEAR } from '../../constants';
 import { PlanetPosition, getDivisionalChart } from '../../horoscope/charts';
 import { getHouseOwnerFromPlanetPositions } from '../../horoscope/house';
-import { getPlanetLongitude } from '../../panchanga/drik';
+import { getPlanetLongitude, nextSolarDate } from '../../panchanga/drik';
 import { sunrise, sunset } from '../../ephemeris/swe-adapter';
 import type { Place } from '../../types';
 import { julianDayToGregorian } from '../../utils/julian';
@@ -77,24 +77,6 @@ function formatJdAsDate(jd: number): string {
   const ampm = time.hour < 12 ? 'AM' : 'PM';
   const yearStr = date.year < 0 ? `${Math.abs(date.year)} BC` : date.year.toString();
   return `${yearStr}-${pad(date.month)}-${pad(date.day)} ${pad(hour12)}:${pad(time.minute)}:${pad(time.second)} ${ampm}`;
-}
-
-/**
- * Approximate next_solar_date from Python drik.py.
- * When years=1, months=1, sixtyHours=1 (defaults), returns jd unchanged (matching Python).
- * Otherwise advances JD by tropical year fraction.
- */
-function nextSolarDateApprox(
-  jd: number,
-  years: number = 1,
-  months: number = 1,
-  sixtyHours: number = 1
-): number {
-  if (years === 1 && months === 1 && sixtyHours === 1) return jd;
-  const jdExtra = Math.floor(
-    ((years - 1) + (months - 1) / 12 + (sixtyHours - 1) / 144) * TROPICAL_YEAR
-  );
-  return jd + jdExtra;
 }
 
 /**
@@ -189,8 +171,10 @@ export function getChakraDashaBhukti(
     sixtyHours = 1
   } = options;
 
-  // Advance JD by solar date (Python: drik.next_solar_date) before seed calculation
-  const jdYears = nextSolarDateApprox(jd, years, months, sixtyHours);
+  // Advance JD by solar date (Python: drik.next_solar_date)
+  // NOTE: Python chakra.py passes sixty_hours=months (not sixty_hours), matching its source:
+  //   jd_years = drik.next_solar_date(jd_at_dob, place, years=years, months=months, sixty_hours=months)
+  const jdYears = nextSolarDate(jd, place, years, months, months);
 
   const planetPositions = getPlanetPositionsArray(jdYears, place, divisionalChartFactor);
 

@@ -154,11 +154,13 @@ export function getShoolaDashaBhukti(
   const bhuktis: ShoolaBhuktiPeriod[] = [];
   let startJd = jd;
   let totalDuration = 0;
-  
-  // First cycle
+  const firstCycleDurations: number[] = [];
+
+  // First cycle — duration is always 9 for Shoola
   for (const dhasaLord of dhasaProgression) {
     const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
-    
+    firstCycleDurations.push(DHASA_DURATION);
+
     mahadashas.push({
       rasi: dhasaLord,
       rasiName,
@@ -166,15 +168,15 @@ export function getShoolaDashaBhukti(
       startDate: formatJdAsDate(startJd),
       durationYears: DHASA_DURATION
     });
-    
+
     if (includeBhuktis) {
       const bhuktiLords = getAntardhasa(dhasaLord, pToH);
       const bhuktiDuration = DHASA_DURATION / 12;
       let bhuktiStartJd = startJd;
-      
+
       for (const bhuktiLord of bhuktiLords) {
         const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-        
+
         bhuktis.push({
           dashaRasi: dhasaLord,
           bhuktiRasi: bhuktiLord,
@@ -183,24 +185,27 @@ export function getShoolaDashaBhukti(
           startDate: formatJdAsDate(bhuktiStartJd),
           durationYears: bhuktiDuration
         });
-        
+
         bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
       }
     }
-    
+
     startJd += DHASA_DURATION * YEAR_DURATION;
     totalDuration += DHASA_DURATION;
   }
-  
-  // Second cycle
-  for (let c = 0; c < dhasaProgression.length && totalDuration < HUMAN_LIFE_SPAN; c++) {
+
+  // Second cycle — duration = 12 - first cycle duration (Python: 12 - dhasa_info[c][-1])
+  for (let c = 0; c < dhasaProgression.length; c++) {
+    if (totalDuration >= HUMAN_LIFE_SPAN) break;
+
     const dhasaLord = dhasaProgression[c]!;
-    const dhasaDuration = 12 - DHASA_DURATION;
-    
+    const dhasaDuration = Math.round((12 - (firstCycleDurations[c] ?? 0)) * 100) / 100;
+
+    totalDuration += dhasaDuration;
     if (dhasaDuration <= 0) continue;
-    
+
     const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
-    
+
     mahadashas.push({
       rasi: dhasaLord,
       rasiName,
@@ -208,15 +213,15 @@ export function getShoolaDashaBhukti(
       startDate: formatJdAsDate(startJd),
       durationYears: dhasaDuration
     });
-    
+
     if (includeBhuktis) {
       const bhuktiLords = getAntardhasa(dhasaLord, pToH);
       const bhuktiDuration = dhasaDuration / 12;
       let bhuktiStartJd = startJd;
-      
+
       for (const bhuktiLord of bhuktiLords) {
         const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-        
+
         bhuktis.push({
           dashaRasi: dhasaLord,
           bhuktiRasi: bhuktiLord,
@@ -225,14 +230,13 @@ export function getShoolaDashaBhukti(
           startDate: formatJdAsDate(bhuktiStartJd),
           durationYears: bhuktiDuration
         });
-        
+
         bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
       }
     }
-    
+
     startJd += dhasaDuration * YEAR_DURATION;
-    totalDuration += dhasaDuration;
-    
+
     if (totalDuration >= HUMAN_LIFE_SPAN) break;
   }
   

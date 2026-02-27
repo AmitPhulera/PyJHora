@@ -16,7 +16,7 @@ import {
 } from '../../constants';
 import { PlanetPosition, getDivisionalChart } from '../../horoscope/charts';
 import { getHouseOwnerFromPlanetPositions, getStrongerRasi } from '../../horoscope/house';
-import { getPlanetLongitude } from '../../panchanga/drik';
+import { getPlanetLongitude, nextSolarDate } from '../../panchanga/drik';
 import type { Place } from '../../types';
 import { julianDayToGregorian } from '../../utils/julian';
 
@@ -221,6 +221,141 @@ export function getNarayanaAntardhasa(planetPositions: PlanetPosition[], dhasaRa
 }
 
 // ============================================================================
+// INTERNAL CALCULATION
+// ============================================================================
+
+const HUMAN_LIFE_SPAN_NARAYANA = 120;
+
+/**
+ * Internal Narayana dasha calculation (shared by standard and varsha variants)
+ *
+ * When varshaNarayana=true:
+ *   - Duration is multiplied by 3 (handled in getNarayanaDashaDuration)
+ *   - dhasa_factor = sidereal_year / 360 (annual days per year-unit)
+ *   - Life span limit = 120 * 3 = 360
+ */
+function narayanaDhasaCalculation(
+  planetPositions: PlanetPosition[],
+  dhasaSeedSign: number,
+  startJd: number,
+  includeBhuktis: boolean,
+  varshaNarayana: boolean = false
+): NarayanaResult {
+  const pToH = getPlanetToHouseMap(planetPositions);
+
+  const dhasaFactor = varshaNarayana ? YEAR_DURATION / 360 : YEAR_DURATION;
+  const lifeSpanLimit = varshaNarayana
+    ? HUMAN_LIFE_SPAN_NARAYANA * 3
+    : HUMAN_LIFE_SPAN_NARAYANA;
+
+  // Progression
+  let dhasaProgression = NARAYANA_DHASA_NORMAL_PROGRESSION[dhasaSeedSign]!;
+
+  if (pToH.get(KETU) === dhasaSeedSign) {
+    dhasaProgression = NARAYANA_DHASA_KETU_EXCEPTION_PROGRESSION[dhasaSeedSign]!;
+  } else if (pToH.get(SATURN) === dhasaSeedSign) {
+    dhasaProgression = NARAYANA_DHASA_SATURN_EXCEPTION_PROGRESSION[dhasaSeedSign]!;
+  }
+
+  const mahadashas: NarayanaDashaPeriod[] = [];
+  const bhuktis: NarayanaBhuktiPeriod[] = [];
+  let currentJd = startJd;
+  let totalDuration = 0;
+  const firstCycleDurations: number[] = [];
+
+  // First Cycle
+  for (const dhasaLord of dhasaProgression) {
+    const duration = getNarayanaDashaDuration(planetPositions, dhasaLord, varshaNarayana);
+    firstCycleDurations.push(duration);
+
+    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
+
+    mahadashas.push({
+      rasi: dhasaLord,
+      rasiName,
+      startJd: currentJd,
+      startDate: formatJdAsDate(currentJd),
+      durationYears: duration
+    });
+
+    if (includeBhuktis) {
+      const bhuktiLords = getNarayanaAntardhasa(planetPositions, dhasaLord);
+      const bhuktiDuration = duration / 12;
+      let bhuktiStartJd = currentJd;
+
+      for (const bhuktiLord of bhuktiLords) {
+        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
+
+        bhuktis.push({
+          dashaRasi: dhasaLord,
+          bhuktiRasi: bhuktiLord,
+          bhuktiRasiName,
+          startJd: bhuktiStartJd,
+          startDate: formatJdAsDate(bhuktiStartJd),
+          durationYears: bhuktiDuration
+        });
+
+        bhuktiStartJd += bhuktiDuration * dhasaFactor;
+      }
+    }
+
+    currentJd += duration * dhasaFactor;
+    totalDuration += duration;
+  }
+
+  // Second Cycle (if needed)
+  if (totalDuration < lifeSpanLimit) {
+    for (let c = 0; c < dhasaProgression.length; c++) {
+      if (totalDuration >= lifeSpanLimit) break;
+
+      const dhasaLord = dhasaProgression[c]!;
+      const secondDuration = 12 - (firstCycleDurations[c] ?? 0);
+
+      if (secondDuration <= 0) continue;
+
+      totalDuration += secondDuration;
+
+      const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
+
+      mahadashas.push({
+        rasi: dhasaLord,
+        rasiName,
+        startJd: currentJd,
+        startDate: formatJdAsDate(currentJd),
+        durationYears: secondDuration
+      });
+
+      if (includeBhuktis) {
+        const bhuktiLords = getNarayanaAntardhasa(planetPositions, dhasaLord);
+        const bhuktiDuration = secondDuration / 12;
+        let bhuktiStartJd = currentJd;
+
+        for (const bhuktiLord of bhuktiLords) {
+          const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
+
+          bhuktis.push({
+            dashaRasi: dhasaLord,
+            bhuktiRasi: bhuktiLord,
+            bhuktiRasiName,
+            startJd: bhuktiStartJd,
+            startDate: formatJdAsDate(bhuktiStartJd),
+            durationYears: bhuktiDuration
+          });
+
+          bhuktiStartJd += bhuktiDuration * dhasaFactor;
+        }
+      }
+
+      currentJd += secondDuration * dhasaFactor;
+
+      if (varshaNarayana && totalDuration >= lifeSpanLimit) break;
+    }
+  }
+
+  return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
+}
+
+// ============================================================================
 // MAIN FUNCTIONS
 // ============================================================================
 
@@ -240,7 +375,6 @@ export function getNarayanaDashaBhukti(
   } = options;
 
   const planetPositions = getPlanetPositionsArray(jd, place, divisionalChartFactor);
-  const pToH = getPlanetToHouseMap(planetPositions);
 
   // Determine Seed Sign
   let dhasaSeedSign: number;
@@ -254,106 +388,61 @@ export function getNarayanaDashaBhukti(
     dhasaSeedSign = getStrongerRasi(planetPositions, ascHouse, seventhHouse);
   }
 
-  // Progression
-  let dhasaProgression = NARAYANA_DHASA_NORMAL_PROGRESSION[dhasaSeedSign]!;
+  return narayanaDhasaCalculation(planetPositions, dhasaSeedSign, jd, includeBhuktis, false);
+}
 
-  if (pToH.get(KETU) === dhasaSeedSign) {
-    dhasaProgression = NARAYANA_DHASA_KETU_EXCEPTION_PROGRESSION[dhasaSeedSign]!;
-  } else if (pToH.get(SATURN) === dhasaSeedSign) {
-    dhasaProgression = NARAYANA_DHASA_SATURN_EXCEPTION_PROGRESSION[dhasaSeedSign]!;
-  }
+/**
+ * Varsha Narayana Dasha (annual variant)
+ *
+ * Python: varsha_narayana_dhasa_bhukthi()
+ *
+ * Key differences from standard Narayana:
+ *   - Uses solar return positions for the given year
+ *   - Seed sign = varga position of the annual house owner
+ *   - Duration multiplied by 3
+ *   - Factor divided by 360 (annual days instead of years)
+ */
+export function getVarshaNarayanaDashaBhukti(
+  jd: number,
+  place: Place,
+  options: {
+    divisionalChartFactor?: number;
+    includeBhuktis?: boolean;
+    years?: number;
+    months?: number;
+    sixtyHours?: number;
+  } = {}
+): NarayanaResult {
+  const {
+    divisionalChartFactor = 1,
+    includeBhuktis = true,
+    years = 1,
+    months = 1,
+    sixtyHours = 1
+  } = options;
 
-  const mahadashas: NarayanaDashaPeriod[] = [];
-  const bhuktis: NarayanaBhuktiPeriod[] = [];
-  let startJd = jd;
-  let totalDuration = 0;
-  const firstCycleDurations: number[] = [];
+  // Get solar return date
+  const jdAtYears = nextSolarDate(jd, place, years);
 
-  // First Cycle
-  for (const dhasaLord of dhasaProgression) {
-    const duration = getNarayanaDashaDuration(planetPositions, dhasaLord);
-    firstCycleDurations.push(duration);
-    
-    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
+  // Get rasi chart at solar return
+  const rasiPositions = getPlanetPositionsArray(jdAtYears, place, 1);
+  const pToHRasi = getPlanetToHouseMap(rasiPositions);
 
-    mahadashas.push({
-      rasi: dhasaLord,
-      rasiName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears: duration
-    });
+  // Get varga chart at solar return
+  const vargaPositions = getPlanetPositionsArray(jdAtYears, place, divisionalChartFactor);
+  const pToHVarga = getPlanetToHouseMap(vargaPositions);
 
-    if (includeBhuktis) {
-      const bhuktiLords = getNarayanaAntardhasa(planetPositions, dhasaLord);
-      const bhuktiDuration = duration / 12;
-      let bhuktiStartJd = startJd;
+  // Natal lagna (Sun as proxy in rasi chart)
+  const natalLagna = rasiPositions[0]?.rasi ?? 0;
 
-      for (const bhuktiLord of bhuktiLords) {
-        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-        
-        bhuktis.push({
-          dashaRasi: dhasaLord,
-          bhuktiRasi: bhuktiLord,
-          bhuktiRasiName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
+  // Annual house: (natal_lagna + years - 1 + divisionalChartFactor - 1) % 12
+  const annualHouse = (natalLagna + (years - 1) + (divisionalChartFactor - 1)) % 12;
 
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-      }
-    }
-    
-    startJd += duration * YEAR_DURATION;
-    totalDuration += duration;
-  }
+  // Find the owner of the annual house in the varga chart
+  const annualHouseOwner = getHouseOwnerFromPlanetPositions(vargaPositions, annualHouse, true);
 
-  // Second Cycle (if needed)
-  if (totalDuration < 120) {
-    for (let c = 0; c < dhasaProgression.length; c++) {
-      if (totalDuration >= 120) break;
+  // Seed sign = position of the annual house owner in varga chart
+  const dhasaSeedSign = pToHVarga.get(annualHouseOwner) ?? 0;
 
-      const dhasaLord = dhasaProgression[c]!;
-      const secondDuration = 12 - (firstCycleDurations[c] ?? 0);
-
-        if (secondDuration <= 0) continue;
-
-        const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
-
-        mahadashas.push({
-          rasi: dhasaLord,
-          rasiName,
-          startJd,
-          startDate: formatJdAsDate(startJd),
-          durationYears: secondDuration
-        });
-
-        if (includeBhuktis) {
-          const bhuktiLords = getNarayanaAntardhasa(planetPositions, dhasaLord);
-          const bhuktiDuration = secondDuration / 12;
-          let bhuktiStartJd = startJd;
-
-          for (const bhuktiLord of bhuktiLords) {
-            const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-
-            bhuktis.push({
-              dashaRasi: dhasaLord,
-              bhuktiRasi: bhuktiLord,
-              bhuktiRasiName,
-              startJd: bhuktiStartJd,
-              startDate: formatJdAsDate(bhuktiStartJd),
-              durationYears: bhuktiDuration
-            });
-
-            bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-          }
-        }
-
-        startJd += secondDuration * YEAR_DURATION;
-        totalDuration += secondDuration;
-    }
-  }
-
-  return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
+  return narayanaDhasaCalculation(vargaPositions, dhasaSeedSign, jd, includeBhuktis, true);
 }
