@@ -4334,6 +4334,54 @@ export const annadanaYogaFromPlanetPositions = (
   positions: PlanetPosition[]
 ): boolean => annadanaYoga(planetPositionsToChart(positions));
 
+// ============================================================================
+// PARIHASAKA YOGA (#156)
+// ============================================================================
+
+/**
+ * Parihasaka Yoga (#156):
+ * The lord of the Navamsa occupied by the Sun should attain Vaiseshikamsa
+ * (score of 13 in Shodhasavarga) and be in the 2nd house of the Rasi chart.
+ *
+ * This yoga requires D9 (navamsa) chart data and vaiseshikamsa scores to evaluate.
+ * Without these, returns false (conservative).
+ *
+ * @param chartD1 - D1 (rasi) house chart
+ * @param chartD9 - D9 (navamsa) house chart (optional)
+ * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
+ *                              e.g. from vaiseshikamsaShodhasavargaOfPlanets().count
+ */
+export const parihasakaYoga = (
+  chartD1: HouseChart,
+  chartD9?: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => {
+  // Without navamsa and vaiseshikamsa data, cannot evaluate
+  if (!chartD9 || !vaiseshikamsaScores) return false;
+
+  const pToHD1 = getPlanetToHouseDict(chartD1);
+  const pToHD9 = getPlanetToHouseDict(chartD9);
+
+  // 1. Find Sun's sign in D9 and identify its Lord
+  const sunSignD9 = h(pToHD9, SUN);
+  const lordOfSunNavamsa = getLordOfSign(sunSignD9);
+
+  // 2. Check Criteria A: Must attain Vaiseshikamsa (Score >= 13)
+  if ((vaiseshikamsaScores[lordOfSunNavamsa] ?? 0) < 13) return false;
+
+  // 3. Check Criteria B: Must be in the 2nd House of the Rasi (D1) chart
+  const ascHouseD1 = h(pToHD1, ASCENDANT_SYMBOL);
+  const secondHouseD1 = (ascHouseD1 + 1) % 12;
+  const lordPlacementD1 = h(pToHD1, lordOfSunNavamsa);
+
+  return lordPlacementD1 === secondHouseD1;
+};
+export const parihasakaYogaFromPlanetPositions = (
+  positionsD1: PlanetPosition[],
+  chartD9?: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => parihasakaYoga(planetPositionsToChart(positionsD1), chartD9, vaiseshikamsaScores);
+
 // Aliases for naming variants
 // ============================================================================
 // UTILITY: Lord Exchange Check
@@ -4613,6 +4661,9 @@ export const detectAllYogas = (chart: HouseChart): YogaResult[] => {
   results.push({ name: 'Bhojana Soukhya Yoga', isPresent: bhojanaSoukhyaYoga(chart) });
   results.push({ name: 'Annadana Yoga', isPresent: annadanaYoga(chart) });
 
+  // Parihasaka Yoga (requires D9 chart + vaiseshikamsa scores; returns false in batch detection)
+  results.push({ name: 'Parihasaka Yoga', isPresent: parihasakaYoga(chart) });
+
   // Malika Yogas
   results.push({ name: 'Lagna Malika Yoga', isPresent: lagnaMalikaYoga(chart) });
   results.push({ name: 'Dhana Malika Yoga', isPresent: dhanaMalikaYoga(chart) });
@@ -4867,6 +4918,7 @@ export default {
   durmukhaYoga,
   bhojanaSoukhyaYoga,
   annadanaYoga,
+  parihasakaYoga,
 
   // Aliases
   lagnaadhiYoga,
@@ -5070,6 +5122,7 @@ export default {
   durmukhaYogaFromPlanetPositions,
   bhojanaSoukhyaYogaFromPlanetPositions,
   annadanaYogaFromPlanetPositions,
+  parihasakaYogaFromPlanetPositions,
   lagnaadhiYogaFromPlanetPositions,
   sreenaathaYogaFromPlanetPositions,
   sreenathaYogaFromPlanetPositions,
