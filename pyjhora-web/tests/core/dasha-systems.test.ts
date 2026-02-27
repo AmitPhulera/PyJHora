@@ -141,20 +141,20 @@ describe('Yogini Dasha System', () => {
   });
 });
 
-describe('Shastihayani Dasha System (60 years)', () => {
-  it('should return 8 mahadashas', () => {
+describe('Shastihayani Dasha System (180 years, 3 cycles of 60)', () => {
+  it('should return 24 mahadashas (8 × 3 cycles)', () => {
     const jd = 2451545.0;
     const result = getShastihayaniDashaBhukti(jd, bangalore, { includeBhuktis: false });
 
-    expect(result.mahadashas.length).toBe(8);
+    expect(result.mahadashas.length).toBe(24);
   });
 
-  it('should have total duration of 60 years', () => {
+  it('should have total duration of 180 years', () => {
     const jd = 2451545.0;
     const result = getShastihayaniDashaBhukti(jd, bangalore, { includeBhuktis: false });
 
     const totalYears = result.mahadashas.reduce((sum: number, d: { durationYears: number }) => sum + d.durationYears, 0);
-    expect(totalYears).toBe(60);
+    expect(totalYears).toBe(180);
   });
 });
 
@@ -797,11 +797,12 @@ describe('Python Parity - Chennai 1996-12-07 10:34', () => {
   });
 
   describe('Shastihayani Dasha - First Lord and Durations', () => {
-    it('should start with Mercury and have correct durations', () => {
+    it('should start with Mercury and have correct durations (3 cycles)', () => {
       const result = getShastihayaniDashaBhukti(testJd, chennai, { includeBhuktis: false });
 
-      // Python: Mercury(6), Venus(6), Saturn(6), Rahu(6), Jupiter(10), Sun(10), Mars(10), Moon(6)
-      expect(result.mahadashas.length).toBe(8);
+      // 3 cycles of 8 lords = 24 mahadashas, 180 years total
+      // Python: Mercury(6), Venus(6), Saturn(6), Rahu(6), Jupiter(10), Sun(10), Mars(10), Moon(6) × 3
+      expect(result.mahadashas.length).toBe(24);
       expect(result.mahadashas[0]!.lord).toBe(MERCURY);
       expect(result.mahadashas[0]!.durationYears).toBe(6);
       expect(result.mahadashas[1]!.lord).toBe(VENUS);
@@ -814,7 +815,7 @@ describe('Python Parity - Chennai 1996-12-07 10:34', () => {
       expect(result.mahadashas[4]!.durationYears).toBe(10);
 
       const total = result.mahadashas.reduce((s, d) => s + d.durationYears, 0);
-      expect(total).toBe(60);
+      expect(total).toBe(180);
     });
   });
 });
