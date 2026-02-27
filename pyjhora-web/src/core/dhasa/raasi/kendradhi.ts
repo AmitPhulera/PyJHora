@@ -8,7 +8,7 @@
 
 import { EVEN_FOOTED_SIGNS, HOUSE_STRENGTHS_OF_PLANETS, KETU, RASI_NAMES_EN, SATURN, SIDEREAL_YEAR, STRENGTH_DEBILITATED, STRENGTH_EXALTED } from '../../constants';
 import { PlanetPosition, getDivisionalChart } from '../../horoscope/charts';
-import { getHouseOwnerFromPlanetPositions, getStrongerRasi } from '../../horoscope/house';
+import { getCharaKarakas, getHouseOwnerFromPlanetPositions, getStrongerRasi } from '../../horoscope/house';
 import { getPlanetLongitude } from '../../panchanga/drik';
 import type { Place } from '../../types';
 import { julianDayToGregorian } from '../../utils/julian';
@@ -141,11 +141,136 @@ function getAntardhasa(antardhasaSeedRasi: number, pToH: Map<number, number>): n
 }
 
 // ============================================================================
-// MAIN FUNCTION
+// CORE DASHA COMPUTATION (shared between lagna and karaka variants)
 // ============================================================================
 
 /**
- * Get Kendradhi Rasi Dasha periods
+ * Core computation for Kendradhi Rasi Dasha given a seed sign.
+ * Both lagna and karaka variants use this after determining the seed.
+ */
+function computeKendradhiFromSeed(
+  dhasaSeedSign: number,
+  planetPositions: PlanetPosition[],
+  pToH: Map<number, number>,
+  jd: number,
+  includeBhuktis: boolean,
+): KendradhiResult {
+  // Determine direction based on Saturn/Ketu placement or odd/even
+  let direction: number;
+  if (pToH.get(SATURN) === dhasaSeedSign) {
+    direction = 1;
+  } else if (pToH.get(KETU) === dhasaSeedSign) {
+    direction = -1;
+  } else if (ODD_SIGNS.includes(dhasaSeedSign)) {
+    direction = 1;
+  } else {
+    direction = -1;
+  }
+
+  // Build kendra progression (1,4,7,10,2,5,8,11,3,6,9,12)
+  const dhasaProgression = KENDRAS.map(k =>
+    (dhasaSeedSign + direction * (k - 1) + 12) % 12
+  );
+
+  const mahadashas: KendradhiDashaPeriod[] = [];
+  const bhuktis: KendradhiBhuktiPeriod[] = [];
+  let startJd = jd;
+  let totalDuration = 0;
+  const firstCycleDurations: number[] = [];
+
+  // First cycle
+  for (const dhasaLord of dhasaProgression) {
+    const duration = getDhasaDuration(planetPositions, dhasaLord);
+    firstCycleDurations.push(duration);
+
+    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
+
+    mahadashas.push({
+      rasi: dhasaLord,
+      rasiName,
+      startJd,
+      startDate: formatJdAsDate(startJd),
+      durationYears: duration
+    });
+
+    if (includeBhuktis) {
+      const bhuktiLords = getAntardhasa(dhasaLord, pToH);
+      const bhuktiDuration = duration / 12;
+      let bhuktiStartJd = startJd;
+
+      for (const bhuktiLord of bhuktiLords) {
+        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
+
+        bhuktis.push({
+          dashaRasi: dhasaLord,
+          bhuktiRasi: bhuktiLord,
+          bhuktiRasiName,
+          startJd: bhuktiStartJd,
+          startDate: formatJdAsDate(bhuktiStartJd),
+          durationYears: bhuktiDuration
+        });
+
+        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+      }
+    }
+
+    startJd += duration * YEAR_DURATION;
+    totalDuration += duration;
+  }
+
+  // Second cycle
+  for (let c = 0; c < dhasaProgression.length && totalDuration < HUMAN_LIFE_SPAN; c++) {
+    const dhasaLord = dhasaProgression[c]!;
+    const secondDuration = 12 - firstCycleDurations[c]!;
+
+    if (secondDuration <= 0) continue;
+
+    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
+
+    mahadashas.push({
+      rasi: dhasaLord,
+      rasiName,
+      startJd,
+      startDate: formatJdAsDate(startJd),
+      durationYears: secondDuration
+    });
+
+    if (includeBhuktis) {
+      const bhuktiLords = getAntardhasa(dhasaLord, pToH);
+      const bhuktiDuration = secondDuration / 12;
+      let bhuktiStartJd = startJd;
+
+      for (const bhuktiLord of bhuktiLords) {
+        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
+
+        bhuktis.push({
+          dashaRasi: dhasaLord,
+          bhuktiRasi: bhuktiLord,
+          bhuktiRasiName,
+          startJd: bhuktiStartJd,
+          startDate: formatJdAsDate(bhuktiStartJd),
+          durationYears: bhuktiDuration
+        });
+
+        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+      }
+    }
+
+    startJd += secondDuration * YEAR_DURATION;
+    totalDuration += secondDuration;
+
+    if (totalDuration >= HUMAN_LIFE_SPAN) break;
+  }
+
+  return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
+}
+
+// ============================================================================
+// MAIN FUNCTIONS
+// ============================================================================
+
+/**
+ * Get Kendradhi Rasi Dasha periods (Lagna variant)
  * Uses kendras from stronger of Asc/7th
  */
 export function getKendradhiDashaBhukti(
@@ -160,121 +285,65 @@ export function getKendradhiDashaBhukti(
     divisionalChartFactor = 1,
     includeBhuktis = true
   } = options;
-  
+
   const planetPositions = getPlanetPositionsArray(jd, place, divisionalChartFactor);
   const pToH = getPlanetToHouseMap(planetPositions);
-  
+
   const ascHouse = planetPositions[0]?.rasi ?? 0;
   const seventhHouse = (ascHouse + 6) % 12;
-  
+
   const dhasaSeedSign = getStrongerRasi(planetPositions, ascHouse, seventhHouse);
-  
-  // Determine direction based on Saturn/Ketu placement or odd/even
-  let direction: number;
-  if (pToH.get(SATURN) === dhasaSeedSign) {
-    direction = 1;
-  } else if (pToH.get(KETU) === dhasaSeedSign) {
-    direction = -1;
-  } else if (ODD_SIGNS.includes(dhasaSeedSign)) {
-    direction = 1;
-  } else {
-    direction = -1;
+
+  return computeKendradhiFromSeed(dhasaSeedSign, planetPositions, pToH, jd, includeBhuktis);
+}
+
+/**
+ * Get Karaka Kendradhi Rasi Dasha periods
+ * Python: karaka_kendradhi_rasi_dhasa(dob, tob, place, divisional_chart_factor=1, karaka_index=1, include_antardhasa=True)
+ *
+ * Uses kendras from the house of a specific chara karaka (identified by karaka_index).
+ * The karaka variant uses chara karakas (variable significators) instead of the
+ * ascendant for the dasha seed determination.
+ *
+ * @param jd - Julian Day of birth
+ * @param place - Birth place
+ * @param options - Configuration options
+ * @param options.divisionalChartFactor - Divisional chart factor (default 1 = D-1)
+ * @param options.karakaIndex - Karaka index 1-8 (1=AK, 2=AmK, etc.; default 1)
+ * @param options.includeBhuktis - Whether to include bhukti sub-periods (default true)
+ * @returns KendradhiResult with mahadashas and optional bhuktis
+ */
+export function getKarakaKendradhiDashaBhukti(
+  jd: number,
+  place: Place,
+  options: {
+    divisionalChartFactor?: number;
+    karakaIndex?: number;
+    includeBhuktis?: boolean;
+  } = {}
+): KendradhiResult {
+  const {
+    divisionalChartFactor = 1,
+    includeBhuktis = true
+  } = options;
+
+  let { karakaIndex = 1 } = options;
+
+  // Validate karaka index (1-8), default to 1 if invalid
+  if (karakaIndex < 1 || karakaIndex > 8) {
+    karakaIndex = 1;
   }
-  
-  // Build kendra progression (1,4,7,10,2,5,8,11,3,6,9,12)
-  const dhasaProgression = KENDRAS.map(k => 
-    (dhasaSeedSign + direction * (k - 1) + 12) % 12
-  );
-  
-  const mahadashas: KendradhiDashaPeriod[] = [];
-  const bhuktis: KendradhiBhuktiPeriod[] = [];
-  let startJd = jd;
-  let totalDuration = 0;
-  const firstCycleDurations: number[] = [];
-  
-  // First cycle
-  for (const dhasaLord of dhasaProgression) {
-    const duration = getDhasaDuration(planetPositions, dhasaLord);
-    firstCycleDurations.push(duration);
-    
-    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
-    
-    mahadashas.push({
-      rasi: dhasaLord,
-      rasiName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears: duration
-    });
-    
-    if (includeBhuktis) {
-      const bhuktiLords = getAntardhasa(dhasaLord, pToH);
-      const bhuktiDuration = duration / 12;
-      let bhuktiStartJd = startJd;
-      
-      for (const bhuktiLord of bhuktiLords) {
-        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-        
-        bhuktis.push({
-          dashaRasi: dhasaLord,
-          bhuktiRasi: bhuktiLord,
-          bhuktiRasiName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
-        
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-      }
-    }
-    
-    startJd += duration * YEAR_DURATION;
-    totalDuration += duration;
-  }
-  
-  // Second cycle
-  for (let c = 0; c < dhasaProgression.length && totalDuration < HUMAN_LIFE_SPAN; c++) {
-    const dhasaLord = dhasaProgression[c]!;
-    const secondDuration = 12 - firstCycleDurations[c]!;
-    
-    if (secondDuration <= 0) continue;
-    
-    const rasiName = RASI_NAMES_EN[dhasaLord] ?? `Rasi ${dhasaLord}`;
-    
-    mahadashas.push({
-      rasi: dhasaLord,
-      rasiName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears: secondDuration
-    });
-    
-    if (includeBhuktis) {
-      const bhuktiLords = getAntardhasa(dhasaLord, pToH);
-      const bhuktiDuration = secondDuration / 12;
-      let bhuktiStartJd = startJd;
-      
-      for (const bhuktiLord of bhuktiLords) {
-        const bhuktiRasiName = RASI_NAMES_EN[bhuktiLord] ?? `Rasi ${bhuktiLord}`;
-        
-        bhuktis.push({
-          dashaRasi: dhasaLord,
-          bhuktiRasi: bhuktiLord,
-          bhuktiRasiName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
-        
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-      }
-    }
-    
-    startJd += secondDuration * YEAR_DURATION;
-    totalDuration += secondDuration;
-    
-    if (totalDuration >= HUMAN_LIFE_SPAN) break;
-  }
-  
-  return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
+
+  const planetPositions = getPlanetPositionsArray(jd, place, divisionalChartFactor);
+  const pToH = getPlanetToHouseMap(planetPositions);
+
+  // Get chara karakas and find the house of the selected karaka
+  const karakas = getCharaKarakas(planetPositions);
+  const karakaPlanet = karakas[karakaIndex - 1]!;
+  const karakaHouse = pToH.get(karakaPlanet) ?? 0;
+  const seventhHouse = (karakaHouse + 6) % 12;
+
+  const dhasaSeedSign = getStrongerRasi(planetPositions, karakaHouse, seventhHouse);
+
+  return computeKendradhiFromSeed(dhasaSeedSign, planetPositions, pToH, jd, includeBhuktis);
 }
