@@ -1,0 +1,76 @@
+/* DashaExplorer layout */
+
+.dasha-explorer {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-lg);
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .dasha-explorer {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* Sidebar */
+.dasha-explorer-sidebar {
+  max-height: calc(100vh - 120px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .dasha-explorer-sidebar {
+    max-height: 300px;
+  }
+}
+
+/* Main content */
+.dasha-explorer-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.dasha-explorer-main .dasha-table {
+  max-width: none;
+}
+
+/* System info card */
+.dasha-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.dasha-info-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.dasha-info-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dasha-info-desc {
+  font-size: 0.875rem;
+}
+
+/* Empty state */
+.dasha-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}

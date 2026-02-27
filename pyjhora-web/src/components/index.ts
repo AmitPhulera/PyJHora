@@ -19,6 +19,12 @@ export { LagnaDisplay } from './lagna/LagnaDisplay';
 
 // Dasha
 export { DashaTable } from './dasha/DashaTable';
+export { DashaExplorer } from './dasha/DashaExplorer';
+export { DashaSystemSelector } from './dasha/DashaSystemSelector';
+
+// Yogas
+export { YogaCard } from './yogas/YogaCard';
+export { YogaList } from './yogas/YogaList';
 
 // Input
 export { BirthInputForm } from './input/BirthInputForm';

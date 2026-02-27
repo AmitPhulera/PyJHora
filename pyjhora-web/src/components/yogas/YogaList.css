@@ -1,0 +1,175 @@
+/* YogaList styles */
+
+.yoga-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Toolbar */
+.yoga-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.yoga-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.yoga-filter-btn {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.yoga-filter-btn:hover {
+  background: rgba(201, 161, 78, 0.1);
+}
+
+.yoga-filter-btn.active {
+  background: rgba(201, 161, 78, 0.15);
+  color: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+}
+
+/* Search */
+.yoga-search {
+  flex-shrink: 0;
+}
+
+.yoga-search-input {
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  width: 200px;
+}
+
+.yoga-search-input:focus {
+  border-color: var(--color-accent-gold);
+}
+
+.yoga-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Category sections */
+.yoga-categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.yoga-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.yoga-category-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.yoga-category-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(201, 161, 78, 0.15);
+  color: var(--color-accent-gold);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-full);
+}
+
+/* Grid */
+.yoga-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+@media (max-width: 600px) {
+  .yoga-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Yoga card styles */
+.yoga-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.yoga-present {
+  border-left: 3px solid var(--color-accent-gold);
+}
+
+.yoga-absent {
+  opacity: 0.6;
+  border-left: 3px solid transparent;
+}
+
+.yoga-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.yoga-card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.yoga-present .yoga-card-name {
+  color: var(--color-accent-gold);
+}
+
+.yoga-card-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.yoga-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.yoga-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* Empty state */
+.yoga-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+}

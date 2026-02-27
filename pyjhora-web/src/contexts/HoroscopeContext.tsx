@@ -117,7 +117,7 @@ export function HoroscopeProvider({ children }: { children: ReactNode }) {
   const dashaResult = useMemo<DashaResult | null>(() => {
     if (!horoscope) return null;
     try {
-      return calculateDasha(selectedSystem, horoscope.jd, horoscope.place);
+      return calculateDasha(selectedSystem, horoscope.jd, horoscope.place, horoscope.planets);
     } catch (err) {
       console.error('Dasha calculation error:', err);
       return null;
