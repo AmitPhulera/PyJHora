@@ -2409,23 +2409,46 @@ export const haraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Brahma Yoga (Method 1): benefics in 4th, 10th, 11th from lagna lord */
-export const brahmaYoga = (chart: HouseChart): boolean => {
+/**
+ * Brahma Yoga - 2 methods:
+ * Method 1 (PVR, default): Benefics in 4th, 10th and 11th from Lagna Lord.
+ * Method 2 (BV Raman): Jupiter in quadrant from 9th lord, Venus in quadrant from 11th lord,
+ *                       and Mercury in quadrant from 1st or 10th lord.
+ */
+export const brahmaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
   const lagnaLord = getLordOfSign(ascHouse);
-  const llPos = h(pToH, lagnaLord);
-  const m1Targets = [
-    (llPos + HOUSE_4) % 12,
-    (llPos + HOUSE_10) % 12,
-    (llPos + HOUSE_11) % 12,
-  ];
-  const benefics = getNaturalBenefics(chart);
-  return benefics
-    .filter((p) => p !== lagnaLord)
-    .every((p) => m1Targets.includes(h(pToH, p)));
+
+  if (method === 1) {
+    const llPos = h(pToH, lagnaLord);
+    const m1Targets = [
+      (llPos + HOUSE_4) % 12,
+      (llPos + HOUSE_10) % 12,
+      (llPos + HOUSE_11) % 12,
+    ];
+    const benefics = getNaturalBenefics(chart);
+    return benefics
+      .filter((p) => p !== lagnaLord)
+      .every((p) => m1Targets.includes(h(pToH, p)));
+  } else {
+    // Method 2: Jupiter in quadrant from 9th lord, Venus in quadrant from 11th lord,
+    // Mercury in quadrant from 1st or 10th lord
+    const l1 = getLordOfSign(ascHouse);
+    const l9 = getLordOfSign((ascHouse + HOUSE_9) % 12);
+    const l10 = getLordOfSign((ascHouse + HOUSE_10) % 12);
+    const l11 = getLordOfSign((ascHouse + HOUSE_11) % 12);
+
+    const jupInQuadFrom9 = getQuadrants(h(pToH, l9)).includes(h(pToH, JUPITER));
+    const venInQuadFrom11 = getQuadrants(h(pToH, l11)).includes(h(pToH, VENUS));
+    const merInQuadFrom1 = getQuadrants(h(pToH, l1)).includes(h(pToH, MERCURY));
+    const merInQuadFrom10 = getQuadrants(h(pToH, l10)).includes(h(pToH, MERCURY));
+
+    return jupInQuadFrom9 && venInQuadFrom11 && (merInQuadFrom1 || merInQuadFrom10);
+  }
 };
-export const brahmaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  brahmaYoga(planetPositionsToChart(positions));
+export const brahmaYogaFromPlanetPositions = (positions: PlanetPosition[], method: number = 1): boolean =>
+  brahmaYoga(planetPositionsToChart(positions), method);
 
 // ============================================================================
 // SIVA YOGA
@@ -2568,35 +2591,63 @@ export const kulavardhanaYogaFromPlanetPositions = (positions: PlanetPosition[])
 // GANDHARVA YOGA
 // ============================================================================
 
-/** Gandharva Yoga: 10th lord in trine from 7th, L1 aspected by Jupiter, Sun exalted, Moon in 9th */
-export const gandharvaYoga = (chart: HouseChart): boolean => {
+/**
+ * Gandharva Yoga - 2 methods:
+ * Method 1 (PVR, default):
+ *   (1) 10th lord is in a trine from the 7th house.
+ *   (2) Lagna lord is conjoined or aspected by Jupiter.
+ *   (3) Sun is exalted and strong.
+ *   (4) Moon is in the 9th house.
+ * Method 2 (BV Raman / Kama Trikona):
+ *   (1) 10th Lord is in a Kama Trikona house (3rd, 7th, or 11th).
+ *   (2) Lagna Lord and Jupiter are conjoined.
+ *   (3) Sun is exalted and strong.
+ *   (4) Moon is in the 9th house.
+ */
+export const gandharvaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
-  const h7 = (ascHouse + HOUSE_7) % 12;
   const h10 = (ascHouse + HOUSE_10) % 12;
   const l10 = getLordOfSign(h10);
   const l1 = getLordOfSign(ascHouse);
-
-  // (1) 10th lord in trine from 7th house
-  const cond1 = getTrines(h7).includes(h(pToH, l10));
-
-  // (2) Lagna lord conjoined or aspected by Jupiter
-  const l1Pos = h(pToH, l1);
   const jupPos = h(pToH, JUPITER);
-  const jupAspects = getGrahaDrishtiRasisOfPlanet(chart, JUPITER);
-  const cond2 = l1Pos === jupPos || jupAspects.includes(l1Pos);
-
-  // (3) Sun exalted and strong
   const sunPos = h(pToH, SUN);
+
+  // (3) Sun exalted and strong (common to both methods)
   const cond3 = (HOUSE_STRENGTHS_OF_PLANETS[SUN]?.[sunPos] ?? 0) >= STRENGTH_EXALTED;
 
-  // (4) Moon in 9th house
+  // (4) Moon in 9th house (common to both methods)
   const cond4 = h(pToH, MOON) === (ascHouse + HOUSE_9) % 12;
+
+  let cond1: boolean;
+  let cond2: boolean;
+
+  if (method === 1) {
+    // (1) 10th lord in trine from 7th house
+    const h7 = (ascHouse + HOUSE_7) % 12;
+    cond1 = getTrines(h7).includes(h(pToH, l10));
+
+    // (2) Lagna lord conjoined or aspected by Jupiter
+    const l1Pos = h(pToH, l1);
+    const jupAspects = getGrahaDrishtiRasisOfPlanet(chart, JUPITER);
+    cond2 = l1Pos === jupPos || jupAspects.includes(l1Pos);
+  } else {
+    // (1) 10th Lord in Kama Trikona (3rd, 7th, or 11th from ascendant)
+    const kamaHouses = [
+      (ascHouse + HOUSE_3) % 12,
+      (ascHouse + HOUSE_7) % 12,
+      (ascHouse + HOUSE_11) % 12,
+    ];
+    cond1 = kamaHouses.includes(h(pToH, l10));
+
+    // (2) Lagna Lord and Jupiter conjoined
+    cond2 = h(pToH, l1) === jupPos;
+  }
 
   return cond1 && cond2 && cond3 && cond4;
 };
-export const gandharvaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  gandharvaYoga(planetPositionsToChart(positions));
+export const gandharvaYogaFromPlanetPositions = (positions: PlanetPosition[], method: number = 1): boolean =>
+  gandharvaYoga(planetPositionsToChart(positions), method);
 
 // ============================================================================
 // VIDYUT YOGA
@@ -3361,12 +3412,17 @@ export const swaveeryaddhanaYogaFromPlanetPositions = (positions: PlanetPosition
 // ============================================================================
 
 /**
- * Matsya Yoga (method=2, Parashara/PVR default):
- * (1) Benefics in Lagna AND 9th
- * (2) 5th contains BOTH benefics AND malefics
- * (3) 4th AND 8th contain ONLY malefics (and at least one in each)
+ * Matsya Yoga - 2 methods:
+ * Method 1 (BV Raman, default):
+ *   (1) MALEFICS in Lagna AND 9th (strict exclusive)
+ *   (2) 5th contains BOTH benefics AND malefics
+ *   (3) 4th AND 8th contain ONLY malefics (and at least one in each)
+ * Method 2 (Parashara/PVR):
+ *   (1) BENEFICS in Lagna AND 9th (strict exclusive)
+ *   (2) 5th contains BOTH benefics AND malefics
+ *   (3) 4th AND 8th contain ONLY malefics (and at least one in each)
  */
-export const matsyaYoga = (chart: HouseChart): boolean => {
+export const matsyaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
   const benefics = new Set(getNaturalBenefics(chart));
@@ -3386,22 +3442,31 @@ export const matsyaYoga = (chart: HouseChart): boolean => {
   const occFourth = new Set(occupants(fourthAbs));
   const occEighth = new Set(occupants(eighthAbs));
 
-  // Method 1 (BV Raman, default): malefics in lagna and 9th (strict_exclusive=True)
-  const lagnaOk = [...occLagna].some(p => malefics.has(p)) && [...occLagna].every(p => malefics.has(p));
-  const ninthOk = [...occNinth].some(p => malefics.has(p)) && [...occNinth].every(p => malefics.has(p));
+  // (1) Lagna & 9th condition depends on method
+  let lagnaOk: boolean;
+  let ninthOk: boolean;
+  if (method === 1) {
+    // BV Raman: malefics in lagna and 9th (strict_exclusive=True)
+    lagnaOk = [...occLagna].some(p => malefics.has(p)) && [...occLagna].every(p => malefics.has(p));
+    ninthOk = [...occNinth].some(p => malefics.has(p)) && [...occNinth].every(p => malefics.has(p));
+  } else {
+    // Parashara: benefics in lagna and 9th (strict_exclusive=True)
+    lagnaOk = [...occLagna].some(p => benefics.has(p)) && [...occLagna].every(p => benefics.has(p));
+    ninthOk = [...occNinth].some(p => benefics.has(p)) && [...occNinth].every(p => benefics.has(p));
+  }
   const cond1 = lagnaOk && ninthOk;
 
-  // 5th must contain BOTH benefic and malefic
+  // (2) 5th must contain BOTH benefic and malefic
   const cond2 = [...occFifth].some(p => benefics.has(p)) && [...occFifth].some(p => malefics.has(p));
 
-  // 4th & 8th ONLY malefics (and present)
+  // (3) 4th & 8th ONLY malefics (and present)
   const cond3 = occFourth.size > 0 && [...occFourth].every(p => malefics.has(p)) &&
                 occEighth.size > 0 && [...occEighth].every(p => malefics.has(p));
 
   return cond1 && cond2 && cond3;
 };
-export const matsyaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  matsyaYoga(planetPositionsToChart(positions));
+export const matsyaYogaFromPlanetPositions = (positions: PlanetPosition[], method: number = 1): boolean =>
+  matsyaYoga(planetPositionsToChart(positions), method);
 
 /**
  * Mooka Yoga: The 2nd lord should join the 8th with Jupiter.
