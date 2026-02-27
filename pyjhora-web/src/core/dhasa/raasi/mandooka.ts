@@ -6,7 +6,7 @@
  * Uses KN Rao method for duration calculation
  */
 
-import { RASI_NAMES_EN, SIDEREAL_YEAR } from '../../constants';
+import { HOUSE_STRENGTHS_OF_PLANETS, RASI_NAMES_EN, SIDEREAL_YEAR, STRENGTH_OWN_SIGN } from '../../constants';
 import { PlanetPosition, getDivisionalChart } from '../../horoscope/charts';
 import { getHouseOwnerFromPlanetPositions, getStrongerRasi } from '../../horoscope/house';
 import { getPlanetLongitude } from '../../panchanga/drik';
@@ -132,7 +132,7 @@ function getDhasaDurationKNRao(
     dhasaPeriod = ((houseOfLord - sign + 1) % 12 + 12) % 12;
   }
   
-  if (dhasaPeriod <= 0 || houseOfLord === sign) {
+  if (dhasaPeriod <= 0 || HOUSE_STRENGTHS_OF_PLANETS[lordOfSign]?.[houseOfLord] === STRENGTH_OWN_SIGN) {
     dhasaPeriod = 12;
   }
   if (houseOfLord === (sign + 6) % 12) {
