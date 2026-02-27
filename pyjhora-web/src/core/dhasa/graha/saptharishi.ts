@@ -88,6 +88,42 @@ function formatJdAsDate(jd: number): string {
   return `${yearStr}-${pad(date.month)}-${pad(date.day)} ${pad(hour12)}:${pad(time.minute)}:${pad(time.second)} ${ampm}`;
 }
 
+/**
+ * Get the next lord in the dhasa lords list
+ */
+function getNextAdhipati(lord: number, dashaLords: number[], direction = 1): number {
+  const currentIndex = dashaLords.indexOf(lord);
+  if (currentIndex === -1) return dashaLords[0]!;
+  const nextIndex = ((currentIndex + direction) % dashaLords.length + dashaLords.length) % dashaLords.length;
+  return dashaLords[nextIndex]!;
+}
+
+/**
+ * Calculate antardhasa (bhukti) lord sequence based on option
+ * Matches Python's _antardhasa function
+ */
+function getAntardhasa(dashaLord: number, antardashaOption: number): number[] {
+  const dashaLords: number[] = [];
+  for (let i = 0; i < DASHA_COUNT; i++) {
+    dashaLords.push(((dashaLord - i) % 27 + 27) % 27);
+  }
+
+  let lord = dashaLord;
+  if (antardashaOption === 3 || antardashaOption === 4) {
+    lord = getNextAdhipati(dashaLord, dashaLords, 1);
+  } else if (antardashaOption === 5 || antardashaOption === 6) {
+    lord = getNextAdhipati(dashaLord, dashaLords, -1);
+  }
+
+  const direction = (antardashaOption === 1 || antardashaOption === 3 || antardashaOption === 5) ? 1 : -1;
+  const bhuktiLords: number[] = [];
+  for (let i = 0; i < dashaLords.length; i++) {
+    bhuktiLords.push(lord);
+    lord = getNextAdhipati(lord, dashaLords, direction);
+  }
+  return bhuktiLords;
+}
+
 export function getSaptharishiDashaBhukti(
   jd: number,
   place: Place,
@@ -96,66 +132,64 @@ export function getSaptharishiDashaBhukti(
     includeBhuktis?: boolean;
     antardashaOption?: number;
     divisionalChartFactor?: number;
+    useTribhagiVariation?: boolean;
   } = {}
 ): SaptharishiResult {
   const {
     startingPlanet = MOON,
     includeBhuktis = true,
     antardashaOption = 1,
-    divisionalChartFactor = 1
+    divisionalChartFactor = 1,
+    useTribhagiVariation = false
   } = options;
-  
+
+  // Tribhagi variation: divide each dasha by 3, run 3x cycles
+  const tribhagiFactor = useTribhagiVariation ? 1 / 3 : 1;
+  const dhasaCycles = useTribhagiVariation ? 3 : 1;
+
   const progression = getDashaProgression(jd, place, startingPlanet, divisionalChartFactor);
-  
+
   let startJd = jd;
   const mahadashas: SaptharishiDashaPeriod[] = [];
   const bhuktis: SaptharishiBhuktiPeriod[] = [];
-  
-  for (const dashaLord of progression) {
-    const durationYears = DASHA_DURATION;
-    const lordName = NAKSHATRA_NAMES_EN[dashaLord] ?? `Nakshatra ${dashaLord}`;
-    
-    mahadashas.push({
-      lord: dashaLord,
-      lordName,
-      startJd,
-      startDate: formatJdAsDate(startJd),
-      durationYears
-    });
-    
-    if (includeBhuktis) {
-      // Build bhukti lords based on antardasha option
-      let bhuktiLords: number[];
-      if (antardashaOption === 1 || antardashaOption === 2) {
-        bhuktiLords = [...progression];
-      } else {
-        bhuktiLords = [...progression];
+
+  for (let cycle = 0; cycle < dhasaCycles; cycle++) {
+    for (const dashaLord of progression) {
+      const durationYears = DASHA_DURATION * tribhagiFactor;
+      const lordName = NAKSHATRA_NAMES_EN[dashaLord] ?? `Nakshatra ${dashaLord}`;
+
+      mahadashas.push({
+        lord: dashaLord,
+        lordName,
+        startJd,
+        startDate: formatJdAsDate(startJd),
+        durationYears
+      });
+
+      if (includeBhuktis) {
+        // Build bhukti lords using Python-matching antardhasa logic
+        const bhuktiLords = getAntardhasa(dashaLord, antardashaOption);
+        const bhuktiDuration = DASHA_DURATION / bhuktiLords.length;
+        let bhuktiStartJd = startJd;
+
+        for (const bhuktiLord of bhuktiLords) {
+          const bhuktiLordName = NAKSHATRA_NAMES_EN[bhuktiLord] ?? `Nakshatra ${bhuktiLord}`;
+
+          bhuktis.push({
+            dashaLord,
+            bhuktiLord,
+            bhuktiLordName,
+            startJd: bhuktiStartJd,
+            startDate: formatJdAsDate(bhuktiStartJd),
+            durationYears: bhuktiDuration
+          });
+          bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
+        }
       }
-      
-      if (antardashaOption === 2 || antardashaOption === 4 || antardashaOption === 6) {
-        bhuktiLords.reverse();
-      }
-      
-      const bhuktiDuration = durationYears / bhuktiLords.length;
-      let bhuktiStartJd = startJd;
-      
-      for (const bhuktiLord of bhuktiLords) {
-        const bhuktiLordName = NAKSHATRA_NAMES_EN[bhuktiLord] ?? `Nakshatra ${bhuktiLord}`;
-        
-        bhuktis.push({
-          dashaLord,
-          bhuktiLord,
-          bhuktiLordName,
-          startJd: bhuktiStartJd,
-          startDate: formatJdAsDate(bhuktiStartJd),
-          durationYears: bhuktiDuration
-        });
-        bhuktiStartJd += bhuktiDuration * YEAR_DURATION;
-      }
+
+      startJd += durationYears * YEAR_DURATION;
     }
-    
-    startJd += durationYears * YEAR_DURATION;
   }
-  
+
   return includeBhuktis ? { mahadashas, bhuktis } : { mahadashas };
 }
