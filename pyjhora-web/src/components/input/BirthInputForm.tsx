@@ -1,6 +1,6 @@
 /**
  * Birth Input Form Component
- * Form for entering birth date, time, and place
+ * Form for entering birth date, time, and place with improved UX.
  */
 
 import { useState } from 'react';
@@ -31,6 +31,14 @@ const PRESET_PLACES = [
   { name: 'London, UK', lat: 51.507, lon: -0.127, tz: 0 },
 ];
 
+function formatTimezoneUTC(tz: number): string {
+  const sign = tz >= 0 ? '+' : '-';
+  const abs = Math.abs(tz);
+  const hours = Math.floor(abs);
+  const mins = Math.round((abs - hours) * 60);
+  return `UTC${sign}${hours}${mins > 0 ? `:${mins.toString().padStart(2, '0')}` : ''}`;
+}
+
 export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
   const [date, setDate] = useState(initialData?.date ?? '2025-05-26');
   const [time, setTime] = useState(initialData?.time ?? '04:15');
@@ -38,7 +46,6 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
   const [latitude, setLatitude] = useState(initialData?.latitude ?? 12.972);
   const [longitude, setLongitude] = useState(initialData?.longitude ?? 77.594);
   const [timezone, setTimezone] = useState(initialData?.timezone ?? 5.5);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handlePresetSelect = (preset: typeof PRESET_PLACES[0]) => {
     setPlaceName(preset.name);
@@ -62,7 +69,8 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
   return (
     <form className="birth-input-form card" onSubmit={handleSubmit}>
       <h3 className="form-title">Birth Details</h3>
-      
+
+      {/* Date & Time — prominent row */}
       <div className="form-row">
         <div className="form-group">
           <label className="label" htmlFor="birth-date">Date</label>
@@ -75,7 +83,7 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
             required
           />
         </div>
-        
+
         <div className="form-group">
           <label className="label" htmlFor="birth-time">Time</label>
           <input
@@ -88,9 +96,10 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
           />
         </div>
       </div>
-      
+
+      {/* Place */}
       <div className="form-group">
-        <label className="label" htmlFor="place-select">Place</label>
+        <label className="label" htmlFor="place-select">Place (Preset)</label>
         <select
           id="place-select"
           className="select"
@@ -107,63 +116,57 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
           ))}
         </select>
       </div>
-      
-      <button
-        type="button"
-        className="btn btn-secondary toggle-advanced"
-        onClick={() => setShowAdvanced(!showAdvanced)}
-      >
-        {showAdvanced ? 'Hide' : 'Show'} Coordinates
-      </button>
-      
-      {showAdvanced && (
-        <div className="advanced-fields animate-fadeIn">
-          <div className="form-row">
-            <div className="form-group">
-              <label className="label" htmlFor="latitude">Latitude</label>
-              <input
-                id="latitude"
-                type="number"
-                className="input"
-                value={latitude}
-                onChange={(e) => setLatitude(parseFloat(e.target.value))}
-                step="0.001"
-                min="-90"
-                max="90"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="label" htmlFor="longitude">Longitude</label>
-              <input
-                id="longitude"
-                type="number"
-                className="input"
-                value={longitude}
-                onChange={(e) => setLongitude(parseFloat(e.target.value))}
-                step="0.001"
-                min="-180"
-                max="180"
-              />
-            </div>
-          </div>
-          
+
+      {/* Coordinates — always visible */}
+      <div className="form-coords">
+        <div className="form-row form-row-3">
           <div className="form-group">
-            <label className="label" htmlFor="timezone">Timezone (hours from UTC)</label>
+            <label className="label" htmlFor="latitude">Latitude</label>
+            <input
+              id="latitude"
+              type="number"
+              className="input input-mono"
+              value={latitude}
+              onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
+              step="0.001"
+              min="-90"
+              max="90"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="label" htmlFor="longitude">Longitude</label>
+            <input
+              id="longitude"
+              type="number"
+              className="input input-mono"
+              value={longitude}
+              onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
+              step="0.001"
+              min="-180"
+              max="180"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="label" htmlFor="timezone">
+              Timezone
+              <span className="form-tz-badge">{formatTimezoneUTC(timezone)}</span>
+            </label>
             <input
               id="timezone"
               type="number"
-              className="input"
+              className="input input-mono"
               value={timezone}
-              onChange={(e) => setTimezone(parseFloat(e.target.value))}
+              onChange={(e) => setTimezone(parseFloat(e.target.value) || 0)}
               step="0.5"
               min="-12"
               max="14"
             />
           </div>
         </div>
-      )}
-      
+      </div>
+
       <button type="submit" className="btn btn-primary submit-btn">
         Calculate Horoscope
       </button>

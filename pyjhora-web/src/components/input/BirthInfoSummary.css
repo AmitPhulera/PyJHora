@@ -1,0 +1,37 @@
+/* BirthInfoSummary — Compact TopBar display */
+
+.birth-info-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, var(--text-secondary));
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.birth-info-summary-place {
+  font-weight: 500;
+  color: var(--color-text, var(--text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.birth-info-summary-sep {
+  color: var(--color-text-muted, var(--text-muted));
+  flex-shrink: 0;
+}
+
+.birth-info-summary-datetime {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Hide on small screens to avoid cramping */
+@media (max-width: 600px) {
+  .birth-info-summary {
+    display: none;
+  }
+}

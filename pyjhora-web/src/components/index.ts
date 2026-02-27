@@ -3,6 +3,7 @@
 // Charts
 export { ChartRenderer } from './charts/ChartRenderer';
 export { ChartStyleSelector } from './charts/ChartStyleSelector';
+export { DivisionalChartGrid } from './charts/DivisionalChartGrid';
 export { DivisionalChartSelector } from './charts/DivisionalChartSelector';
 export type { ChartView } from './charts/DivisionalChartSelector';
 export { EastIndianChart } from './charts/EastIndianChart';
@@ -28,6 +29,7 @@ export { YogaList } from './yogas/YogaList';
 
 // Input
 export { BirthInputForm } from './input/BirthInputForm';
+export { BirthInfoSummary } from './input/BirthInfoSummary';
 
 // Match / Compatibility
 export { MatchUI } from './match/MatchUI';

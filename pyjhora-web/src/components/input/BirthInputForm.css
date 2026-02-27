@@ -1,7 +1,8 @@
-/* Birth Input Form Styles */
+/* Birth Input Form Styles — Redesigned */
 
 .birth-input-form {
-  max-width: 400px;
+  max-width: 440px;
+  text-align: left;
 }
 
 .form-title {
@@ -20,8 +21,21 @@
   gap: var(--space-md);
 }
 
-@media (max-width: 400px) {
+.form-row-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 480px) {
   .form-row {
+    grid-template-columns: 1fr;
+  }
+  .form-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 340px) {
+  .form-row-3 {
     grid-template-columns: 1fr;
   }
 }
@@ -30,17 +44,40 @@
   margin-bottom: var(--space-md);
 }
 
-.toggle-advanced {
-  width: 100%;
+/* Coordinates block */
+.form-coords {
+  padding: var(--space-md);
+  background: var(--color-surface, var(--bg-secondary));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-md);
+}
+
+.form-coords .form-group {
+  margin-bottom: var(--space-sm);
+}
+
+.form-coords .form-row-3 {
+  gap: var(--space-sm);
+}
+
+.input-mono {
+  font-family: var(--font-mono, monospace);
   font-size: 0.85rem;
 }
 
-.advanced-fields {
-  padding: var(--space-md);
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
+/* Timezone UTC badge */
+.form-tz-badge {
+  display: inline-block;
+  margin-left: var(--space-xs);
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono, monospace);
+  background: var(--color-accent-gold, var(--accent-gold));
+  color: #000;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  vertical-align: middle;
 }
 
 .submit-btn {

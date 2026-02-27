@@ -1,0 +1,53 @@
+/* ChartsPage */
+
+.charts-page {
+  max-width: 900px;
+}
+
+.charts-page-header {
+  margin-bottom: var(--space-lg);
+}
+
+.charts-page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.charts-page-selector {
+  margin-bottom: var(--space-lg);
+}
+
+.charts-page-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.charts-page-chart-title,
+.charts-page-positions-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  color: var(--color-accent-gold, var(--accent-gold));
+}
+
+.charts-page-chart-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .charts-page-content {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-page-chart-container {
+    max-width: 100%;
+  }
+}
