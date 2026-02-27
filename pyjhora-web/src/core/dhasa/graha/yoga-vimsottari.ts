@@ -120,25 +120,31 @@ function getYogaPhase(jdUtc: number): number {
 }
 
 /**
- * Calculate yoga number and fraction from JD
+ * Calculate yoga number and fraction from JD.
+ *
+ * Python yoga_vimsottari.py uses time-based interpolation via
+ * utils.get_fraction(yoga_start, yoga_end, birth_time_hrs), which computes
+ * (end - birth) / (end - start) = fraction remaining. The degree-based
+ * approach here is algebraically equivalent because in the Python yogam()
+ * new-path, start_time is derived from degrees_left/one_yoga, so the time
+ * fraction equals degrees_left / one_yoga = our fractionLeft.
  */
 function calculateYogaAndFraction(jd: number, place: Place): {
   yogaNumber: number;
   yogaFraction: number;
 } {
   const jdUtc = toUtc(jd, place.timezone);
-  const { time } = julianDayToGregorian(jd);
-  const birthTimeHrs = time.hour + time.minute / 60 + time.second / 3600;
 
   const oneYoga = 360 / 27;
   const total = getYogaPhase(jdUtc);
   const yogaNumber = Math.ceil(total / oneYoga) || 27;
 
-  // Calculate fraction left in current yoga
+  // Calculate fraction left in current yoga (degree-based)
   const degreesLeft = yogaNumber * oneYoga - total;
   const fractionLeft = degreesLeft / oneYoga;
 
   // The yoga fraction is how much has elapsed (1 - fraction left)
+  // Equivalent to Python's (1 - get_fraction(start, end, birth_time_hrs))
   return {
     yogaNumber,
     yogaFraction: 1 - fractionLeft

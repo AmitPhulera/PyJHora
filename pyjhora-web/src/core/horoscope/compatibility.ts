@@ -151,6 +151,16 @@ const STOMACH_RAJJU = [3, 7, 12, 16, 21, 25];
 const WAIST_RAJJU = [2, 8, 11, 17, 20, 26];
 const FOOT_RAJJU = [1, 9, 10, 18, 19, 27];
 
+// --- South Indian Rajju: Aaroga (ascending) / Avaroga (descending) ---
+// Python: neck_aaroga_rajju = [413,22] (typo in Python source: 413 should be 4,13 but we match Python behavior)
+// The Python typo means nakshatra 4 and 13 are NOT in aaroga, only 22 is from neck aaroga.
+const NECK_AAROGA_RAJJU = [413, 22];  // Match Python's actual values (413 is unreachable)
+const FOOT_AAROGA_RAJJU = [1, 10, 19];
+const WAIST_AAROGA_RAJJU = [2, 11, 20];
+const STOMACH_AAROGA_RAJJU = [3, 12, 21];
+// Combined aaroga nakshatras (ascending rajju) — matching Python concatenation
+const ALL_AAROGA = [...NECK_AAROGA_RAJJU, ...FOOT_AAROGA_RAJJU, ...WAIST_AAROGA_RAJJU, ...STOMACH_AAROGA_RAJJU];
+
 // --- Sthree Dheerga ---
 const STHREE_DHEERGA_THRESHOLD_NORTH = 15;
 const STHREE_DHEERGA_THRESHOLD_SOUTH = 7;
@@ -372,12 +382,25 @@ export function vedhaPorutham(
 
 /**
  * Rajju Porutham (boolean).
- * Good if boy and girl are not in the same rajju group.
+ * North: Good if boy and girl are not in the same rajju group.
+ * South: Uses aaroga (ascending) / avaroga (descending) classification.
+ *   If one is aaroga and the other is not, they are compatible (return true).
+ *   Otherwise, fall back to the standard same-body-part check.
  */
 export function rajjuPorutham(
   boyNakshatra: number,
   girlNakshatra: number,
+  method: Method = 'North',
 ): boolean {
+  if (method === 'South') {
+    // Python: rajju_porutham_south()
+    const bnAaroga = ALL_AAROGA.includes(boyNakshatra);
+    const gnAaroga = ALL_AAROGA.includes(girlNakshatra);
+    // If one is ascending and the other is descending/head, compatible
+    if ((bnAaroga && !gnAaroga) || (gnAaroga && !bnAaroga)) return true;
+    // Fall through to standard same-body-part check
+  }
+
   const boyGroup = getRajjuGroup(boyNakshatra);
   const girlGroup = getRajjuGroup(girlNakshatra);
   if (boyGroup === -1 || girlGroup === -1) return true;
@@ -439,7 +462,7 @@ export function compatibilityScore(
 
   const mahendra = mahendraPorutham(boyNakshatra, girlNakshatra);
   const vedha = vedhaPorutham(boyNakshatra, girlNakshatra);
-  const rajju = rajjuPorutham(boyNakshatra, girlNakshatra);
+  const rajju = rajjuPorutham(boyNakshatra, girlNakshatra, method);
   const sthreeDheerga = sthreeDheergaPorutham(boyNakshatra, girlNakshatra, method);
 
   if (method === 'South') {
