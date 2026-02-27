@@ -3383,8 +3383,22 @@ export const bhaarathiYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // SWAVEERYADDHANA YOGA (simplified - rasi-only)
 // ============================================================================
 
-/** Swaveeryaddhana Yoga (simplified): L2 in kendra/trine from L1, or L2 benefic and exalted */
-export const swaveeryaddhanaYoga = (chart: HouseChart): boolean => {
+/**
+ * Swaveeryaddhana Yoga (Wealth by own effort) - BV Raman 130, 131, 132.
+ *
+ * (a) Raman 130: LL strong in Kendra + with Jupiter + 2nd Lord Vaiseshikamsa >= 13
+ * (b) Raman 131: Navamsa-Sign-Dispositor chain (requires chartNavamsa)
+ * (c,d,e) Raman 132: L2 in kendra/trine from L1, or L2 benefic and (exalted or with exalted planet)
+ *
+ * @param chart - D1 rasi chart
+ * @param chartNavamsa - D9 navamsa chart (optional, for condition b)
+ * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional, for condition a)
+ */
+export const swaveeryaddhanaYoga = (
+  chart: HouseChart,
+  chartNavamsa?: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
   const l1 = getLordOfSign(ascHouse);
@@ -3392,20 +3406,60 @@ export const swaveeryaddhanaYoga = (chart: HouseChart): boolean => {
   const l1H = h(pToH, l1);
   const l2H = h(pToH, l2);
 
+  // (a) Raman 130: LL strong in Kendra + with Jupiter + L2 has Vaiseshikamsa >= 13
+  const l1Strength = HOUSE_STRENGTHS_OF_PLANETS[l1]?.[l1H] ?? 0;
+  const isLLStrong = l1Strength >= STRENGTH_EXALTED;
+  const isLLInKendra = [0, 3, 6, 9].includes(l1H);
+  const isLLWithJupiter = getPlanetsInHouse(chart, l1H).includes(JUPITER);
+  const has13Vargas = vaiseshikamsaScores != null && (vaiseshikamsaScores[l2] ?? 0) >= 13;
+
+  if (isLLStrong && isLLInKendra && isLLWithJupiter && has13Vargas) return true;
+
+  // (b) Raman 131: Navamsa-Sign-Dispositor chain
+  if (chartNavamsa) {
+    const pToHNav = getPlanetToHouseDict(chartNavamsa);
+    // 1. Sign occupied by LL in Navamsa
+    const navSignOfLL = h(pToHNav, l1);
+    // 2. Lord of that sign (the Navamsa Lord)
+    const navLord = getLordOfSign(navSignOfLL);
+    // 3. Sign occupied by NavLord in Rasi
+    const rasiSignOfNavLord = h(pToH, navLord);
+    // 4. Ruler of that sign (the Final Dispositor)
+    const dispositorOfNavLord = getLordOfSign(rasiSignOfNavLord);
+
+    const dispositorHouse = h(pToH, dispositorOfNavLord);
+    const dispositorStrength = HOUSE_STRENGTHS_OF_PLANETS[dispositorOfNavLord]?.[dispositorHouse] ?? 0;
+
+    // Check relative position to 2nd lord
+    const relPosDisp = (dispositorHouse - l2H + 12) % 12;
+    const isRelKendraTrine = [0, 3, 6, 9, 4, 8].includes(relPosDisp);
+    const isOwnOrExalted = dispositorStrength >= STRENGTH_EXALTED;
+
+    if (dispositorStrength >= STRENGTH_FRIEND && (isRelKendraTrine || isOwnOrExalted)) return true;
+  }
+
+  // (c,d,e) Raman 132: 2nd Lord Relations
   // (c) L2 in kendra/trine from L1
   const relPos = (l2H - l1H + 12) % 12;
   const kendraTrine = [HOUSE_1, HOUSE_4, HOUSE_5, HOUSE_7, HOUSE_9, HOUSE_10];
   if (kendraTrine.includes(relPos)) return true;
 
-  // (d/e) L2 is benefic AND exalted
+  // (d/e) L2 is benefic AND (exalted OR with exalted planet)
   const benefics = getNaturalBenefics(chart);
   const l2Strength = HOUSE_STRENGTHS_OF_PLANETS[l2]?.[l2H] ?? 0;
-  if (benefics.includes(l2) && l2Strength >= STRENGTH_EXALTED) return true;
+  const isWithExalted = getPlanetsInHouse(chart, l2H)
+    .filter(p => p !== l2)
+    .some(p => (HOUSE_STRENGTHS_OF_PLANETS[p]?.[l2H] ?? 0) === STRENGTH_EXALTED);
+
+  if (benefics.includes(l2) && (l2Strength === STRENGTH_EXALTED || isWithExalted)) return true;
 
   return false;
 };
-export const swaveeryaddhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  swaveeryaddhanaYoga(planetPositionsToChart(positions));
+export const swaveeryaddhanaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  chartNavamsa?: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => swaveeryaddhanaYoga(planetPositionsToChart(positions), chartNavamsa, vaiseshikamsaScores);
 
 // ============================================================================
 // REMAINING YOGA FUNCTIONS (Batch 3)
@@ -3575,11 +3629,17 @@ export const jadaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 
 /**
  * Bhratrumooladdhanaprapti Yoga (BV Raman 136/137):
- * Wealth from brothers. L1 and L2 in 3rd aspected by benefics,
- * or L3 in 2nd with Jupiter aspected by L1.
- * Note: Vaiseshikamsa check simplified (always false without scores).
+ * Wealth from brothers.
+ * 136: L1 and L2 in 3rd house, aspected by benefics.
+ * 137: L3 in 2nd with Jupiter, aspected or conjoined by L1, AND L1 in Vaiseshikamsa (>= 13).
+ *
+ * @param chart - D1 rasi chart
+ * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional, for condition 137)
  */
-export const bhratrumooladdhanapraptiYoga = (chart: HouseChart): boolean => {
+export const bhratrumooladdhanapraptiYoga = (
+  chart: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
   const l1 = getLordOfSign(ascHouse);
@@ -3599,27 +3659,36 @@ export const bhratrumooladdhanapraptiYoga = (chart: HouseChart): boolean => {
     if (h3AspectedByBenefic) return true;
   }
 
-  // 137: L3 in 2nd with Jupiter, aspected or conjoined by L1
+  // 137: L3 in 2nd with Jupiter, aspected or conjoined by L1, L1 in Vaiseshikamsa
   const l3In2 = h(pToH, l3) === h2;
   const planetsInH2 = getPlanetsInHouse(chart, h2);
   const withJupiter = planetsInH2.includes(JUPITER);
   const l1AspectsL3 = getGrahaDrishtiPlanetsOfPlanet(chart, l1).includes(l3);
   const l1ConjL3 = h(pToH, l1) === h(pToH, l3);
+  const l1Vaiseshikamsa = vaiseshikamsaScores != null && (vaiseshikamsaScores[l1] ?? 0) >= 13;
 
-  // Without vaiseshikamsa scores, this condition always fails (conservative)
-  return l3In2 && withJupiter && (l1AspectsL3 || l1ConjL3) && false;
+  return l3In2 && withJupiter && (l1AspectsL3 || l1ConjL3) && l1Vaiseshikamsa;
 };
-export const bhratrumooladdhanapraptiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  bhratrumooladdhanapraptiYoga(planetPositionsToChart(positions));
+export const bhratrumooladdhanapraptiYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => bhratrumooladdhanapraptiYoga(planetPositionsToChart(positions), vaiseshikamsaScores);
 
 /**
  * Putramooladdhana Yoga (BV Raman 139):
- * Strong lord of 2nd conjunct 5th lord or Jupiter, and L1 in Vaiseshikamsa.
- * Simplified: without vaiseshikamsa scores, always returns false.
+ * The strong lord of the 2nd is in conjunction with the 5th lord or Jupiter,
+ * and the lord of Lagna is in Vaiseshikamsa (score >= 13).
+ *
+ * @param chart - D1 rasi chart
+ * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
  */
-export const putramooladdhanaYoga = (chart: HouseChart): boolean => {
+export const putramooladdhanaYoga = (
+  chart: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
+  const l1 = getLordOfSign(ascHouse);
   const l2 = getLordOfSign((ascHouse + HOUSE_2) % 12);
   const l5 = getLordOfSign((ascHouse + HOUSE_5) % 12);
   const l2H = h(pToH, l2);
@@ -3628,20 +3697,30 @@ export const putramooladdhanaYoga = (chart: HouseChart): boolean => {
   const planetsInL2H = getPlanetsInHouse(chart, l2H);
   const conj = h(pToH, l2) === h(pToH, l5) || planetsInL2H.includes(JUPITER);
 
-  // Vaiseshikamsa check: requires external data, return false conservatively
-  return l2Strong && conj && false;
+  const l1Vaiseshikamsa = vaiseshikamsaScores != null && (vaiseshikamsaScores[l1] ?? 0) >= 13;
+
+  return l2Strong && conj && l1Vaiseshikamsa;
 };
-export const putramooladdhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  putramooladdhanaYoga(planetPositionsToChart(positions));
+export const putramooladdhanaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => putramooladdhanaYoga(planetPositionsToChart(positions), vaiseshikamsaScores);
 
 /**
  * Shatrumooladdhana Yoga (BV Raman 140):
- * Strong lord of 2nd joins 6th lord or Mars, and L1 in Vaiseshikamsa.
- * Simplified: without vaiseshikamsa scores, always returns false.
+ * The strong lord of the 2nd should join the lord of the 6th or Mars,
+ * and the powerful lord of Lagna should be in Vaiseshikamsa (score >= 13).
+ *
+ * @param chart - D1 rasi chart
+ * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
  */
-export const shatrumooladdhanaYoga = (chart: HouseChart): boolean => {
+export const shatrumooladdhanaYoga = (
+  chart: HouseChart,
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
+  const l1 = getLordOfSign(ascHouse);
   const l2 = getLordOfSign((ascHouse + HOUSE_2) % 12);
   const l6 = getLordOfSign((ascHouse + HOUSE_6) % 12);
   const l2H = h(pToH, l2);
@@ -3650,11 +3729,14 @@ export const shatrumooladdhanaYoga = (chart: HouseChart): boolean => {
   const planetsInL2H = getPlanetsInHouse(chart, l2H);
   const conj = h(pToH, l2) === h(pToH, l6) || planetsInL2H.includes(MARS);
 
-  // Vaiseshikamsa check: requires external data, return false conservatively
-  return l2Strong && conj && false;
+  const l1Vaiseshikamsa = vaiseshikamsaScores != null && (vaiseshikamsaScores[l1] ?? 0) >= 13;
+
+  return l2Strong && conj && l1Vaiseshikamsa;
 };
-export const shatrumooladdhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  shatrumooladdhanaYoga(planetPositionsToChart(positions));
+export const shatrumooladdhanaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  vaiseshikamsaScores?: Record<number, number>,
+): boolean => shatrumooladdhanaYoga(planetPositionsToChart(positions), vaiseshikamsaScores);
 
 /**
  * Amaranantha Dhana Yoga (BV Raman 142):
