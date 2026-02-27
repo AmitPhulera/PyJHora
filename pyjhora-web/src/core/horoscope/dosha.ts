@@ -908,12 +908,9 @@ export const getGuruChandalaResults = (
       } else if (jupiterPos && ketuPos && jupiterPos.rasi === ketuPos.rasi) {
         resultStr += GURU_STRONGER_THAN_KETU + nextLine;
       }
-      // Add house-specific message based on Jupiter's rasi (1-indexed)
+      // Add house-specific message based on Jupiter's absolute rasi (Python: m_msgs[planet_positions[5][1][0]+1])
       if (jupiterPos) {
-        const lagnaPos = positions.find(p => p.planet === -1);
-        const jupiterHouseIdx = lagnaPos
-          ? getRelativeHouseOfPlanet(lagnaPos.rasi, jupiterPos.rasi)
-          : jupiterPos.rasi + 1;
+        const jupiterHouseIdx = jupiterPos.rasi + 1; // 1-indexed from absolute rasi
         if (jupiterHouseIdx >= 1 && jupiterHouseIdx <= 12) {
           resultStr += GURU_CHANDAL_MSGS[jupiterHouseIdx] + nextLine;
         }
