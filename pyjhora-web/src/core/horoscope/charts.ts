@@ -108,7 +108,10 @@ import { countRasis } from '../utils/angle';
 import {
   horaLagnaAsync, horaLagnaMixedChart,
   dasavargaFromLong as drikDasavargaFromLong,
-  ascendant as drikAscendant, planetaryPositions as drikPlanetaryPositions
+  ascendant as drikAscendant, planetaryPositions as drikPlanetaryPositions,
+  kaalaLongitudeAsync, mrityuLongitudeAsync, arthaPraharakaLongitudeAsync,
+  yamaGhantakaLongitudeAsync, gulikaLongitudeAsync, maandiLongitudeAsync,
+  solarUpagrahaLongitudes as drikSolarUpagrahaLongitudes
 } from '../panchanga/drik';
 
 import { nakshatraPada, cyclicCountOfStarsWithAbhijit } from '../panchanga/drik';
@@ -1213,6 +1216,206 @@ export const solarUpagrahaLongitudes = (
   const solarLongitude = sunPos.rasi * 30 + sunPos.longitude;
   return solarUpagrahaLongitudesFromSunLong(solarLongitude, upagraha, divisionalChartFactor);
 };
+
+// ============================================================================
+// SPECIAL PLANET LONGITUDES (Upagrahas + Solar Upagrahas)
+// ============================================================================
+
+/**
+ * Special planet abbreviation list matching Python's sub_planet_list_1 and sub_planet_list_2.
+ * Order: Kaala, Mrityu, Artha Praharaka, Yama Ghantaka, Gulika, Maandi,
+ *        Dhuma, Vyatipaata, Parivesha, Indrachaapa, Upaketu
+ */
+const SPECIAL_PLANET_ABBREVS = ['Kl', 'Mr', 'Ap', 'Yg', 'Gk', 'Md', 'Dm', 'Vp', 'Pv', 'Ic', 'Uk'] as const;
+
+/** Return type matching Python: [[abbreviation, [rasi, longitude]], ...] */
+export type SpecialPlanetPosition = [string, [number, number]];
+
+/**
+ * Compute longitudes for special planets (upagrahas + solar upagrahas).
+ * Python: charts.special_planet_longitudes(dob, tob, place, ...)
+ *
+ * Returns 11 special planet positions:
+ *   sub_planet_list_1: Kl (Kaala), Mr (Mrityu), Ap (Artha Praharaka),
+ *                      Yg (Yama Ghantaka), Gk (Gulika), Md (Maandi)
+ *   sub_planet_list_2: Dm (Dhuma), Vp (Vyatipaata), Pv (Parivesha),
+ *                      Ic (Indrachaapa), Uk (Upaketu)
+ *
+ * @param dob - Date of birth
+ * @param tob - Time of birth
+ * @param place - Place of birth
+ * @param divisionalChartFactor - Division factor (1=D1, default)
+ * @param chartMethod - Chart method (undefined or 0 for default)
+ * @param baseRasi - Base rasi for custom divisional charts
+ * @param countFromEndOfSign - Count from end of sign for custom charts
+ * @returns Array of [abbreviation, [rasi, longitude]] tuples
+ */
+export async function specialPlanetLongitudesAsync(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  divisionalChartFactor: number = 1,
+  chartMethod?: number,
+  baseRasi?: number,
+  countFromEndOfSign?: boolean
+): Promise<SpecialPlanetPosition[]> {
+  const jd = julianDayNumber(dob, tob);
+  const tobHours = tob.hour + tob.minute / 60 + tob.second / 3600;
+
+  // sub_planet_list_1: time-based upagrahas (from drik async functions)
+  const [kl, mr, ap, yg, gk, md] = await Promise.all([
+    kaalaLongitudeAsync(jd, place, tobHours),
+    mrityuLongitudeAsync(jd, place, tobHours),
+    arthaPraharakaLongitudeAsync(jd, place, tobHours),
+    yamaGhantakaLongitudeAsync(jd, place, tobHours),
+    gulikaLongitudeAsync(jd, place, tobHours),
+    maandiLongitudeAsync(jd, place, tobHours),
+  ]);
+
+  // sub_planet_list_2: solar upagrahas (from sun longitude in rasi chart)
+  const d1Positions = buildD1PositionsFromJd(jd, place);
+  const sunPos = d1Positions.find(p => p.planet === SUN);
+  const sunLong = sunPos ? sunPos.rasi * 30 + sunPos.longitude : 0;
+
+  const solarUpagrahaNames = ['dhuma', 'vyatipaata', 'parivesha', 'indrachaapa', 'upaketu'] as const;
+  const solarResults: [number, number][] = solarUpagrahaNames.map(name => {
+    const result = drikSolarUpagrahaLongitudes(sunLong, name);
+    return result ? [result[0], result[1]] : [0, 0];
+  });
+
+  // Build the result list in Python order
+  const splRasiPositions: SpecialPlanetPosition[] = [
+    ['Kl', [kl[0], kl[1]]],
+    ['Mr', [mr[0], mr[1]]],
+    ['Ap', [ap[0], ap[1]]],
+    ['Yg', [yg[0], yg[1]]],
+    ['Gk', [gk[0], gk[1]]],
+    ['Md', [md[0], md[1]]],
+    ['Dm', solarResults[0]!],
+    ['Vp', solarResults[1]!],
+    ['Pv', solarResults[2]!],
+    ['Ic', solarResults[3]!],
+    ['Uk', solarResults[4]!],
+  ];
+
+  // If D1 chart, return as-is
+  if (divisionalChartFactor === 1) return splRasiPositions;
+
+  // Apply divisional chart transformation
+  // Convert to PlanetPosition[] for getDivisionalChart, then convert back
+  const asPlanetPositions: PlanetPosition[] = splRasiPositions.map((sp, idx) => ({
+    planet: 100 + idx, // Use dummy planet IDs 100-110 for special planets
+    rasi: sp[1][0],
+    longitude: sp[1][1],
+  }));
+
+  let transformed: PlanetPosition[];
+  if (baseRasi !== undefined && baseRasi !== null) {
+    // Custom divisional chart with baseRasi
+    transformed = customDivisionalChart(
+      asPlanetPositions, divisionalChartFactor,
+      chartMethod ?? 0, baseRasi, countFromEndOfSign ?? false
+    );
+  } else if (chartMethod !== undefined && chartMethod !== null && chartMethod > 0) {
+    // Standard divisional chart with chart method
+    transformed = getDivisionalChart(asPlanetPositions, divisionalChartFactor, chartMethod);
+  } else {
+    // Custom divisional chart (default cyclic)
+    transformed = customDivisionalChart(
+      asPlanetPositions, divisionalChartFactor,
+      chartMethod ?? 0, baseRasi, countFromEndOfSign ?? false
+    );
+  }
+
+  // Convert back to SpecialPlanetPosition format
+  return transformed.map((pos, idx) => {
+    const abbrev = SPECIAL_PLANET_ABBREVS[idx]!;
+    return [abbrev, [pos.rasi, pos.longitude]] as SpecialPlanetPosition;
+  });
+}
+
+/**
+ * Compute special planet longitudes for a mixed (composite) divisional chart.
+ * Python: charts.special_planet_longitudes_mixed_chart(dob, tob, place, ...)
+ *
+ * First computes D1 special planet positions, then applies two sequential
+ * varga transformations.
+ *
+ * @param dob - Date of birth
+ * @param tob - Time of birth
+ * @param place - Place of birth
+ * @param vargaFactor1 - First divisional factor
+ * @param chartMethod1 - First chart method
+ * @param vargaFactor2 - Second divisional factor
+ * @param chartMethod2 - Second chart method
+ * @returns Array of [abbreviation, [rasi, longitude]] tuples
+ */
+export async function specialPlanetLongitudesMixedChartAsync(
+  dob: JhoraDate, tob: JhoraTime, place: Place,
+  vargaFactor1: number = 1, chartMethod1: number = 1,
+  vargaFactor2: number = 1, chartMethod2: number = 1
+): Promise<SpecialPlanetPosition[]> {
+  // Get D1 special planet positions first
+  const splD1 = await specialPlanetLongitudesAsync(dob, tob, place);
+
+  if (vargaFactor1 === 1 && vargaFactor2 === 1) return splD1;
+
+  // Convert to PlanetPosition[] for divisional chart processing
+  const asPlanetPositions: PlanetPosition[] = splD1.map((sp, idx) => ({
+    planet: 100 + idx,
+    rasi: sp[1][0],
+    longitude: sp[1][1],
+  }));
+
+  // Apply first varga (if not D1)
+  const pp1 = vargaFactor1 === 1
+    ? asPlanetPositions
+    : getDivisionalChart(asPlanetPositions, vargaFactor1, chartMethod1);
+
+  // Apply second varga (if not D2... wait, Python uses varga_factor_2==2 check, which seems like a bug)
+  // Python: pp2 = pp1 if varga_factor_2==2 else eval(...)
+  // This is likely a typo in Python (should be ==1), but we match the Python behavior
+  const pp2 = vargaFactor2 === 2
+    ? pp1
+    : getDivisionalChart(pp1, vargaFactor2, chartMethod2);
+
+  // Convert back to SpecialPlanetPosition format
+  return pp2.map((pos, idx) => {
+    const abbrev = SPECIAL_PLANET_ABBREVS[idx]!;
+    return [abbrev, [pos.rasi, pos.longitude]] as SpecialPlanetPosition;
+  });
+}
+
+// ============================================================================
+// SPECIAL LAGNA LONGITUDES (stub — matches Python stub)
+// ============================================================================
+
+/**
+ * Compute special lagna longitudes.
+ * Python: charts.special_lagna_longitudes(dob, tob, place, ...)
+ *
+ * NOTE: This function is a stub in Python (the body is commented out).
+ * The comment says "For now let us comment this here as there is no longitude
+ * for arudha lagna". We port it as a stub for API completeness.
+ *
+ * @param _dob - Date of birth (unused in stub)
+ * @param _tob - Time of birth (unused in stub)
+ * @param _place - Place of birth (unused in stub)
+ * @param _divisionalChartFactor - Division factor (unused in stub)
+ * @param _chartMethod - Chart method (unused in stub)
+ * @param _baseRasi - Base rasi (unused in stub)
+ * @param _countFromEndOfSign - Count from end of sign (unused in stub)
+ * @returns undefined (stub implementation matching Python)
+ */
+export function specialLagnaLongitudes(
+  _dob: JhoraDate, _tob: JhoraTime, _place: Place,
+  _divisionalChartFactor: number = 1,
+  _chartMethod: number = 1,
+  _baseRasi?: number,
+  _countFromEndOfSign?: boolean
+): undefined {
+  // Python stub: function body is entirely commented out
+  // "For now let us comment this here as there is no longitude for arudha lagna"
+  return undefined;
+}
 
 // ============================================================================
 // MIXED CHART FROM RASI POSITIONS
