@@ -7,9 +7,16 @@
  */
 
 import {
+    AQUARIUS,
     EVEN_FOOTED_SIGNS,
+    HOUSE_OWNERS,
     HOUSE_STRENGTHS_OF_PLANETS,
+    KETU,
+    MARS,
+    RAHU,
     RASI_NAMES_EN,
+    SATURN,
+    SCORPIO,
     SIDEREAL_YEAR,
     STRENGTH_DEBILITATED,
     STRENGTH_EXALTED
@@ -74,6 +81,84 @@ export const getCharaDhasaDuration = (
         dhasaPeriod += 1;
     } else if (strength === STRENGTH_DEBILITATED) {
         dhasaPeriod -= 1;
+    }
+
+    return dhasaPeriod;
+};
+
+/**
+ * Calculate duration of Chara Dasha for a sign (PVN Rao Method)
+ * Python: _dhasa_duration_pvnrao_method
+ *
+ * Key differences from KN Rao:
+ * - Special co-lordship handling for Scorpio (Mars/Ketu) and Aquarius (Saturn/Rahu)
+ * - Uses const.house_owners for basic lord (no co-lordship resolution)
+ * - No exalted/debilitated exceptions
+ */
+export const getCharaDhasaDurationPvnRao = (
+    planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
+    sign: number
+): number => {
+    const pToH = getPlanetToHouseDict(planetPositions);
+
+    let houseOfLord: number;
+
+    if (sign === SCORPIO) {
+        // Scorpio: Mars(2)/Ketu(8) co-lords
+        const marsHouse = pToH[MARS];
+        const ketuHouse = pToH[KETU];
+        if (marsHouse === sign && ketuHouse === sign) {
+            return 12;
+        } else if (marsHouse === sign && ketuHouse !== sign) {
+            houseOfLord = ketuHouse ?? 0;
+        } else if (ketuHouse === sign && marsHouse !== sign) {
+            houseOfLord = marsHouse ?? 0;
+        } else {
+            const lordOfSign = getHouseOwnerFromPlanetPositions(planetPositions, sign, false);
+            houseOfLord = pToH[lordOfSign] ?? 0;
+        }
+    } else if (sign === AQUARIUS) {
+        // Aquarius: Saturn(6)/Rahu(7) co-lords
+        const saturnHouse = pToH[SATURN];
+        const rahuHouse = pToH[RAHU];
+        if (saturnHouse === sign && rahuHouse === sign) {
+            return 12;
+        } else if (saturnHouse === sign && rahuHouse !== sign) {
+            houseOfLord = rahuHouse ?? 0;
+        } else if (rahuHouse === sign && saturnHouse !== sign) {
+            houseOfLord = saturnHouse ?? 0;
+        } else {
+            const lordOfSign = getHouseOwnerFromPlanetPositions(planetPositions, sign, false);
+            houseOfLord = pToH[lordOfSign] ?? 0;
+        }
+    } else {
+        const lordOfSign = HOUSE_OWNERS[sign]!;
+        houseOfLord = pToH[lordOfSign] ?? 0;
+    }
+
+    let dhasaPeriod: number;
+
+    if (EVEN_FOOTED_SIGNS.includes(sign)) {
+        // Counting backward
+        if (houseOfLord < sign) {
+            dhasaPeriod = sign + 1 - houseOfLord;
+        } else {
+            dhasaPeriod = sign + 13 - houseOfLord;
+        }
+    } else {
+        // Counting forward
+        if (houseOfLord < sign) {
+            dhasaPeriod = houseOfLord + 13 - sign;
+        } else {
+            dhasaPeriod = houseOfLord + 1 - sign;
+        }
+    }
+
+    dhasaPeriod -= 1;
+
+    if (dhasaPeriod <= 0) {
+        dhasaPeriod = 12;
+        // No exalted/debilitated exceptions for PVN Rao
     }
 
     return dhasaPeriod;
@@ -235,7 +320,10 @@ export function getCharaDashaBhukti(
 
             let dd: number;
             if (dc === 0) {
-                dd = getCharaDhasaDuration(positions, lord);
+                // charaMethod=1: KN Rao duration, charaMethod=2: PVN Rao duration
+                dd = charaMethod === 1
+                    ? getCharaDhasaDuration(positions, lord)
+                    : getCharaDhasaDurationPvnRao(positions, lord);
                 firstCycleDurations.push(dd);
             } else {
                 // Second cycle: 12 - first cycle duration
