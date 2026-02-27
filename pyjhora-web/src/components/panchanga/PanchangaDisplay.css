@@ -2,11 +2,13 @@
 
 .panchanga-display {
   max-width: 400px;
+  font-family: var(--font-body);
 }
 
 .panchanga-title {
   font-size: 1.125rem;
   font-weight: 600;
+  font-family: var(--font-display);
   margin-bottom: var(--space-md);
   background: var(--gradient-primary);
   -webkit-background-clip: text;
@@ -25,7 +27,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-sm) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .panchanga-item:last-child {
@@ -34,14 +36,14 @@
 
 .panchanga-label {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .panchanga-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   text-align: right;
 }
 
@@ -49,5 +51,5 @@
   display: block;
   font-size: 0.75rem;
   font-weight: 400;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }

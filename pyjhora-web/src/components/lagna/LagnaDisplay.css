@@ -2,11 +2,13 @@
 
 .lagna-display {
   max-width: 400px;
+  font-family: var(--font-body);
 }
 
 .lagna-title {
   font-size: 1.125rem;
   font-weight: 600;
+  font-family: var(--font-display);
   margin-bottom: var(--space-md);
   background: var(--gradient-primary);
   -webkit-background-clip: text;
@@ -20,19 +22,19 @@
   align-items: center;
   padding: var(--space-md);
   margin-bottom: var(--space-md);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-card-hover);
   border-radius: var(--radius-md);
 }
 
 .lagna-rasi {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .lagna-rasi-sa {
   font-size: 0.875rem;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
   font-style: italic;
   margin-top: var(--space-xs);
 }
@@ -40,7 +42,7 @@
 .lagna-degrees {
   font-size: 1rem;
   font-family: var(--font-mono);
-  color: var(--accent-primary);
+  color: var(--color-accent-gold);
   margin-top: var(--space-sm);
 }
 
@@ -55,7 +57,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-sm) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .lagna-item:last-child {
@@ -64,14 +66,14 @@
 
 .lagna-label {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .lagna-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   text-align: right;
 }
 
@@ -79,22 +81,22 @@
   display: block;
   font-size: 0.75rem;
   font-weight: 400;
-  color: var(--text-tertiary);
+  color: var(--color-text-muted);
 }
 
 /* Element colors */
 .element-fire {
-  color: var(--rasi-fire);
+  color: var(--color-rasi-fire);
 }
 
 .element-earth {
-  color: var(--rasi-earth);
+  color: var(--color-rasi-earth);
 }
 
 .element-air {
-  color: var(--rasi-air);
+  color: var(--color-rasi-air);
 }
 
 .element-water {
-  color: var(--rasi-water);
+  color: var(--color-rasi-water);
 }
