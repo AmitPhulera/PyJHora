@@ -38,6 +38,16 @@ export interface MuddaBhuktiPeriod {
   durationDays: number;
 }
 
+export interface MuddaAntaraPeriod {
+  dashaLord: number;
+  bhuktiLord: number;
+  antaraLord: number;
+  antaraLordName: string;
+  startJd: number;
+  startDate: string;
+  durationDays: number;
+}
+
 export interface MuddaResult {
   mahadashas: MuddaDashaPeriod[];
   bhuktis: MuddaBhuktiPeriod[];
@@ -136,6 +146,83 @@ function varshaVimsottariBhukti(
     lord = getNextVarshaAdhipati(lord);
   }
   return result;
+}
+
+// ============================================================================
+// ANTARA
+// ============================================================================
+
+/**
+ * Compute all antaradasas within a given bhukti.
+ * Python: varsha_vimsottari_antara(maha_lord, bhukti_lord, start_date)
+ *
+ * @param mahaLord - Mahadasha lord planet index
+ * @param bhuktiLord - Bhukti lord planet index
+ * @param startDate - Start date (JD) of the bhukti
+ * @returns Array of [lord, startJd, durationDays] tuples
+ */
+export function varshaVimsottariAntara(
+  mahaLord: number,
+  bhuktiLord: number,
+  startDate: number,
+): Array<[number, number, number]> {
+  let lord = bhuktiLord;
+  const result: Array<[number, number, number]> = [];
+
+  for (let i = 0; i < 9; i++) {
+    const factor = VARSHA_VIMSOTTARI_DAYS[lord]! * (VARSHA_VIMSOTTARI_DAYS[mahaLord]! / CYCLE);
+    const duration = factor * (VARSHA_VIMSOTTARI_DAYS[bhuktiLord]! / CYCLE);
+    result.push([lord, startDate, duration]);
+    startDate += duration;
+    lord = getNextVarshaAdhipati(lord);
+  }
+  return result;
+}
+
+/**
+ * Find which mahadasha/bhukti a given JD falls in, within a dict of {lord: startJd}.
+ * Returns the lord whose startJd is less than jd (searching from the end).
+ * Python: _where_occurs(jd, some_dict)
+ */
+function whereOccurs(jd: number, dict: Map<number, number>): number | undefined {
+  const keys = Array.from(dict.keys());
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const key = keys[i]!;
+    if (dict.get(key)! < jd) return key;
+  }
+  return undefined;
+}
+
+/**
+ * Compute the antaradasha within which a given JD falls.
+ * Python: compute_varsha_vimsottari_antara_from(jd, mahadashas)
+ *
+ * @param jd - Julian Day to locate
+ * @param mahadashas - Map of lord -> start JD (ordered)
+ * @returns Tuple of [mahaLord, bhuktiLord, antaraPeriods] or undefined if JD is before all periods
+ */
+export function computeVarshaVimsottariAntaraFrom(
+  jd: number,
+  mahadashas: Map<number, number>,
+): { mahaLord: number; bhuktiLord: number; antaras: Array<[number, number, number]> } | undefined {
+  // Find mahadasha where this JD falls
+  const mahaLord = whereOccurs(jd, mahadashas);
+  if (mahaLord === undefined) return undefined;
+
+  // Compute all bhuktis of that mahadasha
+  const bhuktiTuples = varshaVimsottariBhukti(mahaLord, mahadashas.get(mahaLord)!);
+  const bhuktiMap = new Map<number, number>();
+  for (const [lord, start] of bhuktiTuples) {
+    bhuktiMap.set(lord, start);
+  }
+
+  // Find bhukti where this JD falls
+  const bhuktiLord = whereOccurs(jd, bhuktiMap);
+  if (bhuktiLord === undefined) return undefined;
+
+  // Compute all antaras of that bhukti
+  const antaras = varshaVimsottariAntara(mahaLord, bhuktiLord, bhuktiMap.get(bhuktiLord)!);
+  return { mahaLord, bhuktiLord, antaras };
 }
 
 // ============================================================================

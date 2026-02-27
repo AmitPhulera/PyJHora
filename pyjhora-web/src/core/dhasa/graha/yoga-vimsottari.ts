@@ -41,6 +41,18 @@ export interface YogaVimsottariBhuktiPeriod {
   durationYears: number;
 }
 
+export interface YogaVimsottariAntaraPeriod {
+  dashaLord: number;
+  dashaLordName: string;
+  bhuktiLord: number;
+  bhuktiLordName: string;
+  antaraLord: number;
+  antaraLordName: string;
+  startJd: number;
+  startDate: string;
+  durationYears: number;
+}
+
 export interface YogaVimsottariResult {
   yogaNumber: number;
   yogaName: string;
@@ -176,6 +188,128 @@ function getDashaStartDate(jd: number, place: Place): {
   const startJd = jd - periodElapsed;
 
   return { lord, startJd };
+}
+
+// ============================================================================
+// ANTARA CALCULATION (Level 3)
+// ============================================================================
+
+/**
+ * Compute all antaradasas from a given bhukti's start date.
+ * Ported from Python yoga_vimsottari._vimsottari_antara().
+ *
+ * Note: The Python source has a bug where it accesses vimsottari_dict[lord]
+ * which returns [yoga_list, duration] instead of just the duration. The
+ * correct semantics (matching standard vimsottari antara) use the duration
+ * value (index [1]), which is what this port implements.
+ *
+ * Formula: factor = (maha_years * bhukti_years * antara_years) / total^2
+ *
+ * @param mahaLord - Mahadasha lord
+ * @param bhuktiLord - Bhukti lord
+ * @param startDate - Start JD of the bhukti
+ * @returns Map of antara lord to start JD
+ */
+export function vimsottariAntara(
+  mahaLord: number,
+  bhuktiLord: number,
+  startDate: number
+): Map<number, number> {
+  let lord = bhuktiLord;
+  const antaras = new Map<number, number>();
+
+  for (let i = 0; i < 9; i++) {
+    antaras.set(lord, startDate);
+
+    const mahaYears = VIMSOTTARI_YEARS[mahaLord] ?? 0;
+    const bhuktiYears = VIMSOTTARI_YEARS[bhuktiLord] ?? 0;
+    const antaraYears = VIMSOTTARI_YEARS[lord] ?? 0;
+
+    // factor = (maha * bhukti * antara) / total^2
+    const factor = (mahaYears * bhuktiYears * antaraYears) /
+      (VIMSOTTARI_TOTAL_YEARS * VIMSOTTARI_TOTAL_YEARS);
+
+    startDate += factor * YEAR_DURATION;
+    lord = getNextLord(lord);
+  }
+
+  return antaras;
+}
+
+/**
+ * Find the key in a sorted map such that map[key] < jd, returning the
+ * last (largest) such key. Ported from Python _where_occurs().
+ *
+ * @param jd - Julian day to locate
+ * @param dict - Ordered map of lord -> start JD (ascending order)
+ * @returns The lord key, or undefined if not found
+ */
+function whereOccurs(jd: number, dict: Map<number, number>): number | undefined {
+  const keys = Array.from(dict.keys());
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const key = keys[i]!;
+    const val = dict.get(key)!;
+    if (val < jd) return key;
+  }
+  return undefined;
+}
+
+/**
+ * Compute the bhukti sub-periods for a given mahadasha lord and start date.
+ * Internal helper matching Python _vimsottari_bhukti() with default antardhasaOption=1.
+ *
+ * @param mahaLord - Mahadasha lord
+ * @param startDate - Start JD of the mahadasha
+ * @returns Map of bhukti lord to start JD
+ */
+function vimsottariBhuktiMap(
+  mahaLord: number,
+  startDate: number
+): Map<number, number> {
+  let lord = mahaLord;
+  const bhuktis = new Map<number, number>();
+
+  for (let i = 0; i < 9; i++) {
+    bhuktis.set(lord, startDate);
+
+    const bhuktiYears = VIMSOTTARI_YEARS[lord] ?? 0;
+    const mahaYears = VIMSOTTARI_YEARS[mahaLord] ?? 0;
+    const factor = (bhuktiYears * mahaYears) / VIMSOTTARI_TOTAL_YEARS;
+
+    startDate += factor * YEAR_DURATION;
+    lord = getNextLord(lord);
+  }
+
+  return bhuktis;
+}
+
+/**
+ * Returns the antaradasha within which the given JD falls.
+ * Ported from Python compute_vimsottari_antara_from().
+ *
+ * @param jd - Julian day to locate
+ * @param mahadashas - Map of mahadasha lord to start JD (from vimsottariMahadasa)
+ * @returns Tuple of [mahaLord, bhuktiLord, antaraMap] or undefined if not found
+ */
+export function computeVimsottariAntaraFrom(
+  jd: number,
+  mahadashas: Map<number, number>
+): { mahaLord: number; bhuktiLord: number; antaras: Map<number, number> } | undefined {
+  // Find mahadasha where this JD falls
+  const mahaLord = whereOccurs(jd, mahadashas);
+  if (mahaLord === undefined) return undefined;
+
+  // Compute all bhuktis of that mahadasha
+  const bhuktis = vimsottariBhuktiMap(mahaLord, mahadashas.get(mahaLord)!);
+
+  // Find bhukti where this JD falls
+  const bhuktiLord = whereOccurs(jd, bhuktis);
+  if (bhuktiLord === undefined) return undefined;
+
+  // Compute all antaras of that bhukti
+  const antaras = vimsottariAntara(mahaLord, bhuktiLord, bhuktis.get(bhuktiLord)!);
+
+  return { mahaLord, bhuktiLord, antaras };
 }
 
 // ============================================================================
