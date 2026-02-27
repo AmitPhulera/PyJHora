@@ -1,0 +1,51 @@
+/* Theme Toggle Button */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  color: var(--color-accent-gold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  background: var(--color-card-hover);
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-glow);
+}
+
+.theme-toggle-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-normal);
+}
+
+.theme-toggle-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.theme-toggle-icon.rotate-in {
+  animation: toggleRotateIn var(--transition-normal) ease;
+}
+
+.theme-toggle-icon.rotate-out {
+  animation: toggleRotateOut var(--transition-normal) ease;
+}
+
+@keyframes toggleRotateIn {
+  from { transform: rotate(-90deg) scale(0.8); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+@keyframes toggleRotateOut {
+  from { transform: rotate(90deg) scale(0.8); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
