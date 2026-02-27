@@ -5507,3 +5507,6 @@ export default {
   getYogaDetails,
   getYogaDetailsForAllCharts,
 };
+
+// Re-export JD/place wrapper functions (Python: xxx_yoga(jd, place, ...))
+export * from './yoga-jd-wrappers';
