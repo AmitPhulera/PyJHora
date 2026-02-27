@@ -11,6 +11,7 @@
 
 import {
   ASCENDANT_SYMBOL,
+  DIVISION_CHART_FACTORS,
   GRAHA_DRISHTI,
   HOUSE_STRENGTHS_OF_PLANETS,
   NATURAL_BENEFICS,
@@ -20,6 +21,7 @@ import {
   STRENGTH_FRIEND,
 } from '../constants';
 import type { HouseChart, PlanetPosition } from '../types';
+import { getDivisionalChart } from './charts';
 import {
   getCharaKarakas,
   getHouseOwnerFromPlanetPositions,
@@ -795,4 +797,69 @@ export const getRajaYogaDetails = (
     isOtherRajaYoga2,
     isOtherRajaYoga3,
   };
+};
+
+// ============================================================================
+// PUBLIC: getRajaYogaDetailsForAllCharts
+// ============================================================================
+
+/**
+ * Result type combining raja yoga findings across multiple divisional charts.
+ */
+export interface RajaYogaAllChartsResult {
+  /** Map of divisional chart factor (e.g. 1, 9, 10) to its RajaYogaResult */
+  results: Record<number, RajaYogaResult>;
+  /** Number of charts that had at least one raja yoga */
+  count: number;
+  /** Total number of charts checked */
+  total: number;
+}
+
+/**
+ * Get raja yoga details across all (or a specific) divisional charts.
+ *
+ * Ported from Python's get_raja_yoga_details_for_all_charts.
+ * The Python version accepts (jd, place) and computes charts internally via
+ * drik.dhasavarga. This TS version accepts pre-computed D-1 positions and
+ * uses getDivisionalChart to derive each divisional chart's positions.
+ *
+ * @param d1Positions - Rasi chart (D-1) positions including ascendant (planet === -1)
+ * @param divisionalChartFactor - If provided, only check this single chart factor.
+ *   If null/undefined, iterate over all DIVISION_CHART_FACTORS.
+ * @param chartMethod - Method for divisional chart calculation (default 0)
+ * @returns RajaYogaAllChartsResult with combined results across charts
+ */
+export const getRajaYogaDetailsForAllCharts = (
+  d1Positions: PlanetPosition[],
+  divisionalChartFactor?: number | null,
+  chartMethod: number = 0
+): RajaYogaAllChartsResult => {
+  const results: Record<number, RajaYogaResult> = {};
+  const factors =
+    divisionalChartFactor != null
+      ? [divisionalChartFactor]
+      : DIVISION_CHART_FACTORS;
+
+  for (const dv of factors) {
+    // Compute divisional chart positions from D-1
+    const dvPositions = getDivisionalChart(d1Positions, dv, chartMethod);
+
+    // Build HouseChart from divisional positions
+    const chart = buildChartFromPositions(dvPositions);
+
+    // Get raja yoga details for this chart
+    const result = getRajaYogaDetails(chart, dvPositions);
+
+    // Only include charts that have at least one raja yoga pair
+    // (Python stores all results via dict.update, but only those with pairs
+    // produce non-empty entries)
+    if (result.pairs.length > 0) {
+      results[dv] = result;
+    }
+  }
+
+  const count = Object.keys(results).length;
+  const total = factors.length;
+
+  return { results, count, total };
 };

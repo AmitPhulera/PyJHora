@@ -76,6 +76,28 @@ import {
   PAACHAKAADI_SAMBHANDHA,
   LATTA_STARS_OF_PLANETS,
   ODD_SIGNS,
+  EVEN_SIGNS,
+  MOVABLE_SIGNS,
+  FIXED_SIGNS,
+  DUAL_SIGNS,
+  FIRE_SIGNS,
+  EARTH_SIGNS,
+  AIR_SIGNS,
+  WATER_SIGNS,
+  HOUSE_STRENGTHS_OF_PLANETS,
+  STRENGTH_OWN_SIGN,
+  STRENGTH_FRIEND,
+  MOOLA_TRIKONA_OF_PLANETS,
+  DIVISION_CHART_FACTORS,
+  DHASAVARGA_AMSA_VIMSOPAKA,
+  SHADVARGA_AMSA_VIMSOPAKA,
+  SAPTHAVARGA_AMSA_VIMSOPAKA,
+  SHODHASA_VARGA_AMSA_VIMSOPAKA,
+  DHASAVARGA_AMSA_VAISESHIKAMSA,
+  SHADVARGA_AMSA_VAISESHIKAMSA,
+  SAPTHAVARGA_AMSA_VAISESHIKAMSA,
+  SHODHASA_VARGA_AMSA_VAISESHIKAMSA,
+  VIMSAMSA_VARGA_AMSA_FACTORS,
 } from '../constants';
 
 import { PRASNA_KP_249_DICT } from '../kp-data';
@@ -91,9 +113,7 @@ import {
 
 import { nakshatraPada, cyclicCountOfStarsWithAbhijit } from '../panchanga/drik';
 
-import { kendras } from './house';
-
-import { getRelativeHouseOfPlanet } from './house';
+import { kendras, getRelativeHouseOfPlanet, getCompoundRelationshipsOfPlanets } from './house';
 
 export interface PlanetPosition {
   planet: number;
@@ -1533,6 +1553,439 @@ async function varnadaLagnaJhaPandey(
 
   return drikDasavargaFromLong(vl, 1);
 }
+
+// ============================================================================
+// VAISESHIKAMSA (STRENGTH BY DIGNITY IN MULTIPLE VARGAS)
+// ============================================================================
+
+/**
+ * Result of vaiseshikamsa/vimsopaka analysis for a single planet.
+ * - count: number of vargas where planet is in favorable dignity
+ * - charts: string listing which D-charts contributed (e.g. "D1/D9/D30")
+ * - score: weighted score (for vaiseshikamsa = count, for vimsopaka = weighted sum)
+ */
+export interface VargaBalaResult {
+  count: number;
+  charts: string;
+  score: number;
+}
+
+/**
+ * Core vaiseshikamsa bala calculation.
+ * For each planet, checks across multiple vargas whether the planet is in its
+ * moolatrikona sign, own sign, exalted sign, or a sign stronger than friend.
+ *
+ * Python: _vaiseshikamsa_bala_of_planets
+ *
+ * @param jd - Julian day number
+ * @param place - Birth place
+ * @param amsaVaiseshikamsa - Dict of {dcf: weight} for each varga to check
+ * @returns Record mapping planet index (0-8) to VargaBalaResult
+ */
+export const vaiseshikamsaBalaOfPlanets = (
+  jd: number,
+  place: Place,
+  amsaVaiseshikamsa: Record<number, number>
+): Record<number, VargaBalaResult> => {
+  const pCount = Array(9).fill(0);
+  const pScore = Array(9).fill(0);
+  const pCharts: string[] = Array(9).fill('');
+
+  const d1Positions = buildD1PositionsFromJd(jd, place);
+
+  for (const dcfStr of Object.keys(amsaVaiseshikamsa)) {
+    const dcf = Number(dcfStr);
+    const positions = getDivisionalChart(d1Positions, dcf).slice(0, PP_COUNT_UPTO_KETU);
+
+    for (const pos of positions) {
+      const p = pos.planet;
+      if (p === -1) continue; // Skip ascendant (planet=-1 is 'L')
+
+      const h = pos.rasi;
+      if (
+        h === MOOLA_TRIKONA_OF_PLANETS[p] ||
+        HOUSE_STRENGTHS_OF_PLANETS[p][h] > STRENGTH_FRIEND
+      ) {
+        pCount[p] += 1;
+        pCharts[p] += 'D' + dcf + '/';
+        pScore[p] += amsaVaiseshikamsa[dcf];
+      }
+    }
+  }
+
+  const result: Record<number, VargaBalaResult> = {};
+  for (let p = 0; p < 9; p++) {
+    // Remove trailing '/'
+    const charts = pCharts[p].endsWith('/') ? pCharts[p].slice(0, -1) : pCharts[p];
+    result[p] = { count: pCount[p], charts, score: pScore[p] };
+  }
+  return result;
+};
+
+/**
+ * Vaiseshikamsa Dhasavarga — 10 vargas: D1,2,3,7,9,10,12,16,30,60
+ * Classification names (count >= 2):
+ *   2=Paarijaataamsa, 3=Uttamaamsa, 4=Gopuraamsa, 5=Simhaasanaamsa,
+ *   6=Paaraavataamsa, 7=Devalokaamsa, 8=Brahmalokamsa, 9=Airaavataamsa,
+ *   10=Sreedhaamaamsa
+ *
+ * Python: vaiseshikamsa_dhasavarga_of_planets
+ */
+export const vaiseshikamsaDhasavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vaiseshikamsaBalaOfPlanets(jd, place, DHASAVARGA_AMSA_VAISESHIKAMSA);
+};
+
+/**
+ * Vaiseshikamsa Shadvarga — 6 vargas: D1,2,3,9,12,30
+ * Classification names (count >= 2):
+ *   2=Kimsukaamsa, 3=Vyanjanaamsa, 4=Chaamaraamsa, 5=Chatraamsa, 6=Kundalaamsa
+ *
+ * Python: vaiseshikamsa_shadvarga_of_planets
+ */
+export const vaiseshikamsaShadvargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vaiseshikamsaBalaOfPlanets(jd, place, SHADVARGA_AMSA_VAISESHIKAMSA);
+};
+
+/**
+ * Vaiseshikamsa Sapthavarga — 7 vargas: D1,2,3,7,9,12,30
+ * Classification names (count >= 2):
+ *   2=Kimsukaamsa, 3=Vyanjanaamsa, 4=Chaamaraamsa, 5=Chatraamsa,
+ *   6=Kundalaamsa, 7=Mukutaamsa
+ *
+ * Python: vaiseshikamsa_sapthavarga_of_planets
+ */
+export const vaiseshikamsaSapthavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vaiseshikamsaBalaOfPlanets(jd, place, SAPTHAVARGA_AMSA_VAISESHIKAMSA);
+};
+
+/**
+ * Vaiseshikamsa Shodhasavarga — 16 vargas: D1,2,3,4,7,9,10,12,16,20,24,27,30,40,45,60
+ * Classification names (count >= 2):
+ *   2=Bhedakaamsa, 3=Kusumaamsa, 4=Nagapurushaamsa, 5=Kandukaamsa,
+ *   6=Keralaamsa, 7=Kalpavrikshaamsa, 8=Chandanavanaamsa, 9=Poornachandraamsa,
+ *   10=Uchchaisravaamsa, 11=Dhanvantaryamsa, 12=Sooryakaantaamsa,
+ *   13=Vidrumaamsa, 14=Indraasanaamsa, 15=Golokaamsa, 16=Sree Vallabhaamsa
+ *
+ * Python: vaiseshikamsa_shodhasavarga_of_planets
+ */
+export const vaiseshikamsaShodhasavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vaiseshikamsaBalaOfPlanets(jd, place, SHODHASA_VARGA_AMSA_VAISESHIKAMSA);
+};
+
+// ============================================================================
+// VIMSOPAKA (WEIGHTED STRENGTH BY DIGNITY + COMPOUND RELATIONSHIPS)
+// ============================================================================
+
+/**
+ * Core vimsopaka bala calculation.
+ * Similar to vaiseshikamsa, but uses weighted scores based on compound
+ * planetary relationships from the D1 chart.
+ *
+ * Python: _vimsopaka_bala_of_planets
+ *
+ * Scoring: For each varga, if planet is in own sign => vv=20,
+ * else vv = scores[compound_relationship(planet, sign_owner)] where
+ * scores = [5, 7, 10, 15, 18] (indexed by compound relationship 0-4).
+ * Final score += weight[dcf] * vv / 20.
+ *
+ * @param jd - Julian day number
+ * @param place - Birth place
+ * @param amsaVimsopaka - Dict of {dcf: weight} for each varga
+ * @returns Record mapping planet index (0-8) to VargaBalaResult
+ */
+export const vimsopakaBalaOfPlanets = (
+  jd: number,
+  place: Place,
+  amsaVimsopaka: Record<number, number>
+): Record<number, VargaBalaResult> => {
+  const pCount = Array(9).fill(0);
+  const pScore: number[] = Array(9).fill(0);
+  const pCharts: string[] = Array(9).fill('');
+
+  const scores = [5, 7, 10, 15, 18];
+
+  const d1Positions = buildD1PositionsFromJd(jd, place);
+
+  // Get compound relationships from D1 chart
+  const d1Chart = getHousePlanetListFromPositions(d1Positions);
+  const cr = getCompoundRelationshipsOfPlanets(d1Chart);
+
+  for (const dcfStr of Object.keys(amsaVimsopaka)) {
+    const dcf = Number(dcfStr);
+    const positions = getDivisionalChart(d1Positions, dcf).slice(0, PP_COUNT_UPTO_KETU);
+
+    for (const pos of positions) {
+      const p = pos.planet;
+      if (p === -1) continue; // Skip ascendant
+
+      const h = pos.rasi;
+
+      // Check if favorable (moolatrikona, own, or better than friend) — count only
+      if (
+        h === MOOLA_TRIKONA_OF_PLANETS[p] ||
+        HOUSE_STRENGTHS_OF_PLANETS[p][h] > STRENGTH_FRIEND
+      ) {
+        pCount[p] += 1;
+        pCharts[p] += 'D' + dcf + '/';
+      }
+
+      // Calculate vimsopaka score — applies to ALL planets, not just favorable ones
+      let vv: number;
+      if (HOUSE_STRENGTHS_OF_PLANETS[p][h] === STRENGTH_OWN_SIGN) {
+        vv = 20;
+      } else {
+        const d = HOUSE_OWNERS[h]; // owner of this rasi
+        vv = scores[cr[p][d]] ?? 5;
+      }
+      pScore[p] += amsaVimsopaka[dcf] * vv / 20;
+    }
+  }
+
+  const result: Record<number, VargaBalaResult> = {};
+  for (let p = 0; p < 9; p++) {
+    const charts = pCharts[p].endsWith('/') ? pCharts[p].slice(0, -1) : pCharts[p];
+    result[p] = { count: pCount[p], charts, score: pScore[p] };
+  }
+  return result;
+};
+
+/**
+ * Vimsopaka Dhasavarga — 10 vargas with weights
+ * Python: vimsopaka_dhasavarga_of_planets
+ */
+export const vimsopakaDhasavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vimsopakaBalaOfPlanets(jd, place, DHASAVARGA_AMSA_VIMSOPAKA);
+};
+
+/**
+ * Vimsopaka Shadvarga — 6 vargas with weights
+ * Python: vimsopaka_shadvarga_of_planets
+ */
+export const vimsopakaShadvargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vimsopakaBalaOfPlanets(jd, place, SHADVARGA_AMSA_VIMSOPAKA);
+};
+
+/**
+ * Vimsopaka Sapthavarga — 7 vargas with weights
+ * Python: vimsopaka_sapthavarga_of_planets
+ */
+export const vimsopakaSapthavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vimsopakaBalaOfPlanets(jd, place, SAPTHAVARGA_AMSA_VIMSOPAKA);
+};
+
+/**
+ * Vimsopaka Shodhasavarga — 16 vargas with weights
+ * Python: vimsopaka_shodhasavarga_of_planets
+ */
+export const vimsopakaShodhasavargaOfPlanets = (
+  jd: number, place: Place
+): Record<number, VargaBalaResult> => {
+  return vimsopakaBalaOfPlanets(jd, place, SHODHASA_VARGA_AMSA_VIMSOPAKA);
+};
+
+// ============================================================================
+// VIMSAMSAVARGA (20-VARGA ANALYSIS)
+// ============================================================================
+
+/**
+ * Count how many of the 20+ standard vargas each planet occupies a favorable position in.
+ * Favorable = moolatrikona, own sign, or better than friend.
+ *
+ * Python: vimsamsavarga_of_planets
+ *
+ * @param jd - Julian day number
+ * @param place - Birth place
+ * @returns Array of 9 numbers (index = planet 0-8), each = count of favorable vargas
+ */
+export const vimsamsavargaOfPlanets = (
+  jd: number, place: Place
+): number[] => {
+  const planetVimsamsa = Array(9).fill(0);
+
+  const d1Positions = buildD1PositionsFromJd(jd, place);
+
+  for (const dcf of VIMSAMSA_VARGA_AMSA_FACTORS) {
+    const positions = getDivisionalChart(d1Positions, dcf);
+
+    for (const pos of positions) {
+      const p = pos.planet;
+      if (p === -1) continue; // Skip ascendant
+
+      const h = pos.rasi;
+      if (
+        h === MOOLA_TRIKONA_OF_PLANETS[p] ||
+        HOUSE_STRENGTHS_OF_PLANETS[p][h] > STRENGTH_FRIEND
+      ) {
+        planetVimsamsa[p] += 1;
+      }
+    }
+  }
+
+  return planetVimsamsa;
+};
+
+// ============================================================================
+// CUSTOM DIVISIONAL CHART
+// ============================================================================
+
+/**
+ * Generate a parivritti cyclic lookup table.
+ * Each entry: result[sign][part] = target varga sign
+ *
+ * Python: utils.parivritti_cyclic(dcf, dirn=1)
+ */
+const generateParivrittiCyclic = (dcf: number, dirn: number = 1): number[][] => {
+  const pc: number[][] = [];
+  let hs = 0;
+  for (let i = 0; i < 12; i++) {
+    const t: number[] = [];
+    for (let j = 0; j < dcf; j++) {
+      t.push(((hs % 12) + 12) % 12);
+      hs = ((hs + dirn) % 12 + 12) % 12;
+    }
+    pc.push(t);
+  }
+  return pc;
+};
+
+/**
+ * Generate a non-cyclic varga lookup table.
+ * For each of the 12 signs, produces dcf entries giving the target varga sign.
+ *
+ * Python: utils.__varga_non_cyclic(dcf, base_rasi, start_sign_variation, count_from_end_of_sign)
+ *
+ * @param dcf - divisional chart factor
+ * @param baseRasi - 0=Aries as base, 1=sign itself as base
+ * @param startSignVariation - 0-9, see below
+ * @param countFromEndOfSign - if true, even signs count from end
+ * @returns 12-element array, each element is a dcf-length array of target signs
+ */
+const generateVargaNonCyclic = (
+  dcf: number,
+  baseRasi: number = 0,
+  startSignVariation: number = 1,
+  countFromEndOfSign: boolean = false
+): number[][] => {
+  const pc: number[][] = [];
+
+  for (let sign = 0; sign < 12; sign++) {
+    let seed = baseRasi === 0 ? 0 : sign;
+    let dirn = 1;
+
+    if (countFromEndOfSign && EVEN_SIGNS.includes(sign)) {
+      seed = ((12 + sign - dcf + 1) % 12 + 12) % 12;
+      dirn = -1;
+    }
+
+    let startSign = seed;
+
+    if (startSignVariation === 1 && EVEN_SIGNS.includes(sign)) {
+      startSign = (seed + 6) % 12;
+    } else if (startSignVariation === 2 && EVEN_SIGNS.includes(sign)) {
+      startSign = (seed + 8) % 12;
+    } else if (startSignVariation === 3 && EVEN_SIGNS.includes(sign)) {
+      startSign = (seed + 4) % 12;
+    } else if (startSignVariation === 4 && EVEN_SIGNS.includes(sign)) {
+      startSign = (seed + 10) % 12;
+    } else if (startSignVariation === 5 && EVEN_SIGNS.includes(sign)) {
+      startSign = (seed + 2) % 12;
+    } else if (startSignVariation === 6) {
+      if (FIXED_SIGNS.includes(sign)) {
+        startSign = (seed + 4) % 12;
+      } else if (DUAL_SIGNS.includes(sign)) {
+        startSign = (seed + 8) % 12;
+      }
+    } else if (startSignVariation === 7) {
+      if (FIXED_SIGNS.includes(sign)) {
+        startSign = (seed + 8) % 12;
+      } else if (DUAL_SIGNS.includes(sign)) {
+        startSign = (seed + 4) % 12;
+      }
+    } else if (startSignVariation === 8) {
+      if (EARTH_SIGNS.includes(sign)) {
+        startSign = (seed + 3) % 12;
+      } else if (AIR_SIGNS.includes(sign)) {
+        startSign = (seed + 6) % 12;
+      } else if (WATER_SIGNS.includes(sign)) {
+        startSign = (seed + 9) % 12;
+      }
+    } else if (startSignVariation === 9) {
+      if (EARTH_SIGNS.includes(sign)) {
+        startSign = (seed + 9) % 12;
+      } else if (AIR_SIGNS.includes(sign)) {
+        startSign = (seed + 6) % 12;
+      } else if (WATER_SIGNS.includes(sign)) {
+        startSign = (seed + 3) % 12;
+      }
+    }
+
+    const t: number[] = [];
+    for (let h = 0; h < dcf; h++) {
+      t.push(((startSign + dirn * h) % 12 + 12) % 12);
+    }
+    pc.push(t);
+  }
+
+  return pc;
+};
+
+/**
+ * Custom divisional chart (cyclic or non-cyclic).
+ *
+ * Python: custom_divisional_chart(planet_positions_in_rasi, divisional_chart_factor,
+ *           chart_method=0, base_rasi=None, count_from_end_of_sign=False)
+ *
+ * @param d1Positions - Planet positions in Rasi chart (D1)
+ * @param divisionalChartFactor - D-chart factor (1..300)
+ * @param chartMethod - Chart method (0-9), see Python docs
+ * @param baseRasi - undefined/null for cyclic, 0=Aries base, 1=sign base for non-cyclic
+ * @param countFromEndOfSign - If true, count from end for even signs (experimental)
+ * @returns Array of PlanetPosition for the custom divisional chart
+ */
+export const customDivisionalChart = (
+  d1Positions: PlanetPosition[],
+  divisionalChartFactor: number,
+  chartMethod: number = 0,
+  baseRasi?: number,
+  countFromEndOfSign: boolean = false
+): PlanetPosition[] => {
+  const dvf = divisionalChartFactor;
+  const f1 = 30.0 / dvf;
+
+  // Cyclic variation when baseRasi is not specified
+  if (baseRasi === undefined || baseRasi === null) {
+    const horaList = generateParivrittiCyclic(dvf, 1);
+    return d1Positions.map(pos => {
+      const dLong = (pos.longitude * dvf) % 30;
+      const hora = Math.floor(pos.longitude / f1);
+      const horaSign = horaList[pos.rasi][hora];
+      return { planet: pos.planet, rasi: horaSign, longitude: dLong };
+    });
+  }
+
+  // Non-cyclic variation
+  const horaList = generateVargaNonCyclic(dvf, baseRasi, chartMethod, countFromEndOfSign);
+  return d1Positions.map(pos => {
+    const dLong = (pos.longitude * dvf) % 30;
+    const hora = Math.floor(pos.longitude / f1);
+    const horaSign = horaList[pos.rasi][hora];
+    return { planet: pos.planet, rasi: horaSign, longitude: dLong };
+  });
+};
 
 /**
  * Build D1 (Rasi) positions from JD and place (sync helper).

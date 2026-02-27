@@ -820,6 +820,31 @@ export const PUSHKARA_BHAGAS = [21, 14, 24, 7, 21, 14, 24, 7, 21, 14, 24, 7];
 /** Python: division_chart_factors */
 export const DIVISION_CHART_FACTORS = [1,2,3,4,5,6,7,8,9,10,11,12,16,20,24,27,30,40,45,60,81,108,144];
 
+// ============================================================================
+// VIMSOPAKA & VAISESHIKAMSA CONSTANTS
+// ============================================================================
+
+/** Python: dhasavarga_amsa_vimsopaka — weights for 10 vargas */
+export const DHASAVARGA_AMSA_VIMSOPAKA: Record<number, number> = {1:3,2:1.5,3:1.5,7:1.5,9:1.5,10:1.5,12:1.5,16:1.5,30:1.5,60:5};
+/** Python: shadvarga_amsa_vimsopaka — weights for 6 vargas */
+export const SHADVARGA_AMSA_VIMSOPAKA: Record<number, number> = {1:6,2:2,3:4,9:5,12:2,30:1};
+/** Python: sapthavarga_amsa_vimsopaka — weights for 7 vargas */
+export const SAPTHAVARGA_AMSA_VIMSOPAKA: Record<number, number> = {1:5,2:2,3:3,7:1,9:2.5,12:4.5,30:2};
+/** Python: shodhasa_varga_amsa_vimsopaka — weights for 16 vargas */
+export const SHODHASA_VARGA_AMSA_VIMSOPAKA: Record<number, number> = {1:3.5,2:1,3:1,4:0.5,7:0.5,9:3,10:0.5,12:0.5,16:2,20:0.5,24:0.5,27:0.5,30:1,40:0.5,45:0.5,60:4};
+
+/** Python: dhasavarga_amsa_vaiseshikamsa — equal weights for 10 vargas */
+export const DHASAVARGA_AMSA_VAISESHIKAMSA: Record<number, number> = {1:1,2:1,3:1,7:1,9:1,10:1,12:1,16:1,30:1,60:1};
+/** Python: shadvarga_amsa_vaiseshikamsa — equal weights for 6 vargas */
+export const SHADVARGA_AMSA_VAISESHIKAMSA: Record<number, number> = {1:1,2:1,3:1,9:1,12:1,30:1};
+/** Python: sapthavarga_amsa_vaiseshikamsa — equal weights for 7 vargas */
+export const SAPTHAVARGA_AMSA_VAISESHIKAMSA: Record<number, number> = {1:1,2:1,3:1,7:1,9:1,12:1,30:1};
+/** Python: shodhasa_varga_amsa_vaiseshikamsa — equal weights for 16 vargas */
+export const SHODHASA_VARGA_AMSA_VAISESHIKAMSA: Record<number, number> = {1:1,2:1,3:1,4:1,7:1,9:1,10:1,12:1,16:1,20:1,24:1,27:1,30:1,40:1,45:1,60:1};
+
+/** Python: vimsamsa_varga_amsa_factors — same as division_chart_factors (all 20+ vargas) */
+export const VIMSAMSA_VARGA_AMSA_FACTORS = DIVISION_CHART_FACTORS;
+
 /**
  * Number of chart methods available per divisional chart factor.
  * Python: varga_option_dict = {factor: (num_methods, default_method), ...}

@@ -271,9 +271,11 @@ export const manglik = (
   // Exception 15: Lagna in Cancer or Leo (Mars becomes yoga karaka)
   exceptions.push(lagnaHouse === CANCER || lagnaHouse === LEO);
 
-  // Exception 16: Mars conjunct Jupiter or Moon
+  // Exception 16: Mars conjunct Jupiter or Venus
+  // Note: Python comment says "Jupiter or moon" but code uses p_to_h[4] (Jupiter) and p_to_h[5] (Venus).
+  // We follow the Python code, which checks Venus not Moon.
   exceptions.push(
-    pToH[JUPITER] === marsHouse || pToH[MOON] === marsHouse
+    pToH[JUPITER] === marsHouse || pToH[VENUS] === marsHouse
   );
 
   // Exception 17: Jupiter or Venus in Lagna
@@ -518,4 +520,80 @@ export const shrapit = (positions: PlanetPosition[]): boolean => {
 
   if (!rahuPos || !saturnPos) return false;
   return rahuPos.rasi === saturnPos.rasi;
+};
+
+// ============================================================================
+// GET DOSHA DETAILS (Top-level wrapper)
+// ============================================================================
+
+/**
+ * Result type for all dosha checks.
+ */
+export interface DoshaDetails {
+  kalaSarpa: boolean;
+  manglik: {
+    isManglik: boolean;
+    hasExceptions: boolean;
+    exceptionIndices: number[];
+  };
+  pitru: {
+    hasDosha: boolean;
+    conditionIndices: number[];
+  };
+  guruChandala: {
+    hasDosha: boolean;
+    jupiterStronger: boolean;
+  };
+  kalathra: boolean;
+  gandaMoola: boolean;
+  ghata: boolean;
+  shrapit: boolean;
+}
+
+/**
+ * Get all dosha details for a given chart.
+ * Ported from Python get_dosha_details. Unlike the Python version which
+ * requires jd/place for language resources and generates HTML strings,
+ * this TS version returns structured data from pre-computed positions.
+ *
+ * @param chart - HouseChart (string[12]) for kala sarpa check
+ * @param positions - Array of PlanetPosition for other dosha checks
+ * @param moonStar - 1-indexed nakshatra number of the Moon for ganda moola check
+ * @param referencePlanet - Reference planet for manglik/kalathra (default: 'L')
+ * @returns DoshaDetails with all dosha findings
+ */
+export const getDoshaDetails = (
+  chart: HouseChart,
+  positions: PlanetPosition[],
+  moonStar: number,
+  referencePlanet: number | 'L' = 'L'
+): DoshaDetails => {
+  const ksResult = kalaSarpa(chart);
+
+  const [isManglik, hasExceptions, exceptionIndices] = manglik(
+    positions, referencePlanet
+  );
+
+  const [hasPitru, pitruConditions] = pitruDosha(positions);
+
+  const [hasGuru, jupiterStronger] = guruChandalaDosha(positions);
+
+  const kalathraResult = kalathra(positions, referencePlanet);
+
+  const gandaMoolaResult = gandaMoola(moonStar);
+
+  const ghataResult = ghata(positions);
+
+  const shrapitResult = shrapit(positions);
+
+  return {
+    kalaSarpa: ksResult,
+    manglik: { isManglik, hasExceptions, exceptionIndices },
+    pitru: { hasDosha: hasPitru, conditionIndices: pitruConditions },
+    guruChandala: { hasDosha: hasGuru, jupiterStronger },
+    kalathra: kalathraResult,
+    gandaMoola: gandaMoolaResult,
+    ghata: ghataResult,
+    shrapit: shrapitResult,
+  };
 };

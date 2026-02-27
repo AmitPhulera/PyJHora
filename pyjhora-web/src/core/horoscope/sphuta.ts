@@ -281,3 +281,221 @@ export const rahuTithiSphuta = (positions: PlanetPosition[]): { rasi: number; lo
   const tithiLong = ((rahuLong - sunLong) % 360 + 360) % 360;
   return dasavargaFromLong(tithiLong, 1);
 };
+
+// ============================================================================
+// MIXED CHART SPHUTA VARIANTS
+// ============================================================================
+// These functions take planet positions from a mixed chart (charts.mixedChart)
+// and use the mixed divisional chart factor (vargaFactor1 * vargaFactor2)
+// for the final dasavarga conversion.
+
+/**
+ * Tri Sphuta for mixed chart.
+ * Formula: (Moon + Ascendant + Gulika) % 360, converted with mixed dvf.
+ *
+ * @param positions - Planet positions from mixed chart
+ * @param gulikaLongitude - Absolute longitude of Gulika (computed with mixed dvf)
+ * @param mixedDvf - Mixed divisional chart factor (vargaFactor1 * vargaFactor2)
+ */
+export const triSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const moonLong = getAbsLong(positions, MOON);
+  const ascLong = getAbsLong(positions, LAGNA);
+  const triLong = (moonLong + ascLong + gulikaLongitude) % 360;
+  return dasavargaFromLong(triLong, mixedDvf);
+};
+
+/**
+ * Chatur Sphuta for mixed chart.
+ * Formula: (Sun + triSphutaMixedChart) % 360
+ */
+export const chaturSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const sunLong = getAbsLong(positions, SUN);
+  const tri = triSphotaMixedChart(positions, gulikaLongitude, mixedDvf);
+  const triAbsLong = tri.rasi * 30 + tri.longitude;
+  const chaturLong = (sunLong + triAbsLong) % 360;
+  return dasavargaFromLong(chaturLong, mixedDvf);
+};
+
+/**
+ * Pancha Sphuta for mixed chart.
+ * Formula: (Rahu + chaturSphutaMixedChart) % 360
+ */
+export const panchaSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const rahuLong = getAbsLong(positions, RAHU);
+  const chatur = chaturSphotaMixedChart(positions, gulikaLongitude, mixedDvf);
+  const chaturAbsLong = chatur.rasi * 30 + chatur.longitude;
+  const panchaLong = (rahuLong + chaturAbsLong) % 360;
+  return dasavargaFromLong(panchaLong, mixedDvf);
+};
+
+/**
+ * Prana Sphuta for mixed chart.
+ * Formula: (Ascendant * 5 + Gulika) % 360
+ */
+export const pranaSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const ascLong = getAbsLong(positions, LAGNA);
+  const pranaLong = (ascLong * 5 + gulikaLongitude) % 360;
+  return dasavargaFromLong(pranaLong, mixedDvf);
+};
+
+/**
+ * Deha Sphuta for mixed chart.
+ * Formula: (Moon * 8 + Gulika) % 360
+ */
+export const dehaSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const moonLong = getAbsLong(positions, MOON);
+  const dehaLong = (moonLong * 8 + gulikaLongitude) % 360;
+  return dasavargaFromLong(dehaLong, mixedDvf);
+};
+
+/**
+ * Mrityu Sphuta for mixed chart.
+ * Formula: (Gulika * 7 + Sun) % 360
+ */
+export const mrityuSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const sunLong = getAbsLong(positions, SUN);
+  const mrityuLong = (gulikaLongitude * 7 + sunLong) % 360;
+  return dasavargaFromLong(mrityuLong, mixedDvf);
+};
+
+/**
+ * Sookshma Tri Sphuta for mixed chart.
+ * Formula: (Prana + Deha + Mrityu) % 360
+ */
+export const sookshmaTriSphotaMixedChart = (
+  positions: PlanetPosition[],
+  gulikaLongitude: number,
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const prana = pranaSphotaMixedChart(positions, gulikaLongitude, mixedDvf);
+  const deha = dehaSphotaMixedChart(positions, gulikaLongitude, mixedDvf);
+  const mrityu = mrityuSphotaMixedChart(positions, gulikaLongitude, mixedDvf);
+  const sookshmaLong = (
+    prana.rasi * 30 + prana.longitude +
+    deha.rasi * 30 + deha.longitude +
+    mrityu.rasi * 30 + mrityu.longitude
+  ) % 360;
+  return dasavargaFromLong(sookshmaLong, mixedDvf);
+};
+
+/**
+ * Beeja Sphuta for mixed chart.
+ * Formula: (Sun + Jupiter + Venus) % 360
+ */
+export const beejaSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const sunLong = getAbsLong(positions, SUN);
+  const jupiterLong = getAbsLong(positions, JUPITER);
+  const venusLong = getAbsLong(positions, VENUS);
+  const beejaLong = (sunLong + jupiterLong + venusLong) % 360;
+  return dasavargaFromLong(beejaLong, mixedDvf);
+};
+
+/**
+ * Kshetra Sphuta for mixed chart.
+ * Formula: (Moon + Jupiter + Mars) % 360
+ */
+export const kshetraSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const moonLong = getAbsLong(positions, MOON);
+  const jupiterLong = getAbsLong(positions, JUPITER);
+  const marsLong = getAbsLong(positions, MARS);
+  const kshetraLong = (moonLong + jupiterLong + marsLong) % 360;
+  return dasavargaFromLong(kshetraLong, mixedDvf);
+};
+
+/**
+ * Tithi Sphuta for mixed chart.
+ * Formula: (Moon - Sun) % 360
+ */
+export const tithiSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const moonLong = getAbsLong(positions, MOON);
+  const sunLong = getAbsLong(positions, SUN);
+  const tithiLong = ((moonLong - sunLong) % 360 + 360) % 360;
+  return dasavargaFromLong(tithiLong, mixedDvf);
+};
+
+/**
+ * Yoga Sphuta for mixed chart.
+ * Formula: (Moon + Sun + yogiOffset) % 360
+ */
+export const yogaSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number,
+  addYogiLongitude: boolean = false
+): { rasi: number; longitude: number } => {
+  const moonLong = getAbsLong(positions, MOON);
+  const sunLong = getAbsLong(positions, SUN);
+  const yogiLong = addYogiLongitude ? 93 + 20 / 60 : 0;
+  const yogaLong = (moonLong + sunLong + yogiLong) % 360;
+  return dasavargaFromLong(yogaLong, mixedDvf);
+};
+
+/**
+ * Yogi Sphuta for mixed chart.
+ * Simply calls yogaSphotaMixedChart with addYogiLongitude=true.
+ */
+export const yogiSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  return yogaSphotaMixedChart(positions, mixedDvf, true);
+};
+
+/**
+ * Avayogi Sphuta for mixed chart.
+ * Formula: (yogiSphutaMixedChart + 186 + 40/60) % 360
+ */
+export const avayogiSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const yogi = yogiSphotaMixedChart(positions, mixedDvf);
+  const avayogiLong = (yogi.rasi * 30 + yogi.longitude + 186 + 40 / 60) % 360;
+  return dasavargaFromLong(avayogiLong, mixedDvf);
+};
+
+/**
+ * Rahu Tithi Sphuta for mixed chart.
+ * Formula: (Rahu - Sun) % 360
+ */
+export const rahuTithiSphotaMixedChart = (
+  positions: PlanetPosition[],
+  mixedDvf: number
+): { rasi: number; longitude: number } => {
+  const rahuLong = getAbsLong(positions, RAHU);
+  const sunLong = getAbsLong(positions, SUN);
+  const tithiLong = ((rahuLong - sunLong) % 360 + 360) % 360;
+  return dasavargaFromLong(tithiLong, mixedDvf);
+};
