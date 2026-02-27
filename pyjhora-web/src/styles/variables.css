@@ -1,0 +1,158 @@
+/* ============================================
+   JHora — Dual-Theme CSS Variables
+   "Celestial Scholar" Design System
+   ============================================ */
+
+/* Dark Theme (Celestial) — default */
+[data-theme="dark"],
+:root {
+  /* Backgrounds */
+  --color-bg: #070b14;
+  --color-surface: #0f1523;
+  --color-card: #151d2e;
+  --color-card-hover: #1c2640;
+  --color-glass: rgba(15, 21, 35, 0.8);
+
+  /* Accents */
+  --color-accent-gold: #c9a14e;
+  --color-accent-blue: #5b7fff;
+  --color-accent-success: #10b981;
+  --color-accent-error: #ef4444;
+  --color-accent-warning: #f59e0b;
+
+  /* Text */
+  --color-text: #e8e2d6;
+  --color-text-secondary: #9b937f;
+  --color-text-muted: #665e4e;
+
+  /* Borders */
+  --color-border: rgba(201, 161, 78, 0.15);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #c9a14e 0%, #a07c2e 100%);
+  --gradient-gold: linear-gradient(135deg, #c9a14e 0%, #8b6914 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(201, 161, 78, 0.2);
+}
+
+/* Light Theme (Parchment) */
+[data-theme="light"] {
+  /* Backgrounds */
+  --color-bg: #f8f5ef;
+  --color-surface: #ffffff;
+  --color-card: #f0ede6;
+  --color-card-hover: #e8e4db;
+  --color-glass: rgba(248, 245, 239, 0.9);
+
+  /* Accents */
+  --color-accent-gold: #8b6914;
+  --color-accent-blue: #3a5bc7;
+  --color-accent-success: #059669;
+  --color-accent-error: #dc2626;
+  --color-accent-warning: #d97706;
+
+  /* Text */
+  --color-text: #1a1207;
+  --color-text-secondary: #5c5344;
+  --color-text-muted: #8a8070;
+
+  /* Borders */
+  --color-border: rgba(139, 105, 20, 0.15);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #8b6914 0%, #a07c2e 100%);
+  --gradient-gold: linear-gradient(135deg, #8b6914 0%, #c9a14e 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(139, 105, 20, 0.12);
+}
+
+/* ---- Shared (theme-independent) tokens ---- */
+:root {
+  /* Planet Colors (same in both themes) */
+  --color-planet-sun: #f59e0b;
+  --color-planet-moon: #c4b5a0;
+  --color-planet-mars: #ef4444;
+  --color-planet-mercury: #22c55e;
+  --color-planet-jupiter: #eab308;
+  --color-planet-venus: #ec4899;
+  --color-planet-saturn: #6366f1;
+  --color-planet-rahu: #64748b;
+  --color-planet-ketu: #a1a1aa;
+
+  /* Rasi Colors (same in both themes) */
+  --color-rasi-fire: #f97316;
+  --color-rasi-earth: #84cc16;
+  --color-rasi-air: #06b6d4;
+  --color-rasi-water: #3b82f6;
+
+  /* Typography */
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* ----- Legacy aliases (backward compat) ----- */
+  --bg-primary: var(--color-bg);
+  --bg-secondary: var(--color-surface);
+  --bg-card: var(--color-card);
+  --bg-card-hover: var(--color-card-hover);
+  --bg-glass: var(--color-glass);
+
+  --accent-primary: var(--color-accent-gold);
+  --accent-secondary: var(--color-accent-blue);
+  --accent-gold: var(--color-accent-gold);
+  --accent-success: var(--color-accent-success);
+  --accent-warning: var(--color-accent-warning);
+  --accent-error: var(--color-accent-error);
+
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
+
+  --planet-sun: var(--color-planet-sun);
+  --planet-moon: var(--color-planet-moon);
+  --planet-mars: var(--color-planet-mars);
+  --planet-mercury: var(--color-planet-mercury);
+  --planet-jupiter: var(--color-planet-jupiter);
+  --planet-venus: var(--color-planet-venus);
+  --planet-saturn: var(--color-planet-saturn);
+  --planet-rahu: var(--color-planet-rahu);
+  --planet-ketu: var(--color-planet-ketu);
+
+  --rasi-fire: var(--color-rasi-fire);
+  --rasi-earth: var(--color-rasi-earth);
+  --rasi-air: var(--color-rasi-air);
+  --rasi-water: var(--color-rasi-water);
+
+  --font-sans: var(--font-body);
+}
