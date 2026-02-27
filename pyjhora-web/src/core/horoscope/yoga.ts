@@ -56,6 +56,7 @@ import {
   ODD_SIGNS,
   EVEN_SIGNS,
   COMPOUND_ADHIMITRA,
+  DIVISION_CHART_FACTORS,
 } from '../constants';
 
 import type { PlanetPosition } from '../types';
@@ -4612,6 +4613,230 @@ export const kaahalaYoga = kahalaYoga;
 export const kaahalaYogaFromPlanetPositions = kahalaYogaFromPlanetPositions;
 
 // ============================================================================
+// YOGA FUNCTION REGISTRY (maps Python snake_case names to TS functions)
+// ============================================================================
+
+/**
+ * Registry mapping Python yoga function names (from yoga_msgs_<lang>.json)
+ * to their TypeScript _from_planet_positions equivalents.
+ * Used by getYogaDetails to dynamically evaluate all yogas.
+ *
+ * Python calls: eval(yoga_function + '_from_planet_positions')(planet_positions)
+ * TS equivalent: YOGA_FUNCTION_REGISTRY[yoga_function](positions)
+ */
+const YOGA_FUNCTION_REGISTRY: Record<string, (positions: PlanetPosition[]) => boolean> = {
+  vesi_yoga: vesiYogaFromPlanetPositions,
+  vosi_yoga: vosiYogaFromPlanetPositions,
+  ubhayachara_yoga: ubhayacharaYogaFromPlanetPositions,
+  nipuna_yoga: nipunaYogaFromPlanetPositions,
+  sunaphaa_yoga: sunaphaaYogaFromPlanetPositions,
+  anaphaa_yoga: anaphaaYogaFromPlanetPositions,
+  duradhara_yoga: duradharaYogaFromPlanetPositions,
+  kemadruma_yoga: kemadrumaYogaFromPlanetPositions,
+  chandra_mangala_yoga: chandraMangalaYogaFromPlanetPositions,
+  adhi_yoga: adhiYogaFromPlanetPositions,
+  ruchaka_yoga: ruchakaYogaFromPlanetPositions,
+  bhadra_yoga: bhadraYogaFromPlanetPositions,
+  sasa_yoga: sasaYogaFromPlanetPositions,
+  maalavya_yoga: maalavyaYogaFromPlanetPositions,
+  hamsa_yoga: hamsaYogaFromPlanetPositions,
+  rajju_yoga: rajjuYogaFromPlanetPositions,
+  musala_yoga: musalaYogaFromPlanetPositions,
+  nala_yoga: nalaYogaFromPlanetPositions,
+  maalaa_yoga: maalaaYogaFromPlanetPositions,
+  sarpa_yoga: sarpaYogaFromPlanetPositions,
+  gadaa_yoga: gadaaYogaFromPlanetPositions,
+  sakata_yoga: sakataYogaFromPlanetPositions,
+  sringaataka_yoga: sringaatakaYogaFromPlanetPositions,
+  hala_yoga: halaYogaFromPlanetPositions,
+  vajra_yoga: vajraYogaFromPlanetPositions,
+  yava_yoga: yavaYogaFromPlanetPositions,
+  kamala_yoga: kamalaYogaFromPlanetPositions,
+  vaapi_yoga: vaapiYogaFromPlanetPositions,
+  yoopa_yoga: yoopaYogaFromPlanetPositions,
+  sara_yoga: saraYogaFromPlanetPositions,
+  sakti_yoga: saktiYogaFromPlanetPositions,
+  danda_yoga: dandaYogaFromPlanetPositions,
+  naukaa_yoga: naukaaYogaFromPlanetPositions,
+  koota_yoga: kootaYogaFromPlanetPositions,
+  chatra_yoga: chatraYogaFromPlanetPositions,
+  chaapa_yoga: chaapaYogaFromPlanetPositions,
+  ardha_chandra_yoga: ardhaChandraYogaFromPlanetPositions,
+  chakra_yoga: chakraYogaFromPlanetPositions,
+  samudra_yoga: samudraYogaFromPlanetPositions,
+  veenaa_yoga: veenaaYogaFromPlanetPositions,
+  daama_yoga: daamaYogaFromPlanetPositions,
+  paasa_yoga: paasaYogaFromPlanetPositions,
+  kedaara_yoga: kedaaraYogaFromPlanetPositions,
+  soola_yoga: soolaYogaFromPlanetPositions,
+  yuga_yoga: yugaYogaFromPlanetPositions,
+  gola_yoga: golaYogaFromPlanetPositions,
+  subha_yoga: subhaYogaFromPlanetPositions,
+  asubha_yoga: asubhaYogaFromPlanetPositions,
+  gaja_kesari_yoga: gajaKesariYogaFromPlanetPositions,
+  guru_mangala_yoga: guruMangalaYogaFromPlanetPositions,
+  amala_yoga: amalaYogaFromPlanetPositions,
+  parvata_yoga: parvataYogaFromPlanetPositions,
+  kaahala_yoga: kaahalaYogaFromPlanetPositions,
+  chaamara_yoga: chaamaraYogaFromPlanetPositions,
+  sankha_yoga: sankhaYogaFromPlanetPositions,
+  bheri_yoga: bheriYogaFromPlanetPositions,
+  mridanga_yoga: mridangaYogaFromPlanetPositions,
+  sreenaatha_yoga: sreenaatheYogaFromPlanetPositions,
+  matsya_yoga: matsyaYogaFromPlanetPositions,
+  koorma_yoga: koormaYogaFromPlanetPositions,
+  khadga_yoga: khadgaYogaFromPlanetPositions,
+  kusuma_yoga: kusumaYogaFromPlanetPositions,
+  kalaanidhi_yoga: kalaanidhiYogaFromPlanetPositions,
+  kalpadruma_yoga: kalpadrumaYogaFromPlanetPositions,
+  lagnaadhi_yoga: lagnaAdhiYogaFromPlanetPositions,
+  hari_yoga: hariYogaFromPlanetPositions,
+  brahma_yoga: brahmaYogaFromPlanetPositions,
+  vishnu_yoga: vishnuYogaFromPlanetPositions,
+  siva_yoga: sivaYogaFromPlanetPositions,
+  trilochana_yoga: trilochanaYogaFromPlanetPositions,
+  gouri_yoga: gouriYogaFromPlanetPositions,
+  chandikaa_yoga: chandikaaYogaFromPlanetPositions,
+  lakshmi_yoga: lakshmiYogaFromPlanetPositions,
+  saarada_yoga: saaradaYogaFromPlanetPositions,
+  bhaarathi_yoga: bhaarathiYogaFromPlanetPositions,
+  saraswathi_yoga: saraswathiYogaFromPlanetPositions,
+  amsaavatara_yoga: amsaavataraYogaFromPlanetPositions,
+  devendra_yoga: devendraYogaFromPlanetPositions,
+  indra_yoga: indraYogaFromPlanetPositions,
+  ravi_yoga: raviYogaFromPlanetPositions,
+  bhaaskara_yoga: bhaaskaraYogaFromPlanetPositions,
+  kulavardhana_yoga: kulavardhanaYogaFromPlanetPositions,
+  vasumati_yoga: vasumathiYogaFromPlanetPositions,
+  gandharva_yoga: gandharvaYogaFromPlanetPositions,
+  go_yoga: goYogaFromPlanetPositions,
+  vidyut_yoga: vidyutYogaFromPlanetPositions,
+  chapa_yoga: chapaYogaFromPlanetPositions,
+  pushkala_yoga: pushkalaYogaFromPlanetPositions,
+  makuta_yoga: makutaYogaFromPlanetPositions,
+  jaya_yoga: jayaYogaFromPlanetPositions,
+  harsha_yoga: harshaYogaFromPlanetPositions,
+  sarala_yoga: saralaYogaFromPlanetPositions,
+  vimala_yoga: vimalaYogaFromPlanetPositions,
+};
+
+// ============================================================================
+// GET YOGA DETAILS (Python: get_yoga_details / get_yoga_details_for_all_charts)
+// ============================================================================
+
+/**
+ * Yoga details result structure matching Python's return format.
+ * Key is the Python function name (e.g. 'vesi_yoga'),
+ * value is [chartId, ...details] where details come from the resource file.
+ */
+export interface YogaDetailsResult {
+  /** Map from yoga function name to its details array */
+  yogaResults: Record<string, string[]>;
+  /** Number of yogas found */
+  foundCount: number;
+  /** Total number of yogas checked */
+  totalCount: number;
+}
+
+/**
+ * Get all yoga information present in a chart for given planet positions.
+ * Mirrors Python's get_yoga_details(jd, place, divisional_chart_factor, language).
+ *
+ * In Python, this function:
+ * 1. Computes planet positions for the given divisional chart
+ * 2. Iterates over all yoga function names from the JSON resource
+ * 3. Calls eval(yoga_function + '_from_planet_positions')(planet_positions)
+ * 4. Returns matching yogas with details from the resource file
+ *
+ * In TS, we accept pre-computed planet positions and an optional yoga messages
+ * dictionary (matching the JSON resource structure). If no messages are provided,
+ * we still detect which yogas are present and return their function names.
+ *
+ * @param planetPositions - Planet positions for the chart (already computed for the desired divisional chart)
+ * @param divisionalChartFactor - The divisional chart factor (for labeling, e.g. 1 for D-1)
+ * @param yogaMessages - Optional dictionary mapping yoga function names to [name, description, benefits].
+ *                       If not provided, results will contain just the chart label.
+ * @returns YogaDetailsResult with found yogas, count found, and total checked
+ */
+export const getYogaDetails = (
+  planetPositions: PlanetPosition[],
+  divisionalChartFactor: number = 1,
+  yogaMessages?: Record<string, string[]>
+): YogaDetailsResult => {
+  const yogaResults: Record<string, string[]> = {};
+  const keysToCheck = yogaMessages
+    ? Object.keys(yogaMessages)
+    : Object.keys(YOGA_FUNCTION_REGISTRY);
+  let totalCount = keysToCheck.length;
+
+  for (const yogaFunctionName of keysToCheck) {
+    const fn = YOGA_FUNCTION_REGISTRY[yogaFunctionName];
+    if (!fn) continue;
+
+    const yogaExists = fn(planetPositions);
+    if (yogaExists) {
+      if (yogaMessages && yogaMessages[yogaFunctionName]) {
+        // Clone the details array and prepend chart ID (matching Python behavior)
+        const details = [...yogaMessages[yogaFunctionName]];
+        details.unshift('D' + String(divisionalChartFactor));
+        yogaResults[yogaFunctionName] = details;
+      } else {
+        yogaResults[yogaFunctionName] = ['D' + String(divisionalChartFactor)];
+      }
+    }
+  }
+
+  return {
+    yogaResults,
+    foundCount: Object.keys(yogaResults).length,
+    totalCount,
+  };
+};
+
+/**
+ * Get all yoga information present across all (or specified) divisional charts.
+ * Mirrors Python's get_yoga_details_for_all_charts(jd, place, language, divisional_chart_factor).
+ *
+ * In Python, this function iterates over all division_chart_factors (or a single one),
+ * calling get_yoga_details for each, and merges the results.
+ *
+ * In TS, we accept a function that provides planet positions for each divisional chart,
+ * since computing positions requires async drik operations that this module doesn't own.
+ *
+ * @param getPositionsForChart - Function that returns planet positions for a given divisional chart factor.
+ *                               The caller is responsible for computing these (e.g. using getDivisionalChart).
+ * @param divisionalChartFactor - If specified, only check this chart. If null/undefined, check all charts.
+ * @param yogaMessages - Optional yoga messages dictionary (from yoga_msgs_<lang>.json)
+ * @returns YogaDetailsResult with combined results across all charts
+ */
+export const getYogaDetailsForAllCharts = (
+  getPositionsForChart: (chartFactor: number) => PlanetPosition[],
+  divisionalChartFactor?: number | null,
+  yogaMessages?: Record<string, string[]>
+): YogaDetailsResult => {
+  let yogaResultsCombined: Record<string, string[]> = {};
+  const chartFactors = divisionalChartFactor != null
+    ? [divisionalChartFactor]
+    : DIVISION_CHART_FACTORS;
+  const totalMsgCount = yogaMessages
+    ? Object.keys(yogaMessages).length
+    : Object.keys(YOGA_FUNCTION_REGISTRY).length;
+
+  for (const dv of chartFactors) {
+    const positions = getPositionsForChart(dv);
+    const { yogaResults } = getYogaDetails(positions, dv, yogaMessages);
+    // Merge: new results take precedence (matching Python's dict.update behavior)
+    yogaResultsCombined = { ...yogaResults, ...yogaResultsCombined };
+  }
+
+  return {
+    yogaResults: yogaResultsCombined,
+    foundCount: Object.keys(yogaResultsCombined).length,
+    totalCount: totalMsgCount * chartFactors.length,
+  };
+};
+
+// ============================================================================
 // YOGA DETECTION (Batch Processing)
 // ============================================================================
 
@@ -5277,4 +5502,8 @@ export default {
   kaahalaYogaFromPlanetPositions,
   detectAllYogasFromPlanetPositions,
   getPresentYogasFromPlanetPositions,
+
+  // Yoga details (Python: get_yoga_details / get_yoga_details_for_all_charts)
+  getYogaDetails,
+  getYogaDetailsForAllCharts,
 };
