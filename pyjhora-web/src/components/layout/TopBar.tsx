@@ -1,5 +1,6 @@
 import { useHoroscopeContext } from '../../contexts/HoroscopeContext';
 import { ThemeToggle } from '../shared/ThemeToggle';
+import { ChartStyleSelector } from '../charts/ChartStyleSelector';
 import './TopBar.css';
 
 export function TopBar() {
@@ -22,8 +23,7 @@ export function TopBar() {
       </div>
 
       <div className="topbar-right">
-        {/* Placeholder for ChartStyleSelector (Stage 3) */}
-        <div className="topbar-chart-style-placeholder" />
+        <ChartStyleSelector />
         <ThemeToggle />
       </div>
     </header>

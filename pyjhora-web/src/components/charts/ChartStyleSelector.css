@@ -1,0 +1,38 @@
+/* Chart Style Selector — compact segmented control */
+
+.chart-style-selector {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+}
+
+.chart-style-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  line-height: 1;
+}
+
+.chart-style-btn:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+.chart-style-btn:hover {
+  background: var(--color-card-hover);
+}
+
+.chart-style-btn--active {
+  background: var(--color-accent-gold);
+  color: #000;
+}
+
+.chart-style-btn--active:hover {
+  background: var(--color-accent-gold);
+}

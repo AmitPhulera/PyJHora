@@ -6,12 +6,12 @@
 
 import {
   BirthInputForm,
+  ChartRenderer,
   DashaTable,
   DivisionalChartSelector,
   LagnaDisplay,
   PanchangaDisplay,
   PlanetPositionTable,
-  SouthIndianChart,
 } from '../components';
 
 import {
@@ -75,7 +75,7 @@ export function OverviewPage() {
             selectedVarga={selectedVarga}
             onSelect={setSelectedVarga}
           />
-          <SouthIndianChart
+          <ChartRenderer
             planets={chartData?.planets || []}
             ascendantRasi={chartData?.ascendantRasi || 0}
             title={chartData?.title || ''}

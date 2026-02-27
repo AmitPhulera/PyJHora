@@ -1,8 +1,12 @@
 // Component barrel exports
 
 // Charts
+export { ChartRenderer } from './charts/ChartRenderer';
+export { ChartStyleSelector } from './charts/ChartStyleSelector';
 export { DivisionalChartSelector } from './charts/DivisionalChartSelector';
 export type { ChartView } from './charts/DivisionalChartSelector';
+export { EastIndianChart } from './charts/EastIndianChart';
+export { NorthIndianChart } from './charts/NorthIndianChart';
 export { PlanetPositionTable } from './charts/PlanetPositionTable';
 export { SouthIndianChart } from './charts/SouthIndianChart';
 export { WheelChart } from './charts/WheelChart';
