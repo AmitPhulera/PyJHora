@@ -36,6 +36,18 @@ export interface TithiAshtottariBhuktiPeriod {
   durationYears: number;
 }
 
+export interface TithiAshtottariAntaraPeriod {
+  dashaLord: number;
+  dashaLordName: string;
+  bhuktiLord: number;
+  bhuktiLordName: string;
+  antaraLord: number;
+  antaraLordName: string;
+  startJd: number;
+  startDate: string;
+  durationYears: number;
+}
+
 export interface TithiAshtottariResult {
   tithiNumber: number;
   tithiName: string;
@@ -138,6 +150,48 @@ function getTithiFraction(startTime: number, endTime: number, birthTimeHrs: numb
 
   if (total <= 0) return 0.5; // Default if calculation fails
   return Math.max(0, Math.min(1, elapsed / total));
+}
+
+// ============================================================================
+// ANTARA CALCULATION (Level 3)
+// ============================================================================
+
+/**
+ * Compute all antaras (3rd level sub-periods) for a given bhukti.
+ * Ported from Python ashtottari_anthara().
+ *
+ * In Tithi Ashtottari, the antara sequence starts from the lord NEXT
+ * to the bhukti lord (unlike standard Vimsottari where it starts from
+ * the bhukti lord itself).
+ *
+ * @param dashaLord - Mahadasha lord
+ * @param bhuktiLord - Bhukti lord
+ * @param bhuktiStartJd - Start JD of the bhukti period
+ * @returns Map of antara lord to start JD
+ */
+export function ashtottariAnthara(
+  dashaLord: number,
+  bhuktiLord: number,
+  bhuktiStartJd: number
+): Map<number, number> {
+  const dashaLordDuration = LORD_DURATIONS[dashaLord] ?? 0;
+  const antaras = new Map<number, number>();
+
+  // Antara starts from lord NEXT to bhukti lord
+  let lord = getNextLord(bhuktiLord);
+  let startDate = bhuktiStartJd;
+
+  for (let i = 0; i < ASHTOTTARI_LORDS.length; i++) {
+    antaras.set(lord, startDate);
+
+    const lordDuration = LORD_DURATIONS[lord] ?? 0;
+    // Python formula: lord_duration * dhasa_lord_duration / human_life_span
+    const factor = lordDuration * dashaLordDuration / HUMAN_LIFE_SPAN;
+    startDate += factor * YEAR_DURATION;
+    lord = getNextLord(lord);
+  }
+
+  return antaras;
 }
 
 // ============================================================================
