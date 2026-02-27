@@ -536,8 +536,9 @@ function applyHarana(
   // Astangata Harana - does not depend on method
   const ah = astangataHarana(positions);
 
-  // Shatru Kshetra Harana - method affects Mars treatment
-  const skh = shatruKshetraHarana(positions, dhasaMethod !== 1, dhasaMethod);
+  // Shatru Kshetra Harana - Python always calls with default method=2
+  // (not affected by the method parameter passed to _apply_harana)
+  const skh = shatruKshetraHarana(positions, true, 2);
 
   // Build final harana by taking min of ah and skh for each planet (Python pattern)
   const finalHarana: HaranaFactors = {};
@@ -559,13 +560,10 @@ function applyHarana(
   }
 
   // Krurodaya Harana - not applied for Amsayu
+  // Python always calls _krurodaya_harana with default method=2
   let kh: HaranaFactors = {};
   if (!isAmsayu) {
-    if (dhasaMethod === 1) {
-      kh = krurodayaHaranaSanthanam(positions, subhaGrahas, asubhaGrahas);
-    } else {
-      kh = krurodayaHarana(positions, subhaGrahas, asubhaGrahas);
-    }
+    kh = krurodayaHarana(positions, subhaGrahas, asubhaGrahas);
   } else {
     // Default: no reduction
     for (const key of Object.keys(finalHarana)) {
@@ -711,19 +709,26 @@ export function amsayu(
 /**
  * Calculate lagna longevity (Varahamihira / method=2):
  * Compares rasi lagna lord strength vs navamsa lagna lord strength.
+ *
+ * Mirrors Python's _lagna_longevity(jd, place, divisional_chart_factor=9, chart_method=1).
+ *
+ * @param d1Positions - D1 (rasi chart) planet positions
+ * @param divisionalChartFactor - Divisional chart factor for navamsa comparison (default 9)
+ * @param chartMethod - Chart method for divisional chart (default 1)
  */
 export function lagnaLongevity(
   d1Positions: PlanetPosition[],
-  navamsaPositions?: PlanetPosition[],
+  divisionalChartFactor: number = 9,
+  chartMethod: number = 1,
 ): number {
   const ascRasi = d1Positions[0]!.rasi;
   const ascLord = getHouseOwnerFromPlanetPositions(d1Positions, ascRasi);
   const ascLong = ascRasi * 30 + d1Positions[0]!.longitude;
 
-  const pp9 = navamsaPositions ?? getDivisionalChart(d1Positions, 9);
-  const ascNav = pp9[0]!.rasi;
-  const ascNavLord = getHouseOwnerFromPlanetPositions(pp9, ascNav);
-  const ascNavLong = ascNav * 30 + pp9[0]!.longitude;
+  const ppNav = getDivisionalChart(d1Positions, divisionalChartFactor, chartMethod);
+  const ascNav = ppNav[0]!.rasi;
+  const ascNavLord = getHouseOwnerFromPlanetPositions(ppNav, ascNav);
+  const ascNavLong = ascNav * 30 + ppNav[0]!.longitude;
 
   let lagnaAayu = ascLong / 30.0;
   const rasiStrength = HOUSE_STRENGTHS_OF_PLANETS[ascLord]?.[ascRasi] ?? 0;
@@ -824,7 +829,228 @@ export function getAayurType(positions: PlanetPosition[]): number {
 // ============================================================================
 
 /**
- * Calculate Aayu (Longevity) Dhasa.
+ * Python-compatible tuple format for dhasa with antardasha:
+ * [lord, bhukthi, dhasa_start_string, duration_years]
+ */
+export type DhasaTuple = [number | string, number | string, string, number];
+
+/**
+ * Python-compatible tuple format for dhasa without antardasha:
+ * [lord, dhasa_start_string, duration_years]
+ */
+export type DhasaTupleNoAntardasha = [number | string, string, number];
+
+/**
+ * Main entry point for Aayu dhasa, matching Python's get_dhasa_antardhasa.
+ *
+ * @param d1Positions - D1 planet positions (index 0 = Lagna)
+ * @param jd - Julian Day for start date calculation
+ * @param aayurType - Force type: 0=Sun/Pindayu, 1=Moon/Nisargayu, 2=Lagna/Amsayu, undefined=auto
+ * @param includeAntardhasa - Include sub-periods (default true)
+ * @param applyHaranas - Apply strength reductions (default true)
+ * @param dhasaMethod - 1=Santhanam, 2=Varahamihira (default)
+ * @param divisionalChartFactor - For lagna longevity (default 9)
+ * @param chartMethod - For lagna longevity divisional chart (default 1)
+ * @returns [dhasaType, dhasas] matching Python's return format
+ */
+export function getDhasaAnterdhasa(
+  d1Positions: PlanetPosition[],
+  jd: number,
+  aayurType?: number,
+  includeAntardhasa: boolean = true,
+  applyHaranas: boolean = true,
+  dhasaMethod: number = 2,
+  divisionalChartFactor: number = 9,
+  chartMethod: number = 1,
+): [number, Array<DhasaTuple | DhasaTupleNoAntardasha>] {
+  // Compute benefics/malefics using BV Raman method (method=1) like Python
+  const [subhaGrahas, asubhaGrahas] = beneficsAndMalefics(d1Positions, 15, 1);
+
+  // Compute harana globals (mirrors Python's _get_global_constants)
+  const globals = computeHaranaGlobals(d1Positions, subhaGrahas, asubhaGrahas);
+
+  // Determine aayu type using Python-compatible logic:
+  // aayurType: 0=Pindayu(Sun), 1=Nisargayu(Moon), 2=Amsayu(Lagna), undefined=auto
+  // Python: sp = aayur_type if aayur_type != None else _get_aayur_type(planet_positions)
+  // _get_aayur_type returns _stronger_of_lagna_sun_moon which returns 0, 1, or ASCENDANT_SYMBOL
+  let sp: number | string;
+  if (aayurType !== undefined && aayurType !== null) {
+    // When user forces a type: 0=Sun, 1=Moon, 2 or anything else = Lagna
+    sp = aayurType;
+  } else {
+    // Auto-determine: use _stronger_of_lagna_sun_moon (returns 0, 1, or ASCENDANT_SYMBOL)
+    sp = strongerOfLagnaSunMoon(d1Positions);
+  }
+
+  let dhasaDuration: HaranaFactors;
+  let dhasaType: number;
+
+  if (sp === 0) {
+    // Pindayu - Sun is the lord
+    dhasaDuration = pindayu(d1Positions, applyHaranas, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
+    dhasaType = 0;
+  } else if (sp === 1) {
+    // Nisargayu - Moon is the lord
+    dhasaDuration = nisargayu(d1Positions, applyHaranas, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
+    dhasaType = 1;
+  } else {
+    // Amsayu - Lagna is the lord (sp === ASCENDANT_SYMBOL or sp === 2)
+    dhasaDuration = amsayu(d1Positions, applyHaranas, 1, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
+    dhasaType = 2;
+  }
+
+  // Add lagna longevity (Python always calls _lagna_longevity, not the Santhanam variant, for this)
+  dhasaDuration[ASCENDANT_SYMBOL] = lagnaLongevity(d1Positions, divisionalChartFactor, chartMethod);
+
+  // Compute dhasa progression: order planets from kendras of seed rasi
+  // Python: p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
+  //         _dhasa_seed = p_to_h[sp]
+  const pToH = getPlanetToHouseDict(d1Positions);
+  let dhasaSeed: number;
+  if (sp === ASCENDANT_SYMBOL || sp === 2) {
+    // For Amsayu/Lagna: seed is ascendant's rasi
+    dhasaSeed = pToH[-1] ?? d1Positions[0]!.rasi;
+  } else {
+    dhasaSeed = pToH[sp as number] ?? d1Positions[0]!.rasi;
+  }
+
+  // Python: dhasa_progression = charts.order_planets_from_kendras_of_raasi(planet_positions[:8], _dhasa_seed, include_lagna=True)
+  let dhasaProgression = orderPlanetsFromKendrasOfRaasi(d1Positions.slice(0, 8), dhasaSeed, true);
+
+  // Python: if sp in [0,1,const._ascendant_symbol]:
+  //             dhasa_progression = [sp] + [p for p in dhasa_progression if p!=sp]
+  const seedPlanet = (sp === 0 || sp === 1) ? sp as number : -1; // -1 is Lagna planet id in TS
+  dhasaProgression = [seedPlanet, ...dhasaProgression.filter(p => p !== seedPlanet)];
+
+  const oneYearDays = SIDEREAL_YEAR;
+  let startJd = jd;
+  const dhasas: Array<DhasaTuple | DhasaTupleNoAntardasha> = [];
+
+  for (const lord of dhasaProgression) {
+    const dd = dhasaDuration[lord] ?? 0;
+    const bhukthis = dhasaProgression; // Antardhasa follows same dhasa progression
+
+    if (includeAntardhasa) {
+      const ddb = dd / bhukthis.length;
+      for (const bhukthi of bhukthis) {
+        const { date, time } = julianDayToGregorian(startJd);
+        const pad = (n: number) => Math.abs(n).toString().padStart(2, '0');
+        const h = time.hour + time.minute / 60 + time.second / 3600;
+        const dhasaStart = `${String(date.year).padStart(4, '0')}-${pad(date.month)}-${pad(date.day)} ${formatHMS(h)}`;
+        dhasas.push([lord, bhukthi, dhasaStart, Math.round(ddb * 100) / 100]);
+        startJd += ddb * oneYearDays;
+      }
+    } else {
+      const { date, time } = julianDayToGregorian(startJd);
+      const pad = (n: number) => Math.abs(n).toString().padStart(2, '0');
+      const h = time.hour + time.minute / 60 + time.second / 3600;
+      const dhasaStart = `${String(date.year).padStart(4, '0')}-${pad(date.month)}-${pad(date.day)} ${formatHMS(h)}`;
+      dhasas.push([lord, dhasaStart, Math.round(dd * 100) / 100]);
+      startJd += dd * oneYearDays;
+    }
+  }
+
+  return [dhasaType, dhasas];
+}
+
+/**
+ * Format fractional hours as HH:MM:SS string.
+ * Matches Python's utils.to_dms(h, as_string=True) for time values.
+ */
+function formatHMS(h: number): string {
+  const totalSeconds = Math.round(Math.abs(h) * 3600);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
+/**
+ * Pindayu dhasa bhukthi.
+ * Matches Python's pindayu_dhasa_bhukthi.
+ */
+export function pindayuDhasaBhukthi(
+  d1Positions: PlanetPosition[],
+  jd: number,
+  includeAntardhasa: boolean = true,
+  applyHaranas: boolean = true,
+  dhasaMethod: number = 2,
+  divisionalChartFactor: number = 9,
+  chartMethod: number = 1,
+): Array<DhasaTuple | DhasaTupleNoAntardasha> {
+  return getDhasaAnterdhasa(
+    d1Positions, jd, 0, includeAntardhasa, applyHaranas,
+    dhasaMethod, divisionalChartFactor, chartMethod,
+  )[1];
+}
+
+/**
+ * Nisargayu dhasa bhukthi.
+ * Matches Python's nisargayu_dhasa_bhukthi.
+ */
+export function nisargayuDhasaBhukthi(
+  d1Positions: PlanetPosition[],
+  jd: number,
+  includeAntardhasa: boolean = true,
+  applyHaranas: boolean = true,
+  dhasaMethod: number = 2,
+  divisionalChartFactor: number = 9,
+  chartMethod: number = 1,
+): Array<DhasaTuple | DhasaTupleNoAntardasha> {
+  return getDhasaAnterdhasa(
+    d1Positions, jd, 1, includeAntardhasa, applyHaranas,
+    dhasaMethod, divisionalChartFactor, chartMethod,
+  )[1];
+}
+
+/**
+ * Amsayu dhasa bhukthi.
+ * Matches Python's amsayu_dhasa_bhukthi.
+ */
+export function amsayuDhasaBhukthi(
+  d1Positions: PlanetPosition[],
+  jd: number,
+  includeAntardhasa: boolean = true,
+  applyHaranas: boolean = true,
+  dhasaMethod: number = 2,
+  divisionalChartFactor: number = 9,
+  chartMethod: number = 1,
+): Array<DhasaTuple | DhasaTupleNoAntardasha> {
+  return getDhasaAnterdhasa(
+    d1Positions, jd, 2, includeAntardhasa, applyHaranas,
+    dhasaMethod, divisionalChartFactor, chartMethod,
+  )[1];
+}
+
+/**
+ * Calculate total longevity.
+ * Matches Python's longevity(jd, place, aayu_type=None, dhasa_method=2).
+ *
+ * @returns [totalLongevity, aayurType] where aayurType: 0=Pindayu, 1=Nisargayu, 2=Amsayu
+ */
+export function longevity(
+  d1Positions: PlanetPosition[],
+  jd: number,
+  aayurType?: number,
+  dhasaMethod: number = 2,
+): [number, number] {
+  const [dhasaType, dhasas] = getDhasaAnterdhasa(
+    d1Positions, jd, aayurType, false, true, dhasaMethod,
+  );
+  // Sum durations from the tuples (without antardhasa: [lord, date, duration])
+  const totalLongevity = (dhasas as DhasaTupleNoAntardasha[]).reduce(
+    (sum, entry) => sum + (entry[2] as number),
+    0,
+  );
+  return [totalLongevity, dhasaType];
+}
+
+/**
+ * Calculate Aayu (Longevity) Dhasa (structured output format).
+ * This is a convenience wrapper around getDhasaAnterdhasa that returns
+ * structured AayuResult objects for easier TS consumption.
+ *
  * @param d1Positions - D1 planet positions (index 0 = Lagna)
  * @param jd - Julian Day for start date calculation
  * @param aayurType - Force type: 0=Pindayu, 1=Nisargayu, 2=Amsayu, undefined=auto
@@ -842,14 +1068,20 @@ export function getAayuDhasa(
   dhasaMethod: number = 2,
 ): AayuResult {
   // Compute benefics/malefics using BV Raman method (method=1) like Python
-  // Note: beneficsAndMalefics requires tithi; using 15 as default (Purnima)
   const [subhaGrahas, asubhaGrahas] = beneficsAndMalefics(d1Positions, 15, 1);
 
   // Compute harana globals
   const globals = computeHaranaGlobals(d1Positions, subhaGrahas, asubhaGrahas);
 
-  // Determine type
-  const sp = aayurType ?? getAayurType(d1Positions);
+  // Determine type using Python-compatible logic:
+  // Python: sp = aayur_type if aayur_type != None else _get_aayur_type(planet_positions)
+  let sp: number | string;
+  if (aayurType !== undefined && aayurType !== null) {
+    sp = aayurType;
+  } else {
+    sp = strongerOfLagnaSunMoon(d1Positions);
+  }
+
   let aayurTypeName: string;
   let dhasaDuration: HaranaFactors;
 
@@ -861,25 +1093,24 @@ export function getAayuDhasa(
     dhasaDuration = nisargayu(d1Positions, applyHaranas, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
   } else {
     aayurTypeName = 'Amsayu';
-    dhasaDuration = amsayu(d1Positions, applyHaranas, dhasaMethod, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
+    dhasaDuration = amsayu(d1Positions, applyHaranas, 1, subhaGrahas, asubhaGrahas, dhasaMethod, globals);
   }
 
   // Add lagna longevity
-  if (dhasaMethod === 1) {
-    dhasaDuration[ASCENDANT_SYMBOL] = lagnaLongevitySanthanam(d1Positions);
+  dhasaDuration[ASCENDANT_SYMBOL] = lagnaLongevity(d1Positions);
+
+  // Compute dhasa progression
+  const pToH = getPlanetToHouseDict(d1Positions);
+  let dhasaSeed: number;
+  if (sp === ASCENDANT_SYMBOL || sp === 2) {
+    dhasaSeed = pToH[-1] ?? d1Positions[0]!.rasi;
   } else {
-    dhasaDuration[ASCENDANT_SYMBOL] = lagnaLongevity(d1Positions);
+    dhasaSeed = pToH[sp as number] ?? d1Positions[0]!.rasi;
   }
 
-  // Get dhasa progression: order planets by kendras from seed
-  const seedPlanet = sp === 0 ? 0 : sp === 1 ? 1 : -1; // Sun, Moon, or Lagna
-  const seedHouse = d1Positions.find(p => p.planet === seedPlanet)?.rasi ?? d1Positions[0]!.rasi;
-
-  let progression = orderPlanetsFromKendrasOfRaasi(d1Positions.slice(0, 8), seedHouse, true);
-  // Ensure seed is first
-  if (sp === 0 || sp === 1 || sp === -1) {
-    progression = [seedPlanet, ...progression.filter(p => p !== seedPlanet)];
-  }
+  let progression = orderPlanetsFromKendrasOfRaasi(d1Positions.slice(0, 8), dhasaSeed, true);
+  const seedPlanet = (sp === 0 || sp === 1) ? sp as number : -1;
+  progression = [seedPlanet, ...progression.filter(p => p !== seedPlanet)];
 
   const oneYearDays = SIDEREAL_YEAR;
   let startJd = jd;
@@ -917,8 +1148,10 @@ export function getAayuDhasa(
     }
   }
 
+  const finalType = (sp === ASCENDANT_SYMBOL || sp === 2) ? 2 : sp === 0 ? 0 : sp === 1 ? 1 : 2;
+
   return {
-    aayurType: sp === -1 ? 2 : sp,
+    aayurType: finalType as number,
     aayurTypeName,
     totalLongevity,
     mahadashas,
