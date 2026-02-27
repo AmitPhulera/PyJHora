@@ -24,6 +24,7 @@ import type { HouseChart, PlanetPosition } from '../types';
 import { getDivisionalChart } from './charts';
 import {
   getCharaKarakas,
+  getDushthanasOfRaasi,
   getHouseOwnerFromPlanetPositions,
   getLordOfSign,
   getQuadrantsOfRaasi,
@@ -367,6 +368,110 @@ export const vipareethaRajaYoga = (
 };
 
 // ============================================================================
+// PUBLIC: vipareethaRajaYogaFromPlanetPositions
+// ============================================================================
+
+/**
+ * Check if the raja yoga planets form Vipareetha Raja Yoga, using planet positions.
+ *
+ * Vipareetha Raja Yoga occurs when dusthana lords (6th, 8th, 12th) are
+ * placed in dusthana houses.
+ *
+ * Ported from Python's vipareetha_raja_yoga_from_planet_positions.
+ *
+ * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
+ * @param planet1 - First raja yoga planet
+ * @param planet2 - Second raja yoga planet
+ * @returns false if not present, or [true, subType] where subType is one of
+ *   "Harsh Raja Yoga", "Saral Raja Yoga", "Vimal Raja Yoga"
+ */
+export const vipareethaRajaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  planet1: number,
+  planet2: number
+): false | [true, string] => {
+  const pToH = buildPlanetToHouseFromPositions(positions);
+  const lagnaHouse =
+    pToH[ASCENDANT_SYMBOL] ?? pToH[-1];
+  if (lagnaHouse === undefined) return false;
+
+  // Dusthana houses: 6th, 8th, 12th from Lagna
+  const dusthanas = getDushthanasOfRaasi(lagnaHouse);
+
+  // For each raja yoga planet, check if it's in a dusthana
+  const planets = [planet1, planet2];
+  const inDusthana: boolean[][] = planets.map((rp) => {
+    const rpHouse = pToH[rp];
+    return dusthanas.map((dh) => rpHouse === dh);
+  });
+
+  // Both planets must be in at least one dusthana
+  const bothInDusthana =
+    inDusthana[0].some((v) => v) && inDusthana[1].some((v) => v);
+
+  if (!bothInDusthana) return false;
+
+  // Determine sub-type based on first planet's position
+  let subType = 'Harsh Raja Yoga'; // Default: in 6th house
+  if (inDusthana[0][1]) {
+    subType = 'Saral Raja Yoga'; // In 8th house
+  } else if (inDusthana[0][2]) {
+    subType = 'Vimal Raja Yoga'; // In 12th house
+  }
+
+  return [true, subType];
+};
+
+// ============================================================================
+// PUBLIC: dharmaKarmadhipatiRajaYogaFromPlanetPositions
+// ============================================================================
+
+/**
+ * Check if the two planets are lords of the 9th (dharma) and 10th (karma) houses,
+ * using planet positions.
+ *
+ * Ported from Python's dharma_karmadhipati_raja_yoga_from_planet_positions.
+ * Unlike the chart-based version, this uses getHouseOwnerFromPlanetPositions
+ * which handles Rahu/Ketu co-lordship for Scorpio and Aquarius.
+ *
+ * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
+ * @param planet1 - First raja yoga planet
+ * @param planet2 - Second raja yoga planet
+ * @returns true if {planet1, planet2} are the lords of the 9th and 10th houses
+ */
+export const dharmaKarmadhipatiRajaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  planet1: number,
+  planet2: number
+): boolean => {
+  const pToH = buildPlanetToHouseFromPositions(positions);
+  const lagnaHouse =
+    pToH[ASCENDANT_SYMBOL] ?? pToH[-1];
+  if (lagnaHouse === undefined) return false;
+
+  const positionsForHouse = positions.map(p => ({
+    planet: p.planet,
+    rasi: p.rasi,
+    longitude: p.longitudeInSign,
+  }));
+
+  // 9th house = (lagnaHouse + 8) % 12, 10th house = (lagnaHouse + 9) % 12
+  const ninthHouse = (lagnaHouse + 8) % 12;
+  const tenthHouse = (lagnaHouse + 9) % 12;
+
+  const lord9 = getHouseOwnerFromPlanetPositions(positionsForHouse, ninthHouse);
+  const lord10 = getHouseOwnerFromPlanetPositions(positionsForHouse, tenthHouse);
+
+  // Check if {planet1, planet2} matches {lord9, lord10} in any order
+  const houseLords = [lord9, lord10];
+  const dkCheck =
+    houseLords.includes(planet1) && houseLords.includes(planet2) &&
+    planet1 !== planet2;
+
+  return dkCheck;
+};
+
+// ============================================================================
 // PUBLIC: neechaBhangaRajaYoga
 // ============================================================================
 
@@ -401,6 +506,90 @@ export const neechaBhangaRajaYoga = (
 
   // Kendra from Moon
   const moonHouse = planetToHouse[1]; // Moon = 1
+  const kendraFromMoon =
+    moonHouse !== undefined ? getQuadrantsOfRaasi(moonHouse) : [];
+
+  // Rule 1: Lord of sign of debilitated planet is exalted or in kendra from Moon
+  const chk1_1 =
+    HOUSE_STRENGTHS_OF_PLANETS[planet1]?.[rp1Rasi] <= STRENGTH_DEBILITATED &&
+    ((HOUSE_STRENGTHS_OF_PLANETS[rp1Lord]?.[rp1Rasi] ?? 0) >= STRENGTH_EXALTED ||
+      kendraFromMoon.includes(rp1Rasi));
+
+  const chk1_2 =
+    HOUSE_STRENGTHS_OF_PLANETS[planet2]?.[rp2Rasi] <= STRENGTH_DEBILITATED &&
+    ((HOUSE_STRENGTHS_OF_PLANETS[rp2Lord]?.[rp2Rasi] ?? 0) >= STRENGTH_EXALTED ||
+      kendraFromMoon.includes(rp2Rasi));
+
+  if (chk1_1 || chk1_2) return true;
+
+  // Rule 2: Debilitated planet conjunct with exalted planet
+  const sameHouse = rp1Rasi === rp2Rasi;
+  const chk2_2 =
+    (HOUSE_STRENGTHS_OF_PLANETS[planet1]?.[rp1Rasi] ?? 0) >= STRENGTH_EXALTED &&
+    HOUSE_STRENGTHS_OF_PLANETS[planet2]?.[rp2Rasi] <= STRENGTH_DEBILITATED;
+  const chk2_3 =
+    (HOUSE_STRENGTHS_OF_PLANETS[planet2]?.[rp2Rasi] ?? 0) >= STRENGTH_EXALTED &&
+    HOUSE_STRENGTHS_OF_PLANETS[planet1]?.[rp1Rasi] <= STRENGTH_DEBILITATED;
+
+  if (sameHouse && (chk2_2 || chk2_3)) return true;
+
+  // Rule 3: Debilitated planet aspected by lord of its sign
+  const chk3_1 =
+    HOUSE_STRENGTHS_OF_PLANETS[planet1]?.[rp2Rasi] <= STRENGTH_DEBILITATED &&
+    hasGrahaDrishti(chart, rp1Lord, planet1);
+
+  const chk3_2 =
+    HOUSE_STRENGTHS_OF_PLANETS[planet2]?.[rp2Rasi] <= STRENGTH_DEBILITATED &&
+    hasGrahaDrishti(chart, rp2Lord, planet1);
+
+  return chk3_1 || chk3_2;
+};
+
+// ============================================================================
+// PUBLIC: neechaBhangaRajaYogaFromPlanetPositions
+// ============================================================================
+
+/**
+ * Check if the raja yoga planets form Neecha Bhanga Raja Yoga
+ * (cancellation of debilitation), using planet positions.
+ *
+ * Ported from Python's neecha_bhanga_raja_yoga_from_planet_positions.
+ * Unlike the chart-based version, this uses getHouseOwnerFromPlanetPositions
+ * which handles Rahu/Ketu co-lordship for Scorpio and Aquarius.
+ *
+ * Rules checked (first 3 of 5):
+ * 1. Lord of the sign of a debilitated planet is exalted, or is in kendra from Moon
+ * 2. Debilitated planet is conjunct with an exalted planet
+ * 3. Debilitated planet is aspected by the lord of its sign
+ *
+ * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
+ * @param planet1 - First raja yoga planet
+ * @param planet2 - Second raja yoga planet
+ * @returns true if Neecha Bhanga Raja Yoga is present
+ */
+export const neechaBhangaRajaYogaFromPlanetPositions = (
+  positions: PlanetPosition[],
+  planet1: number,
+  planet2: number
+): boolean => {
+  const chart = buildChartFromPositions(positions);
+  const pToH = buildPlanetToHouseFromPositions(positions);
+
+  const rp1Rasi = pToH[planet1];
+  const rp2Rasi = pToH[planet2];
+  if (rp1Rasi === undefined || rp2Rasi === undefined) return false;
+
+  const positionsForHouse = positions.map(p => ({
+    planet: p.planet,
+    rasi: p.rasi,
+    longitude: p.longitudeInSign,
+  }));
+
+  const rp1Lord = getHouseOwnerFromPlanetPositions(positionsForHouse, rp1Rasi);
+  const rp2Lord = getHouseOwnerFromPlanetPositions(positionsForHouse, rp2Rasi);
+
+  // Kendra from Moon
+  const moonHouse = pToH[1]; // Moon = 1
   const kendraFromMoon =
     moonHouse !== undefined ? getQuadrantsOfRaasi(moonHouse) : [];
 
