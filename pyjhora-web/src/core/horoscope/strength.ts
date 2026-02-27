@@ -34,7 +34,7 @@ import {
   SUN_TO_SATURN,
   VENUS
 } from '../constants';
-import { getDivisionalChart } from './charts';
+import { getDivisionalChart, beneficsAndMalefics } from './charts';
 import { normalizeDegrees, roundTo } from '../utils/angle';
 import {
   gregorianToJulianDay,
@@ -47,8 +47,14 @@ import {
   siderealLongitude,
   getAllPlanetPositionsAsync
 } from '../ephemeris/swe-adapter';
-import { calculateTithi, calculateVara, dayLength, nightLength } from '../panchanga/drik';
-import { getHouseOwnerFromPlanetPositions, getHouseToPlanetList, getPlanetToHouseDict } from './house';
+import { calculateTithi, calculateVara, dayLength, nightLength, declinationOfPlanets, midnight } from '../panchanga/drik';
+import {
+  getHouseOwnerFromPlanetPositions,
+  getHouseToPlanetList,
+  getPlanetToHouseDict,
+  getGrahaDrishtiFromChart,
+  getRaasiDrishtiFromChart
+} from './house';
 
 // ============================================================================
 // STRENGTH CONSTANTS
@@ -288,8 +294,9 @@ const planetLongitudeCorrection = (planetIndex: number, yearsSinceEpoch: number)
 
 /**
  * Get planet mean longitude using epoch table
+ * Python: get_planet_mean_longitude_using_epoch_table(jd, place, planet_index)
  */
-const getPlanetMeanLongitudeUsingEpochTable = (
+export const getPlanetMeanLongitudeUsingEpochTable = (
   jd: number,
   place: Place,
   planetIndex: number
@@ -351,8 +358,9 @@ const getPlanetMeanLongitudeUsingEpochTable = (
 
 /**
  * Get planet mean longitude (simple formula)
+ * Python: get_planet_mean_longitude(jd, place, planet_index)
  */
-const getPlanetMeanLongitude = (jd: number, place: Place, planetIndex: number): number => {
+export const getPlanetMeanLongitude = (jd: number, place: Place, planetIndex: number): number => {
   if (planetIndex === 1) return 0;
 
   const dfe = daysFromEpoch(jd, place.longitude);
@@ -638,35 +646,44 @@ export const calculateSthanaBala = (
 
 /**
  * Calculate Nathonnath Bala (day/night strength)
+ * Python: _nathonnath_bala(jd, place)
+ *
+ * Uses actual midnight time from sunrise/sunset calculations.
  */
 export const calculateNathonnathBala = (jd: number, place: Place): number[] => {
   const nbp: number[] = new Array(7).fill(0);
 
-  const { date, time } = julianDayToGregorian(jd);
+  const { time } = julianDayToGregorian(jd);
   const tobh = time.hour + time.minute / 60 + time.second / 3600;
 
-  // Approximate midnight
-  const mnhl = 0;
-  const tDiff = tobh < 12 ? (tobh - mnhl) * 60 / 12 : (24 + mnhl - tobh) * 60 / 12;
+  // Use actual midnight calculation
+  const mnhl = midnight(jd, place);
+  const tDiff = tobh < 12
+    ? (tobh - mnhl) * 60 / 12
+    : (24 + mnhl - tobh) * 60 / 12;
 
   // Diurnal planets (Sun, Jupiter, Venus) get strength during day
-  for (const p of [0, 4, 5]) {
+  for (const p of [SUN, JUPITER, VENUS]) {
     nbp[p] = roundTo(tDiff, 2);
   }
 
   // Nocturnal planets (Moon, Mars, Saturn) get strength during night
-  for (const p of [1, 2, 6]) {
+  for (const p of [MOON, MARS, SATURN]) {
     nbp[p] = roundTo(60 - tDiff, 2);
   }
 
   // Mercury always gets 60
-  nbp[3] = 60;
+  nbp[MERCURY] = 60;
 
   return nbp;
 };
 
 /**
  * Calculate Paksha Bala (lunar fortnight strength)
+ * Python: _paksha_bala(jd, place, ayanamsa_mode)
+ *
+ * Uses beneficsAndMalefics from charts to properly classify planets
+ * (including Mercury's context-dependent classification).
  */
 export const calculatePakshaBala = (
   jd: number,
@@ -684,20 +701,16 @@ export const calculatePakshaBala = (
   const pb = roundTo(Math.abs(sunLong - moonLong) / 3, 2);
   const pbp: number[] = new Array(7).fill(pb);
 
-  // Get benefics and malefics
+  // Get benefics and malefics using proper classification
   const tithi = calculateTithi(jd, place);
-  const waxingMoon = tithi.number <= 15;
+  const [chtBenefics, chtMalefics] = beneficsAndMalefics(d1Positions, tithi.number, 2, true);
 
-  // Natural benefics (Jupiter, Venus, waxing Moon, Mercury with benefics)
-  const benefics = waxingMoon ? [1, 3, 4, 5] : [3, 4, 5];
-  const malefics = waxingMoon ? [0, 2, 6] : [0, 1, 2, 6];
-
-  for (const p of benefics) {
-    pbp[p] = pb;
+  for (const p of chtBenefics) {
+    if (p < 7) pbp[p] = pb;
   }
 
-  for (const p of malefics) {
-    pbp[p] = roundTo(60 - pb, 2);
+  for (const p of chtMalefics) {
+    if (p < 7) pbp[p] = roundTo(60 - pb, 2);
   }
 
   // Moon gets double
@@ -837,17 +850,22 @@ export const calculateHoraBala = (jd: number, place: Place): number[] => {
 };
 
 /**
- * Calculate Ayana Bala
+ * Calculate Ayana Bala (declination-based strength)
+ * Python: _ayana_bala(jd, place)
+ *
+ * Uses declination_of_planets to compute strength:
+ * ab[p] = (24.0 + declination[p]) * 1.25
+ * Sun gets double this value.
  */
 export const calculateAyanaBala = (jd: number, place: Place): number[] => {
+  const declinations = declinationOfPlanets(jd, place);
   const ab: number[] = new Array(7).fill(0);
 
-  // Simplified declination calculation
-  // Full implementation would use drik.declination_of_planets
   for (let p = 0; p < 7; p++) {
-    // Approximate declination (simplified)
-    ab[p] = roundTo((24 + 0) * 1.25, 2); // Placeholder
-    if (p === 0) ab[p] *= 2;
+    ab[p] = roundTo((24.0 + declinations[p]) * 1.25, 2);
+    if (p === 0) {
+      ab[p] *= 2;
+    }
   }
 
   return ab;
@@ -1057,6 +1075,12 @@ const calculateDrikBalaValue = (dkAngle: number, aspectingPlanet: number): numbe
 
 /**
  * Calculate Drik Bala (aspectual strength)
+ * Python: _drik_bala(jd, place, ayanamsa_mode)
+ *
+ * Uses beneficsAndMalefics from charts to properly classify planets
+ * (including Mercury's context-dependent classification).
+ * Computes aspect matrix, separates benefic/malefic contributions,
+ * and returns net drik bala = (benefic_aspects - malefic_aspects) / 4.
  */
 export const calculateDrikBala = (
   jd: number,
@@ -1066,34 +1090,39 @@ export const calculateDrikBala = (
   const dk: number[][] = Array.from({ length: 7 }, () => new Array(7).fill(0));
 
   const tithi = calculateTithi(jd, place);
-  const waxingMoon = tithi.number <= 15;
 
-  // Natural benefics (adjusted for lunar phase)
-  const subhaGrahas = waxingMoon ? [1, 3, 4, 5] : [3, 4, 5];
-  const asubhaGrahas = waxingMoon ? [0, 2, 6] : [0, 1, 2, 6];
+  // Use proper benefic/malefic classification (matches Python charts.benefics_and_malefics)
+  const [subhaGrahas, asubhaGrahas] = beneficsAndMalefics(d1Positions, tithi.number, 2, true);
+
+  // Build planet positions array excluding ascendant and Rahu/Ketu (Sun to Saturn only)
+  const pp: PlanetPosition[] = [];
+  for (let p = 0; p < 7; p++) {
+    const pos = d1Positions.find(pp => pp.planet === p);
+    if (pos) pp.push(pos);
+  }
 
   // Calculate aspect matrix
   for (let p1 = 0; p1 < 7; p1++) {
-    const pos1 = d1Positions.find(p => p.planet === p1);
+    const pos1 = pp.find(p => p.planet === p1);
     if (!pos1) continue;
     const p1Long = pos1.rasi * 30 + pos1.longitude;
 
     for (let p2 = 0; p2 < 7; p2++) {
-      const pos2 = d1Positions.find(p => p.planet === p2);
+      const pos2 = pp.find(p => p.planet === p2);
       if (!pos2) continue;
       const p2Long = pos2.rasi * 30 + pos2.longitude;
 
-      const dkAngle = normalizeDegrees(p1Long - p2Long);
+      const dkAngle = roundTo((360 + p1Long - p2Long) % 360, 2);
       dk[p1][p2] = roundTo(calculateDrikBalaValue(dkAngle, p2), 2);
     }
   }
 
-  // Transpose the matrix
+  // Transpose the matrix (matching Python: dk = np.array(dk).T.tolist())
   const dkT: number[][] = Array.from({ length: 7 }, (_, i) =>
     Array.from({ length: 7 }, (_, j) => dk[j][i])
   );
 
-  // Calculate final drik bala
+  // Calculate final drik bala: benefic aspects minus malefic aspects, divided by 4
   const dkp: number[] = new Array(7).fill(0);
   const dkm: number[] = new Array(7).fill(0);
   const dkFinal: number[] = new Array(7).fill(0);
@@ -1106,11 +1135,8 @@ export const calculateDrikBala = (
       if (asubhaGrahas.includes(row)) {
         dkm[col] += dkT[row][col];
       }
+      dkFinal[col] = roundTo((dkp[col] - dkm[col]) / 4, 2);
     }
-  }
-
-  for (let col = 0; col < 7; col++) {
-    dkFinal[col] = roundTo((dkp[col] - dkm[col]) / 4, 2);
   }
 
   return dkFinal;
@@ -1254,6 +1280,164 @@ export const calculateBhavaDigBala = (
 };
 
 /**
+ * Calculate aspect value for bhava drik bala.
+ * Python: __bhava_drik_bala_calc_1(dk_p1_p2, p1)
+ *
+ * Similar to calculateDrikBalaValue but with different boundary handling
+ * and a 0.25 multiplier for planets other than Mercury (3) and Jupiter (4).
+ */
+const calculateBhavaDrikBalaValue = (dkAngle: number, aspectingPlanet: number): number => {
+  let value = dkAngle;
+
+  if (dkAngle > 0 && dkAngle <= 30) {
+    value = 0;
+  } else if (dkAngle >= 30.01 && dkAngle <= 60) {
+    value = 0.5 * (dkAngle - 30);
+  } else if (dkAngle >= 60.01 && dkAngle <= 90) {
+    value = (dkAngle - 60) + 15;
+    if (aspectingPlanet === SATURN) value += 45; // Saturn special aspect
+  } else if (dkAngle >= 90.01 && dkAngle <= 120) {
+    value = 0.5 * (120 - dkAngle) + 30;
+    if (aspectingPlanet === MARS) value += 15; // Mars special aspect
+  } else if (dkAngle >= 120.01 && dkAngle <= 150) {
+    value = 150 - dkAngle;
+    if (aspectingPlanet === JUPITER) value += 30; // Jupiter special aspect
+  } else if (dkAngle >= 150.01 && dkAngle <= 180) {
+    value = 2 * (dkAngle - 150);
+  } else if (dkAngle >= 180.01 && dkAngle <= 300) {
+    value = 0.5 * (300 - dkAngle);
+    if (aspectingPlanet === MARS && dkAngle > 210.01 && dkAngle < 240.01) value += 15;
+    if (aspectingPlanet === JUPITER && dkAngle > 240.01 && dkAngle < 270.01) value += 30;
+    if (aspectingPlanet === SATURN && dkAngle > 270.01 && dkAngle < 300.01) value += 45;
+  } else {
+    value = 0;
+  }
+
+  // Apply 0.25 multiplier for planets other than Mercury and Jupiter
+  if (aspectingPlanet !== MERCURY && aspectingPlanet !== JUPITER) {
+    value = roundTo(value * 0.25, 2);
+  }
+
+  return value;
+};
+
+/**
+ * Convert planet positions to chart string format.
+ * Local helper to avoid circular dependency with yoga.ts.
+ */
+const positionsToChartStrings = (d1Positions: PlanetPosition[]): string[] => {
+  const chart: string[] = Array(12).fill('');
+  for (const pos of d1Positions) {
+    const key = pos.planet === -1 ? 'L' : String(pos.planet);
+    if (chart[pos.rasi] === '') {
+      chart[pos.rasi] = key;
+    } else {
+      chart[pos.rasi] += '/' + key;
+    }
+  }
+  return chart;
+};
+
+/**
+ * Calculate Bhava Drik Bala (house aspectual strength)
+ * Python: _bhava_drik_bala(jd, place)
+ *
+ * Computes how much each bhava (house) is aspected by benefic and malefic planets,
+ * using graha drishti and raasi drishti to determine which planets aspect which houses.
+ */
+export const calculateBhavaDrikBala = (
+  jd: number,
+  place: Place,
+  d1Positions: PlanetPosition[]
+): number[] => {
+  const dk: number[][] = Array.from({ length: 12 }, () => new Array(7).fill(0));
+
+  // Convert positions to chart string format for drishti functions
+  const chartStrings = positionsToChartStrings(d1Positions);
+
+  // Build planet-to-house map for raasi drishti
+  const planetToHouseMap: Record<number, number> = {};
+  for (let p = 0; p < 9; p++) {
+    const pos = d1Positions.find(pp => pp.planet === p);
+    if (pos) planetToHouseMap[p] = pos.rasi;
+  }
+
+  // Fixed benefics/malefics for bhava drik bala (Python uses fixed lists, not context-dependent)
+  const subhaGrahas = [MOON, MERCURY, JUPITER, VENUS]; // [1, 3, 4, 5]
+  const asubhaGrahas = [SUN, MARS, SATURN]; // [0, 2, 6]
+
+  // Get graha and raasi drishti aspects
+  const { ahp: ghp } = getGrahaDrishtiFromChart(chartStrings);
+  const { ahp: rhp } = getRaasiDrishtiFromChart(planetToHouseMap);
+
+  // Build planet house aspects (combined graha + raasi drishti)
+  const planetHouseAspects: Record<number, number[]> = {};
+  for (let planet = 0; planet < 7; planet++) {
+    const combined = new Set([
+      ...(ghp[planet] ?? []),
+      ...(rhp[planet] ?? [])
+    ]);
+    // Filter out ascendant symbol and Rahu/Ketu references
+    planetHouseAspects[planet] = [...combined].filter(h =>
+      typeof h === 'number' && h >= 1 && h <= 12
+    ).map(h => Math.floor(h));
+  }
+
+  // Simplified bhava madhya (house cusp midpoints)
+  const ascPos = d1Positions.find(p => p.planet === -1);
+  const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
+  const bm: number[] = [];
+  for (let h = 0; h < 12; h++) {
+    bm.push((ascLong + h * 30) % 360);
+  }
+
+  // Calculate aspect strengths for each house from each planet
+  for (let h = 0; h < 12; h++) {
+    const hMid = bm[h];
+    for (let p = 0; p < 7; p++) {
+      if (planetHouseAspects[p]?.includes(h + 1)) {
+        const pos = d1Positions.find(pp => pp.planet === p);
+        if (pos) {
+          const pLong = pos.rasi * 30 + pos.longitude;
+          const dkHP = roundTo((360 + hMid - pLong) % 360, 2);
+          dk[h][p] = roundTo(calculateBhavaDrikBalaValue(dkHP, p), 2);
+        }
+      }
+    }
+  }
+
+  // Compute net bhava drik bala: (benefic - malefic) / 4
+  const dkp: number[] = new Array(12).fill(0);
+  const dkm: number[] = new Array(12).fill(0);
+  const dkFinal: number[] = new Array(12).fill(0);
+
+  for (let row = 0; row < 12; row++) {
+    for (let col = 0; col < 7; col++) {
+      if (subhaGrahas.includes(col)) {
+        dkp[row] += dk[row][col];
+      }
+      if (asubhaGrahas.includes(row)) {
+        dkm[row] += dk[row][col];
+      }
+      dkFinal[row] = roundTo((dkp[row] - dkm[row]) / 4, 2);
+    }
+  }
+
+  return dkFinal;
+};
+
+/**
+ * Bhava Drishti Bala (public wrapper matching Python's bhava_drishti_bala)
+ */
+export const bhavaDrishtiBala = (
+  jd: number,
+  place: Place,
+  d1Positions: PlanetPosition[]
+): number[] => {
+  return calculateBhavaDrikBala(jd, place, d1Positions);
+};
+
+/**
  * Bhava Bala result interface
  */
 export interface BhavaBalaResult {
@@ -1264,6 +1448,12 @@ export interface BhavaBalaResult {
 
 /**
  * Calculate Bhava Bala (house strength)
+ * Python: bhava_bala(jd, place)
+ *
+ * Combines three components:
+ * - Bhava Adhipathi Bala (house lord strength from shadbala)
+ * - Bhava Dig Bala (directional strength of houses)
+ * - Bhava Drik Bala (aspectual strength on houses)
  */
 export const calculateBhavaBala = (
   jd: number,
@@ -1272,9 +1462,7 @@ export const calculateBhavaBala = (
 ): BhavaBalaResult => {
   const bab = calculateBhavaAdhipathiBala(jd, place, d1Positions);
   const bdb = calculateBhavaDigBala(jd, place, d1Positions);
-
-  // Simplified bhava drik bala (aspectual strength on houses)
-  const bdrb: number[] = new Array(12).fill(0);
+  const bdrb = calculateBhavaDrikBala(jd, place, d1Positions);
 
   // Sum all components
   const bb = bab.map((v, i) => roundTo(v + bdb[i] + bdrb[i], 2));
