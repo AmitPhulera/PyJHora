@@ -19,6 +19,13 @@ interface PlanetPositionTableProps {
 
 const DEFAULT_VARGAS = [1, 9, 10, 12]; // D1, D9, D10, D12
 
+/** Map planet to CSS color class */
+const PLANET_COLOR_CLASS: Record<number, string> = {
+  0: 'planet-sun', 1: 'planet-moon', 2: 'planet-mars',
+  3: 'planet-mercury', 4: 'planet-jupiter', 5: 'planet-venus',
+  6: 'planet-saturn', 7: 'planet-rahu', 8: 'planet-ketu',
+};
+
 export const PlanetPositionTable: React.FC<PlanetPositionTableProps> = ({
   d1Positions,
   vargas = DEFAULT_VARGAS,
@@ -26,7 +33,7 @@ export const PlanetPositionTable: React.FC<PlanetPositionTableProps> = ({
 }) => {
   // Calculate positions for each Varga
   const vargaPositions: Record<number, PlanetPosition[]> = {};
-  
+
   vargas.forEach(v => {
     if (v === 1) {
       vargaPositions[v] = d1Positions;
@@ -37,6 +44,14 @@ export const PlanetPositionTable: React.FC<PlanetPositionTableProps> = ({
 
   // Get planet IDs (0-8: Sun to Ketu)
   const planetIds = d1Positions.map(p => p.planet).filter(p => p >= 0 && p <= 8);
+
+  // Build retrograde lookup from D1 positions
+  // isRetrograde exists on HoroscopeData planets but not in PlanetPosition interface
+  const retrogradeSet = new Set(
+    d1Positions
+      .filter(p => (p as PlanetPosition & { isRetrograde?: boolean }).isRetrograde)
+      .map(p => p.planet)
+  );
 
   const formatDegree = (longitude: number): string => {
     const deg = Math.floor(longitude % 30);
@@ -56,24 +71,32 @@ export const PlanetPositionTable: React.FC<PlanetPositionTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {planetIds.map(planetId => (
-            <tr key={planetId}>
-              <td className="planet-name">{PLANET_NAMES_EN[planetId] || `P${planetId}`}</td>
-              {vargas.map(v => {
-                const pos = vargaPositions[v]?.find(p => p.planet === planetId);
-                if (!pos) return <td key={v}>-</td>;
-                
-                return (
-                  <td key={v}>
-                    <span className="rasi-name">{RASI_NAMES_EN[pos.rasi]}</span>
-                    {showDegrees && (
-                      <span className="degree">{formatDegree(pos.longitude)}</span>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {planetIds.map(planetId => {
+            const isRetro = retrogradeSet.has(planetId);
+            return (
+              <tr key={planetId} className={isRetro ? 'ppt-retro-row' : ''}>
+                <td className={`planet-name ${PLANET_COLOR_CLASS[planetId] ?? ''}`}>
+                  {PLANET_NAMES_EN[planetId] || `P${planetId}`}
+                  {isRetro && (
+                    <span className="ppt-retro-badge" title="Retrograde">R</span>
+                  )}
+                </td>
+                {vargas.map(v => {
+                  const pos = vargaPositions[v]?.find(p => p.planet === planetId);
+                  if (!pos) return <td key={v}>-</td>;
+
+                  return (
+                    <td key={v}>
+                      <span className="rasi-name">{RASI_NAMES_EN[pos.rasi]}</span>
+                      {showDegrees && (
+                        <span className="degree">{formatDegree(pos.longitude)}</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

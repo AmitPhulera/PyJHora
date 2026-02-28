@@ -30,7 +30,25 @@
 
 .planet-position-table .planet-name {
   font-weight: 500;
-  color: var(--color-accent-gold);
+  white-space: nowrap;
+}
+
+.ppt-retro-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1.4;
+  color: var(--color-bg);
+  background: var(--color-planet-mars, #e06666);
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
+.ppt-retro-row {
+  background: rgba(224, 102, 102, 0.04);
 }
 
 .planet-position-table .rasi-name {

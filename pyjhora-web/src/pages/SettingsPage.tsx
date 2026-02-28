@@ -13,26 +13,26 @@ import './SettingsPage.css';
 // ---------------------------------------------------------------------------
 // Ayanamsa options — deduplicated (skip aliases that share the same value)
 // ---------------------------------------------------------------------------
-const AYANAMSA_OPTIONS: Array<{ key: string; label: string }> = [
-  { key: 'LAHIRI',          label: 'Lahiri' },
-  { key: 'RAMAN',           label: 'Raman' },
-  { key: 'KRISHNAMURTI',    label: 'Krishnamurti (KP)' },
-  { key: 'FAGAN_BRADLEY',   label: 'Fagan-Bradley' },
-  { key: 'TRUE_CITRA',      label: 'True Citra' },
-  { key: 'TRUE_REVATI',     label: 'True Revati' },
-  { key: 'TRUE_PUSHYA',     label: 'True Pushya' },
-  { key: 'TRUE_MULA',       label: 'True Mula' },
-  { key: 'YUKTESHWAR',      label: 'Yukteshwar' },
+const AYANAMSA_OPTIONS: Array<{ key: string; label: string; desc?: string }> = [
+  { key: 'LAHIRI',          label: 'Lahiri',                   desc: 'Indian government standard, based on Citra/Spica star' },
+  { key: 'RAMAN',           label: 'Raman',                    desc: 'B.V. Raman\'s ayanamsa, popular in South India' },
+  { key: 'KRISHNAMURTI',    label: 'Krishnamurti (KP)',        desc: 'Used in KP Astrology system' },
+  { key: 'FAGAN_BRADLEY',   label: 'Fagan-Bradley',            desc: 'Western sidereal astrology standard' },
+  { key: 'TRUE_CITRA',      label: 'True Citra',               desc: 'True position of Citra (Spica) star' },
+  { key: 'TRUE_REVATI',     label: 'True Revati',              desc: 'True position of Revati (Zeta Piscium)' },
+  { key: 'TRUE_PUSHYA',     label: 'True Pushya',              desc: 'True position of Pushya (Delta Cancri)' },
+  { key: 'TRUE_MULA',       label: 'True Mula',                desc: 'True position of Mula (Lambda Scorpii)' },
+  { key: 'YUKTESHWAR',      label: 'Yukteshwar',               desc: 'Sri Yukteshwar\'s ayanamsa from The Holy Science' },
   { key: 'USHASHASHI',      label: 'Usha-Shashi' },
   { key: 'JN_BHASIN',       label: 'JN Bhasin' },
-  { key: 'ARYABHATA',       label: 'Aryabhata' },
-  { key: 'ARYABHATA_MSUN',  label: 'Aryabhata (Mean Sun)' },
-  { key: 'SURYASIDDHANTA',  label: 'Surya Siddhanta' },
+  { key: 'ARYABHATA',       label: 'Aryabhata',                desc: 'Based on Aryabhatiya (499 CE)' },
+  { key: 'ARYABHATA_MSUN',  label: 'Aryabhata (Mean Sun)',     desc: 'Aryabhata with mean sun correction' },
+  { key: 'SURYASIDDHANTA',  label: 'Surya Siddhanta',          desc: 'Ancient astronomical text (c. 400 CE)' },
   { key: 'SURYASIDDHANTA_MSUN', label: 'Surya Siddhanta (Mean Sun)' },
   { key: 'SS_CITRA',        label: 'SS Citra' },
   { key: 'SS_REVATI',       label: 'SS Revati' },
-  { key: 'KP_SENTHIL',      label: 'KP Senthil' },
-  { key: 'SASSANIAN',       label: 'Sassanian' },
+  { key: 'KP_SENTHIL',      label: 'KP Senthil',              desc: 'KP variant by Senthilathiban' },
+  { key: 'SASSANIAN',       label: 'Sassanian',                desc: 'Ancient Persian astronomical tradition' },
 ];
 
 // Validate at build time that all keys actually exist in AYANAMSA_MODES
@@ -201,6 +201,12 @@ export function SettingsPage() {
               </option>
             ))}
           </select>
+          {(() => {
+            const selected = AYANAMSA_OPTIONS.find(o => o.key === ayanamsaMode);
+            return selected?.desc ? (
+              <p className="settings-hint">{selected.desc}</p>
+            ) : null;
+          })()}
         </SettingRow>
 
         <SettingRow

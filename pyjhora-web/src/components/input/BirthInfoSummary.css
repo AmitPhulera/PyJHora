@@ -6,7 +6,7 @@
   gap: var(--space-sm);
   font-size: 0.85rem;
   color: var(--color-text-secondary, var(--text-secondary));
-  max-width: 400px;
+  max-width: 600px;
   overflow: hidden;
 }
 
@@ -16,7 +16,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 180px;
 }
 
 .birth-info-summary-sep {
@@ -29,7 +29,30 @@
   flex-shrink: 0;
 }
 
-/* Hide on small screens to avoid cramping */
+.birth-info-summary-astro {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.birth-info-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: var(--radius-full);
+  background: rgba(201, 161, 78, 0.15);
+  color: var(--color-accent-gold);
+}
+
+/* Hide astro tags on medium screens, hide entirely on small */
+@media (max-width: 900px) {
+  .birth-info-summary-astro {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
   .birth-info-summary {
     display: none;
