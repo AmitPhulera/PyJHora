@@ -76,7 +76,7 @@ export function layoutPlanetsInCell(
 
   const cx = bounds.x + bounds.width / 2;
   const cy = bounds.y + bounds.height / 2;
-  const lineHeight = fontSize * 1.3;
+  const lineHeight = fontSize * 1.4;
 
   const items: PositionedText[] = [];
 

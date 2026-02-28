@@ -171,9 +171,9 @@ export function SouthIndianChart({
             <text
               x={cell.x + 4}
               y={cell.y + 12}
-              fontSize="9"
+              fontSize="10"
               fontFamily="var(--font-mono)"
-              fill="var(--color-text-muted)"
+              fill="var(--color-text-secondary)"
             >
               {RASI_SYMBOLS[cell.rasi]}
             </text>
@@ -186,7 +186,7 @@ export function SouthIndianChart({
                 y={item.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize="11"
+                fontSize="12"
                 fontWeight="600"
                 fontFamily="var(--font-body)"
                 fill={item.color}

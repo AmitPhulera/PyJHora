@@ -134,7 +134,7 @@ export function EastIndianChart({
       <rect width={SIZE} height={SIZE} rx="8" fill="var(--color-card)" />
 
       {/* Center cell fill */}
-      <rect x={C} y={C} width={C} height={C} fill="var(--color-surface)" />
+      <rect x={C} y={C} width={C} height={C} fill="var(--color-bg)" />
 
       {/* Grid lines */}
       {[1, 2].map((i) => (
@@ -188,9 +188,9 @@ export function EastIndianChart({
             <text
               x={labelPos.x}
               y={labelPos.y}
-              fontSize="9"
+              fontSize="10"
               fontFamily="var(--font-mono)"
-              fill="var(--color-text-muted)"
+              fill="var(--color-text-secondary)"
             >
               {RASI_SYMBOLS[h.rasi]}
             </text>
@@ -203,7 +203,7 @@ export function EastIndianChart({
                 y={item.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize="10"
+                fontSize="11"
                 fontWeight="600"
                 fontFamily="var(--font-body)"
                 fill={item.color}

@@ -52,17 +52,17 @@ interface NorthIndianChartProps {
 /** Approximate center positions for planet text in each house (0-indexed) */
 const HOUSE_PLANET_BOUNDS: Array<{ x: number; y: number; width: number; height: number }> = [
   { x: 130, y: 20,  width: 140, height: 80 },   // H1  top center
-  { x: 20,  y: 15,  width: 100, height: 70 },    // H2  upper-left
+  { x: 25,  y: 20,  width: 90,  height: 65 },    // H2  upper-left
   { x: 10,  y: 110, width: 90,  height: 80 },    // H3  left upper
   { x: 20,  y: 225, width: 100, height: 80 },    // H4  left center
   { x: 10,  y: 310, width: 90,  height: 70 },    // H5  left lower
-  { x: 30,  y: 310, width: 100, height: 70 },    // H6  lower-left
+  { x: 25,  y: 315, width: 90,  height: 65 },    // H6  lower-left
   { x: 130, y: 300, width: 140, height: 80 },    // H7  bottom center
-  { x: 270, y: 310, width: 100, height: 70 },    // H8  lower-right
+  { x: 275, y: 315, width: 90,  height: 65 },    // H8  lower-right
   { x: 300, y: 310, width: 90,  height: 70 },    // H9  right lower
   { x: 280, y: 225, width: 100, height: 80 },    // H10 right center
   { x: 300, y: 110, width: 90,  height: 80 },    // H11 right upper
-  { x: 280, y: 15,  width: 100, height: 70 },    // H12 upper-right
+  { x: 275, y: 20,  width: 90,  height: 65 },    // H12 upper-right
 ];
 
 /** Positions for the small rasi abbreviation label in each house */
@@ -177,9 +177,9 @@ export function NorthIndianChart({
             <text
               x={labelPos.x}
               y={labelPos.y}
-              fontSize="9"
+              fontSize="10"
               fontFamily="var(--font-mono)"
-              fill="var(--color-text-muted)"
+              fill="var(--color-text-secondary)"
               textAnchor="middle"
             >
               {RASI_SYMBOLS[h.rasi]}
@@ -193,7 +193,7 @@ export function NorthIndianChart({
                 y={item.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize="10"
+                fontSize="12"
                 fontWeight="600"
                 fontFamily="var(--font-body)"
                 fill={item.color}
