@@ -25,6 +25,8 @@ export function OverviewPage() {
     birthData,
     setBirthData,
     horoscope,
+    isCalculating,
+    error,
     selectedVarga,
     setSelectedVarga,
     chartData,
@@ -46,7 +48,17 @@ export function OverviewPage() {
             Enter your birth details to generate a complete Vedic horoscope with
             Panchanga, Divisional Charts, and 44 different Dasha systems.
           </p>
-          <BirthInputForm onSubmit={setBirthData} />
+          {error && (
+            <div className="error-banner" role="alert">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                <line x1="8" y1="4" x2="8" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
+              </svg>
+              {error}
+            </div>
+          )}
+          <BirthInputForm onSubmit={setBirthData} isCalculating={isCalculating} />
         </div>
       </div>
     );

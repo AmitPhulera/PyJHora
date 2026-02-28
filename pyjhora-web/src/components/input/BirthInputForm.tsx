@@ -18,17 +18,31 @@ interface BirthData {
 interface BirthInputFormProps {
   onSubmit: (data: BirthData) => void;
   initialData?: Partial<BirthData>;
+  isCalculating?: boolean;
 }
 
-// Some preset places for quick selection
+// Preset places for quick selection — global coverage across time zones
 const PRESET_PLACES = [
-  { name: 'Pithoragarh, Uttarakhand, India', lat: 29.5829, lon: 80.2182, tz: 5.5 },
+  { name: 'Pithoragarh, India', lat: 29.5829, lon: 80.2182, tz: 5.5 },
   { name: 'Bangalore, India', lat: 12.972, lon: 77.594, tz: 5.5 },
   { name: 'Delhi, India', lat: 28.679, lon: 77.217, tz: 5.5 },
   { name: 'Mumbai, India', lat: 19.076, lon: 72.878, tz: 5.5 },
   { name: 'Chennai, India', lat: 13.083, lon: 80.27, tz: 5.5 },
-  { name: 'New York, USA', lat: 40.714, lon: -74.006, tz: -5 },
+  { name: 'Kolkata, India', lat: 22.573, lon: 88.364, tz: 5.5 },
+  { name: 'Hyderabad, India', lat: 17.385, lon: 78.487, tz: 5.5 },
   { name: 'London, UK', lat: 51.507, lon: -0.127, tz: 0 },
+  { name: 'New York, USA', lat: 40.714, lon: -74.006, tz: -5 },
+  { name: 'Los Angeles, USA', lat: 34.052, lon: -118.244, tz: -8 },
+  { name: 'Chicago, USA', lat: 41.878, lon: -87.630, tz: -6 },
+  { name: 'Toronto, Canada', lat: 43.653, lon: -79.383, tz: -5 },
+  { name: 'Dubai, UAE', lat: 25.204, lon: 55.271, tz: 4 },
+  { name: 'Singapore', lat: 1.352, lon: 103.820, tz: 8 },
+  { name: 'Sydney, Australia', lat: -33.869, lon: 151.209, tz: 11 },
+  { name: 'Tokyo, Japan', lat: 35.682, lon: 139.692, tz: 9 },
+  { name: 'Kathmandu, Nepal', lat: 27.717, lon: 85.324, tz: 5.75 },
+  { name: 'Colombo, Sri Lanka', lat: 6.927, lon: 79.861, tz: 5.5 },
+  { name: 'Nairobi, Kenya', lat: -1.286, lon: 36.817, tz: 3 },
+  { name: 'São Paulo, Brazil', lat: -23.550, lon: -46.633, tz: -3 },
 ];
 
 function formatTimezoneUTC(tz: number): string {
@@ -39,7 +53,7 @@ function formatTimezoneUTC(tz: number): string {
   return `UTC${sign}${hours}${mins > 0 ? `:${mins.toString().padStart(2, '0')}` : ''}`;
 }
 
-export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
+export function BirthInputForm({ onSubmit, initialData, isCalculating = false }: BirthInputFormProps) {
   const [date, setDate] = useState(initialData?.date ?? '2025-05-26');
   const [time, setTime] = useState(initialData?.time ?? '04:15');
   const [placeName, setPlaceName] = useState(initialData?.placeName ?? 'Bangalore, India');
@@ -67,7 +81,7 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
   };
 
   return (
-    <form className="birth-input-form card" onSubmit={handleSubmit}>
+    <form className="birth-input-form card" onSubmit={handleSubmit} aria-label="Birth details">
       <h3 className="form-title">Birth Details</h3>
 
       {/* Date & Time — prominent row */}
@@ -167,8 +181,19 @@ export function BirthInputForm({ onSubmit, initialData }: BirthInputFormProps) {
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary submit-btn">
-        Calculate Horoscope
+      <button
+        type="submit"
+        className={`btn btn-primary submit-btn${isCalculating ? ' submit-btn--loading' : ''}`}
+        disabled={isCalculating}
+      >
+        {isCalculating ? (
+          <>
+            <span className="submit-spinner" aria-hidden="true" />
+            Calculating…
+          </>
+        ) : (
+          'Calculate Horoscope'
+        )}
       </button>
     </form>
   );

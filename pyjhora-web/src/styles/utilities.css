@@ -145,6 +145,15 @@
 .text-muted { color: var(--color-text-muted); }
 .font-mono { font-family: var(--font-mono); }
 
+/* ---- Focus Visible (Keyboard Accessibility) ---- */
+.btn:focus-visible,
+.input:focus-visible,
+.select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
+}
+
 /* ---- Planet Colors ---- */
 .planet-sun { color: var(--color-planet-sun); }
 .planet-moon { color: var(--color-planet-moon); }

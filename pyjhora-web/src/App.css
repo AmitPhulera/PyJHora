@@ -239,3 +239,23 @@
 .page-stub .btn {
   margin-top: var(--space-lg);
 }
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  border-radius: var(--radius-md);
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #ef4444;
+  font-size: 0.875rem;
+  text-align: left;
+  animation: fadeIn 0.3s ease;
+}
+
+.error-banner svg {
+  flex-shrink: 0;
+}

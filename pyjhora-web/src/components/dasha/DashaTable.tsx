@@ -114,6 +114,11 @@ export function DashaTable({
               key={index}
               className={`mahadasha-item ${selectedDasha === dasha.lord ? 'active' : ''}`}
               onClick={() => onDashaSelect?.(dasha.lord)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDashaSelect?.(dasha.lord); } }}
+              role="button"
+              tabIndex={0}
+              aria-pressed={selectedDasha === dasha.lord}
+              aria-label={`${dasha.lordName} dasha, ${dasha.durationYears} years from ${formatDate(dasha.startDate)}`}
             >
               <span className={`dasha-lord ${getClass(dasha.lord) ?? ''}`}>
                 {dasha.lordName}

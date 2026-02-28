@@ -40,6 +40,7 @@ export function DivisionalChartGrid({ selectedVarga, onSelect }: DivisionalChart
             className={`dcg-card ${selectedVarga === factor ? 'dcg-card--selected' : ''}`}
             onClick={() => onSelect(factor)}
             title={VARGA_NAMES[factor] || `D-${factor}`}
+            aria-pressed={selectedVarga === factor}
           >
             <span className="dcg-card-factor">D-{factor}</span>
             <span className="dcg-card-name">{getShortName(factor)}</span>
@@ -64,6 +65,7 @@ export function DivisionalChartGrid({ selectedVarga, onSelect }: DivisionalChart
                   className={`dcg-card ${selectedVarga === factor ? 'dcg-card--selected' : ''}`}
                   onClick={() => onSelect(factor)}
                   title={VARGA_NAMES[factor] || `D-${factor}`}
+                  aria-pressed={selectedVarga === factor}
                 >
                   <span className="dcg-card-factor">D-{factor}</span>
                   <span className="dcg-card-name">{getShortName(factor)}</span>
