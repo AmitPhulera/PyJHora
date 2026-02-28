@@ -5,6 +5,7 @@
 
 .planet-position-table table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
@@ -41,4 +42,21 @@
   color: var(--color-text-secondary);
   font-size: 0.75rem;
   font-family: var(--font-mono);
+}
+
+@media (max-width: 768px) {
+  .planet-position-table {
+    margin: 0.75rem -0.5rem;
+    padding: 0 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .planet-position-table table {
+    font-size: 0.8rem;
+  }
+
+  .planet-position-table th,
+  .planet-position-table td {
+    padding: 0.4rem 0.5rem;
+  }
 }

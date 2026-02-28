@@ -28,6 +28,20 @@
     padding: var(--space-md);
     padding-bottom: calc(64px + var(--space-md));
   }
+
+  .horoscope-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .horoscope-header button {
+    align-self: flex-end;
+  }
+
+  .horoscope-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ============================================

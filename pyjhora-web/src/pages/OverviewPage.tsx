@@ -82,14 +82,11 @@ export function OverviewPage() {
           />
         </div>
 
-        <div className="section">
+        <div className="section" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <LagnaDisplay
             ascendantRasi={horoscope.ascendantRasi}
             ascendantLongitude={horoscope.ascendantLongitude}
           />
-        </div>
-
-        <div className="section">
           <PanchangaDisplay panchanga={horoscope.panchanga} />
         </div>
 
