@@ -19,18 +19,20 @@ export function ChartsPage() {
     return (
       <div className="page-stub">
         <Card>
+          <div className="page-stub-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect x="4" y="4" width="40" height="40" rx="4" stroke="var(--color-accent-gold)" strokeWidth="2" opacity="0.5" />
+              <line x1="4" y1="24" x2="44" y2="24" stroke="var(--color-border)" strokeWidth="1" />
+              <line x1="24" y1="4" x2="24" y2="44" stroke="var(--color-border)" strokeWidth="1" />
+              <line x1="4" y1="4" x2="44" y2="44" stroke="var(--color-accent-gold)" strokeWidth="1" opacity="0.4" />
+              <line x1="44" y1="4" x2="4" y2="44" stroke="var(--color-accent-gold)" strokeWidth="1" opacity="0.4" />
+            </svg>
+          </div>
           <h2>Divisional Charts</h2>
-          <p
-            className="text-secondary"
-            style={{ marginTop: 'var(--space-md)' }}
-          >
-            Calculate a horoscope first to explore divisional charts.
+          <p className="text-secondary" style={{ marginTop: 'var(--space-md)' }}>
+            Calculate a horoscope first to explore all 23 divisional charts.
           </p>
-          <Link
-            to="/"
-            className="btn btn-secondary"
-            style={{ marginTop: 'var(--space-md)', display: 'inline-block' }}
-          >
+          <Link to="/" className="btn btn-secondary">
             Go to Overview
           </Link>
         </Card>

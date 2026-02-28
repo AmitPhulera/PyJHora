@@ -197,7 +197,9 @@ export function NorthIndianChart({
                 fontWeight="600"
                 fontFamily="var(--font-body)"
                 fill={item.color}
+                style={{ cursor: item.tooltip ? 'pointer' : undefined }}
               >
+                {item.tooltip && <title>{item.tooltip}</title>}
                 {item.text}
               </text>
             ))}

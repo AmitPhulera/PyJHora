@@ -21,11 +21,34 @@ export const PLANET_SYMBOLS: Record<number, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Planet full names (for tooltips)
+// ---------------------------------------------------------------------------
+export const PLANET_FULL_NAMES: Record<number, string> = {
+  0: 'Sun',
+  1: 'Moon',
+  2: 'Mars',
+  3: 'Mercury',
+  4: 'Jupiter',
+  5: 'Venus',
+  6: 'Saturn',
+  7: 'Rahu',
+  8: 'Ketu',
+};
+
+// ---------------------------------------------------------------------------
 // Rasi short names (indexed 0 = Aries .. 11 = Pisces)
 // ---------------------------------------------------------------------------
 export const RASI_SYMBOLS = [
   'Ar', 'Ta', 'Ge', 'Cn', 'Le', 'Vi',
   'Li', 'Sc', 'Sg', 'Cp', 'Aq', 'Pi',
+];
+
+// ---------------------------------------------------------------------------
+// Rasi full names (for tooltips)
+// ---------------------------------------------------------------------------
+export const RASI_FULL_NAMES = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
 
 // ---------------------------------------------------------------------------
@@ -48,6 +71,33 @@ export function getPlanetColor(planetId: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Degree formatting (longitude → DD°MM'SS")
+// ---------------------------------------------------------------------------
+export function formatDegrees(longitude: number): string {
+  const deg = Math.floor(longitude);
+  const minFloat = (longitude - deg) * 60;
+  const min = Math.floor(minFloat);
+  const sec = Math.round((minFloat - min) * 60);
+  return `${deg}°${String(min).padStart(2, '0')}'${String(sec).padStart(2, '0')}"`;
+}
+
+/**
+ * Build a tooltip string for a planet in a chart cell.
+ */
+export function buildPlanetTooltip(
+  planetId: number,
+  rasi: number,
+  longitude: number,
+  isRetrograde?: boolean,
+): string {
+  const name = PLANET_FULL_NAMES[planetId] ?? `Planet ${planetId}`;
+  const rasiName = RASI_FULL_NAMES[rasi] ?? `Rasi ${rasi}`;
+  const degInSign = longitude % 30;
+  const retro = isRetrograde ? ' (R)' : '';
+  return `${name}${retro} — ${rasiName} ${formatDegrees(degInSign)}`;
+}
+
+// ---------------------------------------------------------------------------
 // Layout planets within a cell bounding box
 // ---------------------------------------------------------------------------
 export interface PositionedText {
@@ -55,6 +105,7 @@ export interface PositionedText {
   x: number;
   y: number;
   color: string;
+  tooltip?: string;
 }
 
 /**
@@ -68,7 +119,7 @@ export interface PositionedText {
  * Retrograde planets get an "R" suffix appended to their abbreviation.
  */
 export function layoutPlanetsInCell(
-  planets: Array<{ planet: number; isRetrograde?: boolean }>,
+  planets: Array<{ planet: number; rasi?: number; longitude?: number; isRetrograde?: boolean }>,
   bounds: { x: number; y: number; width: number; height: number },
   fontSize: number,
 ): PositionedText[] {
@@ -88,11 +139,15 @@ export function layoutPlanetsInCell(
     for (let i = 0; i < planets.length; i++) {
       const p = planets[i];
       const label = (PLANET_SYMBOLS[p.planet] ?? '?') + (p.isRetrograde ? '\u1D3F' : '');
+      const tooltip = p.rasi != null && p.longitude != null
+        ? buildPlanetTooltip(p.planet, p.rasi, p.longitude, p.isRetrograde)
+        : undefined;
       items.push({
         text: label,
         x: cx,
         y: startY + i * lineHeight,
         color: getPlanetColor(p.planet),
+        tooltip,
       });
     }
   } else {
@@ -108,11 +163,15 @@ export function layoutPlanetsInCell(
       const row = Math.floor(i / cols);
       const p = planets[i];
       const label = (PLANET_SYMBOLS[p.planet] ?? '?') + (p.isRetrograde ? '\u1D3F' : '');
+      const tooltip = p.rasi != null && p.longitude != null
+        ? buildPlanetTooltip(p.planet, p.rasi, p.longitude, p.isRetrograde)
+        : undefined;
       items.push({
         text: label,
         x: bounds.x + colWidth * (col + 0.75),
         y: startY + row * lineHeight,
         color: getPlanetColor(p.planet),
+        tooltip,
       });
     }
   }

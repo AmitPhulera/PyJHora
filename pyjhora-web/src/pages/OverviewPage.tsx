@@ -44,7 +44,7 @@ export function OverviewPage() {
           <h1 className="intro-title">Vedic Horoscope Calculator</h1>
           <p className="intro-subtitle text-secondary">
             Enter your birth details to generate a complete Vedic horoscope with
-            Panchanga, Divisional Charts, and 27 different Dasha systems.
+            Panchanga, Divisional Charts, and 44 different Dasha systems.
           </p>
           <BirthInputForm onSubmit={setBirthData} />
         </div>

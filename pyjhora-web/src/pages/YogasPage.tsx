@@ -15,15 +15,17 @@ export function YogasPage() {
     return (
       <div className="page-stub">
         <Card>
+          <div className="page-stub-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M24 4L30 16L44 18L34 28L36 44L24 37L12 44L14 28L4 18L18 16Z" stroke="var(--color-accent-gold)" strokeWidth="2" fill="none" opacity="0.5" />
+              <circle cx="24" cy="24" r="4" fill="var(--color-accent-gold)" opacity="0.4" />
+            </svg>
+          </div>
           <h2>Yoga Analysis</h2>
           <p className="text-secondary" style={{ marginTop: 'var(--space-md)' }}>
-            Calculate a horoscope first to analyze yogas.
+            Calculate a horoscope first to analyze 170+ yoga combinations.
           </p>
-          <Link
-            to="/"
-            className="btn btn-secondary"
-            style={{ marginTop: 'var(--space-md)', display: 'inline-block' }}
-          >
+          <Link to="/" className="btn btn-secondary">
             Go to Overview
           </Link>
         </Card>

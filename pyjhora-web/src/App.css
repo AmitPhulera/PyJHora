@@ -200,11 +200,42 @@
   font-style: italic;
 }
 
-/* Stub pages */
+/* Page titles (shared gradient) */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Stub pages (empty state) */
 .page-stub {
   max-width: 600px;
 }
 
 .page-stub h2 {
   font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-stub .card {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.page-stub-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+.page-stub .btn {
+  margin-top: var(--space-lg);
 }
