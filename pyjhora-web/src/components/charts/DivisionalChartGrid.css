@@ -63,6 +63,20 @@
   max-width: 100%;
 }
 
+.dcg-card-purpose {
+  font-size: 0.6rem;
+  color: var(--color-text-muted, var(--text-muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+.dcg-card--selected .dcg-card-purpose {
+  color: var(--color-text-secondary, var(--text-secondary));
+}
+
 .dcg-toggle {
   display: block;
   margin: var(--space-md) auto 0;

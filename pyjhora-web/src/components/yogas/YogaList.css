@@ -140,12 +140,39 @@
 }
 
 .yoga-card-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.9rem;
   font-weight: 600;
 }
 
+.yoga-category-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.yoga-present .yoga-category-icon {
+  color: var(--color-accent-gold);
+}
+
 .yoga-present .yoga-card-name {
   color: var(--color-accent-gold);
+}
+
+.yoga-card-badges-header {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Nature-based left border colors */
+.yoga-benefic {
+  border-left-color: var(--color-success, #22c55e);
+}
+
+.yoga-malefic {
+  border-left-color: var(--color-error, #ef4444);
 }
 
 .yoga-card-desc {

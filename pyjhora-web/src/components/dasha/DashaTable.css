@@ -99,6 +99,42 @@
   background: var(--color-card);
 }
 
+/* Current period highlighting */
+.current-period {
+  position: relative;
+  background: rgba(91, 127, 255, 0.08);
+}
+
+.mahadasha-item.current-period {
+  border-left: 2px solid var(--color-accent-blue, #5b7fff);
+  padding-left: calc(var(--space-sm) - 2px);
+}
+
+.bhukti-item.current-period {
+  border-left: 2px solid var(--color-accent-blue, #5b7fff);
+  padding-left: calc(var(--space-sm) - 2px);
+}
+
+.current-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  color: #fff;
+  background: var(--color-accent-blue, #5b7fff);
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+  letter-spacing: 0.02em;
+}
+
+.current-badge--sm {
+  font-size: 0.55rem;
+  padding: 0 4px;
+}
+
 .dasha-lord, .bhukti-lord {
   font-weight: 600;
   font-size: 0.9rem;

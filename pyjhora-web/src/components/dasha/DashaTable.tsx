@@ -63,9 +63,26 @@ const RASI_CLASS: Record<number, string> = {
   0: 'rasi-aries'
 };
 
-export function DashaTable({ 
+/** Parse a dasha date string into a Date object */
+function parseDashaDate(dateStr: string): Date | null {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+/** Find the index of the current period (where today falls between start dates) */
+function findCurrentIndex<T extends { startDate: string }>(periods: T[]): number {
+  const now = new Date();
+  for (let i = periods.length - 1; i >= 0; i--) {
+    const d = parseDashaDate(periods[i].startDate);
+    if (d && d <= now) return i;
+  }
+  return -1;
+}
+
+export function DashaTable({
   title = 'Dasha',
-  mahadashas, 
+  mahadashas,
   bhuktis,
   balance,
   selectedDasha,
@@ -76,6 +93,10 @@ export function DashaTable({
   const selectedBhuktis = selectedDasha !== undefined && bhuktis
     ? bhuktis.filter(b => b.dashaLord === selectedDasha)
     : [];
+
+  // Find current mahadasha and bhukti indices
+  const currentMahaIndex = findCurrentIndex(mahadashas);
+  const currentBhuktiIndex = findCurrentIndex(selectedBhuktis);
 
   const getClass = (id: number) => {
     if (coloringMode === 'rasi') {
@@ -112,16 +133,19 @@ export function DashaTable({
           {mahadashas.map((dasha, index) => (
             <div
               key={index}
-              className={`mahadasha-item ${selectedDasha === dasha.lord ? 'active' : ''}`}
+              className={`mahadasha-item ${selectedDasha === dasha.lord ? 'active' : ''} ${index === currentMahaIndex ? 'current-period' : ''}`}
               onClick={() => onDashaSelect?.(dasha.lord)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDashaSelect?.(dasha.lord); } }}
               role="button"
               tabIndex={0}
               aria-pressed={selectedDasha === dasha.lord}
-              aria-label={`${dasha.lordName} dasha, ${dasha.durationYears} years from ${formatDate(dasha.startDate)}`}
+              aria-label={`${dasha.lordName} dasha, ${dasha.durationYears} years from ${formatDate(dasha.startDate)}${index === currentMahaIndex ? ' (current)' : ''}`}
             >
               <span className={`dasha-lord ${getClass(dasha.lord) ?? ''}`}>
                 {dasha.lordName}
+                {index === currentMahaIndex && (
+                  <span className="current-badge" title="Current period">Now</span>
+                )}
               </span>
               <span className="dasha-duration">{dasha.durationYears}y</span>
               <span className="dasha-date">{formatDate(dasha.startDate)}</span>
@@ -133,9 +157,12 @@ export function DashaTable({
           <div className="bhukti-list">
             <div className="list-header">Bhuktis</div>
             {selectedBhuktis.map((bhukti, index) => (
-              <div key={index} className="bhukti-item">
+              <div key={index} className={`bhukti-item ${index === currentBhuktiIndex ? 'current-period' : ''}`}>
                 <span className={`bhukti-lord ${getClass(bhukti.bhuktiLord) ?? ''}`}>
                   {bhukti.bhuktiLordName}
+                  {index === currentBhuktiIndex && (
+                    <span className="current-badge current-badge--sm" title="Current sub-period">Now</span>
+                  )}
                 </span>
                 <span className="bhukti-date">{formatDate(bhukti.startDate)}</span>
               </div>

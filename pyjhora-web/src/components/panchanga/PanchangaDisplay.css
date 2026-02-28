@@ -34,6 +34,17 @@
   border-bottom: none;
 }
 
+.panchanga-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panchanga-icon {
+  color: var(--color-accent-gold);
+  flex-shrink: 0;
+}
+
 .panchanga-label {
   font-size: 0.875rem;
   color: var(--color-text-secondary);

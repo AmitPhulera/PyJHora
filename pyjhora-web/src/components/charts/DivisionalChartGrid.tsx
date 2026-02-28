@@ -20,6 +20,30 @@ const OTHER_FACTORS = DIVISIONAL_CHART_FACTORS.filter(
   (f) => !POPULAR_FACTORS.includes(f)
 );
 
+/** Chart purpose descriptions for tooltips */
+const VARGA_PURPOSE: Record<number, string> = {
+  1: 'Overall life, personality, body',
+  2: 'Wealth, financial prospects',
+  3: 'Siblings, courage, communication',
+  4: 'Property, fixed assets, fortune',
+  5: 'Spiritual practices, mantras',
+  6: 'Health, diseases, enemies',
+  7: 'Children, progeny, creativity',
+  8: 'Longevity, sudden events',
+  9: 'Marriage, dharma, fortune (spouse)',
+  10: 'Career, profession, social status',
+  11: 'Destruction, Rudra blessings',
+  12: 'Parents, ancestral heritage',
+  16: 'Vehicles, comforts, luxuries',
+  20: 'Spiritual progress, upasana',
+  24: 'Education, learning, knowledge',
+  27: 'Strengths and weaknesses',
+  30: 'Evils, misfortunes, arishtas',
+  40: 'Auspicious/inauspicious effects',
+  45: 'General indications, all matters',
+  60: 'Past life karma, all results',
+};
+
 function getShortName(factor: number): string {
   const full = VARGA_NAMES[factor];
   if (!full) return `D-${factor}`;
@@ -39,11 +63,14 @@ export function DivisionalChartGrid({ selectedVarga, onSelect }: DivisionalChart
             key={factor}
             className={`dcg-card ${selectedVarga === factor ? 'dcg-card--selected' : ''}`}
             onClick={() => onSelect(factor)}
-            title={VARGA_NAMES[factor] || `D-${factor}`}
+            title={`${VARGA_NAMES[factor] || `D-${factor}`}${VARGA_PURPOSE[factor] ? ` — ${VARGA_PURPOSE[factor]}` : ''}`}
             aria-pressed={selectedVarga === factor}
           >
             <span className="dcg-card-factor">D-{factor}</span>
             <span className="dcg-card-name">{getShortName(factor)}</span>
+            {VARGA_PURPOSE[factor] && (
+              <span className="dcg-card-purpose">{VARGA_PURPOSE[factor]}</span>
+            )}
           </button>
         ))}
       </div>
@@ -64,11 +91,14 @@ export function DivisionalChartGrid({ selectedVarga, onSelect }: DivisionalChart
                   key={factor}
                   className={`dcg-card ${selectedVarga === factor ? 'dcg-card--selected' : ''}`}
                   onClick={() => onSelect(factor)}
-                  title={VARGA_NAMES[factor] || `D-${factor}`}
+                  title={`${VARGA_NAMES[factor] || `D-${factor}`}${VARGA_PURPOSE[factor] ? ` — ${VARGA_PURPOSE[factor]}` : ''}`}
                   aria-pressed={selectedVarga === factor}
                 >
                   <span className="dcg-card-factor">D-{factor}</span>
                   <span className="dcg-card-name">{getShortName(factor)}</span>
+                  {VARGA_PURPOSE[factor] && (
+                    <span className="dcg-card-purpose">{VARGA_PURPOSE[factor]}</span>
+                  )}
                 </button>
               ))}
             </div>
