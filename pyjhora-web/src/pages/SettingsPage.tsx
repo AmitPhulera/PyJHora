@@ -75,6 +75,68 @@ function SettingRow({
 }
 
 // ---------------------------------------------------------------------------
+// Mini chart silhouettes for the style preview cards
+// ---------------------------------------------------------------------------
+function ChartMiniSilhouette({ style }: { style: ChartStyle }) {
+  const stroke = 'var(--color-accent-gold)';
+  const faint = 'var(--color-border)';
+
+  if (style === 'south') {
+    return (
+      <svg viewBox="0 0 80 80" width="72" height="72" style={{ opacity: 0.85 }}>
+        {/* 4x4 grid */}
+        {[1, 2, 3].map((i) => (
+          <g key={i}>
+            <line x1={i * 20} y1={0} x2={i * 20} y2={80} stroke={faint} strokeWidth="0.8" />
+            <line x1={0} y1={i * 20} x2={80} y2={i * 20} stroke={faint} strokeWidth="0.8" />
+          </g>
+        ))}
+        {/* Outer border */}
+        <rect x="0.5" y="0.5" width="79" height="79" fill="none" stroke={stroke} strokeWidth="1.5" rx="2" />
+        {/* Ascendant marker (Aries = row 0, col 1) */}
+        <line x1={20} y1={0.5} x2={20} y2={8} stroke={stroke} strokeWidth="1.2" />
+        <line x1={20} y1={0.5} x2={28} y2={0.5} stroke={stroke} strokeWidth="1.2" />
+        <line x1={28} y1={0.5} x2={20} y2={8} stroke={stroke} strokeWidth="1.2" />
+      </svg>
+    );
+  }
+
+  if (style === 'north') {
+    return (
+      <svg viewBox="0 0 80 80" width="72" height="72" style={{ opacity: 0.85 }}>
+        {/* Outer square */}
+        <rect x="2" y="2" width="76" height="76" fill="none" stroke={stroke} strokeWidth="1.5" rx="2" />
+        {/* Diagonals */}
+        <line x1={2} y1={2} x2={78} y2={78} stroke={stroke} strokeWidth="0.8" />
+        <line x1={2} y1={78} x2={78} y2={2} stroke={stroke} strokeWidth="0.8" />
+        {/* Inner diamond */}
+        <polygon points="2,40 40,2 78,40 40,78" fill="none" stroke={stroke} strokeWidth="0.8" />
+      </svg>
+    );
+  }
+
+  // East Indian
+  return (
+    <svg viewBox="0 0 90 90" width="72" height="72" style={{ opacity: 0.85 }}>
+      {/* 3x3 grid */}
+      {[1, 2].map((i) => (
+        <g key={i}>
+          <line x1={i * 30} y1={0} x2={i * 30} y2={90} stroke={faint} strokeWidth="0.8" />
+          <line x1={0} y1={i * 30} x2={90} y2={i * 30} stroke={faint} strokeWidth="0.8" />
+        </g>
+      ))}
+      {/* Corner diagonals */}
+      <line x1={0} y1={0} x2={30} y2={30} stroke={stroke} strokeWidth="0.8" />
+      <line x1={60} y1={0} x2={90} y2={30} stroke={stroke} strokeWidth="0.8" />
+      <line x1={0} y1={60} x2={30} y2={90} stroke={stroke} strokeWidth="0.8" />
+      <line x1={60} y1={60} x2={90} y2={90} stroke={stroke} strokeWidth="0.8" />
+      {/* Outer border */}
+      <rect x="0.5" y="0.5" width="89" height="89" fill="none" stroke={stroke} strokeWidth="1.5" rx="2" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export function SettingsPage() {
@@ -169,6 +231,7 @@ export function SettingsPage() {
               className={`settings-chart-preview-card ${chartStyle === style ? 'settings-chart-preview-card--selected' : ''}`}
               onClick={() => setChartStyle(style)}
             >
+              <ChartMiniSilhouette style={style} />
               <span className="settings-chart-preview-label">
                 {style === 'south'
                   ? 'South Indian'
