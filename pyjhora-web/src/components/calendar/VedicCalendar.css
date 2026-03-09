@@ -1,0 +1,230 @@
+/* Vedic Calendar Styles */
+
+.vedic-calendar {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.vedic-calendar-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.calendar-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.calendar-input-row label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.calendar-input-row input,
+.calendar-input-row select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.calendar-input-row input[type="text"] {
+  width: 120px;
+}
+
+.calendar-input-row input[type="number"] {
+  width: 80px;
+}
+
+.calendar-body {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.calendar-info-panel {
+  min-width: 280px;
+  max-width: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: var(--space-sm);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.8rem;
+  overflow-y: auto;
+  max-height: 550px;
+}
+
+.calendar-info-panel h4 {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  font-size: 0.85rem;
+}
+
+.calendar-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.calendar-info-key {
+  color: #a0522d;
+  font-weight: 500;
+}
+
+.calendar-info-value {
+  color: #6495ed;
+  text-align: right;
+}
+
+.calendar-grid-container {
+  flex: 1;
+}
+
+.calendar-header-label {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px 8px 0 0;
+  color: #800000;
+  background: rgba(255, 255, 255, 0.03);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: green;
+  padding: 6px 0;
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.calendar-cell {
+  min-height: 72px;
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  font-size: 0.7rem;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.calendar-cell:hover {
+  filter: brightness(1.15);
+}
+
+.calendar-cell.default {
+  background: rgba(255, 255, 224, 0.08);
+}
+
+.calendar-cell.selected {
+  background: rgba(144, 238, 144, 0.15);
+}
+
+.calendar-cell.prev-month {
+  background: rgba(255, 165, 0, 0.1);
+}
+
+.calendar-cell.next-month {
+  background: rgba(173, 216, 230, 0.1);
+}
+
+.calendar-cell.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.cell-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cell-tithi {
+  color: #ff00ff;
+  font-weight: 600;
+  font-size: 0.65rem;
+}
+
+.cell-sunrise {
+  color: #0000ff;
+  font-size: 0.6rem;
+  text-align: right;
+}
+
+.cell-middle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cell-tamil-date {
+  color: #ff0000;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.cell-greg-date {
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.cell-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cell-nakshatra {
+  color: #008000;
+  font-weight: 600;
+  font-size: 0.65rem;
+}
+
+.cell-sunset {
+  color: #0000ff;
+  font-size: 0.6rem;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .calendar-body {
+    flex-direction: column;
+  }
+  .calendar-info-panel {
+    max-width: unset;
+    min-width: unset;
+    max-height: 200px;
+  }
+  .calendar-cell {
+    min-height: 50px;
+    font-size: 0.6rem;
+  }
+}

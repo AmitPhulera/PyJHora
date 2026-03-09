@@ -1,0 +1,140 @@
+/* Vedic Clock Styles */
+
+.vedic-clock {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.vedic-clock-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vedic-clock-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.vedic-clock-input-row label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.vedic-clock-input-row select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.vedic-clock-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.vedic-clock-analog {
+  position: relative;
+  width: 400px;
+  height: 400px;
+}
+
+.vedic-clock-analog svg {
+  width: 100%;
+  height: 100%;
+}
+
+.vedic-clock-digital {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.clock-digital-block {
+  text-align: center;
+  padding: 12px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  min-width: 140px;
+}
+
+.clock-digital-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.clock-digital-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.clock-digital-time.local {
+  color: #ef4444;
+}
+
+.clock-digital-time.vedic {
+  color: #22c55e;
+}
+
+.clock-digital-sublabel {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.vedic-clock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  margin-top: var(--space-sm);
+  width: 100%;
+  max-width: 400px;
+}
+
+.vedic-clock-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.vedic-clock-info-key {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.vedic-clock-info-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+}
+
+@media (max-width: 500px) {
+  .vedic-clock-analog {
+    width: 300px;
+    height: 300px;
+  }
+}

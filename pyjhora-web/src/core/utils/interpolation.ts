@@ -76,3 +76,70 @@ export function extendAngleRange(angles: number[], target: number): number[] {
   }
   return extended;
 }
+
+/**
+ * Newton's divided-difference polynomial interpolation.
+ * Evaluates the interpolating polynomial at point x given data points.
+ *
+ * Python: utils.newton_polynomial(x_data, y_data, x)
+ *
+ * @param xData - Array of x data points
+ * @param yData - Array of y data points
+ * @param x - Evaluation point
+ * @returns Interpolated y value at x
+ */
+export function newtonPolynomial(xData: number[], yData: number[], x: number): number {
+  const m = xData.length;
+
+  // Compute divided-difference coefficients
+  const a = [...yData];
+  for (let k = 1; k < m; k++) {
+    for (let i = m - 1; i >= k; i--) {
+      a[i] = (a[i]! - a[i - 1]!) / (xData[i]! - xData[i - k]!);
+    }
+  }
+
+  // Evaluate using Horner's method
+  const n = m - 1;
+  let p = a[n]!;
+  for (let k = 1; k <= n; k++) {
+    p = a[n - k]! + (x - xData[n - k]!) * p;
+  }
+
+  return p;
+}
+
+/**
+ * Bisection search to find a root of a function within [start, stop].
+ *
+ * Python: utils._bisection_search(func, start, stop)
+ *
+ * @param func - Function to find root of
+ * @param start - Left bound
+ * @param stop - Right bound
+ * @param epsilon - Convergence tolerance (default 5e-10)
+ * @returns Approximate root
+ */
+export function bisectionSearch(
+  func: (x: number) => number,
+  start: number,
+  stop: number,
+  epsilon = 5e-10,
+): number {
+  let left = start;
+  let right = stop;
+
+  while (right - left > epsilon) {
+    const middle = (left + right) / 2;
+    const midVal = func(middle);
+    const rtVal = func(right);
+
+    if (midVal * rtVal >= 0) {
+      right = middle;
+    } else {
+      left = middle;
+    }
+  }
+
+  return (right + left) / 2;
+}

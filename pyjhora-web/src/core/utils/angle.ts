@@ -66,6 +66,46 @@ export function rasiFromLongitude(longitude: number): number {
   return Math.floor(normalizeDegrees(longitude) / 30);
 }
 
+/**
+ * Normalize angle to be within [start, start + 360).
+ *
+ * Python: normalize_angle(angle, start=0)
+ *
+ * @param angle - Angle in degrees
+ * @param start - Start of the range (default 0)
+ * @returns Normalized angle within [start, start + 360)
+ */
+export function normalizeAngle(angle: number, start = 0): number {
+  let a = angle;
+  while (a >= start + 360) a -= 360;
+  while (a < start) a += 360;
+  return a;
+}
+
+/**
+ * Make angle lie between [-180, 180).
+ *
+ * Python: norm180 = lambda angle: (angle - 360) if angle >= 180 else angle
+ *
+ * @param angle - Angle in [0, 360) range
+ * @returns Angle in [-180, 180) range
+ */
+export function norm180(angle: number): number {
+  return angle >= 180 ? angle - 360 : angle;
+}
+
+/**
+ * Make angle lie between [0, 360).
+ *
+ * Python: norm360 = lambda angle: angle % 360
+ *
+ * @param angle - Any angle
+ * @returns Angle in [0, 360) range
+ */
+export function norm360(angle: number): number {
+  return ((angle % 360) + 360) % 360;
+}
+
 // ============================================================================
 // DEGREE/MINUTE/SECOND CONVERSIONS
 // ============================================================================
@@ -261,4 +301,81 @@ export function roundTo(value: number, decimals: number): number {
  */
 export function almostEqual(a: number, b: number, tolerance = 1e-9): boolean {
   return Math.abs(a - b) <= tolerance;
+}
+
+// ============================================================================
+// DMS STRING PARSING (from Python to_dms / from_dms)
+// ============================================================================
+
+/**
+ * Convert decimal degrees to DMS with float seconds (higher precision).
+ *
+ * Python: to_dms_prec(deg)
+ *
+ * @param deg - Decimal degrees
+ * @returns [degrees, minutes, seconds] where seconds is a float
+ */
+export function toDmsPrec(deg: number): [number, number, number] {
+  const d = Math.trunc(deg);
+  const mins = (deg - d) * 60;
+  const m = Math.trunc(mins);
+  const s = roundTo((mins - m) * 60, 2);
+  return [d, m, s];
+}
+
+/**
+ * Convert a DMS time string (HH:MM:SS) to [hours, minutes, seconds] tuple.
+ * Handles (+1) and (-1) day markers and AM/PM suffixes.
+ *
+ * Python: from_dms_str_to_dms(dms_str)
+ *
+ * @param dmsStr - Time string like "10:34:00", "10:34:00 AM", "06:10:00(+1)"
+ * @returns [hours, minutes, seconds]
+ */
+export function fromDmsStrToDms(dmsStr: string): [number, number, number] {
+  let dmsh = 0;
+  if (dmsStr.includes('+1')) {
+    dmsh = 24;
+  } else if (dmsStr.includes('-1')) {
+    dmsh = -24;
+  }
+
+  const cleaned = dmsStr
+    .replace(/\(\+1\)/g, '')
+    .replace(/\(-1\)/g, '')
+    .replace(/ AM/gi, '')
+    .replace(/ PM/gi, '')
+    .trim();
+
+  const parts = cleaned.split(':');
+  return [
+    dmsh + parseInt(parts[0] ?? '0', 10),
+    parseInt(parts[1] ?? '0', 10),
+    parseInt(parts[2] ?? '0', 10),
+  ];
+}
+
+/**
+ * Convert a DMS time string to decimal degrees/hours.
+ *
+ * Python: from_dms_str_to_degrees(dms_str)
+ *
+ * @param dmsStr - Time/angle string like "10:34:00"
+ * @returns Decimal value
+ */
+export function fromDmsStrToDegrees(dmsStr: string): number {
+  const [d, m, s] = fromDmsStrToDms(dmsStr);
+  return d + m / 60 + s / 3600;
+}
+
+/**
+ * Convert DMS list to formatted string with degree symbols.
+ *
+ * Python: from_dms_to_str(dms_list)
+ *
+ * @param dms - Array of [degrees, minutes, seconds]
+ * @returns Formatted string like "23\u00b0 30\u2032 45\u2033"
+ */
+export function dmsToString(dms: [number, number, number]): string {
+  return `${dms[0]}\u00b0 ${dms[1]}\u2032 ${dms[2]}\u2033`;
 }

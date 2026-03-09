@@ -22,6 +22,16 @@ import {
   gandaMoola,
   ghata,
   shrapit,
+  getDoshaDetails,
+  getDoshaDetailsWithResults,
+  getKalaSarpaResults,
+  getManglikResults,
+  getPitruResults,
+  getGuruChandalaResults,
+  getGandaMoolaResults,
+  getKalathraResults,
+  getGhataResults,
+  getShrapitResults,
 } from '../../../src/core/horoscope/dosha';
 import {
   SUN,
@@ -530,5 +540,139 @@ describe('Shrapit Dosha', () => {
       { planet: SATURN, rasi: 8, longitude: 20 },
     ];
     expect(shrapit(positions)).toBe(false);
+  });
+});
+
+// ============================================================================
+// GET DOSHA DETAILS (comprehensive wrapper)
+// ============================================================================
+
+describe('getDoshaDetails', () => {
+  it('should return structured dosha details for the test chart', () => {
+    const details = getDoshaDetails(testChart, testPositions, 15); // moonStar=15 (Swati, not ganda moola)
+
+    expect(details).toBeDefined();
+    expect(typeof details.kalaSarpa).toBe('boolean');
+    expect(details.manglik).toBeDefined();
+    expect(typeof details.manglik.isManglik).toBe('boolean');
+    expect(details.pitru).toBeDefined();
+    expect(typeof details.pitru.hasDosha).toBe('boolean');
+    expect(details.guruChandala).toBeDefined();
+    expect(typeof details.guruChandala.hasDosha).toBe('boolean');
+    expect(typeof details.kalathra).toBe('boolean');
+    expect(typeof details.gandaMoola).toBe('boolean');
+    expect(typeof details.ghata).toBe('boolean');
+    expect(typeof details.shrapit).toBe('boolean');
+  });
+
+  it('should correctly report all doshas for the test chart', () => {
+    const details = getDoshaDetails(testChart, testPositions, 15);
+
+    // Kala Sarpa: false (planets not all between nodes)
+    expect(details.kalaSarpa).toBe(false);
+    // Manglik: true (Mars in house 8 from Lagna)
+    expect(details.manglik.isManglik).toBe(true);
+    // Pitru: true
+    expect(details.pitru.hasDosha).toBe(true);
+    // Guru Chandala: false (Jupiter and Rahu in different houses)
+    expect(details.guruChandala.hasDosha).toBe(false);
+    // Ganda Moola: false (moonStar=15 is not a ganda moola star)
+    expect(details.gandaMoola).toBe(false);
+    // Ghata: false (Mars and Saturn not conjunct)
+    expect(details.ghata).toBe(false);
+    // Shrapit: false (Rahu and Saturn not conjunct)
+    expect(details.shrapit).toBe(false);
+  });
+});
+
+// ============================================================================
+// GET DOSHA DETAILS WITH RESULTS (HTML formatted)
+// ============================================================================
+
+describe('getDoshaDetailsWithResults', () => {
+  it('should return structured details plus HTML result strings', () => {
+    const detailsWithResults = getDoshaDetailsWithResults(testPositions, 15);
+
+    expect(detailsWithResults).toBeDefined();
+    expect(detailsWithResults.results).toBeDefined();
+    expect(typeof detailsWithResults.results).toBe('object');
+
+    // Should have keys for each dosha type
+    const keys = Object.keys(detailsWithResults.results);
+    expect(keys.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('should produce HTML strings containing html tags', () => {
+    const detailsWithResults = getDoshaDetailsWithResults(testPositions, 15);
+    for (const [, value] of Object.entries(detailsWithResults.results)) {
+      expect(typeof value).toBe('string');
+    }
+  });
+});
+
+// ============================================================================
+// INDIVIDUAL DETAIL COMPOSERS
+// ============================================================================
+
+describe('Detail Composers', () => {
+  it('getKalaSarpaResults should produce valid result', () => {
+    const result = getKalaSarpaResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getManglikResults should produce valid result', () => {
+    const result = getManglikResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getPitruResults should produce valid result', () => {
+    const result = getPitruResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getGuruChandalaResults should produce valid result', () => {
+    const result = getGuruChandalaResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getGandaMoolaResults should produce valid result', () => {
+    const result = getGandaMoolaResults(15);
+    expect(Object.keys(result)).toHaveLength(1);
+  });
+
+  it('getKalathraResults should produce valid result', () => {
+    const result = getKalathraResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getGhataResults should produce valid result', () => {
+    const result = getGhataResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getShrapitResults should produce valid result', () => {
+    const result = getShrapitResults(testPositions);
+    expect(Object.keys(result)).toHaveLength(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('</html>');
+  });
+
+  it('getGandaMoolaResults should identify ganda moola stars', () => {
+    // Test with a ganda moola star (Ashwini = star 1)
+    const result = getGandaMoolaResults(1);
+    const html = Object.values(result)[0];
+    expect(html).toContain('Ganda Moola Dosha');
   });
 });

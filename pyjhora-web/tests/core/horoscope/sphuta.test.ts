@@ -26,6 +26,20 @@ import {
   yogiSphuta,
   avayogiSphuta,
   rahuTithiSphuta,
+  triSphotaMixedChart,
+  chaturSphotaMixedChart,
+  panchaSphotaMixedChart,
+  pranaSphotaMixedChart,
+  dehaSphotaMixedChart,
+  mrityuSphotaMixedChart,
+  sookshmaTriSphotaMixedChart,
+  beejaSphotaMixedChart,
+  kshetraSphotaMixedChart,
+  tithiSphotaMixedChart,
+  yogaSphotaMixedChart,
+  yogiSphotaMixedChart,
+  avayogiSphotaMixedChart,
+  rahuTithiSphotaMixedChart,
 } from '../../../src/core/horoscope/sphuta';
 
 // D-1 planet positions for Chennai, 1996-12-07, 10:34:00 IST
@@ -247,6 +261,112 @@ describe('Sphuta (Sensitive Point) Calculations', () => {
     it('should throw when Sun is missing for mrityuSphuta', () => {
       const noSun = testPositions.filter(p => p.planet !== 0);
       expect(() => mrityuSphuta(noSun, gulikaLongitude)).toThrow('Planet 0 not found');
+    });
+  });
+
+  // =========================================================================
+  // Mixed chart sphuta variants
+  // =========================================================================
+
+  describe('Mixed chart variants (dvf=1 should match regular)', () => {
+    // When mixedDvf=1, mixed chart variants should produce same results as regular versions
+
+    it('triSphotaMixedChart with dvf=1 should match triSphuta', () => {
+      const regular = triSphuta(testPositions, gulikaLongitude);
+      const mixed = triSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('chaturSphotaMixedChart with dvf=1 should match chaturSphuta', () => {
+      const regular = chaturSphuta(testPositions, gulikaLongitude);
+      const mixed = chaturSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('panchaSphotaMixedChart with dvf=1 should match panchaSphuta', () => {
+      const regular = panchaSphuta(testPositions, gulikaLongitude);
+      const mixed = panchaSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('pranaSphotaMixedChart with dvf=1 should match pranaSphuta', () => {
+      const regular = pranaSphuta(testPositions, gulikaLongitude);
+      const mixed = pranaSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('dehaSphotaMixedChart with dvf=1 should match dehaSphuta', () => {
+      const regular = dehaSphuta(testPositions, gulikaLongitude);
+      const mixed = dehaSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('mrityuSphotaMixedChart with dvf=1 should match mrityuSphuta', () => {
+      const regular = mrityuSphuta(testPositions, gulikaLongitude);
+      const mixed = mrityuSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('sookshmaTriSphotaMixedChart with dvf=1 should match sookshmaTriSphuta', () => {
+      const regular = sookshmaTriSphuta(testPositions, gulikaLongitude);
+      const mixed = sookshmaTriSphotaMixedChart(testPositions, gulikaLongitude, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('beejaSphotaMixedChart with dvf=1 should match beejaSphuta', () => {
+      const regular = beejaSphuta(testPositions);
+      const mixed = beejaSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('kshetraSphotaMixedChart with dvf=1 should match kshetraSphuta', () => {
+      const regular = kshetraSphuta(testPositions);
+      const mixed = kshetraSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('tithiSphotaMixedChart with dvf=1 should match tithiSphuta', () => {
+      const regular = tithiSphuta(testPositions);
+      const mixed = tithiSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('yogaSphotaMixedChart with dvf=1 should match yogaSphuta', () => {
+      const regular = yogaSphuta(testPositions);
+      const mixed = yogaSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('yogiSphotaMixedChart with dvf=1 should match yogiSphuta', () => {
+      const regular = yogiSphuta(testPositions);
+      const mixed = yogiSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('avayogiSphotaMixedChart with dvf=1 should match avayogiSphuta', () => {
+      const regular = avayogiSphuta(testPositions);
+      const mixed = avayogiSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
+    });
+
+    it('rahuTithiSphotaMixedChart with dvf=1 should match rahuTithiSphuta', () => {
+      const regular = rahuTithiSphuta(testPositions);
+      const mixed = rahuTithiSphotaMixedChart(testPositions, 1);
+      expect(mixed.rasi).toBe(regular.rasi);
+      expect(mixed.longitude).toBeCloseTo(regular.longitude, 10);
     });
   });
 });

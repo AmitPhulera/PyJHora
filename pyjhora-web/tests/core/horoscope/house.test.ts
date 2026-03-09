@@ -30,6 +30,12 @@ import {
   getVargaViswaOfPlanets,
   naturalFriendsOfPlanets, naturalEnemiesOfPlanets, naturalNeutralOfPlanets,
   buildHouseChart,
+  getAspectedHousesOfRaasi, getAspectedRasisOfRaasi,
+  getMarakas, getPlanetsAspectingPlanet,
+  arePlanetsAssociated, getAssociatedPlanetPairs,
+  getAssociationsOfThePlanet, getBadhakasOfRaasi,
+  getMarakasFromPlanetPositions, getOrderOfPlanetsByStrength,
+  getBrahma, getRaasiDrishtiMap,
 } from '../../../src/core/horoscope/house';
 
 describe('House Calculations', () => {
@@ -1516,5 +1522,343 @@ describe('Lords of Quadrants and Trines', () => {
     // Lord of Taurus(1) = Venus(5)
     // Lord of Virgo(5) = Mercury(3)
     expect(lords).toEqual([SATURN, VENUS, MERCURY]);
+  });
+});
+
+// ============================================================================
+// Aspected Houses/Rasis of Raasi Tests
+// ============================================================================
+
+describe('Aspected Houses and Rasis of Raasi', () => {
+  const chennaiChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
+
+  describe('getAspectedRasisOfRaasi', () => {
+    it('should find planets whose sign aspects Sagittarius(8) via raasi drishti', () => {
+      // Sagittarius(8) is dual. Other dual signs aspect it: Gemini(2), Virgo(5), Pisces(11)
+      // Planets in those signs: Virgo(5)->Rahu(7), Pisces(11)->Saturn(6)/Ketu(8)
+      const planets = getAspectedRasisOfRaasi(chennaiChart, SAGITTARIUS);
+      expect(planets).toContain(RAHU);
+      expect(planets).toContain(SATURN);
+      expect(planets).toContain(KETU);
+    });
+
+    it('should find planets whose sign aspects Leo(4) via raasi drishti', () => {
+      // Leo(4) is fixed. Movable signs aspect it except adjacent.
+      // Movable: 0,3,6,9. Adjacent to 4: 3(Cancer) and 5(Virgo).
+      // Exclude Cancer(3). So Aries(0), Libra(6), Capricorn(9) aspect Leo.
+      // Planets in those signs: Libra(6)->Moon(1)/Venus(5), Capricorn(9)->Lagna only
+      const planets = getAspectedRasisOfRaasi(chennaiChart, LEO);
+      expect(planets).toContain(MOON);
+      expect(planets).toContain(VENUS);
+    });
+  });
+
+  describe('getAspectedHousesOfRaasi', () => {
+    it('should return planet indices whose house aspects include the given rasi', () => {
+      const houses = getAspectedHousesOfRaasi(chennaiChart, SAGITTARIUS);
+      // This mirrors aspected_houses_of_the_raasi from Python
+      expect(Array.isArray(houses)).toBe(true);
+    });
+  });
+});
+
+// ============================================================================
+// Marakas (Chart Format) Tests
+// ============================================================================
+
+describe('Marakas (chart format)', () => {
+  const chennaiChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
+
+  it('should return an array of maraka planet indices', () => {
+    const marakas = getMarakas(chennaiChart);
+    expect(Array.isArray(marakas)).toBe(true);
+    expect(marakas.length).toBeGreaterThan(0);
+  });
+
+  it('all maraka planets should be valid planet IDs (0-8)', () => {
+    const marakas = getMarakas(chennaiChart);
+    marakas.forEach(p => {
+      expect(p).toBeGreaterThanOrEqual(0);
+      expect(p).toBeLessThanOrEqual(8);
+    });
+  });
+
+  it('should include lords of 2nd and 7th houses from Lagna', () => {
+    const marakas = getMarakas(chennaiChart);
+    // Lagna in Capricorn(9).
+    // 2nd house sign = (2+9-1)%12 = Aquarius(10). Lord = Saturn(6) or Rahu(7).
+    // 7th house sign = (7+9-1)%12 = Cancer(3). Lord = Moon(1).
+    expect(marakas).toContain(MOON);
+  });
+});
+
+// ============================================================================
+// Planets Aspecting a Planet Tests
+// ============================================================================
+
+describe('getPlanetsAspectingPlanet', () => {
+  const chennaiChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
+
+  it('should return planets that aspect Sun via graha drishti', () => {
+    const aspectors = getPlanetsAspectingPlanet(chennaiChart, SUN);
+    // Sun is in Scorpio(7). Mars in Leo(4) has 4th house aspect at (4+3)%12=7. Yes!
+    expect(aspectors).toContain(MARS);
+  });
+
+  it('should not include the planet itself', () => {
+    const aspectors = getPlanetsAspectingPlanet(chennaiChart, SUN);
+    expect(aspectors).not.toContain(SUN);
+  });
+
+  it('should return valid planet IDs', () => {
+    for (let p = 0; p < 9; p++) {
+      const aspectors = getPlanetsAspectingPlanet(chennaiChart, p);
+      aspectors.forEach(a => {
+        expect(a).toBeGreaterThanOrEqual(0);
+        expect(a).toBeLessThanOrEqual(8);
+        expect(a).not.toBe(p);
+      });
+    }
+  });
+});
+
+// ============================================================================
+// Association Tests
+// ============================================================================
+
+describe('Planet Associations', () => {
+  const chennaiPositions = [
+    { planet: -1, rasi: CAPRICORN, longitude: 15 },
+    { planet: SUN, rasi: SCORPIO, longitude: 22 },
+    { planet: MOON, rasi: LIBRA, longitude: 8 },
+    { planet: MARS, rasi: LEO, longitude: 12 },
+    { planet: MERCURY, rasi: SAGITTARIUS, longitude: 5 },
+    { planet: JUPITER, rasi: SAGITTARIUS, longitude: 18 },
+    { planet: VENUS, rasi: LIBRA, longitude: 25 },
+    { planet: SATURN, rasi: PISCES, longitude: 10 },
+    { planet: RAHU, rasi: VIRGO, longitude: 20 },
+    { planet: KETU, rasi: PISCES, longitude: 20 },
+  ];
+
+  describe('getAssociationsOfThePlanet', () => {
+    it('should find conjunction associations for Mercury and Jupiter (both in Sagittarius)', () => {
+      const assocMercury = getAssociationsOfThePlanet(chennaiPositions, MERCURY);
+      // Mercury and Jupiter are both in Sagittarius -> conjunction
+      expect(assocMercury).toContain(JUPITER);
+    });
+
+    it('should find conjunction associations for Moon and Venus (both in Libra)', () => {
+      const assocMoon = getAssociationsOfThePlanet(chennaiPositions, MOON);
+      expect(assocMoon).toContain(VENUS);
+    });
+
+    it('should find conjunction associations for Saturn and Ketu (both in Pisces)', () => {
+      const assocSaturn = getAssociationsOfThePlanet(chennaiPositions, SATURN);
+      expect(assocSaturn).toContain(KETU);
+    });
+
+    it('should return valid planet IDs not including self', () => {
+      for (let p = 0; p < 9; p++) {
+        const assoc = getAssociationsOfThePlanet(chennaiPositions, p);
+        expect(assoc).not.toContain(p);
+        assoc.forEach(a => {
+          expect(a).toBeGreaterThanOrEqual(0);
+          expect(a).toBeLessThanOrEqual(8);
+        });
+      }
+    });
+  });
+
+  describe('arePlanetsAssociated', () => {
+    it('should return true for conjoined planets (Mercury and Jupiter)', () => {
+      expect(arePlanetsAssociated(chennaiPositions, MERCURY, JUPITER)).toBe(true);
+    });
+
+    it('should return true for conjoined planets (Moon and Venus)', () => {
+      expect(arePlanetsAssociated(chennaiPositions, MOON, VENUS)).toBe(true);
+    });
+
+    it('should return true for conjoined planets (Saturn and Ketu)', () => {
+      expect(arePlanetsAssociated(chennaiPositions, SATURN, KETU)).toBe(true);
+    });
+  });
+
+  describe('getAssociatedPlanetPairs', () => {
+    it('should return array of [number, number] pairs', () => {
+      const pairs = getAssociatedPlanetPairs(chennaiPositions);
+      expect(Array.isArray(pairs)).toBe(true);
+      pairs.forEach(([p1, p2]) => {
+        expect(p1).toBeLessThan(p2); // Pairs should be normalized (min, max)
+        expect(p1).toBeGreaterThanOrEqual(0);
+        expect(p2).toBeLessThanOrEqual(8);
+      });
+    });
+
+    it('should include conjunction pairs', () => {
+      const pairs = getAssociatedPlanetPairs(chennaiPositions);
+      const pairStrings = pairs.map(([a, b]) => `${a},${b}`);
+      // Mercury(3) and Jupiter(4) are conjoined
+      expect(pairStrings).toContain(`${MERCURY},${JUPITER}`);
+      // Moon(1) and Venus(5) are conjoined
+      expect(pairStrings).toContain(`${MOON},${VENUS}`);
+    });
+
+    it('should not have duplicate pairs', () => {
+      const pairs = getAssociatedPlanetPairs(chennaiPositions);
+      const pairStrings = pairs.map(([a, b]) => `${a},${b}`);
+      const unique = new Set(pairStrings);
+      expect(unique.size).toBe(pairStrings.length);
+    });
+  });
+});
+
+// ============================================================================
+// Baadhakas Tests
+// ============================================================================
+
+describe('Baadhakas of Raasi', () => {
+  it('should return [baadhaka_sthana, baadhaka_planets] for Aries', () => {
+    const [sthana, planets] = getBadhakasOfRaasi(ARIES);
+    expect(sthana).toBe(AQUARIUS); // 10
+    expect(planets).toEqual([SATURN, RAHU]); // [6, 7]
+  });
+
+  it('should return correct baadhakas for Cancer', () => {
+    const [sthana, planets] = getBadhakasOfRaasi(CANCER);
+    expect(sthana).toBe(TAURUS); // 1
+    expect(planets).toEqual([VENUS]); // [5]
+  });
+
+  it('should return valid data for all 12 rasis', () => {
+    for (let r = 0; r < 12; r++) {
+      const [sthana, planets] = getBadhakasOfRaasi(r);
+      expect(sthana).toBeGreaterThanOrEqual(0);
+      expect(sthana).toBeLessThan(12);
+      expect(Array.isArray(planets)).toBe(true);
+      expect(planets.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+// ============================================================================
+// Marakas from Planet Positions Tests
+// ============================================================================
+
+describe('getMarakasFromPlanetPositions', () => {
+  const chennaiPositions = [
+    { planet: -1, rasi: CAPRICORN, longitude: 15 },
+    { planet: SUN, rasi: SCORPIO, longitude: 22 },
+    { planet: MOON, rasi: LIBRA, longitude: 8 },
+    { planet: MARS, rasi: LEO, longitude: 12 },
+    { planet: MERCURY, rasi: SAGITTARIUS, longitude: 5 },
+    { planet: JUPITER, rasi: SAGITTARIUS, longitude: 18 },
+    { planet: VENUS, rasi: LIBRA, longitude: 25 },
+    { planet: SATURN, rasi: PISCES, longitude: 10 },
+    { planet: RAHU, rasi: VIRGO, longitude: 20 },
+    { planet: KETU, rasi: PISCES, longitude: 20 },
+  ];
+
+  it('should return valid planet IDs', () => {
+    const marakas = getMarakasFromPlanetPositions(chennaiPositions);
+    expect(marakas.length).toBeGreaterThan(0);
+    marakas.forEach(p => {
+      expect(p).toBeGreaterThanOrEqual(0);
+      expect(p).toBeLessThanOrEqual(8);
+    });
+  });
+
+  it('should include lord of 7th house from Lagna', () => {
+    // Lagna in Capricorn(9), 7th house = Cancer(3), Lord = Moon(1)
+    const marakas = getMarakasFromPlanetPositions(chennaiPositions);
+    expect(marakas).toContain(MOON);
+  });
+});
+
+// ============================================================================
+// Order of Planets by Strength Tests
+// ============================================================================
+
+describe('getOrderOfPlanetsByStrength', () => {
+  const chennaiPositions = [
+    { planet: -1, rasi: CAPRICORN, longitude: 15 },
+    { planet: SUN, rasi: SCORPIO, longitude: 22 },
+    { planet: MOON, rasi: LIBRA, longitude: 8 },
+    { planet: MARS, rasi: LEO, longitude: 12 },
+    { planet: MERCURY, rasi: SAGITTARIUS, longitude: 5 },
+    { planet: JUPITER, rasi: SAGITTARIUS, longitude: 18 },
+    { planet: VENUS, rasi: LIBRA, longitude: 25 },
+    { planet: SATURN, rasi: PISCES, longitude: 10 },
+    { planet: RAHU, rasi: VIRGO, longitude: 20 },
+    { planet: KETU, rasi: PISCES, longitude: 20 },
+  ];
+
+  it('should return all 9 planets', () => {
+    const order = getOrderOfPlanetsByStrength(chennaiPositions);
+    expect(order).toHaveLength(9);
+    expect(order.sort()).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  });
+});
+
+// ============================================================================
+// Brahma Tests
+// ============================================================================
+
+describe('getBrahma', () => {
+  const chennaiPositions = [
+    { planet: -1, rasi: CAPRICORN, longitude: 15 },
+    { planet: SUN, rasi: SCORPIO, longitude: 22 },
+    { planet: MOON, rasi: LIBRA, longitude: 8 },
+    { planet: MARS, rasi: LEO, longitude: 12 },
+    { planet: MERCURY, rasi: SAGITTARIUS, longitude: 5 },
+    { planet: JUPITER, rasi: SAGITTARIUS, longitude: 18 },
+    { planet: VENUS, rasi: LIBRA, longitude: 25 },
+    { planet: SATURN, rasi: PISCES, longitude: 10 },
+    { planet: RAHU, rasi: VIRGO, longitude: 20 },
+    { planet: KETU, rasi: PISCES, longitude: 20 },
+  ];
+
+  it('should return a valid planet ID', () => {
+    const brahma = getBrahma(chennaiPositions);
+    expect(brahma).toBeGreaterThanOrEqual(0);
+    expect(brahma).toBeLessThanOrEqual(8);
+  });
+
+  it('should not return Rahu or Ketu (they are filtered out)', () => {
+    const brahma = getBrahma(chennaiPositions);
+    // Brahma removes Rahu and Ketu from lords list per the logic
+    expect(brahma).not.toBe(RAHU);
+    expect(brahma).not.toBe(KETU);
+  });
+});
+
+// ============================================================================
+// Raasi Drishti Map Tests
+// ============================================================================
+
+describe('getRaasiDrishtiMap', () => {
+  it('should return drishti for all 12 signs', () => {
+    const map = getRaasiDrishtiMap();
+    for (let i = 0; i < 12; i++) {
+      expect(Array.isArray(map[i])).toBe(true);
+      expect(map[i].length).toBe(3); // Each sign aspects exactly 3 others
+    }
+  });
+
+  it('movable signs should aspect 3 fixed signs (excluding adjacent)', () => {
+    const map = getRaasiDrishtiMap();
+    // Aries(0) is movable. Adjacent fixed: Taurus(1). Aspects: Leo(4), Scorpio(7), Aquarius(10)
+    expect(map[ARIES].sort()).toEqual([LEO, SCORPIO, AQUARIUS].sort());
+  });
+
+  it('fixed signs should aspect 3 movable signs (excluding adjacent)', () => {
+    const map = getRaasiDrishtiMap();
+    // Taurus(1) is fixed. Adjacent movable: Aries(0). Aspects: Cancer(3), Libra(6), Capricorn(9)
+    expect(map[TAURUS].sort()).toEqual([CANCER, LIBRA, CAPRICORN].sort());
+  });
+
+  it('dual signs should aspect all other dual signs', () => {
+    const map = getRaasiDrishtiMap();
+    // Gemini(2) is dual. Aspects: Virgo(5), Sagittarius(8), Pisces(11)
+    expect(map[GEMINI].sort()).toEqual([VIRGO, SAGITTARIUS, PISCES].sort());
   });
 });

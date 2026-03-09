@@ -10,7 +10,8 @@ import {
   getPlanetToHouseFromChart,
   trikonaSodhana,
   ekadhipatyaSodhana,
-  getCompleteAshtakavarga
+  getCompleteAshtakavarga,
+  getKaksha
 } from '../../../src/core/horoscope/ashtakavarga';
 
 describe('Ashtakavarga', () => {
@@ -166,6 +167,52 @@ describe('Ashtakavarga', () => {
       expect(result.binnaAshtakavarga.length).toBe(8);
       // Lagna's BAV should have some values
       expect(result.binnaAshtakavarga[7]).toBeDefined();
+    });
+  });
+
+  describe('getKaksha', () => {
+    it('should return kaksha index 0 for longitude near 0 degrees', () => {
+      const result = getKaksha(1.0);
+      expect(result.kakshaIndex).toBe(0);
+      // Kaksha lords: Saturn(6), Jupiter(4), Mars(2), Sun(0), Venus(5), Mercury(3), Moon(1), Lagna('L')
+      expect(result.kakshaLord).toBe(6); // Saturn
+    });
+
+    it('should return kaksha index for various longitudes within a sign', () => {
+      // Each kaksha spans 3.75 degrees (30/8)
+      // 0-3.75: index 0 (Saturn)
+      // 3.75-7.5: index 1 (Jupiter)
+      // 7.5-11.25: index 2 (Mars)
+      // 11.25-15: index 3 (Sun)
+      // 15-18.75: index 4 (Venus)
+      // 18.75-22.5: index 5 (Mercury)
+      // 22.5-26.25: index 6 (Moon)
+      // 26.25-30: index 7 (Lagna)
+
+      expect(getKaksha(0).kakshaIndex).toBe(0);
+      expect(getKaksha(4).kakshaIndex).toBe(1);
+      expect(getKaksha(8).kakshaIndex).toBe(2);
+      expect(getKaksha(12).kakshaIndex).toBe(3);
+      expect(getKaksha(16).kakshaIndex).toBe(4);
+      expect(getKaksha(20).kakshaIndex).toBe(5);
+      expect(getKaksha(24).kakshaIndex).toBe(6);
+      expect(getKaksha(28).kakshaIndex).toBe(7);
+    });
+
+    it('should return correct kaksha lords', () => {
+      expect(getKaksha(0).kakshaLord).toBe(6);   // Saturn
+      expect(getKaksha(4).kakshaLord).toBe(4);   // Jupiter
+      expect(getKaksha(8).kakshaLord).toBe(2);   // Mars
+      expect(getKaksha(12).kakshaLord).toBe(0);  // Sun
+      expect(getKaksha(16).kakshaLord).toBe(5);  // Venus
+      expect(getKaksha(20).kakshaLord).toBe(3);  // Mercury
+      expect(getKaksha(24).kakshaLord).toBe(1);  // Moon
+      expect(getKaksha(28).kakshaLord).toBe('L'); // Lagna
+    });
+
+    it('should handle boundary between kakshas', () => {
+      // At exactly 3.75 degrees, should be in kaksha 1
+      expect(getKaksha(3.75).kakshaIndex).toBe(1);
     });
   });
 });

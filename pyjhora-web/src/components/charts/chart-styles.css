@@ -1,0 +1,197 @@
+/* Chart Styles - Ported from PyJHora chart_styles.py */
+/* Common styling for all chart visualizations */
+
+/* ============================================
+   Chart View Toggle
+   ============================================ */
+.chart-view-toggle {
+  display: flex;
+  gap: var(--space-xs);
+  margin-left: auto;
+}
+
+.chart-view-toggle button {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chart-view-toggle button:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--text-primary);
+}
+
+.chart-view-toggle button.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+/* ============================================
+   Wheel / Western Chart Styles
+   ============================================ */
+.wheel-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.wheel-chart .chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wheel-chart-svg {
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.15));
+}
+
+/* Wheel chart circle rings */
+.wheel-ring {
+  fill: none;
+  stroke: rgba(99, 102, 241, 0.5);
+  stroke-width: 1.5;
+}
+
+.wheel-ring-outer {
+  stroke: rgba(99, 102, 241, 0.7);
+  stroke-width: 2;
+}
+
+.wheel-ring-inner {
+  stroke: rgba(99, 102, 241, 0.3);
+  stroke-width: 1;
+}
+
+/* House divider lines */
+.wheel-house-line {
+  stroke: rgba(99, 102, 241, 0.4);
+  stroke-width: 1;
+}
+
+/* Ascendant line (thicker) */
+.wheel-asc-line {
+  stroke: var(--accent-gold);
+  stroke-width: 2.5;
+}
+
+/* Degree tick marks */
+.wheel-tick {
+  stroke: rgba(99, 102, 241, 0.25);
+  stroke-width: 0.5;
+}
+
+.wheel-tick-major {
+  stroke: rgba(99, 102, 241, 0.4);
+  stroke-width: 1;
+}
+
+/* Rasi labels in outer ring */
+.wheel-rasi-label {
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--accent-gold);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Planet labels inside the chart */
+.wheel-planet-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+  cursor: default;
+  transition: font-size 0.15s ease;
+}
+
+.wheel-planet-label:hover {
+  font-size: 13px;
+}
+
+/* Planet colors in wheel chart - matches SouthIndianChart */
+.wheel-planet-0 { fill: var(--planet-sun); }
+.wheel-planet-1 { fill: var(--planet-moon); }
+.wheel-planet-2 { fill: var(--planet-mars); }
+.wheel-planet-3 { fill: var(--planet-mercury); }
+.wheel-planet-4 { fill: var(--planet-jupiter); }
+.wheel-planet-5 { fill: var(--planet-venus); }
+.wheel-planet-6 { fill: var(--planet-saturn); }
+.wheel-planet-7 { fill: var(--planet-rahu); }
+.wheel-planet-8 { fill: var(--planet-ketu); }
+
+/* Retrograde indicator */
+.wheel-retrograde {
+  font-size: 7px;
+  fill: var(--accent-error);
+}
+
+/* Center of chart */
+.wheel-center-circle {
+  fill: var(--bg-card);
+  stroke: rgba(99, 102, 241, 0.3);
+  stroke-width: 1;
+}
+
+.wheel-center-text {
+  font-size: 9px;
+  fill: var(--text-tertiary);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Ascendant house highlight */
+.wheel-asc-house {
+  fill: rgba(99, 102, 241, 0.08);
+}
+
+/* Degree markers in zodiac ring */
+.wheel-degree-text {
+  font-size: 6px;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* ============================================
+   Enhanced South Indian Chart Styles
+   ============================================ */
+
+/* Diagonal line for ascendant marker */
+.si-asc-marker {
+  stroke: var(--accent-gold);
+  stroke-width: 2;
+}
+
+/* House number label */
+.si-house-number {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .wheel-chart-svg {
+    width: 280px;
+    height: 280px;
+  }
+
+  .wheel-rasi-label {
+    font-size: 8px;
+  }
+
+  .wheel-planet-label {
+    font-size: 9px;
+  }
+}

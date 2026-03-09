@@ -1,0 +1,69 @@
+/* Vratha Finder Dialog Styles */
+
+.vratha-dialog {
+  min-width: 600px;
+  max-width: 800px;
+}
+
+.vratha-type-group {
+  flex: 1.5;
+}
+
+.vratha-search-modes {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  flex-wrap: wrap;
+}
+
+.vratha-results-list {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  min-height: 180px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: var(--space-sm);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.vratha-result-item {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.15s ease;
+}
+
+.vratha-result-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vratha-result-item.active {
+  background: rgba(var(--accent-rgb, 99, 102, 241), 0.15);
+  color: var(--accent);
+}
+
+.vratha-result-item:last-child {
+  border-bottom: none;
+}
+
+.vratha-empty,
+.vratha-computing {
+  padding: var(--space-lg);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.vratha-computing {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.vratha-stats {
+  padding: var(--space-xs) 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}

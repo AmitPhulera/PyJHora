@@ -318,6 +318,14 @@ export const VARGA_NAMES: Record<number, string> = {
 
 export const ASCENDANT_SYMBOL = 'L';
 
+/** Retrograde symbol (Python: const._retrogade_symbol) */
+export const RETROGADE_SYMBOL = '\u211E'; // ℞
+
+/** Chara Karaka names (Python: chara_karakas list) */
+export const CHARA_KARAKA_NAMES = [
+  'AK', 'AmK', 'BK', 'MK', 'PiK', 'PuK', 'GK', 'DK'
+] as const;
+
 // ============================================================================
 // CALCULATION PRECISION
 // ============================================================================
@@ -1184,4 +1192,69 @@ export const TRIGUNA_DAYS_DICT: Record<number, number[]> = {
 
 /** Tamil month method: 0=Ravi Annasamy, 1=V4.3.5, 2=V4.3.8, 3=Midday/UTC */
 export const TAMIL_MONTH_METHOD = 3;
+
+// ============================================================================
+// SURYA SIDDHANTA CONSTANTS
+// ============================================================================
+
+/** Civil days in a Mahayuga (Surya Siddhanta) */
+export const CIVIL_DAYS_IN_MAHAYUGA = 1577917828;
+
+/** Mean revolutions in a Mahayuga */
+export const MEAN_REVOLUTIONS_SUN_KALI = 4320000;
+export const MEAN_REVOLUTIONS_MOON_KALI = 57753336;
+export const MEAN_REVOLUTIONS_RAHU_KALI = 232238;
+
+/** Planet mean revolutions at Kali */
+export const PLANET_MEAN_REVOLUTIONS_AT_KALI: Record<number, number> = {
+  [SUN]: 4320000, [MOON]: 57753336, [MARS]: 2296832, [MERCURY]: 17937060,
+  [JUPITER]: 364220, [VENUS]: 7022376, [SATURN]: 146568, [RAHU]: 232238, [KETU]: 232238,
+};
+
+/** Indian sine radius (R) in arc-minutes / 60 */
+export const MANDAKENDRAJYA_INDIAN_SINE_RADIUS = 3438 / 60.0;
+
+/** Daily mean motions in degrees */
+export const DAILY_MEAN_MOTIONS: Record<number, number> = {
+  [SUN]: 0.9855609323563241, [MOON]: 13.176135332820786, [MARS]: 0.5240193,
+  [MERCURY]: 4.0923181, [JUPITER]: 0.0830963, [VENUS]: 1.6021464,
+  [SATURN]: 0.0334393, [RAHU]: -0.05280146039251785, [KETU]: -0.05280146039251785,
+};
+
+/** Mutable state for planet mean longitudes (used by SS calculations) */
+export const PLANET_MEAN_LONGITUDES: Record<number, number> = {
+  [SUN]: 0, [MOON]: 0, [MARS]: 0, [MERCURY]: 0, [JUPITER]: 0,
+  [VENUS]: 0, [SATURN]: 0, [RAHU]: 0, [KETU]: 0,
+};
+
+/** Moon apogee mean motion in degrees */
+export const MOON_APOGEE_MEAN_MOTION = 6.684 / 60;
+
+/** Ujjain coordinates [latitude, longitude] */
+export const UJJAIN_LAT_LONG: [number, number] = [23.1765, 75.7885];
+
+/** Mandocca (apogee) positions at Kali epoch */
+export const MANODCCA_POSITIONS_AT_KALI: Record<number, number> = {
+  [SUN]: 77.13, [MOON]: 90.0, [MARS]: 129.96, [MERCURY]: 220.32,
+  [JUPITER]: 171.0, [VENUS]: 79.65, [SATURN]: 236.61, [RAHU]: 180.0, [KETU]: 180.0,
+};
+
+/** Mandocca (apogee) revolutions in a Mahayuga */
+export const MADOCCA_REVOLUTIONS: Record<number, number> = {
+  [SUN]: 0.387, [MOON]: 488203, [MARS]: 204, [MERCURY]: 0.368,
+  [JUPITER]: 0.900, [VENUS]: 0.535, [SATURN]: 0.039,
+};
+
+/** Planet mandaphala periphery (modern values) - [Po, Pe] tuples */
+export const PLANET_MANDAPHALA_PERIPHERY_MODERN: Record<number, [number, number]> = {
+  [SUN]: [11.78, 12.29], [MOON]: [36.98, 42.43], [MARS]: [60.27, 76.20],
+  [MERCURY]: [117.72, 198.19], [JUPITER]: [32.77, 36.97],
+  [VENUS]: [4.8, 4.88], [SATURN]: [36.28, 41.52],
+};
+
+/** Planet sighra peripheries - [Po, Pe] tuples */
+export const PLANET_SIGHRA_PERIPHERIES: Record<number, [number, number]> = {
+  [MARS]: [232.0, 235.0], [MERCURY]: [132.0, 133.0], [JUPITER]: [72.0, 70.0],
+  [VENUS]: [260.0, 262.0], [SATURN]: [40.0, 39.0],
+};
 

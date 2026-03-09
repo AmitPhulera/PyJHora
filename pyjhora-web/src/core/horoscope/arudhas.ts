@@ -21,6 +21,7 @@ import {
   PLANETS_UPTO_KETU,
   SUN,
   MOON,
+  ASCENDANT_SYMBOL,
 } from '../constants';
 
 import { countRasis } from '../utils/angle';
@@ -267,4 +268,130 @@ export function formatGrahaArudhasAsChart(grahaArudhas: number[]): string[] {
   });
 
   return chart;
+}
+
+// ============================================================================
+// CHART-BASED FUNCTIONS (Parity with Python bhava_arudhas / graha_arudhas)
+// ============================================================================
+
+/**
+ * Parse a HouseChart (string[12]) into a planet-to-house dictionary.
+ * @param chart - Array of 12 strings, e.g. ['0/1','2','','','3/4/5','','','6','L/7','','8','']
+ * @returns Record mapping planet id (number) or ASCENDANT_SYMBOL to house index (0-11)
+ */
+function parsePlanetToHouseDict(chart: string[]): Record<number | string, number> {
+  const result: Record<number | string, number> = {};
+  for (let h = 0; h < 12; h++) {
+    const entry = chart[h];
+    if (!entry || entry.trim() === '') continue;
+    const parts = entry.split('/');
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed === ASCENDANT_SYMBOL || trimmed === 'L') {
+        result[ASCENDANT_SYMBOL] = h;
+      } else {
+        const planetId = parseInt(trimmed, 10);
+        if (!isNaN(planetId)) {
+          result[planetId] = h;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Calculate Bhava Arudhas from a chart string array.
+ * Ported from Python bhava_arudhas(chart).
+ *
+ * Uses the Ascendant house from the chart as the base, and calls
+ * getHouseOwnerFromPlanetPositions under the hood by building
+ * minimal planet positions from the chart.
+ *
+ * @param chart - Array of 12 strings with planet placements, e.g.
+ *                ['0/1','2','','','3/4/5','','','6','L/7','','8','']
+ * @returns Array of 12 rasi indices representing Bhava Arudhas for houses 1-12
+ */
+export function bhavaArudhas(chart: string[]): number[] {
+  const pToH = parsePlanetToHouseDict(chart);
+  const ascHouse = pToH[ASCENDANT_SYMBOL];
+  if (ascHouse === undefined) return [];
+
+  // Build minimal planet positions for getHouseOwnerFromPlanetPositions
+  const positions: ArudhaPlanetPosition[] = [];
+  positions.push({ planet: -1, rasi: ascHouse, longitude: 0 });
+  for (let p = 0; p <= 8; p++) {
+    if (pToH[p] !== undefined) {
+      positions.push({ planet: p, rasi: pToH[p], longitude: 0 });
+    }
+  }
+
+  const houses = Array.from({ length: 12 }, (_, h) => (h + ascHouse) % 12);
+  const bhavaArudhasOfHouses: number[] = [];
+
+  for (const h of houses) {
+    const lordOfTheHouse = getHouseOwnerFromPlanetPositions(positions, h, false);
+    const houseOfTheLord = pToH[lordOfTheHouse] ?? 0;
+    const signsBetweenHouseAndLord = countRasis(h, houseOfTheLord);
+    let bhavaArudhaOfHouse = (houseOfTheLord + signsBetweenHouseAndLord - 1) % 12;
+    const signsFromTheHouse = ((bhavaArudhaOfHouse + 1 + 12 - h) % 12);
+    if (signsFromTheHouse === 1 || signsFromTheHouse === 7) {
+      bhavaArudhaOfHouse = (bhavaArudhaOfHouse + 10 - 1) % 12;
+    }
+    bhavaArudhasOfHouses.push(bhavaArudhaOfHouse);
+  }
+
+  return bhavaArudhasOfHouses;
+}
+
+/**
+ * Calculate Graha Arudhas from a chart string array.
+ * Ported from Python graha_arudhas(chart).
+ *
+ * @param chart - Array of 12 strings with planet placements
+ * @returns Array of rasi indices for Graha Arudhas.
+ *          Index 0: Lagna Pada, Index 1-9: Sun to Ketu Pada
+ */
+export function grahaArudhas(chart: string[]): number[] {
+  const pToH = parsePlanetToHouseDict(chart);
+  const ascHouse = pToH[ASCENDANT_SYMBOL];
+  if (ascHouse === undefined) return [];
+
+  // Build minimal planet positions for getStrongerRasi
+  const positions: ArudhaPlanetPosition[] = [];
+  positions.push({ planet: -1, rasi: ascHouse, longitude: 0 });
+  for (let p = 0; p <= 8; p++) {
+    if (pToH[p] !== undefined) {
+      positions.push({ planet: p, rasi: pToH[p], longitude: 0 });
+    }
+  }
+
+  const grahaArudhasOfPlanets: number[] = [ascHouse];
+
+  for (let p = 0; p < PLANETS_UPTO_KETU; p++) {
+    const houseOfThePlanet = pToH[p] ?? 0;
+    let signOwnedByPlanet = PLANET_SIGNS_OWNED[p];
+
+    if (!signOwnedByPlanet || signOwnedByPlanet.length === 0) {
+      grahaArudhasOfPlanets.push(houseOfThePlanet);
+      continue;
+    }
+
+    let strongerSign: number;
+    if (signOwnedByPlanet.length > 1) {
+      strongerSign = getStrongerRasi(positions, signOwnedByPlanet[0], signOwnedByPlanet[1]);
+    } else {
+      strongerSign = signOwnedByPlanet[0];
+    }
+
+    const countToStrong = ((strongerSign + 1 + 12 - houseOfThePlanet) % 12);
+    let countToArudha = (houseOfThePlanet + 2 * (countToStrong - 1)) % 12;
+    const countFromHouse = (houseOfThePlanet + 12 - countToArudha) % 12;
+    if (countFromHouse === 0 || countFromHouse === 6) {
+      countToArudha = (countToArudha + 9) % 12;
+    }
+    grahaArudhasOfPlanets.push(countToArudha);
+  }
+
+  return grahaArudhasOfPlanets;
 }
