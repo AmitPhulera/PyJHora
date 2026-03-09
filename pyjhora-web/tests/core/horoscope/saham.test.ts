@@ -4,7 +4,7 @@ import {
 } from '../../../src/core/constants';
 import {
     punyaSaham, vidyaSaham, yasasSaham, mitraSaham,
-    mahatmyaSaham, ashaSaham, bhratriSaham,
+    mahatmyaSaham, ashaSaham, samarthaSaham, bhratriSaham,
     gauravaSaham, pithriSaham, rajyaSaham,
     maathriSaham, puthraSaham, jeevaSaham, karmaSaham,
     rogaSaham, rogaSaham1, kaliSaham, sastraSaham,
@@ -77,6 +77,15 @@ describe('Saham (Arabic Parts) calculations', () => {
         });
         it('asha_saham (day)', () => {
             expect(ashaSaham(positions, LAGNA_LONG, false)).toBeCloseTo(172.182621, 1);
+        });
+        it('samartha_saham (day)', () => {
+            // Samartha: Mars - LagnaLord + Lagna
+            // LagnaRasi = 7 (Scorpio), Lagna lord = Mars or Ketu (stronger)
+            // If Mars is lagna lord, Jupiter is used instead and night_time_birth is flipped
+            const result = samarthaSaham(positions, LAGNA_LONG, LAGNA_RASI, false);
+            expect(typeof result).toBe('number');
+            expect(result).toBeGreaterThanOrEqual(0);
+            expect(result).toBeLessThan(360);
         });
         it('bhratri_saham', () => {
             expect(bhratriSaham(positions, LAGNA_LONG)).toBeCloseTo(304.728628, 1);

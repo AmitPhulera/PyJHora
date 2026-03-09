@@ -2,8 +2,10 @@
 
 // Charts
 export { DivisionalChartSelector } from './charts/DivisionalChartSelector';
+export type { ChartView } from './charts/DivisionalChartSelector';
 export { PlanetPositionTable } from './charts/PlanetPositionTable';
 export { SouthIndianChart } from './charts/SouthIndianChart';
+export { WheelChart } from './charts/WheelChart';
 
 // Panchanga
 export { PanchangaDisplay } from './panchanga/PanchangaDisplay';
@@ -16,3 +18,16 @@ export { DashaTable } from './dasha/DashaTable';
 
 // Input
 export { BirthInputForm } from './input/BirthInputForm';
+
+// Match / Compatibility
+export { MatchUI } from './match/MatchUI';
+
+// Calendar
+export { VedicCalendar } from './calendar/VedicCalendar';
+export { VedicClock } from './calendar/VedicClock';
+
+// Dialogs
+export { ConjunctionDialog } from './dialogs/ConjunctionDialog';
+export { OptionsDialog } from './dialogs/OptionsDialog';
+export { VrathaFinder } from './dialogs/VrathaFinder';
+export { DashaOptionsDialog } from './dialogs/DashaOptionsDialog';

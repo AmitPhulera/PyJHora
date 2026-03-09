@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { inverseLagrange, unwrapAngles, extendAngleRange } from '@core/utils/interpolation';
+import { inverseLagrange, unwrapAngles, extendAngleRange, newtonPolynomial, bisectionSearch } from '@core/utils/interpolation';
 
 describe('inverseLagrange', () => {
   it('should interpolate linear data exactly', () => {
@@ -94,5 +94,50 @@ describe('extendAngleRange', () => {
   it('should handle single angle (range = 0)', () => {
     const result = extendAngleRange([100], 350);
     expect(Math.max(...result) - Math.min(...result)).toBeGreaterThanOrEqual(350);
+  });
+});
+
+describe('newtonPolynomial', () => {
+  it('should interpolate linear data exactly', () => {
+    // y = 2x + 1
+    const xData = [0, 1, 2, 3];
+    const yData = [1, 3, 5, 7];
+    expect(newtonPolynomial(xData, yData, 1.5)).toBeCloseTo(4.0, 10);
+  });
+
+  it('should interpolate quadratic data', () => {
+    // y = x^2
+    const xData = [0, 1, 2, 3, 4];
+    const yData = [0, 1, 4, 9, 16];
+    expect(newtonPolynomial(xData, yData, 2.5)).toBeCloseTo(6.25, 6);
+  });
+
+  it('should match at data points', () => {
+    const xData = [0, 1, 2];
+    const yData = [5, 10, 20];
+    expect(newtonPolynomial(xData, yData, 0)).toBeCloseTo(5, 10);
+    expect(newtonPolynomial(xData, yData, 1)).toBeCloseTo(10, 10);
+    expect(newtonPolynomial(xData, yData, 2)).toBeCloseTo(20, 10);
+  });
+});
+
+describe('bisectionSearch', () => {
+  it('should find root of linear function', () => {
+    // f(x) = x - 5, root at x = 5 — start must bracket the root
+    // bisection requires func(left) and func(right) have opposite signs
+    const root = bisectionSearch((x) => x - 5, 3, 8);
+    expect(root).toBeCloseTo(5.0, 6);
+  });
+
+  it('should find root of quadratic', () => {
+    // f(x) = x^2 - 4, root at x = 2 (in [0, 3])
+    const root = bisectionSearch((x) => x * x - 4, 0, 3);
+    expect(root).toBeCloseTo(2.0, 6);
+  });
+
+  it('should find root of sin', () => {
+    // sin(x) = 0 at x = pi (in [2, 4])
+    const root = bisectionSearch(Math.sin, 2, 4);
+    expect(root).toBeCloseTo(Math.PI, 6);
   });
 });

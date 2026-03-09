@@ -1,0 +1,23 @@
+/* Conjunction Dialog Styles */
+
+.conjunction-dialog {
+  min-width: 500px;
+  max-width: 650px;
+}
+
+.conjunction-result {
+  padding: var(--space-md);
+  margin-top: var(--space-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  min-height: 2.5em;
+  line-height: 1.5;
+}
+
+.conjunction-result.computing {
+  color: var(--accent);
+  font-weight: 600;
+}

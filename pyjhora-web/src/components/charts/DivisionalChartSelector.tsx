@@ -1,15 +1,22 @@
 
 import React from 'react';
 import { DIVISIONAL_CHART_FACTORS, VARGA_NAMES } from '../../core/constants';
+import './chart-styles.css';
+
+export type ChartView = 'south-indian' | 'wheel';
 
 interface DivisionalChartSelectorProps {
   selectedVarga: number;
   onSelect: (varga: number) => void;
+  chartView?: ChartView;
+  onChartViewChange?: (view: ChartView) => void;
 }
 
 export const DivisionalChartSelector: React.FC<DivisionalChartSelectorProps> = ({
   selectedVarga,
-  onSelect
+  onSelect,
+  chartView = 'south-indian',
+  onChartViewChange
 }) => {
   return (
     <div className="varga-selector mb-sm flex gap-2 items-center">
@@ -26,6 +33,25 @@ export const DivisionalChartSelector: React.FC<DivisionalChartSelectorProps> = (
           </option>
         ))}
       </select>
+
+      {onChartViewChange && (
+        <div className="chart-view-toggle">
+          <button
+            className={chartView === 'south-indian' ? 'active' : ''}
+            onClick={() => onChartViewChange('south-indian')}
+            title="South Indian Chart"
+          >
+            South
+          </button>
+          <button
+            className={chartView === 'wheel' ? 'active' : ''}
+            onClick={() => onChartViewChange('wheel')}
+            title="Wheel / Circular Chart"
+          >
+            Wheel
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,0 +1,33 @@
+/* Dasha Options Dialog Styles */
+
+.dasha-options-dialog {
+  min-width: 400px;
+  max-width: 550px;
+}
+
+.dasha-options-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.dasha-option-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xs) 0;
+}
+
+.dasha-option-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.dasha-option-row .select {
+  flex: 1;
+}

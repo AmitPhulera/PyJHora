@@ -8,7 +8,8 @@ import './App.css';
 import './index.css';
 
 // Components
-import { BirthInputForm, DashaTable, DivisionalChartSelector, LagnaDisplay, PanchangaDisplay, PlanetPositionTable, SouthIndianChart } from './components';
+import { BirthInputForm, DashaTable, DivisionalChartSelector, LagnaDisplay, PanchangaDisplay, PlanetPositionTable, SouthIndianChart, WheelChart } from './components';
+import type { ChartView } from './components';
 
 // Core calculation engine
 import SwissEph from 'swisseph-wasm';
@@ -313,6 +314,7 @@ function App() {
   const [selectedDasha, setSelectedDasha] = useState<number | undefined>();
   const [selectedSystem, setSelectedSystem] = useState<DashaSystemId>('vimsottari');
   const [selectedVarga, setSelectedVarga] = useState<number>(1); // Default to Rasi (D1)
+  const [chartView, setChartView] = useState<ChartView>('south-indian');
 
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
 
@@ -455,13 +457,23 @@ function App() {
                     <DivisionalChartSelector
                       selectedVarga={selectedVarga}
                       onSelect={setSelectedVarga}
+                      chartView={chartView}
+                      onChartViewChange={setChartView}
                     />
 
-                  <SouthIndianChart
+                  {chartView === 'south-indian' ? (
+                    <SouthIndianChart
                       planets={chartData?.planets || []}
                       ascendantRasi={chartData?.ascendantRasi || 0}
                       title={chartData?.title || ''}
-                  />
+                    />
+                  ) : (
+                    <WheelChart
+                      planets={chartData?.planets || []}
+                      ascendantRasi={chartData?.ascendantRasi || 0}
+                      title={chartData?.title || ''}
+                    />
+                  )}
                 </div>
 
                 <div className="section">

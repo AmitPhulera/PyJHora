@@ -13,6 +13,8 @@ import {
   getUpaLagna,
   formatBhavaArudhasAsChart,
   formatGrahaArudhasAsChart,
+  bhavaArudhas,
+  grahaArudhas,
   type ArudhaPlanetPosition,
 } from '../../../src/core/horoscope/arudhas';
 
@@ -237,10 +239,87 @@ describe('Arudha calculation edge cases', () => {
       { planet: 8, rasi: 3, longitude: 105.0 },  // Ketu
     ];
 
-    const bhavaArudhas = bhavaArudhasFromPlanetPositions(minimalPositions, 0);
-    const grahaArudhas = grahaArudhasFromPlanetPositions(minimalPositions);
+    const ba = bhavaArudhasFromPlanetPositions(minimalPositions, 0);
+    const ga = grahaArudhasFromPlanetPositions(minimalPositions);
 
-    expect(bhavaArudhas).toHaveLength(12);
-    expect(grahaArudhas).toHaveLength(10);
+    expect(ba).toHaveLength(12);
+    expect(ga).toHaveLength(10);
+  });
+});
+
+// ============================================================================
+// CHART-BASED ARUDHA FUNCTIONS
+// ============================================================================
+
+describe('Chart-based Bhava Arudhas', () => {
+  // Chart from PyJHora test case
+  // ['','','','','2','7','1/5','0','3/4','L','','6/8']
+  const testChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
+
+  it('should calculate Bhava Arudhas from a chart string array', () => {
+    const ba = bhavaArudhas(testChart);
+
+    // Should return 12 values
+    expect(ba).toHaveLength(12);
+
+    // All values should be valid rasi indices (0-11)
+    ba.forEach((rasi) => {
+      expect(rasi).toBeGreaterThanOrEqual(0);
+      expect(rasi).toBeLessThanOrEqual(11);
+    });
+  });
+
+  it('should return empty array for chart with no Lagna', () => {
+    const noLagnaChart = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '', '', ''];
+    const ba = bhavaArudhas(noLagnaChart);
+    expect(ba).toHaveLength(0);
+  });
+
+  it('should handle a simple chart', () => {
+    // Chart 7 from PVR book
+    const chart7 = ['6/1/7', '', '', '', '', '', '8/4', 'L', '3/2', '0', '5', ''];
+    const ba = bhavaArudhas(chart7);
+    expect(ba).toHaveLength(12);
+    ba.forEach((rasi) => {
+      expect(rasi).toBeGreaterThanOrEqual(0);
+      expect(rasi).toBeLessThanOrEqual(11);
+    });
+  });
+});
+
+describe('Chart-based Graha Arudhas', () => {
+  const testChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
+
+  it('should calculate Graha Arudhas from a chart string array', () => {
+    const ga = grahaArudhas(testChart);
+
+    // Should return 10 values: Lagna + 9 planets (Sun to Ketu)
+    expect(ga).toHaveLength(10);
+
+    // All values should be valid rasi indices (0-11)
+    ga.forEach((rasi) => {
+      expect(rasi).toBeGreaterThanOrEqual(0);
+      expect(rasi).toBeLessThanOrEqual(11);
+    });
+  });
+
+  it('should have Lagna house as first element', () => {
+    const ga = grahaArudhas(testChart);
+    // Lagna is in house 9 (Capricorn)
+    expect(ga[0]).toBe(9);
+  });
+
+  it('should return empty array for chart with no Lagna', () => {
+    const noLagnaChart = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '', '', ''];
+    const ga = grahaArudhas(noLagnaChart);
+    expect(ga).toHaveLength(0);
+  });
+
+  it('should handle Chart 7 from PVR book', () => {
+    const chart7 = ['6/1/7', '', '', '', '', '', '8/4', 'L', '3/2', '0', '5', ''];
+    const ga = grahaArudhas(chart7);
+    expect(ga).toHaveLength(10);
+    // First element is Lagna house (7 = Scorpio)
+    expect(ga[0]).toBe(7);
   });
 });

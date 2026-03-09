@@ -2196,3 +2196,172 @@ export const getVargaViswaOfPlanets = (chart: string[]): number[] => {
 
   return vv;
 };
+
+// ============================================================================
+// ASPECTED HOUSES / RASIS OF A RAASI (Raasi Drishti)
+// ============================================================================
+
+/**
+ * Get aspected houses of a given rasi from the chart via raasi drishti.
+ * Mirrors Python's aspected_houses_of_the_raasi.
+ *
+ * @param chart - HouseChart string array (12 elements)
+ * @param raasi - Rasi index (0-11) being aspected
+ * @returns Array of planet indices whose house aspects include the given rasi
+ */
+export const getAspectedHousesOfRaasi = (chart: string[], raasi: number): number[] => {
+  const pToH = parseChartToPlanetHouseDict(chart);
+  const planetToHouseMap: Record<number, number> = {};
+  for (let p = 0; p < 9; p++) {
+    if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
+  }
+  const { ahp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  return Object.entries(ahp)
+    .filter(([, aspectedHouses]) => aspectedHouses.includes(raasi))
+    .map(([key]) => parseInt(key, 10));
+};
+
+/**
+ * Get aspected rasis of a given rasi from the chart via raasi drishti.
+ * Returns planets whose rasi's raasi-drishti includes the given rasi.
+ * Mirrors Python's aspected_raasis_of_the_raasi.
+ *
+ * @param chart - HouseChart string array (12 elements)
+ * @param raasi - Rasi index (0-11) being aspected
+ * @returns Array of planet indices whose rasi's raasi-drishti includes the given rasi
+ */
+export const getAspectedRasisOfRaasi = (chart: string[], raasi: number): number[] => {
+  const pToH = parseChartToPlanetHouseDict(chart);
+  const planetToHouseMap: Record<number, number> = {};
+  for (let p = 0; p < 9; p++) {
+    if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
+  }
+  const { arp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  return Object.entries(arp)
+    .filter(([, aspectedRasis]) => aspectedRasis.includes(raasi))
+    .map(([key]) => parseInt(key, 10));
+};
+
+// ============================================================================
+// MARAKAS (CHART FORMAT)
+// ============================================================================
+
+/**
+ * Get maraka planets from chart (string array) format.
+ * Mirrors Python's marakas(h_to_p).
+ *
+ * @param chart - HouseChart string array (12 elements)
+ * @returns Array of maraka planet indices
+ */
+export const getMarakas = (chart: string[]): number[] => {
+  const pToH = parseChartToPlanetHouseDict(chart);
+  const lagnaHouse = pToH['L'] ?? 0;
+
+  // Maraka sthanas: 2nd and 7th houses from Lagna
+  const marakaSthanas = [
+    (2 + lagnaHouse - 1 + 12) % 12,
+    (7 + lagnaHouse - 1 + 12) % 12,
+  ];
+
+  // Lords of 2nd and 7th houses
+  const marakaPlanets: number[] = marakaSthanas.map(sign =>
+    getHouseOwnerFromChart(chart, sign)
+  );
+
+  // Planets in maraka sthanas or conjunct with maraka lords
+  const marakaLordHouses = marakaPlanets.map(mp => pToH[mp]);
+  const mpls: number[] = [];
+  for (let mp = 0; mp < 9; mp++) {
+    const mpHouse = pToH[mp];
+    if (mpHouse === undefined) continue;
+    if (marakaSthanas.includes(mpHouse) || marakaLordHouses.includes(mpHouse)) {
+      mpls.push(mp);
+    }
+  }
+
+  if (mpls.length > 0) {
+    marakaPlanets.push(...mpls);
+  }
+
+  return [...new Set(marakaPlanets)];
+};
+
+// ============================================================================
+// PLANETS ASPECTING A PLANET (Reverse Graha Drishti)
+// ============================================================================
+
+/**
+ * Get planets that aspect a given planet via graha drishti from a chart.
+ * This is the reverse lookup: which planets have graha drishti ON the given planet.
+ * Mirrors Python's planets_aspecting_the_planet.
+ *
+ * @param chart - HouseChart string array (12 elements)
+ * @param planet - Planet index (0-8) being aspected
+ * @returns Array of planet indices that aspect the given planet
+ */
+export const getPlanetsAspectingPlanet = (chart: string[], planet: number): number[] => {
+  const { app } = getGrahaDrishtiFromChart(chart);
+  return Object.entries(app)
+    .filter(([key, planets]) => parseInt(key, 10) !== planet && planets.includes(planet))
+    .map(([key]) => parseInt(key, 10));
+};
+
+// ============================================================================
+// ASSOCIATION CHECKS
+// ============================================================================
+
+/**
+ * Check if two planets are associated.
+ * Association means conjunction, mutual graha drishti, or parivartana (exchange).
+ * Mirrors Python's _are_planets_associated.
+ *
+ * @param planetPositions - Array of planet positions
+ * @param planet1 - First planet index (0-8)
+ * @param planet2 - Second planet index (0-8)
+ * @returns True if the two planets are associated
+ */
+export const arePlanetsAssociated = (
+  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
+  planet1: number,
+  planet2: number
+): boolean => {
+  const associations = getAssociationsOfThePlanet(planetPositions, planet1);
+  return associations.includes(planet2);
+};
+
+/**
+ * Get all unique associated planet pairs from planet positions.
+ * Returns sorted list of unique [planet1, planet2] pairs where planet1 < planet2.
+ * Mirrors Python's _get_associated_planet_pairs.
+ *
+ * @param planetPositions - Array of planet positions
+ * @returns Array of [planet1, planet2] tuples
+ */
+export const getAssociatedPlanetPairs = (
+  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+): [number, number][] => {
+  const uniquePairs = new Set<string>();
+  const result: [number, number][] = [];
+
+  for (let p1 = 0; p1 < 9; p1++) {
+    const associations = getAssociationsOfThePlanet(planetPositions, p1);
+    for (const p2 of associations) {
+      if (p2 === p1) continue;
+      const pair: [number, number] = [Math.min(p1, p2), Math.max(p1, p2)];
+      const key = `${pair[0]},${pair[1]}`;
+      if (!uniquePairs.has(key)) {
+        uniquePairs.add(key);
+        result.push(pair);
+      }
+    }
+  }
+
+  return result.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+};
+
+// ============================================================================
+// EXPORTED RAASI DRISHTI COMPONENT FUNCTIONS
+// ============================================================================
+
+// getRaasiDrishtiMovable, getRaasiDrishtiFixed, getRaasiDrishtiDual are already
+// available internally and combined via getRaasiDrishtiMap (exported above).
