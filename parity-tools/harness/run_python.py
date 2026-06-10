@@ -8,6 +8,7 @@ Writes one result JSON per fixture to parity-tools/harness/results/python/<path>
 import argparse
 import datetime
 import importlib
+import inspect
 import json
 import math
 import sys
@@ -52,16 +53,7 @@ def run_fixture(fixture_path: Path, output_root: Path = None):
         raw_inputs = case["inputs"]
         inputs = coerce(raw_inputs) if isinstance(raw_inputs, dict) else raw_inputs
         try:
-            if isinstance(inputs, dict):
-                try:
-                    result = target(**inputs)
-                except TypeError:
-                    # Fallback: pass values positionally (preserving key-order).
-                    result = target(*inputs.values())
-            elif isinstance(inputs, list):
-                result = target(*inputs)
-            else:
-                result = target(inputs)
+            result = _build_call(target, inputs)()
             cases_out.append({"id": case["id"], "ok": True, "result": result, "error": None})
         except Exception:
             cases_out.append({
@@ -71,7 +63,7 @@ def run_fixture(fixture_path: Path, output_root: Path = None):
                 "error": traceback.format_exc(limit=3),
             })
 
-    result = {
+    fixture_result = {
         "fixture": str(fixture_path),
         "runtime": "python",
         "runtime_version": sys.version.split()[0],
@@ -81,8 +73,33 @@ def run_fixture(fixture_path: Path, output_root: Path = None):
     }
 
     if output_root is not None:
-        _write_result(fixture_path, output_root, result)
-    return result
+        _write_result(fixture_path, output_root, fixture_result)
+    return fixture_result
+
+
+def _build_call(target, inputs):
+    """Return a zero-arg callable that invokes target exactly once.
+
+    Decides kwargs vs positional by *binding* the signature first, so the
+    target body never runs twice (a TypeError raised inside the target must
+    not trigger a positional retry).
+    """
+    if isinstance(inputs, dict):
+        try:
+            sig = inspect.signature(target)
+        except (ValueError, TypeError):
+            sig = None  # some C builtins expose no signature
+        if sig is not None:
+            try:
+                sig.bind(**inputs)
+                return lambda: target(**inputs)
+            except TypeError:
+                pass
+        # Pass values positionally (preserving key-order).
+        return lambda: target(*inputs.values())
+    if isinstance(inputs, list):
+        return lambda: target(*inputs)
+    return lambda: target(inputs)
 
 
 def _make_json_safe(value):
@@ -124,7 +141,19 @@ def main():
     output_root = _default_output_root()
     output_root.mkdir(parents=True, exist_ok=True)
     for f in args.fixtures:
-        run_fixture(Path(f), output_root=output_root)
+        fixture_path = Path(f)
+        try:
+            run_fixture(fixture_path, output_root=output_root)
+        except Exception:
+            # Per-fixture isolation: one bad fixture must not abort the rest.
+            err = traceback.format_exc(limit=5)
+            print(f"ERROR running fixture {f}:\n{err}", file=sys.stderr)
+            _write_result(fixture_path, output_root, {
+                "fixture": str(fixture_path),
+                "runtime": "python",
+                "error": err,
+                "cases": [],
+            })
 
 
 if __name__ == "__main__":

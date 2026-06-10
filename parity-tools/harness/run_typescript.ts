@@ -15,7 +15,7 @@
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { coerce } from '../../pyjhora-web/src/parity/coercion';
 import {
   initializeEphemeris,
@@ -36,10 +36,12 @@ interface CaseResult {
   error: string | null;
 }
 
-const HARNESS_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname));
+const HARNESS_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HARNESS_DIR, '..', '..');
 const PYJHORA_WEB_SRC = path.join(REPO_ROOT, 'pyjhora-web', 'src');
 
+// Keep in sync with parity-tools/harness/discover.py:_ALIAS_PREFIXES
+// (duplication is intentional — Python and TS sides resolve aliases independently).
 const ALIAS_PREFIXES: Array<[string, string]> = [
   ['@/', ''],
   ['@core/', 'core/'],
@@ -144,7 +146,19 @@ async function main() {
   await fs.mkdir(outputRoot, { recursive: true });
   for (const f of fixtures) {
     const abs = path.resolve(f);
-    const result = await runFixture(abs);
+    let result: unknown;
+    try {
+      result = await runFixture(abs);
+    } catch (err) {
+      // Per-fixture isolation: one bad fixture must not abort the rest.
+      console.error(`ERROR running fixture ${f}:`, err);
+      result = {
+        fixture: abs,
+        runtime: 'typescript',
+        error: String(err),
+        cases: [],
+      };
+    }
     let rel: string;
     if (abs.startsWith(fixturesRoot)) {
       rel = path.relative(fixturesRoot, abs);
