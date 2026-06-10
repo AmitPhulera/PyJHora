@@ -80,6 +80,28 @@ def parse_parity_tag(source_lines, def_line_index: int):
     return None
 
 
+def _ast_functions(source: str):
+    """Collect module-level function defs from source via AST.
+
+    Does NOT recurse into class bodies, matching the runtime path
+    (inspect.getmembers only returns module-level functions).
+    Returns [(name, ast_node), ...].
+    """
+    tree = ast.parse(source)
+    pairs = []
+
+    class _FnCollector(ast.NodeVisitor):
+        def visit_FunctionDef(self, node):
+            pairs.append((node.name, node))
+        visit_AsyncFunctionDef = visit_FunctionDef
+
+        def visit_ClassDef(self, node):
+            pass  # don't recurse into class bodies
+
+    _FnCollector().visit(tree)
+    return pairs
+
+
 def enumerate_functions(module_rel_path: str):
     """Return [{name, signature, parity_tag, line}, ...] for a Python module.
 
@@ -99,19 +121,13 @@ def enumerate_functions(module_rel_path: str):
         module = importlib.import_module(module_dotted)
         members = inspect.getmembers(module, inspect.isfunction)
         pairs = [(n, f) for n, f in members if getattr(f, "__module__", None) == module_dotted]
+    except KeyboardInterrupt:
+        raise
     except BaseException:
         use_ast = True
 
     if use_ast:
-        tree = ast.parse(source_path.read_text())
-        pairs = []
-
-        class _FnCollector(ast.NodeVisitor):
-            def visit_FunctionDef(self, node):
-                pairs.append((node.name, node))
-            visit_AsyncFunctionDef = visit_FunctionDef
-
-        _FnCollector().visit(tree)
+        pairs = _ast_functions(source_path.read_text())
 
     results = []
     for name, obj in pairs:
@@ -199,7 +215,8 @@ def ts_export_exists(target: str) -> bool:
 def fixture_path_for(python_target: str) -> str:
     """jhora.panchanga.drik.tithi -> .../fixtures/panchanga/drik/tithi.json"""
     parts = python_target.split(".")
-    assert parts[0] == "jhora", f"Expected 'jhora.' prefix, got {python_target!r}"
+    if parts[0] != "jhora":
+        raise ValueError(f"Expected 'jhora.' prefix, got {python_target!r}")
     rel = "/".join(parts[1:-1]) + "/" + parts[-1] + ".json"
     return str(_HARNESS_DIR / "fixtures" / rel)
 
@@ -228,6 +245,8 @@ def run_discovery(output_path: Path = None):
     for module in list_python_modules():
         try:
             fns = enumerate_functions(module["path"])
+        except KeyboardInterrupt:
+            raise
         except BaseException as e:
             # One bad module should not kill the whole discovery
             fns = []

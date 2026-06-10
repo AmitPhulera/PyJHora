@@ -97,6 +97,30 @@ def test_enumerate_functions_skips_private():
         assert not f["name"].startswith("_"), f"Should skip private fn {f['name']}"
 
 
+def test_ast_fallback_skips_class_methods():
+    from discover import _ast_functions
+
+    source = "\n".join([
+        "raise ImportError('cannot import me')",
+        "",
+        "def public_fn(a, b):",
+        "    pass",
+        "",
+        "def _private_fn():",
+        "    pass",
+        "",
+        "class SomeClass:",
+        "    def method_fn(self):",
+        "        pass",
+    ])
+    names = [name for name, _ in _ast_functions(source)]
+    assert "public_fn" in names
+    assert "method_fn" not in names, "Class methods must not be reported as module-level"
+    # _ast_functions collects all module-level defs; the private-name filter
+    # lives in enumerate_functions, so _private_fn is present here.
+    assert "_private_fn" in names
+
+
 from discover import resolve_ts_target, ts_export_exists  # noqa: E402
 
 
