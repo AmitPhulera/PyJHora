@@ -36,3 +36,62 @@ def test_excludes_experimental_ephemeris():
 def test_lists_at_least_10_modules():
     modules = list_python_modules()
     assert len(modules) >= 10, f"Expected many modules, got {len(modules)}"
+
+
+from discover import enumerate_functions, parse_parity_tag  # noqa: E402
+
+
+def test_parses_parity_tag_basic():
+    source_lines = [
+        "# @parity: ts=calculateTithiAsync",
+        "def tithi(jd, place):",
+        "    pass",
+    ]
+    tag = parse_parity_tag(source_lines, def_line_index=1)
+    assert tag == {"ts": "calculateTithiAsync", "notes": None}
+
+
+def test_parses_parity_tag_with_notes():
+    source_lines = [
+        '# @parity: ts=calculateTithiAsync, notes="Python sync, TS async"',
+        "def tithi(jd, place):",
+        "    pass",
+    ]
+    tag = parse_parity_tag(source_lines, def_line_index=1)
+    assert tag == {"ts": "calculateTithiAsync", "notes": "Python sync, TS async"}
+
+
+def test_returns_none_when_no_tag():
+    source_lines = [
+        '"""Some docstring."""',
+        "def tithi(jd, place):",
+        "    pass",
+    ]
+    tag = parse_parity_tag(source_lines, def_line_index=1)
+    assert tag is None
+
+
+def test_enumerate_functions_drik_includes_tithi():
+    fns = enumerate_functions("jhora/panchanga/drik.py")
+    names = [f["name"] for f in fns]
+    assert "tithi" in names
+    assert "nakshatra" in names
+    assert "yogam" in names
+    assert "karana" in names
+    assert "vaara" in names
+
+
+def test_parses_parity_tag_full_target():
+    source_lines = [
+        "# @parity: ts=@/core/panchanga/drik::calculateTithiAsync",
+        "def tithi(jd, place):",
+        "    pass",
+    ]
+    tag = parse_parity_tag(source_lines, def_line_index=1)
+    assert tag == {"ts": "@/core/panchanga/drik::calculateTithiAsync", "notes": None}
+
+
+def test_enumerate_functions_skips_private():
+    fns = enumerate_functions("jhora/panchanga/drik.py")
+    for f in fns:
+        assert not f["name"].startswith("_"), f"Should skip private fn {f['name']}"
