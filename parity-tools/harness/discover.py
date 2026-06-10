@@ -99,7 +99,7 @@ def enumerate_functions(module_rel_path: str):
         module = importlib.import_module(module_dotted)
         members = inspect.getmembers(module, inspect.isfunction)
         pairs = [(n, f) for n, f in members if getattr(f, "__module__", None) == module_dotted]
-    except Exception:
+    except BaseException:
         use_ast = True
 
     if use_ast:
@@ -228,10 +228,10 @@ def run_discovery(output_path: Path = None):
     for module in list_python_modules():
         try:
             fns = enumerate_functions(module["path"])
-        except Exception as e:
+        except BaseException as e:
             # One bad module should not kill the whole discovery
             fns = []
-            print(f"[discover] WARNING: failed to enumerate {module['path']}: {e}", file=sys.stderr)
+            print(f"[discover] WARNING: failed to enumerate {module['path']}: {type(e).__name__}: {e}", file=sys.stderr)
         for fn in fns:
             tag = fn["parity_tag"]
             ts_target = tag.get("ts") if tag else None

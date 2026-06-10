@@ -116,3 +116,29 @@ def test_ts_export_exists_false_for_missing_export():
 
 def test_ts_export_exists_false_for_missing_file():
     assert ts_export_exists("@/core/nonexistent/module::someFn") is False
+
+
+from discover import run_discovery, fixture_path_for  # noqa: E402
+
+
+def test_fixture_path_for():
+    p = fixture_path_for("jhora.panchanga.drik.tithi")
+    assert p.endswith("parity-tools/harness/fixtures/panchanga/drik/tithi.json")
+
+
+def test_run_discovery_returns_summary_structure(tmp_path):
+    out = tmp_path / "discovery.json"
+    result = run_discovery(output_path=out)
+    assert "generated_at" in result
+    assert "functions" in result
+    assert "summary" in result
+    for key in ("total", "ready", "no_fixture", "missing_ts", "broken_tag"):
+        assert key in result["summary"]
+    assert out.exists()
+
+
+def test_run_discovery_finds_drik_functions(tmp_path):
+    out = tmp_path / "discovery.json"
+    result = run_discovery(output_path=out)
+    targets = [f["python_target"] for f in result["functions"]]
+    assert "jhora.panchanga.drik.tithi" in targets
