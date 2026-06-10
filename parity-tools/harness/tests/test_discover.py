@@ -95,3 +95,24 @@ def test_enumerate_functions_skips_private():
     fns = enumerate_functions("jhora/panchanga/drik.py")
     for f in fns:
         assert not f["name"].startswith("_"), f"Should skip private fn {f['name']}"
+
+
+from discover import resolve_ts_target, ts_export_exists  # noqa: E402
+
+
+def test_resolve_ts_target_splits_path_and_export():
+    result = resolve_ts_target("@/core/panchanga/drik::calculateTithiAsync")
+    assert result["export_name"] == "calculateTithiAsync"
+    assert result["file_path"].endswith("pyjhora-web/src/core/panchanga/drik.ts")
+
+
+def test_ts_export_exists_true_for_real_export():
+    assert ts_export_exists("@/core/panchanga/drik::calculateTithiAsync") is True
+
+
+def test_ts_export_exists_false_for_missing_export():
+    assert ts_export_exists("@/core/panchanga/drik::doesNotExistFn") is False
+
+
+def test_ts_export_exists_false_for_missing_file():
+    assert ts_export_exists("@/core/nonexistent/module::someFn") is False
