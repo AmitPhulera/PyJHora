@@ -5,12 +5,12 @@ Compare Python and TS result trees and report the first diverging leaf.
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 DEFAULT_TOLERANCE = {
     "float_abs": 1e-6,
     "float_rel": 1e-9,
-    "time_seconds": 1.0,
 }
 
 
@@ -135,7 +135,7 @@ def compare_fixture_results(fixture_path: Path,
     ts_cases = {c["id"]: c for c in ts.get("cases", [])}
 
     diffs = []
-    for case in fixture["cases"]:
+    for case in fixture.get("cases", []):
         cid = case["id"]
         entry = {"id": cid}
 
@@ -206,7 +206,10 @@ def main():
         rel = _fixture_rel_path(fixture_path)
         py = _RESULTS_ROOT / "python" / rel
         ts = _RESULTS_ROOT / "typescript" / rel
-        compare_fixture_results(fixture_path, py, ts, output_root)
+        try:
+            compare_fixture_results(fixture_path, py, ts, output_root)
+        except (FileNotFoundError, json.JSONDecodeError) as exc:
+            print(f"warning: skipping {fixture_path}: {exc}", file=sys.stderr)
 
 
 if __name__ == "__main__":

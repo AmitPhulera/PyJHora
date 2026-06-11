@@ -52,6 +52,21 @@ def test_dict_divergence_reports_key():
     assert "b" in diff["path"]
 
 
+def test_none_vs_value_is_type_mismatch():
+    diff = compare_values(None, 5, DEFAULT_TOLERANCE)
+    assert diff is not None
+    assert diff["rule"] == "type_mismatch"
+
+
+def test_bool_true_equals_int_one():
+    # Spec-settled: Python True == 1, so True vs 1 matches.
+    assert compare_values(True, 1, DEFAULT_TOLERANCE) is None
+
+
+def test_bool_true_vs_int_two_diverges():
+    assert compare_values(True, 2, DEFAULT_TOLERANCE) is not None
+
+
 def test_string_exact_match():
     assert compare_values("abc", "abc", DEFAULT_TOLERANCE) is None
     assert compare_values("abc ", "abc", DEFAULT_TOLERANCE) is None  # strip behaviour
