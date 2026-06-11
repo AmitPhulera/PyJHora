@@ -1,0 +1,18 @@
+{
+  "python_target": "jhora.panchanga.drik.nakshatra",
+  "typescript_target": "@/core/panchanga/drik::calculateNakshatraAsync",
+  "setup": {"ayanamsa": "LAHIRI"},
+  "cases": [
+    {
+      "id": "pvr_birth_1972_06_01",
+      "description": "PVR's birth chart — reference nakshatra",
+      "inputs": {
+        "jd": 2441469.677777778,
+        "place": {
+          "__type": "Place",
+          "value": {"name": "Machilipatnam", "latitude": 16.1897, "longitude": 81.1389, "timezone": 5.5}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "python_target": "jhora.panchanga.drik.vaara",
+  "typescript_target": "@/core/panchanga/drik::calculateVara",
+  "setup": {"ayanamsa": "LAHIRI"},
+  "cases": [
+    {
+      "id": "pvr_birth_1972_06_01",
+      "description": "PVR's birth chart — reference vaara (weekday)",
+      "inputs": {
+        "jd": 2441469.677777778
+      }
+    }
+  ]
+}
