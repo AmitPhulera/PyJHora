@@ -39,3 +39,46 @@ def test_report_has_all_sections(tmp_path):
     assert "jhora.p.b" in md
     assert "jhora.p.c" in md
     assert "PyQt6" in md
+
+
+def _discovery_stub():
+    return {
+        "generated_at": "2026-04-21T00:00:00Z",
+        "functions": [],
+        "summary": {"total": 0, "ready": 0, "no_fixture": 0, "missing_ts": 0, "broken_tag": 0},
+    }
+
+
+def test_report_diverge_table_escapes_pipes():
+    diffs = [
+        {"fixture": "fixtures/p/a.json", "python_target": "jhora.p.a",
+         "typescript_target": "@/x::a",
+         "summary": {"ok": 0, "diverges": 1, "error": 0, "missing": 0},
+         "cases": [
+             {"id": "case1", "status": "diverges",
+              "diff": {"path": "$[0]", "python": 1, "typescript": 2,
+                       "rule": "a|b mismatch"}},
+         ]},
+    ]
+    md = build_report(discovery=_discovery_stub(), diffs=diffs, exclusions=[])
+    assert "| Function | Case | Path | Python | TypeScript | Rule |" in md
+    assert "jhora.p.a" in md
+    # Pipe in the rule value must be escaped, not break the table row.
+    assert "a\\|b mismatch" in md
+    assert "a|b mismatch" not in md
+
+
+def test_report_runtime_errors_section_lists_error_case():
+    diffs = [
+        {"fixture": "fixtures/p/a.json", "python_target": "jhora.p.a",
+         "typescript_target": "@/x::a",
+         "summary": {"ok": 0, "diverges": 0, "error": 1, "missing": 0},
+         "cases": [
+             {"id": "boom", "status": "error",
+              "python_error": "ValueError: bad input"},
+         ]},
+    ]
+    md = build_report(discovery=_discovery_stub(), diffs=diffs, exclusions=[])
+    assert "## Runtime errors" in md
+    assert "boom" in md
+    assert "ValueError: bad input" in md

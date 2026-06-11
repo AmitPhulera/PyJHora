@@ -1,5 +1,8 @@
 # PyJhora parity harness orchestration.
 
+# Pipeline stages share results/ files; parallel make would race discovery.
+.NOTPARALLEL:
+
 SHELL := /bin/bash
 PYTHON := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || echo python)
 FIXTURES := $(shell find parity-tools/harness/fixtures -name '*.json' 2>/dev/null)

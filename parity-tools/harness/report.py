@@ -11,6 +11,11 @@ _REPO_ROOT = _HARNESS_DIR.parent.parent
 _EXCLUSIONS_PATH = _REPO_ROOT / "parity-tools" / "exclusions.yaml"
 
 
+def _cell(v) -> str:
+    """Escape a value for safe interpolation into a markdown table cell."""
+    return str(v).replace("|", "\\|").replace("`", "'")
+
+
 def build_report(discovery, diffs, exclusions) -> str:
     lines = []
     lines.append("# PyJhora Parity Report")
@@ -44,12 +49,12 @@ def build_report(discovery, diffs, exclusions) -> str:
         for d, c in diverge_cases:
             leaf = c.get("diff", {})
             lines.append(
-                f"| `{d['python_target']}` | `{c['id']}` | `{leaf.get('path', '')}` | "
-                f"`{leaf.get('python')}` | `{leaf.get('typescript')}` | {leaf.get('rule', '')} |"
+                f"| `{_cell(d['python_target'])}` | `{_cell(c['id'])}` | `{_cell(leaf.get('path', ''))}` | "
+                f"`{_cell(leaf.get('python'))}` | `{_cell(leaf.get('typescript'))}` | `{_cell(leaf.get('rule', ''))}` |"
             )
     lines.append("")
 
-    missing = [f for f in discovery["functions"] if f["status"] in ("missing_ts", "broken_tag")]
+    missing = [f for f in discovery["functions"] if f.get("status") in ("missing_ts", "broken_tag")]
     lines.append("## Missing TS partner")
     lines.append("")
     if not missing:
@@ -65,7 +70,7 @@ def build_report(discovery, diffs, exclusions) -> str:
         lines.append("</details>")
     lines.append("")
 
-    todo = [f for f in discovery["functions"] if f["status"] == "no_fixture"]
+    todo = [f for f in discovery["functions"] if f.get("status") == "no_fixture"]
     lines.append("## No fixture yet")
     lines.append("")
     if not todo:
@@ -87,11 +92,11 @@ def build_report(discovery, diffs, exclusions) -> str:
         lines.append("_No runtime errors._")
     else:
         for d, c in error_cases:
-            lines.append(f"- `{d['python_target']}` / case `{c['id']}`")
+            lines.append(f"- `{_cell(d['python_target'])}` / case `{_cell(c['id'])}`")
             if c.get("python_error"):
-                lines.append(f"  - Python: `{c['python_error']}`")
+                lines.append(f"  - Python: `{_cell(c['python_error'])}`")
             if c.get("typescript_error"):
-                lines.append(f"  - TypeScript: `{c['typescript_error']}`")
+                lines.append(f"  - TypeScript: `{_cell(c['typescript_error'])}`")
     lines.append("")
 
     lines.append("## Excluded modules")
