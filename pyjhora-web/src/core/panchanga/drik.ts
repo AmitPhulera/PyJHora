@@ -422,6 +422,7 @@ const VARA_LORDS = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN];
  * @param jd - Julian Day Number
  * @returns Vara information
  */
+// @parity: py=vaara
 export function calculateVara(jd: number): { number: number; name: string; lord: number } {
   const dayOfWeek = Math.ceil(jd + 1) % 7;
   
@@ -881,6 +882,7 @@ async function _getYogamGenericAsync(
  *
  * @returns [tithiNo, startTime, endTime, ...optional nextTithiNo, nextStartTime, nextEndTime]
  */
+// @parity: py=tithi
 export async function calculateTithiAsync(
   jd: number,
   place: Place,
@@ -983,6 +985,7 @@ async function _getNakshatraAsync(
  *
  * @returns [nakNo, padamNo, endTimeHours, nextNakNo, nextPadamNo, nextEndTimeHours]
  */
+// @parity: py=nakshatra
 export async function calculateNakshatraAsync(
   jd: number,
   place: Place
@@ -1056,6 +1059,7 @@ async function _getYogamAsync(
  *
  * @returns [yogamNo, startTime, endTime, ...optional next yogam data]
  */
+// @parity: py=yogam
 export async function calculateYogaAsync(
   jd: number,
   place: Place,
@@ -1096,6 +1100,7 @@ export async function calculateYogaAsync(
  *
  * @returns [karanaNo, startTime, endTime]
  */
+// @parity: py=karana
 export async function calculateKaranaAsync(
   jd: number,
   place: Place

@@ -552,7 +552,8 @@ def tithi_using_planet_speed(jd,place,tithi_index=1,planet1=const._MOON,planet2=
         _next_tithi = (ret[0])%30+1; _next_tithi_start_time = ret[2]; _next_tithi_end_time = ret[2]+ret1[2]
         ret += [_next_tithi,_next_tithi_start_time,_next_tithi_end_time]
     return ret
-def tithi(jd,place,tithi_index=1,planet1=const._MOON, planet2=const._SUN,cycle=1):    
+# @parity: ts=@/core/panchanga/drik::calculateTithiAsync
+def tithi(jd,place,tithi_index=1,planet1=const._MOON, planet2=const._SUN,cycle=1):
     """
         Tithi given jd and place. Also returns tithi's end time.
         @param jd: Julian Day Number of the date/time
@@ -713,6 +714,7 @@ def _get_nakshathra_old(jd,place):
     nak_no = int(leap_nak)
     answer += [nak_no,padam_no, ends]
     return answer
+# @parity: ts=@/core/panchanga/drik::calculateNakshatraAsync
 def nakshatra(jd,place):
     """
         returns the nakshathra at julian day/time
@@ -815,6 +817,7 @@ def _get_yogam(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cyc
         yogam_no = int(leap_yog)
         answer += [yogam_no, ends]
     return answer
+# @parity: ts=@/core/panchanga/drik::calculateYogaAsync
 def yogam(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cycle=1):
     if not const.use_planet_speed_for_panchangam_end_timings: return yogam_old(jd, place)
     _,_,_,jd_hours = utils.jd_to_gregorian(jd)
@@ -868,6 +871,7 @@ def yogam_old(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cycl
     yoga_frac = utils.get_fraction(_yoga_start, _yoga_end, birth_time_hrs)
     result = [_yoga_no,_yoga_start,_yoga_end]+_yoga[2:]
     return result
+# @parity: ts=@/core/panchanga/drik::calculateKaranaAsync
 def karana(jd, place):
     """
         returns the karanam of the day
@@ -887,9 +891,10 @@ def karana(jd, place):
     else: # first of tithi
         _k_start = _t_start; _k_end = _t_mid
     return _karana,_k_start,_k_end
+# @parity: ts=@/core/panchanga/drik::calculateVara
 def vaara(jd):
     """
-        Weekday for given Julian day. 
+        Weekday for given Julian day.
         @param jd: Julian Day Number of the date/time
         @return: day of the date
           0 = Sunday, 1 = Monday,..., 6 = Saturday
