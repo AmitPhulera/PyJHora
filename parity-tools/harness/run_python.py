@@ -116,6 +116,9 @@ def _make_json_safe(value):
         return {k: _make_json_safe(v) for k, v in value.items()}
     if isinstance(value, (int, float, str, bool)) or value is None:
         return value
+    # numpy scalars (np.int64 etc. are not int subclasses in py3)
+    if hasattr(value, "item") and callable(value.item):
+        return _make_json_safe(value.item())
     return repr(value)
 
 

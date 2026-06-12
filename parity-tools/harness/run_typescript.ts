@@ -69,6 +69,12 @@ function resolveTsTarget(target: string): { filePath: string; exportName: string
 function makeJsonSafe(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(makeJsonSafe);
   if (value === null || value === undefined) return value;
+  if (value instanceof Map) {
+    // Mirror Python dict serialization: keys stringified, insertion order kept.
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of value.entries()) out[String(k)] = makeJsonSafe(v);
+    return out;
+  }
   if (typeof value === 'object') {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
