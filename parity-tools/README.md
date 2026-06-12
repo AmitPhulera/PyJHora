@@ -90,6 +90,29 @@ the TS WASM build uses `FLG_MOSEPH` (Moshier theory) — arcsecond-level positio
 differences that translate to sub-second end-time differences, amplified where
 results feed back into evaluation points.
 
+## Known missing TS counterparts (post Phase B)
+
+After the Phase B tag backfill (~970 tagged pairs), the remaining `missing_ts`
+entries fall into these categories:
+
+- **Private helpers folded into TS internals** — Python `_*` helpers (yoga
+  `_*_yoga_calculation`, dhasa `_antardhasa`/`_get_dhasa_dict`, drishti
+  movable/fixed/dual helpers) whose logic exists in TS but as non-exported
+  module-private functions.
+- **I/O and environment functions in `utils.py`** — geolocation (geopy,
+  Nominatim, IP lookup), city-database writers, language-resource loaders
+  (`set_language`, `get_resource_messages`). Browser TS handles these
+  differently or not at all.
+- **Per-D chart dispatchers in `charts.py`** — `hora_chart`, `navamsa_chart`,
+  etc. TS dispatches inside `getDivisionalChart`; no per-chart exports.
+- **Tajaka annual chart casting** — `varsha_pravesh`, `annual_chart`,
+  `maasa_pravesh`, lord-of-year/month. Not yet ported.
+- **Vratha festival search** — sankranti dates, festival-database lookups,
+  conjunction searches. Partially ported via `../data/festivals`.
+- **Old/deprecated variants** — `*_old` functions kept in Python for reference.
+- **Python module-level lambdas** — counted by discovery but not taggable
+  (e.g. `kendras`, `amavasya_dates`); TS equivalents often exist.
+
 ## Exclusions
 
 `parity-tools/exclusions.yaml` lists Python paths not checked for parity

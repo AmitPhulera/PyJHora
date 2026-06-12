@@ -17,3 +17,5 @@
   reason: Language resource files
 - path: jhora/data/**
   reason: Data files (ephemeris, etc.)
+- path: jhora/panchanga/pancha_paksha - Copy.py
+  reason: Stray duplicate of pancha_paksha.py present in upstream source
