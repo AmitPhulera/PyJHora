@@ -129,6 +129,7 @@ kendras = lambda asc_house:[(asc_house+h-1)%12 for h in [1,4,7,10] ]
 panapharas = lambda asc_house:[(asc_house+h-1)%12 for h in [2,5,8,11] ]
 apoklimas = lambda asc_house:[(asc_house+h-1)%12 for h in [3,6,9,12] ]
 
+# @parity: ts=@/core/horoscope/strength::calculateHarshaBala
 def harsha_bala(dob,tob,place,divisional_factor=1):
     """
         computes the harsha bala score of the planets
@@ -194,6 +195,7 @@ def _sapthavargaja_bala(jd,place):
         svb.append(svbc)
     svb_sum = list(map(sum,zip(*svb)))
     return svb_sum
+# @parity: ts=@/core/horoscope/strength::calculateSaptavargajaBala
 def _sapthavargaja_bala1(jd,place,ayanamsa_mode='LAHIRI'):
     sv = [1, 2, 3, 7, 9, 12, 30]
     pp_sv = {}
@@ -211,6 +213,7 @@ def _sapthavargaja_bala1(jd,place,ayanamsa_mode='LAHIRI'):
     svb_sum = list(map(sum,zip(*svb)))
     svb_sum = [round(v,2) for v in svb_sum]
     return svb_sum
+# @parity: ts=@/core/horoscope/strength::calculateSthanaBala
 def _sthana_bala(jd, place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     sv = [1, 2, 3, 7, 9, 12, 30]
     pp_sv = {}
@@ -264,6 +267,7 @@ def _sapthavargaja_bala_1(planet_positions,dcf):
     return sb
 def _yugmayugma_bala(rasi_planet_positions, navamsa_planet_positions):
     return _ojayugama_bala(rasi_planet_positions, navamsa_planet_positions)
+# @parity: ts=@/core/horoscope/strength::calculateOjayugamaBala
 def _ojayugama_bala(rasi_planet_positions, navamsa_planet_positions):
     sb = [0 for _ in range(7)]
     for p in range(7):
@@ -280,6 +284,7 @@ def _ojayugama_bala(rasi_planet_positions, navamsa_planet_positions):
             if nh in const.odd_signs:
                 sb[p] += 15
     return sb
+# @parity: ts=@/core/horoscope/strength::calculateKendraBala
 def _kendra_bala(rasi_planet_positions):
     kb = [0 for _ in range(7)]
     asc_house = rasi_planet_positions[0][1][0]
@@ -291,6 +296,7 @@ def _kendra_bala(rasi_planet_positions):
         elif h in apoklimas(asc_house):
             kb[p] = 15
     return kb
+# @parity: ts=@/core/horoscope/strength::calculateDreshkonBala
 def _dreshkon_bala(planet_positions):
     kb = [0 for _ in range(7)]
     kbf = [(0,2,4),(3,6),(1,5)]
@@ -299,6 +305,7 @@ def _dreshkon_bala(planet_positions):
         if p in kbf[pd]:
             kb[p] = 15
     return kb
+# @parity: ts=@/core/horoscope/strength::calculateUcchaRashmi
 def _uccha_rashmi(planet_positions):
     ub = []
     for p,(h,long) in planet_positions[1:const._pp_count_upto_saturn]: #exclude 0th element Lagnam and Rahu/Ketu
@@ -309,6 +316,7 @@ def _uccha_rashmi(planet_positions):
         pd += 30
         ub.append(round(pd*2/30,1))
     return ub    
+# @parity: ts=@/core/horoscope/strength::calculateUchchaBala
 def _uchcha_bala(planet_positions):
     ub = []
     for p,(h,long) in planet_positions[1:const._pp_count_upto_saturn]: #exclude 0th element Lagnam and Rahu/Ketu
@@ -358,6 +366,7 @@ def _navamsa_bala(p_to_h_navamsa_chart):
         elif const.house_strengths_of_planets[p][h_p]==const._ENEMY:
             kb[p] = 1.25
     return kb
+# @parity: ts=@/core/horoscope/strength::calculatePanchaVargeeyaBala
 def pancha_vargeeya_bala(jd,place):
     """
         computes the Pancha Vargeeya bala score of the planets
@@ -399,6 +408,7 @@ def pancha_vargeeya_bala(jd,place):
     pvb = [round(sum(x)/4.0,2) for x in zip(*pvb)]
     pvbd = {k:pvb[k] for k in range(7)}
     return pvbd
+# @parity: ts=@/core/horoscope/strength::calculateDwadhasaVargeeyaBala
 def dwadhasa_vargeeya_bala(jd,place):
     """
         Calculates dwadhasa_vargeeya_bala score of the planets
@@ -416,6 +426,7 @@ def dwadhasa_vargeeya_bala(jd,place):
                 dvp[p]+=1
     dvpd = {k:dvp[k] for k in range(7)}
     return dvpd
+# @parity: ts=@/core/horoscope/strength::calculateDigBala
 def _dig_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     planet_positions = charts.rasi_chart(jd, place,ayanamsa_mode=ayanamsa_mode)
     powerless_houses_of_planets = [3,9,3,6,6,9,0]#[4,10,4,7,7,10,1]
@@ -428,6 +439,7 @@ def _dig_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     return dbp
 def _divaratri_bala(jd,place):
     return _nathonnath_bala(jd,place)
+# @parity: ts=@/core/horoscope/strength::calculateNathonnathBala
 def _nathonnath_bala(jd,place):
     nbp = [0 for _ in range(7)]
     _,_,_,tobh = utils.jd_to_gregorian(jd)
@@ -439,6 +451,7 @@ def _nathonnath_bala(jd,place):
         nbp[p] = round(60 - t_diff,2)
     nbp[3] = 60.0
     return nbp
+# @parity: ts=@/core/horoscope/strength::calculatePakshaBala
 def _paksha_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     planet_positions = drik.dhasavarga(jd, place,divisional_chart_factor=1)
     sun_long = planet_positions[0][1][0]*30+planet_positions[0][1][1]
@@ -453,6 +466,7 @@ def _paksha_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
         pbp[p] = round(60.0 - pb,2)
     pbp[1] *=2 
     return pbp
+# @parity: ts=@/core/horoscope/strength::calculateTribhagaBala
 def _tribhaga_bala(jd,place):
     tbp = [0 for _ in range(7)]
     _,_,_,tobh = utils.jd_to_gregorian(jd)
@@ -494,6 +508,7 @@ def _days_elapsed_since_base(year,base_year=1951,base_days=174):
     total_days = base_days + (leap_years * 366) + (non_leap_years * 365)
 
     return total_days
+# @parity: ts=@/core/horoscope/strength::calculateAbdadhipathiBala
 def _abdadhipathi(jd,place):
     abp = [0 for _ in range(7)]
     _abda_weekdays = [2,3,4,5,6,0,1] # Starts from Tuesday
@@ -508,6 +523,7 @@ def _abda_bala(jd,place):
     day = drik.vaara(jd)
     abp[day] = 15
     return abp
+# @parity: ts=@/core/horoscope/strength::calculateMasadhipathiBala
 def _masadhipathi(jd,place):
     abp = [0 for _ in range(7)]
     _abda_weekdays = [2,3,4,5,6,0,1] # Starts from Tuesday
@@ -523,6 +539,7 @@ def _masa_bala(jd,place):
     day = drik.vaara(jd)
     abp[day] = 30
     return abp
+# @parity: ts=@/core/horoscope/strength::calculateVaaradhipathiBala
 def _vaaradhipathi(jd,place):
     abp = [0 for _ in range(7)]
     _abda_weekdays = [2,3,4,5,6,0,1]
@@ -544,6 +561,7 @@ def _vaara_bala(jd,place):
         day = (day-1)%7
     abp[day] = 45
     return abp
+# @parity: ts=@/core/horoscope/strength::calculateHoraBala
 def _hora_bala(jd,place):
     abp = [0 for _ in range(7)]
     day = drik.vaara(jd)
@@ -556,6 +574,7 @@ def _hora_bala(jd,place):
     hora = (int(tobh-srise)+day+1)%7
     abp[hora_order[hora]] = 60
     return abp
+# @parity: ts=@/core/horoscope/strength::calculateAyanaBala
 def _ayana_bala(jd,place):
     _declinations = drik.declination_of_planets(jd, place)
     ab = [0 for _ in range(7)]
@@ -564,6 +583,7 @@ def _ayana_bala(jd,place):
         if p==0:
             ab[p] *= 2
     return ab
+# @parity: ts=@/core/horoscope/strength::calculateYuddhaBala
 def _yuddha_bala(jd,place):
     yb = [0 for _ in range(7)]
     pp = drik.dhasavarga(jd, place, divisional_chart_factor=1)[:7]
@@ -593,6 +613,7 @@ def _yuddha_bala(jd,place):
     y_bala = round(b_diff/dia_diff,2)
     yb[indices[0]] =  y_bala ; yb[indices[1]] =  -y_bala
     return yb
+# @parity: ts=@/core/horoscope/strength::calculateKaalaBala
 def _kaala_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     kb = [0 for _ in range(7)]
     nb = _nathonnath_bala(jd, place)
@@ -616,6 +637,7 @@ def _kaala_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
         kb[p] += yb[p]
     kb = [round(kbp,2) for kbp in kb]
     return kb
+# @parity: ts=@/core/horoscope/strength::calculateIshtaPhala
 def _ishta_phala(jd,place):
     planet_positions = charts.rasi_chart(jd, place)
     ip_score = {const._ADHIMITRA_GREATFRIEND:22,
@@ -633,10 +655,12 @@ def _ishta_phala(jd,place):
         else:
             ip[p] = ip_score[const.compound_planet_relations[p][owner]]
     return ip
+# @parity: ts=@/core/horoscope/strength::calculateSubhaRashmi
 def _subha_rashmi(jd,place):
     planet_positions = charts.rasi_chart(jd, place)
     cr = _cheshta_rashmi(jd, place); ur = _uccha_rashmi(planet_positions)
     return [0.25*(cr[i]+ur[i]) for i in range(7)]
+# @parity: ts=@/core/horoscope/strength::calculateCheshtaRashmi
 def _cheshta_rashmi(jd,place):
     """ STILL UNDER EXPERIMENT - Exact Algorithm unknown"""
     cb = [c*3.0 for c in _cheshta_bala(jd, place)]
@@ -667,6 +691,7 @@ def _cheshta_bala(jd,place):
         cb[p_id] = round(reduced_chesta_kendra/3,2)
         #print('planet',p_id,'mean longitude',mean_long, surya_sidhantha._planet_true_longitude(jd, place, p, mean_long))
     return cb
+# @parity: ts=@/core/horoscope/strength::calculateNaisargikaBala
 def _naisargika_bala(jd=None,place=None):
     return const.naisargika_bala[:-2]
 def __drik_bala_calc_1(dk_p1_p2,p1,p2):
@@ -724,6 +749,7 @@ def __drik_bala_calc_1(dk_p1_p2,p1,p2):
     #dk_p1_p2_new = min(60,dk_p1_p2_new) ## Forcing >60 to 60 Not sure this is correct?
     if _DEBUG_: print('final',p1,p2,'drishti value',dk_p1_p2_new)
     return dk_p1_p2_new
+# @parity: ts=@/core/horoscope/strength::calculatePlanetAspectRelationshipTable
 def planet_aspect_relationship_table(planet_positions,include_houses=False):
     _DEBUG_ = False
     pp = planet_positions[1:]
@@ -751,6 +777,7 @@ def planet_aspect_relationship_table(planet_positions,include_houses=False):
     import numpy as np
     dk = np.array(dk).T
     return dk.tolist()
+# @parity: ts=@/core/horoscope/strength::calculateDrikBala
 def _drik_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     dk = [[ 0 for _ in range(7)] for _ in range(7)]
     pp = charts.rasi_chart(jd, place,ayanamsa_mode=ayanamsa_mode)
@@ -778,6 +805,7 @@ def _drik_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
             dk_final[col] = round((dkp[col] - dkm[col])/4,2) 
     #print('drik bala values',dk_final)
     return dk_final
+# @parity: ts=@/core/horoscope/strength::calculateShadBala
 def shad_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     sb = []
     stb = _sthana_bala(jd, place,ayanamsa_mode=ayanamsa_mode)
@@ -805,6 +833,7 @@ def shad_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     sb_req = [5,6,5,7,6.5,5.5,5]
     sb_strength = [round(sb_rupa[p]/sb_req[p],2) for p in range(7)]
     return [stb, kb, dgb, cb, nb, dkb, sb_sum, sb_rupa,sb_strength]
+# @parity: ts=@/core/horoscope/strength::calculateBhavaAdhipathiBala
 def _bhava_adhipathi_bala(jd,place):
     bhava_pp = charts.bhava_chart_houses(jd, place)
     asc_rasi = bhava_pp[const._ascendant_symbol][0]
@@ -815,6 +844,7 @@ def _bhava_adhipathi_bala(jd,place):
         owner = const.house_owners[r]
         bb.append(sb_sum[owner])
     return bb
+# @parity: ts=@/core/horoscope/strength::calculateBhavaDigBala
 def _bhava_dig_bala(jd,place):
     bdb = [0 for _ in range(12)]
     bm = drik.bhaava_madhya(jd, place)
@@ -857,9 +887,11 @@ def __bhava_drik_bala_calc_1(dk_p1_p2,p1):
     if p1 not in [3,4]:
         dk_p1_p2_new = round(dk_p1_p2_new*0.25,2)
     return dk_p1_p2_new
+# @parity: ts=@/core/horoscope/strength::bhavaDrishtiBala
 def bhava_drishti_bala(jd,place):
     """ TODO: Check if Bhava Drishi bala is same as Aspect Relationship Table??? """
     return _bhava_drik_bala(jd, place)
+# @parity: ts=@/core/horoscope/strength::calculateBhavaDrikBala
 def _bhava_drik_bala(jd,place):
     dk = [[ 0 for _ in range(7)] for _ in range(12)]
     pp = charts.rasi_chart(jd, place)
@@ -904,6 +936,7 @@ def _bhava_drik_bala(jd,place):
                 dkm[row] += dk[row][col]
             dk_final[row] = round((dkp[row] - dkm[row])/4,2) 
     return dk_final
+# @parity: ts=@/core/horoscope/strength::calculateBhavaBala
 def bhava_bala(jd,place):
     """
         Computes bhava bala
@@ -917,6 +950,7 @@ def bhava_bala(jd,place):
     bb_rupas = [round(b/60,2) for b in bb]
     bb_strength = [round(b/const.minimum_bhava_bala_rupa,2) for b in bb_rupas]
     return [bb,bb_rupas,bb_strength]
+# @parity: ts=@/core/horoscope/strength::getPlanetMeanLongitudeUsingEpochTable
 def get_planet_mean_longitude_using_epoch_table(jd,place,planet_index=0):
     if planet_index == 1: return 0.0
     days_from_epoch = _DAYS_FROM_EPOCH(jd,place); year_jd = utils.jd_to_gregorian(jd)[0]
@@ -966,6 +1000,7 @@ def get_planet_mean_longitude_using_epoch_table(jd,place,planet_index=0):
     #print(planet_index,planet_correction_factors_per_year_since_epoch[planet_index],_planet_longitude_correction)
     total_sum += _planet_longitude_correction
     return total_sum % 360
+# @parity: ts=@/core/horoscope/strength::getPlanetMeanLongitude
 def get_planet_mean_longitude(jd,place,planet_index=0):
     if planet_index == 1: return 0.0
     days_from_epoch = _DAYS_FROM_EPOCH(jd,place)
@@ -976,6 +1011,7 @@ def get_planet_mean_longitude(jd,place,planet_index=0):
                                     _planet_longitude_correction) % 360
     #print(days_from_epoch,planet_mean_positions_at_epoch_ujjain_1900[planet_index],_planet_longitude_correction,planet_speed_at_epoch,planet_mean_position_at_jd)
     return planet_mean_position_at_jd
+# @parity: ts=@/core/horoscope/strength::calculateCheshtaBala
 def _cheshta_bala_new(jd,place,use_epoch_table=False):
     pp = drik.dhasavarga(jd, place, divisional_chart_factor=1)
     cb = [0 for _ in range(7)]

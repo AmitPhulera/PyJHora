@@ -29,6 +29,7 @@ from jhora.panchanga import drik
 chara_method = 1
 _dhasa_cycles = 2; one_year_days = const.sidereal_year
 
+# @parity: ts=@/core/dhasa/raasi/chara::getCharaDhasaDuration
 def _dhasa_duration_knrao_method(planet_positions,sign):
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
     h_to_p = utils.get_house_to_planet_dict_from_planet_to_house_dict(p_to_h)
@@ -53,6 +54,7 @@ def _dhasa_duration_knrao_method(planet_positions,sign):
         """ Rule (3) If the lord of dasa rasi is debilitated, subtract one year from dasa length."""
         dhasa_period -= 1
     return dhasa_period
+# @parity: ts=@/core/dhasa/raasi/chara::getCharaDhasaDurationPvnRao
 def _dhasa_duration_pvnrao_method(planet_positions,sign):
     """ Not fully implemented yet """
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
@@ -181,6 +183,7 @@ def _dhasa_duration_rangacharya_method(planet_positions,sign,gender):
 def _dhasa_duration(planet_positions,sign):
     return _dhasa_duration_knrao_method(planet_positions, sign)    
 """ CHARA METHODS 2 and 3  - Logic not yet implemented """
+# @parity: ts=@/core/dhasa/raasi/chara::getCharaAntardhasa
 def _antardhasa(dhasas,method=1): # KN Rao Method
     _antardhasas = dhasas[1:]+[dhasas[0]] if method==1 else dhasas
     return _antardhasas
@@ -206,6 +209,7 @@ def _dhasa_progression_pvnrao_method(planet_positions):
         #print('ninth house is even footed')
         _dhasa_progression = [(seed_house+12-h)%12 for h in range(12)]
     return _dhasa_progression
+# @parity: ts=@/core/dhasa/raasi/chara::getCharaDhasaProgression
 def _dhasa_progression_knrao_method(planet_positions):
     asc_house = planet_positions[0][1][0]
     seed_house = asc_house
@@ -224,6 +228,7 @@ def _dhasa_progression_raghava_bhatta_method(planet_positions,gender=1):
     elif dhasa_seed in const.dual_signs:
         _dhasa_progression = [(dhasa_seed+h+4)%12 for h in range(12)]
     return _dhasa_progression
+# @parity: ts=@/core/dhasa/raasi/chara::getCharaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True,
                          chara_method=1,gender=0):
     """

@@ -296,6 +296,7 @@ const planetLongitudeCorrection = (planetIndex: number, yearsSinceEpoch: number)
  * Get planet mean longitude using epoch table
  * Python: get_planet_mean_longitude_using_epoch_table(jd, place, planet_index)
  */
+// @parity: py=get_planet_mean_longitude_using_epoch_table
 export const getPlanetMeanLongitudeUsingEpochTable = (
   jd: number,
   place: Place,
@@ -360,6 +361,7 @@ export const getPlanetMeanLongitudeUsingEpochTable = (
  * Get planet mean longitude (simple formula)
  * Python: get_planet_mean_longitude(jd, place, planet_index)
  */
+// @parity: py=get_planet_mean_longitude
 export const getPlanetMeanLongitude = (jd: number, place: Place, planetIndex: number): number => {
   if (planetIndex === 1) return 0;
 
@@ -415,6 +417,7 @@ const daysElapsedSinceBase = (year: number, baseYear = 1951, baseDays = 174): nu
 /**
  * Calculate Uchcha Bala (exaltation strength) for all planets
  */
+// @parity: py=_uchcha_bala
 export const calculateUchchaBala = (planetPositions: PlanetPosition[]): number[] => {
   const ub: number[] = [];
 
@@ -447,6 +450,7 @@ export const calculateUchchaBala = (planetPositions: PlanetPosition[]): number[]
 /**
  * Calculate Saptavargaja Bala
  */
+// @parity: py=_sapthavargaja_bala1
 export const calculateSaptavargajaBala = (
   d1Positions: PlanetPosition[],
   jd: number,
@@ -523,6 +527,7 @@ const calculateSaptavargajaBalaForChart = (
 /**
  * Calculate Ojayugama Bala (odd-even strength)
  */
+// @parity: py=_ojayugama_bala
 export const calculateOjayugamaBala = (
   rasiPositions: PlanetPosition[],
   navamsaPositions: PlanetPosition[]
@@ -558,6 +563,7 @@ export const calculateOjayugamaBala = (
 /**
  * Calculate Kendra Bala (angular house strength)
  */
+// @parity: py=_kendra_bala
 export const calculateKendraBala = (rasiPositions: PlanetPosition[]): number[] => {
   const kb: number[] = new Array(7).fill(0);
 
@@ -593,6 +599,7 @@ export const calculateKendraBala = (rasiPositions: PlanetPosition[]): number[] =
 /**
  * Calculate Dreshkon Bala
  */
+// @parity: py=_dreshkon_bala
 export const calculateDreshkonBala = (planetPositions: PlanetPosition[]): number[] => {
   const kb: number[] = new Array(7).fill(0);
 
@@ -619,6 +626,7 @@ export const calculateDreshkonBala = (planetPositions: PlanetPosition[]): number
 /**
  * Calculate Sthana Bala (positional strength)
  */
+// @parity: py=_sthana_bala
 export const calculateSthanaBala = (
   d1Positions: PlanetPosition[],
   jd: number,
@@ -650,6 +658,7 @@ export const calculateSthanaBala = (
  *
  * Uses actual midnight time from sunrise/sunset calculations.
  */
+// @parity: py=_nathonnath_bala
 export const calculateNathonnathBala = (jd: number, place: Place): number[] => {
   const nbp: number[] = new Array(7).fill(0);
 
@@ -685,6 +694,7 @@ export const calculateNathonnathBala = (jd: number, place: Place): number[] => {
  * Uses beneficsAndMalefics from charts to properly classify planets
  * (including Mercury's context-dependent classification).
  */
+// @parity: py=_paksha_bala
 export const calculatePakshaBala = (
   jd: number,
   place: Place,
@@ -722,6 +732,7 @@ export const calculatePakshaBala = (
 /**
  * Calculate Tribhaga Bala
  */
+// @parity: py=_tribhaga_bala
 export const calculateTribhagaBala = (jd: number, place: Place): number[] => {
   const tbp: number[] = new Array(7).fill(0);
 
@@ -761,6 +772,7 @@ export const calculateTribhagaBala = (jd: number, place: Place): number[] => {
 /**
  * Calculate Abda Bala (year lord strength)
  */
+// @parity: py=_abdadhipathi
 export const calculateAbdadhipathiBala = (jd: number, place: Place): number[] => {
   const abp: number[] = new Array(7).fill(0);
   const abdaWeekdays = [2, 3, 4, 5, 6, 0, 1]; // Starts from Tuesday
@@ -781,6 +793,7 @@ export const calculateAbdadhipathiBala = (jd: number, place: Place): number[] =>
 /**
  * Calculate Masa Bala (month lord strength)
  */
+// @parity: py=_masadhipathi
 export const calculateMasadhipathiBala = (jd: number, place: Place): number[] => {
   const abp: number[] = new Array(7).fill(0);
   const abdaWeekdays = [2, 3, 4, 5, 6, 0, 1];
@@ -801,6 +814,7 @@ export const calculateMasadhipathiBala = (jd: number, place: Place): number[] =>
 /**
  * Calculate Vaara Bala (weekday lord strength)
  */
+// @parity: py=_vaaradhipathi
 export const calculateVaaradhipathiBala = (jd: number, place: Place): number[] => {
   const abp: number[] = new Array(7).fill(0);
   const abdaWeekdays = [2, 3, 4, 5, 6, 0, 1];
@@ -825,6 +839,7 @@ export const calculateVaaradhipathiBala = (jd: number, place: Place): number[] =
 /**
  * Calculate Hora Bala (hour lord strength)
  */
+// @parity: py=_hora_bala
 export const calculateHoraBala = (jd: number, place: Place): number[] => {
   const abp: number[] = new Array(7).fill(0);
 
@@ -857,6 +872,7 @@ export const calculateHoraBala = (jd: number, place: Place): number[] => {
  * ab[p] = (24.0 + declination[p]) * 1.25
  * Sun gets double this value.
  */
+// @parity: py=_ayana_bala
 export const calculateAyanaBala = (jd: number, place: Place): number[] => {
   const declinations = declinationOfPlanets(jd, place);
   const ab: number[] = new Array(7).fill(0);
@@ -874,6 +890,7 @@ export const calculateAyanaBala = (jd: number, place: Place): number[] => {
 /**
  * Calculate Yuddha Bala (planetary war strength)
  */
+// @parity: py=_yuddha_bala
 export const calculateYuddhaBala = (
   jd: number,
   place: Place,
@@ -922,6 +939,7 @@ export const calculateYuddhaBala = (
 /**
  * Calculate Kaala Bala (temporal strength)
  */
+// @parity: py=_kaala_bala
 export const calculateKaalaBala = (
   jd: number,
   place: Place,
@@ -953,6 +971,7 @@ export const calculateKaalaBala = (
 /**
  * Calculate Dig Bala (directional strength)
  */
+// @parity: py=_dig_bala
 export const calculateDigBala = (
   jd: number,
   place: Place,
@@ -991,6 +1010,7 @@ export const calculateDigBala = (
 /**
  * Calculate Cheshta Bala (motional strength)
  */
+// @parity: py=_cheshta_bala_new
 export const calculateCheshtaBala = (
   jd: number,
   place: Place,
@@ -1034,6 +1054,7 @@ export const calculateCheshtaBala = (
 /**
  * Calculate Naisargika Bala (natural strength)
  */
+// @parity: py=_naisargika_bala
 export const calculateNaisargikaBala = (): number[] => {
   return [...NAISARGIKA_BALA];
 };
@@ -1082,6 +1103,7 @@ const calculateDrikBalaValue = (dkAngle: number, aspectingPlanet: number): numbe
  * Computes aspect matrix, separates benefic/malefic contributions,
  * and returns net drik bala = (benefic_aspects - malefic_aspects) / 4.
  */
+// @parity: py=_drik_bala
 export const calculateDrikBala = (
   jd: number,
   place: Place,
@@ -1164,6 +1186,7 @@ export interface ShadBalaResult {
 /**
  * Calculate Shadbala (six-fold strength)
  */
+// @parity: py=shad_bala
 export const calculateShadBala = (
   jd: number,
   place: Place,
@@ -1209,6 +1232,7 @@ export const calculateShadBala = (
 /**
  * Calculate Bhava Adhipathi Bala (house lord strength)
  */
+// @parity: py=_bhava_adhipathi_bala
 export const calculateBhavaAdhipathiBala = (
   jd: number,
   place: Place,
@@ -1233,6 +1257,7 @@ export const calculateBhavaAdhipathiBala = (
 /**
  * Calculate Bhava Dig Bala (house directional strength)
  */
+// @parity: py=_bhava_dig_bala
 export const calculateBhavaDigBala = (
   jd: number,
   place: Place,
@@ -1345,6 +1370,7 @@ const positionsToChartStrings = (d1Positions: PlanetPosition[]): string[] => {
  * Computes how much each bhava (house) is aspected by benefic and malefic planets,
  * using graha drishti and raasi drishti to determine which planets aspect which houses.
  */
+// @parity: py=_bhava_drik_bala
 export const calculateBhavaDrikBala = (
   jd: number,
   place: Place,
@@ -1429,6 +1455,7 @@ export const calculateBhavaDrikBala = (
 /**
  * Bhava Drishti Bala (public wrapper matching Python's bhava_drishti_bala)
  */
+// @parity: py=bhava_drishti_bala
 export const bhavaDrishtiBala = (
   jd: number,
   place: Place,
@@ -1455,6 +1482,7 @@ export interface BhavaBalaResult {
  * - Bhava Dig Bala (directional strength of houses)
  * - Bhava Drik Bala (aspectual strength on houses)
  */
+// @parity: py=bhava_bala
 export const calculateBhavaBala = (
   jd: number,
   place: Place,
@@ -1484,6 +1512,7 @@ export type HarshaBalaResult = Record<number, number>;
 /**
  * Calculate Harsha Bala
  */
+// @parity: py=harsha_bala
 export const calculateHarshaBala = (
   jd: number,
   place: Place,
@@ -1666,6 +1695,7 @@ export type PanchaVargeeyaBalaResult = Record<number, number>;
 /**
  * Calculate Pancha Vargeeya Bala (five-fold varga strength)
  */
+// @parity: py=pancha_vargeeya_bala
 export const calculatePanchaVargeeyaBala = (
   jd: number,
   place: Place,
@@ -1702,6 +1732,7 @@ export type DwadhasaVargeeyaBalaResult = Record<number, number>;
 /**
  * Calculate Dwadhasa Vargeeya Bala (twelve-fold strength)
  */
+// @parity: py=dwadhasa_vargeeya_bala
 export const calculateDwadhasaVargeeyaBala = (
   jd: number,
   place: Place,
@@ -1735,6 +1766,7 @@ export const calculateDwadhasaVargeeyaBala = (
 /**
  * Calculate planet aspect relationship table
  */
+// @parity: py=planet_aspect_relationship_table
 export const calculatePlanetAspectRelationshipTable = (
   d1Positions: PlanetPosition[],
   includeHouses = false
@@ -1792,6 +1824,7 @@ export const calculatePlanetAspectRelationshipTable = (
  * @param d1Positions - D-1 chart planet positions
  * @returns Array of uccha rashmi values for Sun to Saturn (7 elements)
  */
+// @parity: py=_uccha_rashmi
 export const calculateUcchaRashmi = (d1Positions: PlanetPosition[]): number[] => {
   const ub: number[] = [];
 
@@ -1828,6 +1861,7 @@ export const calculateUcchaRashmi = (d1Positions: PlanetPosition[]): number[] =>
  * @param d1Positions - D-1 chart planet positions
  * @returns Array of cheshta rashmi values for Sun to Saturn (7 elements)
  */
+// @parity: py=_cheshta_rashmi
 export const calculateCheshtaRashmi = (
   jd: number,
   place: Place,
@@ -1866,6 +1900,7 @@ export const calculateCheshtaRashmi = (
  * @param d1Positions - D-1 chart planet positions
  * @returns Array of subha rashmi values for Sun to Saturn (7 elements)
  */
+// @parity: py=_subha_rashmi
 export const calculateSubhaRashmi = (
   jd: number,
   place: Place,
@@ -1898,6 +1933,7 @@ export const calculateSubhaRashmi = (
  * @param d1Positions - D-1 chart planet positions
  * @returns Array of ishta phala values for Sun to Saturn (7 elements)
  */
+// @parity: py=_ishta_phala
 export const calculateIshtaPhala = (d1Positions: PlanetPosition[]): number[] => {
   const ipScore: Record<number, number> = {
     [ADHIMITRA_GREATFRIEND]: 22,

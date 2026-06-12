@@ -145,6 +145,7 @@ function getAntardhasa(antardhasaSeedRasi: number, pToH: Map<number, number>): n
  * Get Moola Dasha periods
  * Uses kendras from stronger of Asc/7th (same as Kendradhi)
  */
+// @parity: py=moola_dhasa
 export function getMoolaDashaBhukti(
   jd: number,
   place: Place,

@@ -93,6 +93,7 @@ import type { Place } from '../types';
 import { normalizeDegrees } from '../utils/angle';
 import { extendAngleRange, inverseLagrange, unwrapAngles } from '../utils/interpolation';
 import { gregorianToJulianDay, julianDayToGregorian, toUtc } from '../utils/julian';
+import { getFraction } from '../utils/chart';
 import { getMixedDivisionalChart, getDivisionalChart } from '../horoscope/charts';
 import type { PlanetPosition } from '../horoscope/charts';
 import { getCharaKarakas, getRelativeHouseOfPlanet } from '../horoscope/house';
@@ -184,6 +185,7 @@ function convertToTamilDateAndTime(
  * @param longitude - Longitude in degrees (0-360)
  * @returns [nakshatra (1-27), pada (1-4), remainder]
  */
+// @parity: py=nakshatra_pada
 export function nakshatraPada(longitude: number): [number, number, number] {
   const oneStar = 360 / 27; // 13°20'
   const onePada = 360 / 108; // 3°20'
@@ -422,6 +424,7 @@ const VARA_LORDS = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN];
  * @param jd - Julian Day Number
  * @returns Vara information
  */
+// @parity: py=vaara
 export function calculateVara(jd: number): { number: number; name: string; lord: number } {
   const dayOfWeek = Math.ceil(jd + 1) % 7;
   
@@ -482,6 +485,7 @@ export function getAllPlanetPositions(
  * @param place - Place data
  * @returns Day length in hours
  */
+// @parity: py=day_length
 export function dayLength(jd: number, place: Place): number {
   const sunriseData = sunrise(jd, place);
   const sunsetData = sunset(jd, place);
@@ -494,6 +498,7 @@ export function dayLength(jd: number, place: Place): number {
  * @param place - Place data
  * @returns Night length in hours
  */
+// @parity: py=night_length
 export function nightLength(jd: number, place: Place): number {
   const sunsetData = sunset(jd, place);
   const nextSunrise = sunrise(jd + 1, place);
@@ -554,6 +559,7 @@ export async function midnightAsync(
  * Python: drik.midday(jd, place) — returns [float_hours, jd]
  * Uses WASM sync sunrise/sunset when available.
  */
+// @parity: py=midday
 export function midday(
   jd: number,
   place: Place
@@ -570,6 +576,7 @@ export function midday(
  * Python: drik.midnight(jd, place)
  * Uses WASM sync sunrise/sunset when available.
  */
+// @parity: py=midnight
 export function midnight(
   jd: number,
   place: Place
@@ -590,6 +597,7 @@ export function midnight(
  * Python: drik.trikalam(jd, place, option)
  * Uses WASM sync sunrise/sunset when available.
  */
+// @parity: py=trikalam
 export function trikalam(
   jd: number,
   place: Place,
@@ -618,6 +626,7 @@ export function trikalam(
  * Python: abhijit_muhurta(jd, place)
  * Uses WASM sync sunrise/sunset when available.
  */
+// @parity: py=abhijit_muhurta
 export function abhijitMuhurta(
   jd: number,
   place: Place
@@ -637,6 +646,7 @@ export function abhijitMuhurta(
  * Python: durmuhurtam(jd, place)
  * Uses WASM sync sunrise/sunset when available.
  */
+// @parity: py=durmuhurtam
 export function durmuhurtam(
   jd: number,
   place: Place
@@ -881,6 +891,7 @@ async function _getYogamGenericAsync(
  *
  * @returns [tithiNo, startTime, endTime, ...optional nextTithiNo, nextStartTime, nextEndTime]
  */
+// @parity: py=tithi
 export async function calculateTithiAsync(
   jd: number,
   place: Place,
@@ -983,6 +994,7 @@ async function _getNakshatraAsync(
  *
  * @returns [nakNo, padamNo, endTimeHours, nextNakNo, nextPadamNo, nextEndTimeHours]
  */
+// @parity: py=nakshatra
 export async function calculateNakshatraAsync(
   jd: number,
   place: Place
@@ -1056,6 +1068,7 @@ async function _getYogamAsync(
  *
  * @returns [yogamNo, startTime, endTime, ...optional next yogam data]
  */
+// @parity: py=yogam
 export async function calculateYogaAsync(
   jd: number,
   place: Place,
@@ -1096,6 +1109,7 @@ export async function calculateYogaAsync(
  *
  * @returns [karanaNo, startTime, endTime]
  */
+// @parity: py=karana
 export async function calculateKaranaAsync(
   jd: number,
   place: Place
@@ -1131,6 +1145,7 @@ export async function calculateKaranaAsync(
  *
  * @returns [raasiNo (1-12), endTimeHours, fracLeft, ...optional next raasi data]
  */
+// @parity: py=raasi
 export async function raasiAsync(
   jd: number,
   place: Place
@@ -1186,6 +1201,7 @@ export async function raasiAsync(
  * @param ascendantLongitude - Ascendant longitude in degrees
  * @returns [rasi (0-11), longitude within rasi]
  */
+// @parity: py=sree_lagna_from_moon_asc_longitudes
 export function sreeLagnaFromLongitudes(
   moonLongitude: number,
   ascendantLongitude: number
@@ -1281,6 +1297,7 @@ export function kaliAharganaDays(jd: number): number {
  * @param maasaIndex - Lunar month index (1-12)
  * @returns [kaliYear, vikramaYear, sakaYear]
  */
+// @parity: py=elapsed_year
 export function elapsedYear(jd: number, maasaIndex: number): [number, number, number] {
   const ahar = ahargana(jd);
   const kali = Math.floor((ahar + (4 - maasaIndex) * 30) / SIDEREAL_YEAR);
@@ -1296,6 +1313,7 @@ export function elapsedYear(jd: number, maasaIndex: number): [number, number, nu
  * @param maasaIndex - Lunar month index (1-12)
  * @returns Ritu index: 0=Vasanta, 1=Greeshma, 2=Varsha, 3=Sharath, 4=Hemantha, 5=Shishira
  */
+// @parity: py=ritu
 export function ritu(maasaIndex: number): number {
   return Math.floor((maasaIndex - 1) / 2);
 }
@@ -1406,6 +1424,7 @@ export async function lunarPhaseAsync(jd: number): Promise<number> {
 /**
  * Sync version of lunar phase.
  */
+// @parity: py=lunar_phase
 export function lunarPhase(jd: number): number {
   const sunLong = solarLongitude(jd);
   const moonLong = lunarLongitude(jd);
@@ -1421,6 +1440,7 @@ export function lunarPhase(jd: number): number {
  * @param opt - -1 for previous new moon, +1 for next new moon
  * @returns Julian Day Number of the new moon
  */
+// @parity: py=new_moon
 export async function newMoonAsync(
   jd: number,
   tithi_: number,
@@ -1458,6 +1478,7 @@ export async function newMoonAsync(
  * @param opt - -1 for previous full moon, +1 for next full moon
  * @returns Julian Day Number of the full moon
  */
+// @parity: py=full_moon
 export async function fullMoonAsync(
   jd: number,
   tithi_: number,
@@ -1496,6 +1517,7 @@ export async function fullMoonAsync(
  * @param raasi - Target raasi (1-12). null = next sign boundary.
  * @returns [jd, planetLongitude] - JD of entry and planet longitude at that point
  */
+// @parity: py=next_planet_entry_date
 export async function nextPlanetEntryDateAsync(
   planet: number,
   jd: number,
@@ -1580,6 +1602,7 @@ export async function nextPlanetEntryDateAsync(
  * @param direction - 1 for next change, -1 for previous change
  * @returns [jd, speedSign] where speedSign is 1 (direct) or -1 (retrograde), or null if planet doesn't retrograde
  */
+// @parity: py=next_planet_retrograde_change_date
 export async function nextPlanetRetrogradeChangeDateAsync(
   planet: number,
   jd: number,
@@ -1636,6 +1659,7 @@ export async function nextPlanetRetrogradeChangeDateAsync(
  * @param chartMethod - Chart calculation method (default 1)
  * @returns [constellation (0-11), longitude_within_sign]
  */
+// @parity: py=special_ascendant
 export async function specialAscendantAsync(
   jd: number,
   place: Place,
@@ -1709,6 +1733,7 @@ export async function vighatiLagnaAsync(
  * @param divisionalChartFactor - Varga chart factor (1=D-1, 9=D-9, etc.)
  * @returns [constellation (0-11), longitude_within_sign]
  */
+// @parity: py=kunda_lagna
 export async function kundaLagnaAsync(
   jd: number,
   place: Place,
@@ -1840,6 +1865,7 @@ export async function durmuhurtamAsync(
  * @param place - Place
  * @returns attr array with eclipse properties (attr[0] = fraction covered), or null
  */
+// @parity: py=is_solar_eclipse
 export async function isSolarEclipseAsync(
   jd: number,
   place: Place
@@ -1859,6 +1885,7 @@ export async function isSolarEclipseAsync(
  *   tret[0] = greatest eclipse, tret[1] = first contact, tret[2-4] = 2nd/3rd/4th contact
  *   attr[0] = fraction of solar diameter covered, attr[2] = obscuration
  */
+// @parity: py=next_solar_eclipse
 export async function nextSolarEclipseAsync(
   jd: number,
   place: Place
@@ -1877,6 +1904,7 @@ export async function nextSolarEclipseAsync(
  *   tret[0] = greatest eclipse, tret[1] = first contact, tret[2-4] = 2nd/3rd/4th contact
  *   attr[0] = fraction covered, attr[2] = obscuration
  */
+// @parity: py=next_lunar_eclipse
 export async function nextLunarEclipseAsync(
   jd: number,
   place: Place
@@ -1897,6 +1925,7 @@ export async function nextLunarEclipseAsync(
  * @param divisionalChartFactor - Chart division factor (1=Rasi, 9=Navamsa, etc.)
  * @returns [constellation (0-11), longitude_within_rasi]
  */
+// @parity: py=dasavarga_from_long
 export function dasavargaFromLong(
   longitude: number,
   divisionalChartFactor: number = 1
@@ -1926,6 +1955,7 @@ export function dasavargaFromLong(
  * @param divisionalChartFactor - Chart division factor
  * @returns Array of [planet_id, [rasi, longitude]] tuples
  */
+// @parity: py=dhasavarga
 export async function dhasavargaAsync(
   jd: number,
   place: Place,
@@ -1958,6 +1988,7 @@ export async function dhasavargaAsync(
  * @param place - Place data
  * @returns Array of 12 sidereal house cusp longitudes
  */
+// @parity: py=bhaava_madhya_kp
 export async function bhaavaMadhyaKP(
   jd: number,
   place: Place
@@ -1974,6 +2005,7 @@ export async function bhaavaMadhyaKP(
  * @param houseCode - Single-character house system code ('P', 'K', 'O', etc.)
  * @returns Array of 12 sidereal house cusp longitudes
  */
+// @parity: py=bhaava_madhya_swe
 export async function bhaavaMadhyaSwe(
   jd: number,
   place: Place,
@@ -1998,6 +2030,7 @@ export async function bhaavaMadhyaSwe(
  * @param place - Place data
  * @returns Array of 12 sidereal house cusp longitudes
  */
+// @parity: py=bhaava_madhya_sripathi
 export async function bhaavaMadhyaSripathi(
   jd: number,
   place: Place
@@ -2028,6 +2061,7 @@ export async function bhaavaMadhyaSripathi(
  * @param bhavaMadhyaMethod - House system method (1-5 or western code)
  * @returns Array of [rasi, [start, mid, end], planetsInHouse[]] for each house
  */
+// @parity: py=_assign_planets_to_houses
 export function assignPlanetsToHouses(
   planetPositions: Array<[number | string, [number, number]]>,
   bhavaHouses: Array<[number, number, number]>,
@@ -2092,6 +2126,7 @@ export function assignPlanetsToHouses(
  *   'P','K','O','R','C','A','V','X','H','T','B','M' = Western systems
  * @returns Array of [rasi, [start, mid, end], planetsInHouse[]] for each house
  */
+// @parity: py=_bhaava_madhya_new
 export async function bhaavaMadhyaNew(
   jd: number,
   place: Place,
@@ -2182,6 +2217,7 @@ export async function bhaavaMadhyaNew(
  * Lunar daily motion (sync).
  * Python: _lunar_daily_motion(jd)
  */
+// @parity: py=_lunar_daily_motion
 export function lunarDailyMotion(jd: number): number {
   const today = lunarLongitude(jd);
   let tomorrow = lunarLongitude(jd + 1);
@@ -2193,6 +2229,7 @@ export function lunarDailyMotion(jd: number): number {
  * Solar daily motion (sync).
  * Python: _solar_daily_motion(jd)
  */
+// @parity: py=_solar_daily_motion
 export function solarDailyMotion(jd: number): number {
   const today = solarLongitude(jd);
   let tomorrow = solarLongitude(jd + 1);
@@ -2201,10 +2238,12 @@ export function solarDailyMotion(jd: number): number {
 }
 
 /** Planets in retrograde (sync). Python: planets_in_retrograde(jd, place) */
+// @parity: py=planets_in_retrograde
 export const planetsInRetrograde = _planetsInRetrograde;
 /** Planets in retrograde (async). */
 export const planetsInRetrogradeAsync = _planetsInRetrogradeAsync;
 /** Planet speed info (sync). Python: _planet_speed_info(jd, place, planet) */
+// @parity: py=_planet_speed_info
 export const planetSpeedInfo = _planetSpeedInfo;
 /** Planet speed info (async). */
 export const planetSpeedInfoAsync = _planetSpeedInfoAsync;
@@ -2237,6 +2276,7 @@ export function dailyPlanetSpeed(jd: number, place: Place, planet: number): numb
  * All planets speed info (sync).
  * Python: planets_speed_info(jd, place)
  */
+// @parity: py=planets_speed_info
 export function planetsSpeedInfo(jd: number, place: Place): Record<number, number[]> {
   const result: Record<number, number[]> = {};
   const planets = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN, RAHU, KETU];
@@ -2255,6 +2295,7 @@ export function planetsSpeedInfo(jd: number, place: Place): Record<number, numbe
  * Planets in Graha Yudh (planetary war).
  * Python: planets_in_graha_yudh(jd, place)
  */
+// @parity: py=planets_in_graha_yudh
 export function planetsInGrahaYudh(jd: number, place: Place): Array<[number, number, number]> {
   const psi = planetsSpeedInfo(jd, place);
   const longLatList: Array<[number, number]> = [];
@@ -2311,6 +2352,7 @@ export function vaara(jd: number): number {
  * Lunar year index (samvatsara index from Kali year).
  * Python: lunar_year_index(jd, maasa_index)
  */
+// @parity: py=lunar_year_index
 export function lunarYearIndex(jd: number, maasaIndex: number): number {
   let kali = elapsedYear(jd, maasaIndex)[0];
   const kaliBase = 14;
@@ -2331,6 +2373,7 @@ export function lunarYearIndex(jd: number, maasaIndex: number): number {
  * Declination of planets (Sun to Saturn).
  * Python: declination_of_planets(jd, place)
  */
+// @parity: py=declination_of_planets
 export function declinationOfPlanets(jd: number, place: Place): number[] {
   const ayaVal = getAyanamsaValue(jd);
   const pp = getAllPlanetPositionsSync(jd, place).slice(0, 7);
@@ -2412,6 +2455,7 @@ export function upaketuLongitude(sunLong: number): number {
  * Solar upagraha longitudes.
  * Python: solar_upagraha_longitudes(solar_longitude, upagraha, divisional_chart_factor)
  */
+// @parity: py=solar_upagraha_longitudes
 export function solarUpagrahaLongitudes(
   solarLong: number,
   upagraha: string,
@@ -2444,6 +2488,7 @@ export function solarUpagrahaLongitudes(
  * @param upagrahaPartMiddle - true for 'middle', false for 'begin'
  * @returns [constellation, longitude_in_sign]
  */
+// @parity: py=upagraha_longitude
 export function upagrahaLongitude(
   jd: number, place: Place, tobHours: number,
   planetIndex: number, upagrahaPartMiddle: boolean = true
@@ -2601,6 +2646,7 @@ export async function maandiLongitudeAsync(
  * Pranapada Lagna (async).
  * Python: pranapada_lagna(jd, place, ...)
  */
+// @parity: py=pranapada_lagna
 export async function pranapadaLagnaAsync(
   jd: number, place: Place, divisionalChartFactor: number = 1,
   chartMethod: number = 1
@@ -2742,6 +2788,7 @@ function nextSolarJd(jd: number, place: Place, sunLong: number): number {
  * @param sixtyHours - Number of 60-hour periods (1 = first period)
  * @returns Julian Day Number when Sun reaches the target longitude
  */
+// @parity: py=next_solar_date
 export function nextSolarDate(
   jdAtDob: number, place: Place, years: number = 1, months: number = 1, sixtyHours: number = 1
 ): number {
@@ -2769,6 +2816,7 @@ export function nextSolarDate(
  * Find next conjunction of two planets.
  * Python: next_conjunction_of_planet_pair(jd, place, p1, p2, direction, separation_angle, ...)
  */
+// @parity: py=next_conjunction_of_planet_pair
 export async function nextConjunctionOfPlanetPairAsync(
   jd: number, place: Place, p1: number, p2: number,
   direction: number = 1, separationAngle: number = 0,
@@ -2826,6 +2874,7 @@ export async function nextConjunctionOfPlanetPairAsync(
 }
 
 /** Previous conjunction */
+// @parity: py=previous_conjunction_of_planet_pair
 export async function previousConjunctionOfPlanetPairAsync(
   jd: number, place: Place, p1: number, p2: number, separationAngle: number = 0
 ): Promise<[number, number, number] | null> {
@@ -2840,6 +2889,7 @@ export async function previousConjunctionOfPlanetPairAsync(
  * Previous planet entry date (async wrapper).
  * Python: previous_planet_entry_date(planet, jd, place, ...)
  */
+// @parity: py=previous_planet_entry_date
 export async function previousPlanetEntryDateAsync(
   planet: number, jd: number, place: Place, raasi?: number
 ): Promise<[number, number]> {
@@ -2851,6 +2901,7 @@ export async function previousPlanetEntryDateAsync(
 // ============================================================================
 
 /** Next solar month (Sun enters next sign) */
+// @parity: py=next_solar_month
 export async function nextSolarMonthAsync(
   jd: number, place: Place, raasi?: number
 ): Promise<[number, number]> {
@@ -2858,6 +2909,7 @@ export async function nextSolarMonthAsync(
 }
 
 /** Previous solar month */
+// @parity: py=previous_solar_month
 export async function previousSolarMonthAsync(
   jd: number, place: Place, raasi?: number
 ): Promise<[number, number]> {
@@ -2865,11 +2917,13 @@ export async function previousSolarMonthAsync(
 }
 
 /** Next solar year (Sun enters Aries) */
+// @parity: py=next_solar_year
 export async function nextSolarYearAsync(jd: number, place: Place): Promise<[number, number]> {
   return nextPlanetEntryDateAsync(SUN, jd, place, 1, 1);
 }
 
 /** Previous solar year */
+// @parity: py=previous_solar_year
 export async function previousSolarYearAsync(jd: number, place: Place): Promise<[number, number]> {
   return previousPlanetEntryDateAsync(SUN, jd, place, 1);
 }
@@ -2882,6 +2936,7 @@ export async function previousSolarYearAsync(jd: number, place: Place): Promise<
  * Graha Drekkana.
  * Python: graha_drekkana(jd, place, use_bv_raman_table)
  */
+// @parity: py=graha_drekkana
 export function grahaDrekkana(jd: number, place: Place, useBvRamanTable: boolean = false): number[] {
   const pp = getAllPlanetPositionsSync(jd, place);
   const table = useBvRamanTable ? DREKKANA_TABLE_BVRAMAN : DREKKANA_TABLE;
@@ -2896,6 +2951,7 @@ export function grahaDrekkana(jd: number, place: Place, useBvRamanTable: boolean
  * Brahma Muhurtha.
  * Python: brahma_muhurtha(jd, place) -> (start, end) in float hours
  */
+// @parity: py=brahma_muhurtha
 export async function brahmaMuhurthaAsync(jd: number, place: Place): Promise<[number, number]> {
   const dl = dayLength(jd, place);
   const nl = nightLength(jd, place);
@@ -2908,6 +2964,7 @@ export async function brahmaMuhurthaAsync(jd: number, place: Place): Promise<[nu
  * Godhuli Muhurtha.
  * Python: godhuli_muhurtha(jd, place)
  */
+// @parity: py=godhuli_muhurtha
 export async function godhuliMuhurthaAsync(jd: number, place: Place): Promise<[number, number]> {
   const dl = dayLength(jd, place);
   const nl = nightLength(jd, place);
@@ -2921,6 +2978,7 @@ export async function godhuliMuhurthaAsync(jd: number, place: Place): Promise<[n
  * Sandhya periods (3 periods).
  * Python: sandhya_periods(jd, place) -> (pratah, madhyaahna, saayam)
  */
+// @parity: py=sandhya_periods
 export async function sandhyaPeriodsAsync(
   jd: number, place: Place
 ): Promise<[[number, number], [number, number], [number, number]]> {
@@ -2940,6 +2998,7 @@ export async function sandhyaPeriodsAsync(
  * Vijaya Muhurtha (day and night).
  * Python: vijaya_muhurtha(jd, place) -> (day_period, night_period)
  */
+// @parity: py=vijaya_muhurtha
 export async function vijayaMuhurthaAsync(
   jd: number, place: Place
 ): Promise<[[number, number], [number, number]]> {
@@ -2961,6 +3020,7 @@ export async function vijayaMuhurthaAsync(
  * Nishita Kaala (8th muhurtha of night).
  * Python: nishita_kaala(jd, place) -> (start, end)
  */
+// @parity: py=nishita_kaala
 export async function nishitaKaalaAsync(jd: number, place: Place): Promise<[number, number]> {
   const nl = nightLength(jd, place);
   const gn = nl / 30;
@@ -2972,6 +3032,7 @@ export async function nishitaKaalaAsync(jd: number, place: Place): Promise<[numb
  * Nishita Muhurtha (2 ghatis around midnight).
  * Python: nishita_muhurtha(jd, place)
  */
+// @parity: py=nishita_muhurtha
 export async function nishitaMuhurthaAsync(jd: number, place: Place): Promise<[number, number]> {
   const nl = nightLength(jd, place);
   const gn = nl / 30;
@@ -2984,6 +3045,7 @@ export async function nishitaMuhurthaAsync(jd: number, place: Place): Promise<[n
  * Tamil Jaamam (10 equal divisions of day+night).
  * Python: tamil_jaamam(jd, place)
  */
+// @parity: py=tamil_jaamam
 export function tamilJaamam(jd: number, place: Place): Array<[number, number]> {
   const dl = dayLength(jd, place);
   const dayJaamam = dl / 5;
@@ -3009,6 +3071,7 @@ export function tamilJaamam(jd: number, place: Place): Array<[number, number]> {
  * Fraction of nakshatra Moon has yet to traverse.
  * Python: fraction_moon_yet_to_traverse(jd, place, round_to_digits)
  */
+// @parity: py=fraction_moon_yet_to_traverse
 export function fractionMoonYetToTraverse(jd: number, place: Place, roundToDigits: number = 5): number {
   const jdUtc = jd - place.timezone / 24;
   const oneStar = 360 / 27;
@@ -3027,6 +3090,7 @@ export function fractionMoonYetToTraverse(jd: number, place: Place, roundToDigit
  * Python: disha_shool(jd)
  * @returns direction index: 0=North, 1=South, 2=West, 3=North (matches Python const.disha_shool_map)
  */
+// @parity: py=disha_shool
 export function dishaShool(jd: number): number {
   return DISHA_SHOOL_MAP[vaara(jd)]!;
 }
@@ -3039,6 +3103,7 @@ export function dishaShool(jd: number): number {
  * Shiva Vaasa index.
  * Python: shiva_vaasa(jd, place, method)
  */
+// @parity: py=shiva_vaasa
 export function shivaVaasa(jd: number, place: Place, method: number = 2): [number, number] {
   const tit = calculateTithi(jd, place);
   const tithiIndex = tit.number;
@@ -3063,6 +3128,7 @@ export function shivaVaasa(jd: number, place: Place, method: number = 2): [numbe
  * Agni Vaasa index.
  * Python: agni_vaasa(jd, place)
  */
+// @parity: py=agni_vaasa
 export function agniVaasa(jd: number, place: Place): [number, number] {
   const tit = calculateTithi(jd, place);
   const tithiIndex = tit.number;
@@ -3080,6 +3146,7 @@ export function agniVaasa(jd: number, place: Place): [number, number] {
  * Find the JD when a specific tithi occurs.
  * Python: next_tithi(jd, place, required_tithi, opt, start_of_tithi)
  */
+// @parity: py=next_tithi
 export async function nextTithiAsync(
   jd: number, place: Place, requiredTithi: number, opt: number = 1, startOfTithi: boolean = true
 ): Promise<number> {
@@ -3111,6 +3178,7 @@ export async function nextTithiAsync(
  * 1000th full moon from birth date.
  * Python: sahasra_chandrodayam(jd, place) -> (year, month, day)
  */
+// @parity: py=sahasra_chandrodayam
 export async function sahasraChandrodayamAsync(
   jd: number, place: Place
 ): Promise<{ year: number; month: number; day: number }> {
@@ -3135,6 +3203,7 @@ export async function sahasraChandrodayamAsync(
  * Convert float hours to Vedic time (ghati, phala, vighati).
  * Python: float_hours_to_vedic_time(jd, place, float_hours, force_equal, vedic_hours_per_day)
  */
+// @parity: py=float_hours_to_vedic_time
 export function floatHoursToVedicTime(
   jd: number, place: Place, floatHours?: number, vedicHoursPerDay: number = 60
 ): [number, number, number] {
@@ -3164,6 +3233,7 @@ export function floatHoursToVedicTime(
  * Convert float hours to Vedic time with equal day/night ghatis.
  * Python: float_hours_to_vedic_time_equal_day_night_ghati(...)
  */
+// @parity: py=float_hours_to_vedic_time_equal_day_night_ghati
 export function floatHoursToVedicTimeEqualDayNightGhati(
   jd: number, place: Place, floatHours?: number, vedicHoursPerDay: number = 60
 ): [number, number, number] {
@@ -3209,6 +3279,7 @@ export function floatHoursToVedicTimeEqualDayNightGhati(
  * Chandrashtama rasi and next Moon entry JD.
  * Python: chandrashtama(jd, place)
  */
+// @parity: py=chandrashtama
 export async function chandrashtamaAsync(
   jd: number, place: Place
 ): Promise<[number, number]> {
@@ -3228,6 +3299,7 @@ export async function chandrashtamaAsync(
  * Next panchaka nakshatra period.
  * Python: next_panchaka_days(jd, place)
  */
+// @parity: py=next_panchaka_days
 export async function nextPanchakaDaysAsync(
   jd: number, place: Place
 ): Promise<[number, number]> {
@@ -3268,6 +3340,7 @@ export function specialTithis(jd: number, place: Place): number[][][] {
  * Python: gauri_choghadiya(jd, place)
  * @returns Array of [choghadiya_type, start_hours, end_hours]
  */
+// @parity: py=gauri_choghadiya
 export function gauriChoghadiya(jd: number, place: Place): Array<[number, number, number]> {
   const sr = sunrise(jd, place);
   const ss = sunset(jd, place);
@@ -3300,6 +3373,7 @@ export function gauriChoghadiya(jd: number, place: Place): Array<[number, number
  * Amrit Kaalam - periods where gauri choghadiya type is 3 (Amrit).
  * Python: amrit_kaalam(jd, place)
  */
+// @parity: py=amrit_kaalam
 export function amritKaalam(jd: number, place: Place): Array<[number, number]> {
   return gauriChoghadiya(jd, place)
     .filter(([gc]) => gc === 3)
@@ -3315,6 +3389,7 @@ export function amritKaalam(jd: number, place: Place): Array<[number, number]> {
  * Python: shubha_hora(jd, place)
  * @returns Array of [hora_planet, start_hours, end_hours]
  */
+// @parity: py=shubha_hora
 export function shubhaHora(jd: number, place: Place): Array<[number, number, number]> {
   const sr = sunrise(jd, place);
   const ss = sunset(jd, place);
@@ -3350,6 +3425,7 @@ export function shubhaHora(jd: number, place: Place): Array<[number, number, num
  * Python: amrita_gadiya(jd, place)
  * @returns [start_hours, end_hours]
  */
+// @parity: py=amrita_gadiya
 export function amritaGadiya(jd: number, place: Place): [number, number] {
   const nak = calculateNakshatra(jd, place);
   const nakNo = nak.number;
@@ -3367,6 +3443,7 @@ export function amritaGadiya(jd: number, place: Place): [number, number] {
  * Python: varjyam(jd, place)
  * @returns [start_hours, end_hours] or [start1, end1, start2, end2] for Moolam
  */
+// @parity: py=varjyam
 export function varjyam(jd: number, place: Place): number[] {
   const nak = calculateNakshatra(jd, place);
   const nakNo = nak.number;
@@ -3399,6 +3476,7 @@ export function varjyam(jd: number, place: Place): number[] {
  * Python: anandhaadhi_yoga(jd, place)
  * @returns [yoga_index, nak_start_time]
  */
+// @parity: py=anandhaadhi_yoga
 export function anandhaadhiYoga(jd: number, place: Place): [number, number] {
   const nak = calculateNakshatra(jd, place);
   const day = vaara(jd);
@@ -3416,6 +3494,7 @@ export function anandhaadhiYoga(jd: number, place: Place): [number, number] {
  * Python: triguna(jd, place)
  * @returns triguna index: 0=Sathva, 1=Rajas, 2=Thamas
  */
+// @parity: py=triguna
 export function triguna(jd: number, place: Place): number {
   const { time } = julianDayToGregorian(jd);
   const fh = time.hour + time.minute / 60 + time.second / 3600;
@@ -3438,6 +3517,7 @@ export function triguna(jd: number, place: Place): number {
  * Vivaha Chakra Palan.
  * Python: vivaha_chakra_palan(jd, place)
  */
+// @parity: py=vivaha_chakra_palan
 export function vivahChakraPalan(jd: number, place: Place): number | null {
   const jdUtc = jd - place.timezone / 24;
   const sunLong = solarLongitude(jdUtc);
@@ -3483,6 +3563,7 @@ export function vivahChakraPalan(jd: number, place: Place): number | null {
  * Python: tamil_yogam(jd, place, check_special_yogas, use_sringeri_panchanga_version)
  * @returns [yoga_index, nak_start, nak_end, ...optional original_yoga]
  */
+// @parity: py=tamil_yogam
 export function tamilYogam(
   jd: number, place: Place,
   checkSpecialYogas: boolean = true,
@@ -3517,6 +3598,7 @@ export function tamilYogam(
  * Thaarabalam calculation.
  * Python: thaaraabalam(jd, place, return_only_good_stars)
  */
+// @parity: py=thaaraabalam
 export function thaarabalam(jd: number, place: Place, returnOnlyGoodStars: boolean = true): number[] | number[][] {
   const goodThaarabalam = [0, 2, 4, 6, 8];
   const gtb: number[] = [];
@@ -3541,6 +3623,7 @@ export function thaarabalam(jd: number, place: Place, returnOnlyGoodStars: boole
  * Python: muhurthas(jd, place)
  * @returns Array of [muhurtha_name, auspicious(0/1), [start_hours, end_hours]]
  */
+// @parity: py=muhurthas
 export function muhurthas(jd: number, place: Place): Array<[string, number, [number, number]]> {
   const dl = dayLength(jd, place);
   const dayMuhurtha = dl / 15;
@@ -3569,6 +3652,7 @@ export function muhurthas(jd: number, place: Place): Array<[string, number, [num
  * Yogini Vaasa from tithi.
  * Python: yogini_vaasa(jd, place)
  */
+// @parity: py=yogini_vaasa
 export function yoginiVaasa(jd: number, place: Place): number {
   const tithiIndex = calculateTithi(jd, place).number;
   return YOGINI_VAASA_TITHI_MAP[tithiIndex - 1]!;
@@ -3583,6 +3667,7 @@ export function yoginiVaasa(jd: number, place: Place): number {
  * Python: pushkara_yoga(jd, place)
  * @returns [type, start, end] or empty array. type: 1=dwi, 2=tri
  */
+// @parity: py=pushkara_yoga
 export function pushkaraYoga(jd: number, place: Place): number[] {
   const tithiList = [2, 17, 7, 22, 12, 27];
   const dayList = [1, 3, 7];
@@ -3624,6 +3709,7 @@ export function pushkaraYoga(jd: number, place: Place): number[] {
  * Python: aadal_yoga(jd, place)
  * @returns [sunrise_hours, star_end] if yoga exists, else empty array
  */
+// @parity: py=aadal_yoga
 export function aadalYoga(jd: number, place: Place): number[] {
   const jdUtc = jd - place.timezone / 24;
   const nak = calculateNakshatra(jd, place);
@@ -3639,6 +3725,7 @@ export function aadalYoga(jd: number, place: Place): number[] {
  * Vidaal Yoga.
  * Python: vidaal_yoga(jd, place)
  */
+// @parity: py=vidaal_yoga
 export function vidaalYoga(jd: number, place: Place): number[] {
   const jdUtc = jd - place.timezone / 24;
   const nak = calculateNakshatra(jd, place);
@@ -3659,6 +3746,7 @@ export function vidaalYoga(jd: number, place: Place): number[] {
  * Python: nava_thaara(jd, place, from_lagna_or_moon)
  * @param fromLagnaOrMoon 0=from lagna, 1=from moon star
  */
+// @parity: py=nava_thaara
 export function navaThaara(jd: number, place: Place, fromLagnaOrMoon: number = 0): Array<[number, number[]]> {
   const nak = calculateNakshatra(jd, place);
   // fromLagnaOrMoon==1: use moon star. Otherwise we'd need ascendant star (approximation: use moon)
@@ -3676,6 +3764,7 @@ export function navaThaara(jd: number, place: Place, fromLagnaOrMoon: number = 0
  * Special Thaara.
  * Python: special_thaara(jd, place, from_lagna_or_moon)
  */
+// @parity: py=special_thaara
 export function specialThaara(jd: number, place: Place, fromLagnaOrMoon: number = 0): Array<[number, number]> {
   const nak = calculateNakshatra(jd, place);
   const baseStar = nak.number - 1;
@@ -3703,6 +3792,7 @@ export function specialThaara(jd: number, place: Place, fromLagnaOrMoon: number 
  * Python: lunar_month(jd, place)
  * @returns [month_index(1-12), is_leap_month, is_nija_month]
  */
+// @parity: py=lunar_month
 export async function lunarMonthAsync(jd: number, place: Place, _depth: number = 0): Promise<[number, boolean, boolean]> {
   const ti = (await calculateTithiAsync(jd, place))[0];
   const srData = await sunriseAsync(jd, place);
@@ -3726,6 +3816,7 @@ export async function lunarMonthAsync(jd: number, place: Place, _depth: number =
  * Next lunar month boundary (new moon or full moon).
  * Python: next_lunar_month(jd, place, lunar_month_type, direction)
  */
+// @parity: py=next_lunar_month
 export async function nextLunarMonthAsync(
   jd: number, place: Place, lunarMonthType: number = 0, direction: number = 1
 ): Promise<[{ year: number; month: number; day: number }, number]> {
@@ -3765,6 +3856,7 @@ export async function nextLunarMonthAsync(
  * Previous lunar month boundary.
  * Python: previous_lunar_month(jd, place, lunar_month_type)
  */
+// @parity: py=previous_lunar_month
 export async function previousLunarMonthAsync(
   jd: number, place: Place, lunarMonthType: number = 0
 ): Promise<[{ year: number; month: number; day: number }, number]> {
@@ -3775,6 +3867,7 @@ export async function previousLunarMonthAsync(
  * Next lunar year start.
  * Python: next_lunar_year(jd, place, lunar_month_type, direction)
  */
+// @parity: py=next_lunar_year
 export async function nextLunarYearAsync(
   jd: number, place: Place, lunarMonthType: number = 0, direction: number = 1
 ): Promise<[{ year: number; month: number; day: number }, number] | null> {
@@ -3804,6 +3897,7 @@ export async function nextLunarYearAsync(
  * Previous lunar year start.
  * Python: previous_lunar_year(jd, place, lunar_month_type)
  */
+// @parity: py=previous_lunar_year
 export async function previousLunarYearAsync(
   jd: number, place: Place, lunarMonthType: number = 0
 ): Promise<[{ year: number; month: number; day: number }, number] | null> {
@@ -3829,6 +3923,7 @@ export async function previousLunarYearAsync(
  * Python: tamil_solar_month_and_date(panchanga_date, place, tamil_month_method, base_time, use_utc)
  * @param tamilMonthMethod - 0: RaviAnnaswamy, 1: V4.3.5, 2: V4.3.8, 3+: new (default)
  */
+// @parity: py=tamil_solar_month_and_date
 export function tamilSolarMonthAndDate(
   jd: number, place: Place, tamilMonthMethod: number = 3,
   baseTime: number = 0, useUtc: boolean = true
@@ -3849,6 +3944,7 @@ export function tamilSolarMonthAndDate(
  * Python: samvatsara(panchanga_date, place, zodiac)
  * @returns samvatsara index [0..59]
  */
+// @parity: py=samvatsara
 export function samvatsara(jd: number, place: Place, zodiac: number = 0): number {
   // Find previous sankranti
   const [psd] = previousSankrantiDate(jd, place, zodiac);
@@ -3862,6 +3958,7 @@ export function samvatsara(jd: number, place: Place, zodiac: number = 0): number
  * Python: _previous_sankranti_date_new(panchanga_date, place, zodiac)
  * @returns [sankranti_date, solar_hour, tamil_month, tamil_day]
  */
+// @parity: py=previous_sankranti_date
 export function previousSankrantiDate(
   jd: number, place: Place, zodiac?: number
 ): [{ year: number; month: number; day: number }, number, number, number] {
@@ -3912,6 +4009,7 @@ export function previousSankrantiDate(
  * Next ascendant entry date.
  * Python: next_ascendant_entry_date(jd, place, direction, precision, raasi, divisional_chart_factor)
  */
+// @parity: py=next_ascendant_entry_date
 export async function nextAscendantEntryDateAsync(
   jd: number, place: Place, direction: number = 1, precision: number = 1.0,
   raasi?: number, divisionalChartFactor: number = 1
@@ -3955,6 +4053,7 @@ export async function nextAscendantEntryDateAsync(
  * Previous ascendant entry date.
  * Python: previous_ascendant_entry_date(jd, place, ...)
  */
+// @parity: py=previous_ascendant_entry_date
 export async function previousAscendantEntryDateAsync(
   jd: number, place: Place, precision: number = 1.0,
   raasi?: number, divisionalChartFactor: number = 1
@@ -3971,6 +4070,7 @@ export async function previousAscendantEntryDateAsync(
  * Python: udhaya_lagna_muhurtha(jd, place)
  * @returns [(rasi, start_hours, end_hours), ...]
  */
+// @parity: py=udhaya_lagna_muhurtha
 export async function udhayaLagnaMuhurthaAsync(
   jd: number, place: Place
 ): Promise<Array<[number, number, number]>> {
@@ -4002,6 +4102,7 @@ export async function udhayaLagnaMuhurthaAsync(
  * Chandrabalam - auspicious ascendant positions relative to Moon.
  * Python: chandrabalam(jd, place)
  */
+// @parity: py=chandrabalam
 export async function chandrabalamAsync(jd: number, place: Place): Promise<number[]> {
   const ulm = await udhayaLagnaMuhurthaAsync(jd, place);
   const jdUtc = jd - place.timezone / 24;
@@ -4023,6 +4124,7 @@ export async function chandrabalamAsync(jd: number, place: Place): Promise<numbe
  * Panchaka Rahitha.
  * Python: panchaka_rahitha(jd, place)
  */
+// @parity: py=panchaka_rahitha
 export async function panchakaRahithaAsync(
   jd: number, place: Place
 ): Promise<Array<[number, number, number]>> {
@@ -4059,6 +4161,7 @@ export async function panchakaRahithaAsync(
  * Python: planetary_positions(jd, place)
  * @returns [[planet_id, [rasi, long_in_sign]], ...]
  */
+// @parity: py=planetary_positions
 export function planetaryPositions(jd: number, place: Place): Array<[number, [number, number]]> {
   const pp = getAllPlanetPositionsSync(jd, place);
   const planets = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN, RAHU, KETU];
@@ -4074,6 +4177,7 @@ export function planetaryPositions(jd: number, place: Place): Array<[number, [nu
  * Python: ascendant(jd, place)
  * @returns [constellation, longitude_in_sign, nakshatra, pada]
  */
+// @parity: py=ascendant
 export function ascendant(jd: number, place: Place): [number, number, number, number] {
   // Sync version: approximate using Sun longitude (known limitation)
   const jdUtc = jd - place.timezone / 24;
@@ -4099,6 +4203,7 @@ export function ascendant(jd: number, place: Place): [number, number, number, nu
  * @param calendarType - 0: Solar, 1: Amanta lunar, 2: Purnimanta lunar
  * @param tamilMonthMethod - 0: RaviAnnaswamy, 1: V4.3.5, 2: V4.3.8, 3+: new (default)
  */
+// @parity: py=vedic_date
 export async function vedicDateAsync(
   jd: number, place: Place, calendarType: number = 0,
   tamilMonthMethod: number = 3,
@@ -4116,6 +4221,7 @@ export async function vedicDateAsync(
  * Lunar month date.
  * Python: lunar_month_date(jd, place, use_purnimanta_system)
  */
+// @parity: py=lunar_month_date
 export async function lunarMonthDateAsync(
   jd: number, place: Place, usePurnimantaSystem: boolean = false
 ): Promise<[number, number, number, boolean, boolean]> {
@@ -4152,6 +4258,7 @@ export async function lunarMonthDateAsync(
  * Next annual solar date (approximate, no ephemeris needed).
  * Python: next_annual_solar_date_approximate(dob, tob, years)
  */
+// @parity: py=next_annual_solar_date_approximate
 export function nextAnnualSolarDateApproximate(
   jd: number, years: number
 ): { weekday: number; hours: number } {
@@ -4170,6 +4277,7 @@ export function nextAnnualSolarDateApproximate(
  * Sree Lagna from JD (async).
  * Python: sree_lagna(jd, place, ...)
  */
+// @parity: py=sree_lagna
 export async function sreeLagnaAsync(
   jd: number, place: Place, divisionalChartFactor: number = 1,
   chartMethod: number = 1
@@ -4199,6 +4307,7 @@ export async function sreeLagnaAsync(
  * Indu Lagna (async).
  * Python: indu_lagna(jd, place, ...)
  */
+// @parity: py=indu_lagna
 export async function induLagnaAsync(
   jd: number, place: Place, divisionalChartFactor: number = 1,
   chartMethod: number = 1
@@ -4244,6 +4353,7 @@ export async function induLagnaAsync(
  * Bhrigu Bindhu (async).
  * Python: bhrigu_bindhu_lagna(jd, place, ...)
  */
+// @parity: py=bhrigu_bindhu_lagna
 export async function bhriguBindhuAsync(
   jd: number, place: Place, divisionalChartFactor: number = 1,
   chartMethod: number = 1
@@ -4279,8 +4389,10 @@ export {
   siderealLongitude, siderealLongitudeAsync,
   getAyanamsaValue, setAyanamsaMode,
 };
+// @parity: py=moonrise
 export const moonrise = _moonrise;
 export const moonriseAsync = _moonriseAsync;
+// @parity: py=moonset
 export const moonset = _moonset;
 export const moonsetAsync = _moonsetAsync;
 
@@ -4298,6 +4410,7 @@ export function resetAyanamsaMode(): void {
  * @param bhavaMethod - 1: KP/Placidus, 2: Sripathi (default from constants)
  * @returns Array of 12 house cusp longitudes
  */
+// @parity: py=bhaava_madhya
 export async function bhaavaMadhya(
   jd: number, place: Place, bhavaMethod: number = BHAAVA_MADHYA_METHOD
 ): Promise<number[]> {
@@ -4318,6 +4431,7 @@ export function navamsaFromLong(longitude: number): [number, number] {
 }
 
 /** Old navamsa calculation - returns just the sign index */
+// @parity: py=navamsa_from_long_old
 export function navamsaFromLongOld(longitude: number): number {
   const onePada = 360 / (12 * 9);
   const oneSign = 12 * onePada;
@@ -4378,6 +4492,7 @@ export async function gulikaiKaalamAsync(jd: number, place: Place): Promise<[num
  * Python: next_sankranti_date(panchanga_date, place)
  * @returns [Date, solarHour, tamilMonth, tamilDay] matching Python format
  */
+// @parity: py=next_sankranti_date
 export function nextSankrantiDate(
   jd: number, place: Place
 ): [{ year: number; month: number; day: number }, number, number, number] {
@@ -4426,6 +4541,7 @@ export async function nextSankrantiDateAsync(
 }
 
 /** days_in_tamil_month — count days remaining in current Tamil month */
+// @parity: py=days_in_tamil_month
 export function daysInTamilMonth(jd: number, place: Place): number {
   const [, dayCount] = tamilSolarMonthAndDate(jd, place);
   const sunsetJdStart = sunset(jd, place).jd;
@@ -4448,6 +4564,7 @@ export function daysInTamilMonth(jd: number, place: Place): number {
 // ============================================================================
 
 /** Switch planet list to tropical (includes Uranus, Neptune, Pluto, excludes Rahu/Ketu) */
+// @parity: py=set_tropical_planets
 export function setTropicalPlanets(): void {
   // In the TS port, planet lists are managed differently per context.
   // This is a compatibility stub matching Python's set_tropical_planets().
@@ -4455,6 +4572,7 @@ export function setTropicalPlanets(): void {
 }
 
 /** Switch planet list to sidereal (default: Sun..Ketu, optionally Uranus..Pluto) */
+// @parity: py=set_sideral_planets
 export function setSiderealPlanets(): void {
   // Compatibility stub matching Python's set_sideral_planets().
 }
@@ -4483,6 +4601,7 @@ function buildD1Positions(jd: number, place: Place): PlanetPosition[] {
  * Special ascendant for mixed chart.
  * Python: special_ascendant_mixed_chart(jd, place, vf1, cm1, vf2, cm2, lagna_rate_factor)
  */
+// @parity: py=special_ascendant_mixed_chart
 export function specialAscendantMixedChart(
   jd: number, place: Place,
   vargaFactor1: number = 1, chartMethod1: number = 1,
@@ -4539,6 +4658,7 @@ export function vighatiLagnaMixedChart(
 }
 
 /** Indu lagna for mixed chart */
+// @parity: py=indu_lagna_mixed_chart
 export function induLagnaMixedChart(
   jd: number, place: Place,
   vf1: number = 1, cm1: number = 1, vf2: number = 1, cm2: number = 1
@@ -4556,6 +4676,7 @@ export function induLagnaMixedChart(
 }
 
 /** Kunda lagna for mixed chart */
+// @parity: py=kunda_lagna_mixed_chart
 export function kundaLagnaMixedChart(
   jd: number, place: Place,
   vf1: number = 1, cm1: number = 1, vf2: number = 1, cm2: number = 1
@@ -4570,6 +4691,7 @@ export function kundaLagnaMixedChart(
 }
 
 /** Bhrigu Bindhu lagna for mixed chart */
+// @parity: py=bhrigu_bindhu_lagna_mixed_chart
 export function bhriguBindhuLagnaMixedChart(
   jd: number, place: Place,
   vf1: number = 1, cm1: number = 1, vf2: number = 1, cm2: number = 1
@@ -4584,6 +4706,7 @@ export function bhriguBindhuLagnaMixedChart(
 }
 
 /** Sree lagna for mixed chart */
+// @parity: py=sree_lagna_mixed_chart
 export function sreeLagnaMixedChart(
   jd: number, place: Place,
   vf1: number = 1, cm1: number = 1, vf2: number = 1, cm2: number = 1
@@ -4597,6 +4720,7 @@ export function sreeLagnaMixedChart(
 }
 
 /** Pranapada lagna for mixed chart */
+// @parity: py=pranapada_lagna_mixed_chart
 export function pranapadaLagnaMixedChart(
   jd: number, place: Place,
   vf1: number = 1, cm1: number = 1, vf2: number = 1, cm2: number = 1
@@ -4635,6 +4759,7 @@ export function pranapadaLagnaMixedChart(
  * Tithi calculation using planet speed method.
  * Python: tithi_using_planet_speed(jd, place, tithi_index, planet1, planet2, cycle)
  */
+// @parity: py=tithi_using_planet_speed
 export function tithiUsingPlanetSpeed(
   jd: number, place: Place,
   tithiIndex: number = 1, planet1: number = MOON, planet2: number = SUN,
@@ -4684,6 +4809,7 @@ export function tithiUsingPlanetSpeed(
  * Legacy yogam calculation (using internal _get_yogam equivalent).
  * Python: yogam_old(jd, place, planet1, planet2, tithi_index, cycle)
  */
+// @parity: py=yogam_old
 export function yogamOld(
   jd: number, place: Place,
   planet1: number = MOON, planet2: number = SUN,
@@ -4750,6 +4876,111 @@ export function yogamOld(
 }
 
 // ============================================================================
+// PYTHON-DEFAULT (PLANET SPEED) PANCHANGA VARIANTS
+// Python const.use_planet_speed_for_panchangam_end_timings defaults to True,
+// so drik.tithi/yogam/karana dispatch to the planet-speed implementations.
+// These exports mirror that default path for parity with Python.
+// ============================================================================
+
+/**
+ * Yogam using planet speeds (Python default path).
+ * Python: yogam(jd, place, tithi_index, planet1, planet2, cycle)
+ * with const.use_planet_speed_for_panchangam_end_timings = True.
+ *
+ * @returns [yogamNo, startTime, endTime, fracLeft, ...optional next yogam quad]
+ */
+export function yogamUsingPlanetSpeed(
+  jd: number, place: Place,
+  tithiIndex: number = 1, planet1: number = MOON, planet2: number = SUN,
+  cycle: number = 1
+): number[] {
+  const { time } = julianDayToGregorian(jd);
+  const jdHours = time.hour + time.minute / 60 + time.second / 3600;
+
+  function getYogamNew(jd_: number): number[] {
+    const jdUtc = jd_ - place.timezone / 24;
+    // Python _special_yoga_phase: (tithi_index*(p1 + p2) + (cycle-1)*180) % 360
+    const p1Long = siderealLongitude(jdUtc, planet1);
+    const p2Long = siderealLongitude(jdUtc, planet2);
+    const yogaPhase = ((tithiIndex * (p1Long + p2Long) + (cycle - 1) * 180) % 360 + 360) % 360;
+    const total = yogaPhase % 360;
+    const oneYoga = 360 / 27;
+    const yog = Math.ceil(total / oneYoga);
+    const yogamNo = yog;
+    const degreesLeft = yog * oneYoga - total;
+    // Python: use only Moon/Sun speeds for end time calculations
+    const dailyPlanet1Motion = dailyMoonSpeed(jd_, place);
+    const dailyPlanet2Motion = dailySunSpeed(jd_, place);
+    const endTime = jdHours + (degreesLeft / (dailyPlanet1Motion + dailyPlanet2Motion)) * 24;
+    const fracLeft = degreesLeft / oneYoga;
+    const startTime = endTime - (endTime - jdHours) / fracLeft;
+    return [yogamNo, startTime, endTime, fracLeft];
+  }
+
+  const result = getYogamNew(jd);
+  if (result[2]! < 24) {
+    // NOTE: Python adds result[2] (hours) directly to jd (days) — replicated verbatim.
+    const nextRes = getYogamNew(jd + result[2]!);
+    nextRes[1] = result[2]!;
+    nextRes[2]! += 24;
+    nextRes[3] = getFraction(nextRes[1]!, nextRes[2]!, jdHours);
+    result.push(...nextRes);
+  }
+  return result;
+}
+
+/**
+ * Karana via the Python-default (planet speed) tithi path.
+ * Python: karana(jd, place) — which calls tithi(), dispatching to
+ * tithi_using_planet_speed when use_planet_speed_for_panchangam_end_timings=True.
+ *
+ * @returns [karanaNo (1..60), startTime, endTime]
+ */
+export function karana(jd: number, place: Place): [number, number, number] {
+  const { time } = julianDayToGregorian(jd);
+  const birthTimeHrs = time.hour + time.minute / 60 + time.second / 3600;
+
+  const _tithi = tithiUsingPlanetSpeed(jd, place);
+  const tStart = _tithi[1]!;
+  const tEnd = _tithi[2]!;
+  const tMid = 0.5 * (tStart + tEnd);
+  let karanaNo = _tithi[0]! * 2 - 1;
+  let kStart: number;
+  let kEnd: number;
+  if (birthTimeHrs > tMid) {
+    karanaNo += 1;
+    kStart = tMid;
+    kEnd = tEnd;
+  } else {
+    kStart = tStart;
+    kEnd = tMid;
+  }
+  return [karanaNo, kStart, kEnd];
+}
+
+/**
+ * Full nakshatra with start time, matching Python's public nakshatra().
+ * Python: nakshatra(jd, place) — wraps _get_nakshathra for jd and jd-1 to
+ * derive the start time (negative => started previous day).
+ *
+ * @returns [nakNo, padamNo, startTime, endTime, nextNakNo, nextPadamNo, nextEndTime]
+ */
+export async function nakshatraAsync(jd: number, place: Place): Promise<number[]> {
+  const _nak = await _getNakshatraAsync(jd, place);
+  const _nakPrev = await _getNakshatraAsync(jd - 1, place);
+  const nakNo = _nak[0]!;
+  const padNo = _nak[1]!;
+  let nakStart = _nakPrev[2]!;
+  const nakEnd = _nak[2]!;
+  if (nakStart < 24.0) {
+    nakStart = -nakStart;
+  } else if (nakStart > 24) {
+    nakStart -= 24.0;
+  }
+  return [nakNo, padNo, nakStart, nakEnd, ..._nak.slice(3)];
+}
+
+// ============================================================================
 // KARAKA TITHI / KARAKA YOGAM
 // ============================================================================
 
@@ -4757,6 +4988,7 @@ export function yogamOld(
  * Karaka tithi (sync fallback) — uses standard tithi.
  * Python: karaka_tithi(jd, place)
  */
+// @parity: py=karaka_tithi
 export function karakaTithi(jd: number, place: Place): number[] {
   const t = calculateTithi(jd, place);
   return [t.number, t.startTime, t.endTime];
@@ -4811,6 +5043,7 @@ export async function karakaTithiAsync(jd: number, place: Place): Promise<number
  * Karaka yogam (sync fallback) — uses standard yogam.
  * Python: karaka_yogam(jd, place)
  */
+// @parity: py=karaka_yogam
 export function karakaYogam(jd: number, place: Place): number[] {
   const y = calculateYoga(jd, place);
   return [y.number, y.startTime, y.endTime];
@@ -4857,6 +5090,7 @@ export async function karakaYogamAsync(jd: number, place: Place): Promise<number
  * Tamil solar month and date (V4.3.8 method — uses solar longitude at JD).
  * Python: tamil_solar_month_and_date_V4_3_8(panchanga_date, place)
  */
+// @parity: py=tamil_solar_month_and_date_V4_3_8
 export function tamilSolarMonthAndDateV438(
   jd: number, place: Place
 ): [number, number] {
@@ -4879,6 +5113,7 @@ export function tamilSolarMonthAndDateV438(
  * Tamil solar month and date (V4.3.5 method — uses sunset JD).
  * Python: tamil_solar_month_and_date_V4_3_5(panchanga_date, place)
  */
+// @parity: py=tamil_solar_month_and_date_V4_3_5
 export function tamilSolarMonthAndDateV435(
   jd: number, place: Place
 ): [number, number] {
@@ -4901,6 +5136,7 @@ export function tamilSolarMonthAndDateV435(
  * Tamil solar month and date (Ravi Annaswamy method).
  * Python: tamil_solar_month_and_date_RaviAnnnaswamy(panchanga_date, place)
  */
+// @parity: py=tamil_solar_month_and_date_RaviAnnnaswamy
 export function tamilSolarMonthAndDateRaviAnnaswamy(
   jd: number, place: Place
 ): [number, number] {
@@ -4925,6 +5161,7 @@ export function tamilSolarMonthAndDateRaviAnnaswamy(
  * Tamil solar month and date (new V4.4.0 method).
  * Python: tamil_solar_month_and_date_new(panchanga_date, place, base_time, use_utc)
  */
+// @parity: py=tamil_solar_month_and_date_new
 export function tamilSolarMonthAndDateNew(
   jd: number, place: Place, baseTime: number = 0, useUtc: boolean = true
 ): [number, number] {
@@ -4969,6 +5206,7 @@ export function tamilSolarMonthAndDateNew(
  * Tamil solar month and date from JD.
  * Python: tamil_solar_month_and_date_from_jd(jd, place)
  */
+// @parity: py=tamil_solar_month_and_date_from_jd
 export function tamilSolarMonthAndDateFromJd(
   jd: number, place: Place
 ): [number, number] {
@@ -4998,6 +5236,7 @@ export function tamilSolarMonthAndDateFromJd(
  * NOTE: The Python version uses the `ephem` library which is not available in TS.
  * This is a stub that returns [-1, -1, -1] to indicate unsupported.
  */
+// @parity: py=sahasra_chandrodayam_old
 export function sahasraChandrodayamOld(
   _dob: [number, number, number], _tob: [number, number], _place: Place
 ): [number, number, number] {
@@ -5052,6 +5291,7 @@ export function udhayadhiNazhikai(jd: number, place: Place): [string, number] {
  *          [hour, minute, second] if rectified,
  *          [true, closestNakshatra] if could not converge
  */
+// @parity: py=_birthtime_rectification_nakshathra_suddhi
 export function birthtimeRectificationNakshatraSuddhi(
   jd: number, place: Place
 ): number | [number, number, number] | [boolean, number] {
@@ -5108,6 +5348,7 @@ export function birthtimeRectificationNakshatraSuddhi(
  *
  * @returns true if rectification IS required, false if not
  */
+// @parity: py=_birthtime_rectification_lagna_suddhi
 export async function birthtimeRectificationLagnaSuddhiAsync(
   jd: number, place: Place
 ): Promise<boolean> {
@@ -5148,6 +5389,7 @@ export async function birthtimeRectificationLagnaSuddhiAsync(
  * @param gender - 0 for male, 1 for female
  * @returns true if rectification IS required, false if not
  */
+// @parity: py=_birthtime_rectification_janma_suddhi
 export function birthtimeRectificationJanmaSuddhi(
   jd: number, place: Place, gender: number
 ): boolean {
@@ -5174,6 +5416,7 @@ export function birthtimeRectificationJanmaSuddhi(
  *
  * @returns Julian day number of estimated nisheka time
  */
+// @parity: py=_nisheka_time
 export async function nishekaTimeAsync(jd: number, place: Place): Promise<number> {
   const pp = await dhasavargaAsync(jd, place, 1);
   const { time: { hour, minute, second } } = julianDayToGregorian(jd);
@@ -5207,6 +5450,7 @@ export async function nishekaTimeAsync(jd: number, place: Place): Promise<number
  *
  * @returns Julian day number of estimated nisheka time
  */
+// @parity: py=_nisheka_time_1
 export async function nishekaTime1Async(jd: number, place: Place): Promise<number> {
   const pp = await dhasavargaAsync(jd, place, 1);
   const { time: { hour, minute, second } } = julianDayToGregorian(jd);
@@ -5236,6 +5480,7 @@ export async function nishekaTime1Async(jd: number, place: Place): Promise<numbe
 }
 
 /** nakshatra_new — newer algorithm using planet speed */
+// @parity: py=nakshatra_new
 export function nakshatraNew(jd: number, place: Place): number[] {
   const jdUtc = jd - place.timezone / 24;
   const oneStar = 360 / 27;

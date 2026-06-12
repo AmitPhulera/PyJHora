@@ -142,6 +142,7 @@ function getTithiFraction(startTime: number, endTime: number, birthTimeHrs: numb
  * @param options - Calculation options
  * @returns Tithi Yogini dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_bhukthi
 export function getTithiYoginiDashaBhukti(
   jd: number,
   place: Place,

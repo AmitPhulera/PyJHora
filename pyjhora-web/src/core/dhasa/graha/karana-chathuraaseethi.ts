@@ -134,6 +134,7 @@ function getFraction(startTimeHrs: number, endTimeHrs: number, birthTimeHrs: num
  * @param options - Calculation options
  * @returns Karana Chathuraaseethi dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_bhukthi
 export function getKaranaChathuraaseethiDashaBhukti(
   jd: number,
   place: Place,

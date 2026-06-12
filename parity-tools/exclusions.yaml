@@ -1,0 +1,21 @@
+# Python modules intentionally excluded from parity checks.
+# Discovery skips any module matching these globs.
+
+- path: jhora/ui/**
+  reason: PyQt6 UI, replaced by React UI in pyjhora-web/src/components
+- path: jhora/horoscope/prediction/**
+  reason: Marked experimental in CLAUDE.md; not ported
+- path: jhora/panchanga/surya_sidhantha.py
+  reason: Experimental alternative ephemeris
+- path: jhora/panchanga/khanda_khaadyaka.py
+  reason: Experimental alternative ephemeris
+- path: jhora/panchanga/drik1.py
+  reason: Legacy/alternative drik implementation
+- path: jhora/tests/**
+  reason: Python test harness itself, not a calculation module
+- path: jhora/lang/**
+  reason: Language resource files
+- path: jhora/data/**
+  reason: Data files (ephemeris, etc.)
+- path: jhora/panchanga/pancha_paksha - Copy.py
+  reason: Stray duplicate of pancha_paksha.py present in upstream source

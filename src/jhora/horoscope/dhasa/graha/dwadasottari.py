@@ -28,10 +28,12 @@ seed_lord = 0
 dhasa_adhipathi_list = {0:7,4:9,8:11,3:13,7:15,2:17,6:19,1:21} #  Total 112 years
 #dhasa_adhipathi_dict = {0:[27,19,11,3],4:[26,18,10,2],8:[25,17,9,1],3:[24,16,8],7:[23,15,7],2:[22,14,6],6:[21,13,5],1:[20,12,4]}
 count_direction = -1 # 1> base star to birth star zodiac -1> base star to birth star antizodiac
+# @parity: ts=@/core/dhasa/graha/applicability::isDwadasottariApplicable
 def applicability_check(navamsa_planet_positions):
     """ Lagna in Taurus/Libra navamsa """
     navamsa_lagna = navamsa_planet_positions[0][1][0]
     return navamsa_lagna in [1,6]
+# @parity: ts=@/core/dhasa/graha/dwadasottari::getNextDwadasottariLord
 def _next_adhipati(lord,dirn=1):
     """Returns next lord after `lord` in the adhipati_list"""
     current = list(dhasa_adhipathi_list.keys()).index(lord)
@@ -50,6 +52,7 @@ def _get_dhasa_dict(seed_star=27):
     return dhasa_dict
 #dhasa_adhipathi_dict = _get_dhasa_dict()
 
+# @parity: ts=@/core/dhasa/graha/dwadasottari::getDwadasottariDhasaLord
 def _maha_dhasa(nak,seed_star=27):
     dhasa_adhipathi_dict = _get_dhasa_dict(seed_star)
     return [(_dhasa_lord, dhasa_adhipathi_list[_dhasa_lord]) for _dhasa_lord,_star_list in dhasa_adhipathi_dict.items() if nak in _star_list][0]
@@ -65,6 +68,7 @@ def _antardhasa(dhasa_lord,antardhasa_option=1):
         _bhukthis.append(lord)
         lord = _next_adhipati(lord,dirn)
     return _bhukthis
+# @parity: ts=@/core/dhasa/graha/dwadasottari::dwadasottariDashaStart
 def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,chart_method=1,
                  seed_star=27,dhasa_starting_planet=1):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob=drik.Date(y,m,d); tob=(fh,0,0)
@@ -106,6 +110,7 @@ def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,ch
     period_elapsed *= sidereal_year        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
+# @parity: ts=@/core/dhasa/graha/dwadasottari::getDwadasottariDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,star_position_from_moon=1,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,seed_star=27,dhasa_starting_planet=1,antardhasa_option=1):
     """

@@ -59,6 +59,7 @@ export const dasavargaFromLong = (longitude: number, divisionFactor: number = 1)
  * continued through the zodiac.
  * Formula: (SignIndex * N + PartIndex) % 12
  */
+// @parity: py=__parivritti_cyclic
 export const calculateCyclicVarga = (longitude: number, divisionFactor: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, divisionFactor);
@@ -111,6 +112,7 @@ export const calculateD2_Hora_Parashara = (longitude: number): number => {
  * Part 2 (10-20): 5th from Sign
  * Part 3 (20-30): 9th from Sign
  */
+// @parity: py=_drekkana_chart_parasara
 export const calculateD3_Drekkana_Parashara = (longitude: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, 3); // 0, 1, 2
@@ -127,6 +129,7 @@ export const calculateD3_Drekkana_Parashara = (longitude: number): number => {
  * Part 3: 7th from Sign
  * Part 4: 10th from Sign
  */
+// @parity: py=_chaturthamsa_parasara
 export const calculateD4_Chaturthamsa_Parashara = (longitude: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, 4); // 0, 1, 2, 3
@@ -522,6 +525,7 @@ export const generateParivrittiAlternate = (dcf: number, dirn: number = 1): numb
  * Parivritti Even Reverse varga sign calculation.
  * Python: __parivritti_even_reverse(planet_positions_in_rasi, dvf)
  */
+// @parity: py=__parivritti_even_reverse
 export const calculateParivrittiEvenReverse = (longitude: number, dvf: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, dvf);
@@ -533,6 +537,7 @@ export const calculateParivrittiEvenReverse = (longitude: number, dvf: number): 
  * Parivritti Alternate (Somanatha) varga sign calculation.
  * Python: __parivritti_alternate(planet_positions_in_rasi, dvf)
  */
+// @parity: py=__parivritti_alternate
 export const calculateParivrittiAlternate = (longitude: number, dvf: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, dvf);
@@ -551,6 +556,7 @@ export const calculateParivrittiAlternate = (longitude: number, dvf: number): nu
  * Python: _hora_traditional_parasara_chart (chart_method=2, default)
  * Sun's Hora = Leo(4), Moon's Hora = Cancer(3)
  */
+// @parity: py=_hora_traditional_parasara_chart
 export const calculateD2_Hora_Traditional = calculateD2_Hora_Parashara;
 
 /**
@@ -565,6 +571,7 @@ export const calculateD2_Hora_ParivrittiEvenReverse = (longitude: number): numbe
  * D-2 Hora - Raman Method
  * Python: _hora_chart_raman_method (chart_method=3)
  */
+// @parity: py=_hora_chart_raman_method
 export const calculateD2_Hora_Raman = (longitude: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, 2);
@@ -609,6 +616,7 @@ export const calculateD3_Drekkana_Somanatha = (longitude: number): number => {
  * D-3 Drekkana - Jagannatha
  * Python: _drekkana_chart_jagannatha (chart_method=4)
  */
+// @parity: py=_drekkana_chart_jagannatha
 export const calculateD3_Drekkana_Jagannatha = (longitude: number): number => {
   const rasi = rasiFromLongitude(longitude);
   const part = getVargaPart(longitude, 3);
@@ -638,6 +646,7 @@ export const calculateD9_Navamsa_ParivrittiCyclic = (longitude: number): number 
  * Python: navamsa_chart chart_method=3
  * Uses KALACHAKRA_NAVAMSA lookup keyed by nakshatra pada (0-26).
  */
+// @parity: py=_navamsa_kalachakra
 export const calculateD9_Navamsa_Kalachakra = (longitude: number): number => {
   const longInSign = longitudeInSign(longitude);
   const rasi = rasiFromLongitude(longitude);

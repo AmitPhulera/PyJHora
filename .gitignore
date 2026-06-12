@@ -10,3 +10,11 @@
 .beads/
 .logs/
 node_modules/
+
+# Parity harness runtime output
+parity-tools/harness/results/python/*
+parity-tools/harness/results/typescript/*
+parity-tools/harness/results/diff/*
+parity-tools/harness/results/discovery.json
+parity-tools/harness/report.md
+!parity-tools/harness/results/.gitkeep

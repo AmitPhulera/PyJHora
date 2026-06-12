@@ -75,6 +75,7 @@ export function rasiFromLongitude(longitude: number): number {
  * @param start - Start of the range (default 0)
  * @returns Normalized angle within [start, start + 360)
  */
+// @parity: py=normalize_angle
 export function normalizeAngle(angle: number, start = 0): number {
   let a = angle;
   while (a >= start + 360) a -= 360;
@@ -315,6 +316,7 @@ export function almostEqual(a: number, b: number, tolerance = 1e-9): boolean {
  * @param deg - Decimal degrees
  * @returns [degrees, minutes, seconds] where seconds is a float
  */
+// @parity: py=to_dms_prec
 export function toDmsPrec(deg: number): [number, number, number] {
   const d = Math.trunc(deg);
   const mins = (deg - d) * 60;
@@ -332,6 +334,7 @@ export function toDmsPrec(deg: number): [number, number, number] {
  * @param dmsStr - Time string like "10:34:00", "10:34:00 AM", "06:10:00(+1)"
  * @returns [hours, minutes, seconds]
  */
+// @parity: py=from_dms_str_to_dms
 export function fromDmsStrToDms(dmsStr: string): [number, number, number] {
   let dmsh = 0;
   if (dmsStr.includes('+1')) {
@@ -363,6 +366,7 @@ export function fromDmsStrToDms(dmsStr: string): [number, number, number] {
  * @param dmsStr - Time/angle string like "10:34:00"
  * @returns Decimal value
  */
+// @parity: py=from_dms_str_to_degrees
 export function fromDmsStrToDegrees(dmsStr: string): number {
   const [d, m, s] = fromDmsStrToDms(dmsStr);
   return d + m / 60 + s / 3600;

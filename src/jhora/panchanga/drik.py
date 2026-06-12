@@ -52,9 +52,11 @@ _tropical_planet_list = [const._SUN, const._MOON, const._MARS, const._MERCURY, c
 _rise_flags = swe.BIT_HINDU_RISING | swe.FLG_TRUEPOS | swe.FLG_SPEED # V3.2.3 # Speed flag added for retrogression
 #_rise_flags = swe.BIT_DISC_CENTER + swe.BIT_NO_REFRACTION #+ swe.BIT_GEOCTR_NO_ECL_LAT #V3.0.6
 
+# @parity: ts=@/core/panchanga/drik::setTropicalPlanets
 def set_tropical_planets():
     global planet_list
     planet_list = _tropical_planet_list    
+# @parity: ts=@/core/panchanga/drik::setSiderealPlanets
 def set_sideral_planets():
     global planet_list
     planet_list = _sideral_planet_list
@@ -96,6 +98,7 @@ def _calculate_ayanamsa_senthil_from_jd(jd):
     ayanamsa = a0 + p0*t + q*t*t
     ayanamsa /= 3600
     return ayanamsa
+# @parity: ts=@/core/panchanga/drik::getAyanamsaValue
 def get_ayanamsa_value(jd):
     """
         Get ayanamsa value for the julian day number
@@ -114,6 +117,7 @@ def get_ayanamsa_value(jd):
         #set_ayanamsa_mode(_ayanamsa_mode,_ayanamsa_value,jd)
         _ayanamsa_value = swe.get_ayanamsa(jd)
         return _ayanamsa_value
+# @parity: ts=@/core/panchanga/drik::setAyanamsaMode
 def set_ayanamsa_mode(ayanamsa_mode = const._DEFAULT_AYANAMSA_MODE,ayanamsa_value=None,jd=None):
     """
         Set Ayanamsa mode
@@ -158,6 +162,7 @@ rahu = lambda ketu: (ketu + 180) % 360
 jd_to_gregorian = lambda jd: swe.revjul(jd, swe.GREG_CAL)   # returns (y, m, d, h, min, s)
 
 # moon daily motion
+# @parity: ts=@/core/panchanga/drik::lunarDailyMotion
 def _lunar_daily_motion(jd):
     """ lunar daily motion"""
     today_longitude = lunar_longitude(jd)
@@ -170,6 +175,7 @@ def _lunar_daily_motion(jd):
     return daily_motion
   
 # sun daily motion
+# @parity: ts=@/core/panchanga/drik::solarDailyMotion
 def _solar_daily_motion(jd):
     """ Sun daily motion"""
     today_longitude = solar_longitude(jd)
@@ -180,6 +186,7 @@ def _solar_daily_motion(jd):
     #  print(tomorrow_longitude,today_longitude)
     return daily_motion
 
+# @parity: ts=@/core/panchanga/drik::nakshatraPada
 def nakshatra_pada(longitude):
     """ 
         Gives nakshatra (1..27) and paada (1..4) in which given longitude lies
@@ -200,6 +207,7 @@ def nakshatra_pada(longitude):
     #print(longitude,quotient,reminder,pada)
     return [1 + quotient, 1 + pada,reminder]
 ephemeris_planet_index = lambda planet: planet_list.index(planet)
+# @parity: ts=@/core/panchanga/drik::siderealLongitude
 def sidereal_longitude(jd_utc, planet):
     """
         The sequence number of 0 to 8 for planets is not followed by swiss ephemeris
@@ -228,6 +236,7 @@ def sidereal_longitude(jd_utc, planet):
     longi,_ = swe.calc_ut(jd_utc, planet, flags = flags)
     reset_ayanamsa_mode()
     return utils.norm360(longi[0]) # degrees
+# @parity: ts=@/core/panchanga/drik::planetsInRetrograde
 def planets_in_retrograde(jd,place):
     """
         To get the list of retrograding planets
@@ -249,6 +258,7 @@ def planets_in_retrograde(jd,place):
         reset_ayanamsa_mode()
         if longi[3]<0 : retro_planets.append(p_id)
     return retro_planets
+# @parity: ts=@/core/panchanga/drik::planetSpeedInfo
 def _planet_speed_info(jd, place,planet):
     """ 
         JD (not UTC)
@@ -263,6 +273,7 @@ def _planet_speed_info(jd, place,planet):
 daily_moon_speed = lambda jd,place: _planet_speed_info(jd,place,const._MOON)[3]
 daily_sun_speed = lambda jd,place: _planet_speed_info(jd,place,const._SUN)[3]
 daily_planet_speed = lambda jd,place,planet: _planet_speed_info(jd, place, planet)[3]
+# @parity: ts=@/core/panchanga/drik::planetsSpeedInfo
 def planets_speed_info(jd,place):
     """
         To get the speed information of planets
@@ -285,6 +296,7 @@ def planets_speed_info(jd,place):
         _planets_speed_info[planet_index] = [round(l,round_factors[i]) for i,l in enumerate(longi)]
         #print(planet_index, planet,_planets_speed_info[planet])
     return _planets_speed_info
+# @parity: ts=@/core/panchanga/drik::planetsInGrahaYudh
 def planets_in_graha_yudh(jd,place):
     """
         Graha Yudh
@@ -339,6 +351,7 @@ def planets_in_graha_yudh(jd,place):
     return _graha_yudh_pairs
 solar_longitude = lambda jd: sidereal_longitude(jd, const._SUN)
 lunar_longitude = lambda jd: sidereal_longitude(jd, const._MOON)
+# @parity: ts=@/core/panchanga/drik::sunrise
 def sunrise(jd, place):
     """
         Sunrise when centre of disc is at horizon for given date and place
@@ -361,6 +374,7 @@ def sunrise(jd, place):
     rise_jd = utils.julian_day_number(dob, tob)
     # Convert to local time
     return [rise_local_time, utils.to_dms(rise_local_time),rise_jd]
+# @parity: ts=@/core/panchanga/drik::midday
 def midday(jd,place):
     """
         Return midday time
@@ -375,6 +389,7 @@ def midday(jd,place):
     _,_,_,ssh = utils.jd_to_gregorian(sun_set[2]) # V4.4.0
     mdhl = 0.5*(srh+ssh)
     return mdhl, 0.5*(sun_rise[2]+sun_set[2])
+# @parity: ts=@/core/panchanga/drik::midnight
 def midnight(jd,place):
     """
         Return midnight time
@@ -393,6 +408,7 @@ def midnight(jd,place):
     else:
         mnhl -= 12
     return mnhl
+# @parity: ts=@/core/panchanga/drik::dayLength
 def day_length(jd, place):
     """
         Return local day length in float hours
@@ -401,6 +417,7 @@ def day_length(jd, place):
         @return: day length in float hours. e.g. 12.125
     """
     return (sunset(jd, place)[0] - sunrise(jd, place)[0])
+# @parity: ts=@/core/panchanga/drik::nightLength
 def night_length(jd, place):
     """
         Return local night length in float hours
@@ -409,6 +426,7 @@ def night_length(jd, place):
         @return: night length in float hours. e.g. 12.125
     """
     return (24.0 + sunrise(jd+1, place)[0] - sunset(jd, place)[0])
+# @parity: ts=@/core/panchanga/drik::sunset
 def sunset(jd, place,gauri_choghadiya_setting=False):
     """
         Sunset when centre of disc is at horizon for given date and place
@@ -431,6 +449,7 @@ def sunset(jd, place,gauri_choghadiya_setting=False):
         tob = tuple(utils.to_dms(set_local_time, as_string=False))
         set_jd = utils.julian_day_number(dob, tob)
     return [set_local_time, utils.to_dms(set_local_time),set_jd]
+# @parity: ts=@/core/panchanga/drik::moonrise
 def moonrise(jd, place):
     """
         Return local moonrise time
@@ -449,6 +468,7 @@ def moonrise(jd, place):
     local_time = (rise - jd_utc) * 24 + tz
     return [local_time,utils.to_dms(local_time),rise]
 
+# @parity: ts=@/core/panchanga/drik::moonset
 def moonset(jd, place):
     """
         Return local moonset time
@@ -466,6 +486,7 @@ def moonset(jd, place):
     # Convert to local time
     local_time = (setting - jd_utc) * 24 + tz
     return [local_time,utils.to_dms(local_time),setting]
+# @parity: ts=@/core/panchanga/drik::calculateTithiAsync
 def _get_tithi(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cycle=1):
     # tithi_index = 1=>Janma Tithi 2=>Dhana 3=>Bhratri, 4=>Matri 5=Putra 6=>Satru 7=>Kalatra 8=>Mrutyu 9=>Bhagya 10=>Karma 11=>Laabha 12=>Vyaya
     """
@@ -517,6 +538,7 @@ def _get_tithi(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cyc
         leap_tithi = 1 if today == 30 else leap_tithi
         answer += [tithi_no, ends]
     return answer
+# @parity: ts=@/core/panchanga/drik::tithiUsingPlanetSpeed
 def tithi_using_planet_speed(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cycle=1):
     _,_,_,jd_hours = utils.jd_to_gregorian(jd)
     #if not const.use_planet_speed_for_panchangam_end_timings: return _general_tithi(jd, place, tithi_index, planet1, planet2)
@@ -552,7 +574,8 @@ def tithi_using_planet_speed(jd,place,tithi_index=1,planet1=const._MOON,planet2=
         _next_tithi = (ret[0])%30+1; _next_tithi_start_time = ret[2]; _next_tithi_end_time = ret[2]+ret1[2]
         ret += [_next_tithi,_next_tithi_start_time,_next_tithi_end_time]
     return ret
-def tithi(jd,place,tithi_index=1,planet1=const._MOON, planet2=const._SUN,cycle=1):    
+# @parity: ts=@/core/panchanga/drik::tithiUsingPlanetSpeed
+def tithi(jd,place,tithi_index=1,planet1=const._MOON, planet2=const._SUN,cycle=1):
     """
         Tithi given jd and place. Also returns tithi's end time.
         @param jd: Julian Day Number of the date/time
@@ -605,6 +628,7 @@ def _special_tithi_phase(jd,planet1=const._MOON,planet2=const._SUN,tithi_index=1
     planet2_long = sidereal_longitude(jd,planet2)
     tithi_phase = (tithi_index*(planet1_long - planet2_long)+(cycle-1)*180) % 360
     return tithi_phase    
+# @parity: ts=@/core/panchanga/drik::raasiAsync
 def raasi(jd, place):
     """
         returns the raasi at julian day/time
@@ -645,6 +669,7 @@ def raasi(jd, place):
         raasi_no = int(leap_raasi)
         answer += [raasi_no, ends, frac_left]
     return answer
+# @parity: ts=@/core/panchanga/drik::calculateNakshatraAsync
 def _get_nakshathra(jd, place):
     """
         V4.2.1 With CoPilot help fixed special case of inverse lagrange
@@ -713,6 +738,7 @@ def _get_nakshathra_old(jd,place):
     nak_no = int(leap_nak)
     answer += [nak_no,padam_no, ends]
     return answer
+# @parity: ts=@/core/panchanga/drik::nakshatraAsync
 def nakshatra(jd,place):
     """
         returns the nakshathra at julian day/time
@@ -732,6 +758,7 @@ def nakshatra(jd,place):
         _nak_start -= 24.0
     result = [_nak_no,_pad_no,_nak_start,_nak_end]+_nak[3:]
     return result
+# @parity: ts=@/core/panchanga/drik::nakshatraNew
 def nakshatra_new(jd,place):
     """
         returns the nakshathra at julian day/time
@@ -772,6 +799,7 @@ def _special_yoga_phase(jd,planet1=const._MOON,planet2=const._SUN,tithi_index=1,
     planet2_long = sidereal_longitude(jd,planet2)
     tithi_phase = (tithi_index*(planet1_long + planet2_long)+(cycle-1)*180) % 360
     return tithi_phase
+# @parity: ts=@/core/panchanga/drik::calculateYogaAsync
 def _get_yogam(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cycle=1):
     # 1. Find time of sunrise
     city, lat, lon, tz = place
@@ -815,6 +843,7 @@ def _get_yogam(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cyc
         yogam_no = int(leap_yog)
         answer += [yogam_no, ends]
     return answer
+# @parity: ts=@/core/panchanga/drik::yogamUsingPlanetSpeed
 def yogam(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cycle=1):
     if not const.use_planet_speed_for_panchangam_end_timings: return yogam_old(jd, place)
     _,_,_,jd_hours = utils.jd_to_gregorian(jd)
@@ -843,6 +872,7 @@ def yogam(jd,place,tithi_index=1,planet1=const._MOON,planet2=const._SUN,cycle=1)
         next_res[3] = utils.get_fraction(next_res[1], next_res[2], jd_hours)
         result += next_res
     return result
+# @parity: ts=@/core/panchanga/drik::yogamOld
 def yogam_old(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cycle=1):
     """
         returns the yogam at julian day/time
@@ -868,6 +898,7 @@ def yogam_old(jd,place,planet1=const._MOON,planet2=const._SUN,tithi_index=1,cycl
     yoga_frac = utils.get_fraction(_yoga_start, _yoga_end, birth_time_hrs)
     result = [_yoga_no,_yoga_start,_yoga_end]+_yoga[2:]
     return result
+# @parity: ts=@/core/panchanga/drik::karana
 def karana(jd, place):
     """
         returns the karanam of the day
@@ -887,14 +918,16 @@ def karana(jd, place):
     else: # first of tithi
         _k_start = _t_start; _k_end = _t_mid
     return _karana,_k_start,_k_end
+# @parity: ts=@/core/panchanga/drik::vaara
 def vaara(jd):
     """
-        Weekday for given Julian day. 
+        Weekday for given Julian day.
         @param jd: Julian Day Number of the date/time
         @return: day of the date
           0 = Sunday, 1 = Monday,..., 6 = Saturday
     """
     return ( int(ahargana(jd)) % 7 + 5) % 7 if const.use_aharghana_for_vaara_calcuation else int(ceil(jd + 1) % 7)  
+# @parity: ts=@/core/panchanga/drik::lunarMonthAsync
 def lunar_month(jd, place):
     """
         Returns lunar month and if it is adhika or not.
@@ -918,6 +951,7 @@ def lunar_month(jd, place):
         pm,pa,_ = lunar_month(jd-30, place)
         is_nija_month = (pm==_lunar_month and pa)
     return [int(_lunar_month), is_leap_month,is_nija_month]
+# @parity: ts=@/core/panchanga/drik::vedicDateAsync
 def vedic_date(jd, place,calendar_type=0,tamil_month_method=const.tamil_month_method,base_time=0,use_utc=True):
     """
         Returns lunar month, lunar day and if it is adhika or not. and the vedic year
@@ -940,6 +974,7 @@ def vedic_date(jd, place,calendar_type=0,tamil_month_method=const.tamil_month_me
     else:
         use_purnimanta_system = (calendar_type==2)
         return lunar_month_date(jd, place, use_purnimanta_system)
+# @parity: ts=@/core/panchanga/drik::lunarMonthDateAsync
 def lunar_month_date(jd, place,use_purnimanta_system=False):
     """
         Returns lunar month, lunar day and if it is adhika or not.
@@ -968,6 +1003,7 @@ def lunar_month_date(jd, place,use_purnimanta_system=False):
         is_nija_month = (pm==_lunar_month and pa)
     _lunar_year = lunar_year_index(jd, _lunar_month+1)
     return [int(_lunar_month+1),lunar_day,_lunar_year, is_leap_month,is_nija_month]
+# @parity: ts=@/core/panchanga/drik::lunarYearIndex
 def lunar_year_index(jd,maasa_index):
     """ 
         TODO: Need to investigate the following patching stuff 
@@ -985,6 +1021,7 @@ def lunar_year_index(jd,maasa_index):
 # Days elapsed since beginning of Kali Yuga
 ahargana = lambda jd: jd - const.mahabharatha_tithi_julian_day
 kali_ahargana_days = lambda jd: int(ahargana(jd))
+# @parity: ts=@/core/panchanga/drik::elapsedYear
 def elapsed_year(jd, maasa_index):
     """
         returns Indian era/epoch year indices (kali year number, saka year and vikrama year numbers)
@@ -1003,6 +1040,7 @@ def elapsed_year(jd, maasa_index):
 
 # New moon day: sun and moon have same longitude (0 degrees = 360 degrees difference)
 # Full moon day: sun and moon are 180 deg apart
+# @parity: ts=@/core/panchanga/drik::newMoonAsync
 def new_moon(jd, tithi_, opt = -1):
     """Returns JDN, where
        opt = -1:  JDN < jd such that lunar_phase(JDN) = 360 degrees
@@ -1017,6 +1055,7 @@ def new_moon(jd, tithi_, opt = -1):
     y0 = utils.inverse_lagrange(x, y, 360)
     #print('new moon',tithi(start+y0,place))
     return start + y0
+# @parity: ts=@/core/panchanga/drik::fullMoonAsync
 def full_moon(jd, tithi_, opt = -1):
     """Returns JDN, where
        opt = -1:  JDN < jd such that lunar_phase(JDN) = 180 degrees
@@ -1032,6 +1071,7 @@ def full_moon(jd, tithi_, opt = -1):
     y = utils.unwrap_angles(y)
     y0 = utils.inverse_lagrange(x, y, 180)
     return start + y0
+# @parity: ts=@/core/panchanga/drik::nextTithiAsync
 def next_tithi(jd,place,required_tithi,opt=1,start_of_tithi=True):
     """
     TODO: UNDER EXPERIMENTATION
@@ -1055,6 +1095,7 @@ def next_tithi(jd,place,required_tithi,opt=1,start_of_tithi=True):
     tithi_jd = start+y0+tz/24
     #print(tithi(tithi_jd,place),solar_longitude(tithi_jd),lunar_longitude(tithi_jd),lunar_phase(tithi_jd))
     return tithi_jd
+# @parity: ts=@/core/panchanga/drik::nextLunarMonthAsync
 def next_lunar_month(jd, place,lunar_month_type=0,direction=1):
     """
         @param lunar_month_type: 0=>Amantha 1=>Purnimantha 2=>Solar month
@@ -1076,6 +1117,7 @@ def next_lunar_month(jd, place,lunar_month_type=0,direction=1):
         extra_days,lmh = 1,lmh+24
         lmy,lmm,lmd = utils.previous_panchanga_day(Date(lmy,lmm,lmd), minus_days=extra_days)
     return Date(lmy,lmm,lmd),lmh
+# @parity: ts=@/core/panchanga/drik::previousLunarMonthAsync
 def previous_lunar_month(jd, place,lunar_month_type=0,direction=-1):
     """
         @param lunar_month_type: 0=>Amantha 1=>Purnimantha 2=>Solar month
@@ -1097,11 +1139,13 @@ def previous_lunar_month(jd, place,lunar_month_type=0,direction=-1):
         extra_days,lmh = 1,lmh+24
         lmy,lmm,lmd = utils.previous_panchanga_day(Date(lmy,lmm,lmd), minus_days=extra_days)
     return Date(lmy,lmm,lmd),lmh
+# @parity: ts=@/core/panchanga/drik::lunarPhase
 def lunar_phase(jd,tithi_index=1):
     solar_long = solar_longitude(jd)
     lunar_long = lunar_longitude(jd)
     moon_phase = tithi_index*(lunar_long - solar_long) % 360
     return moon_phase
+# @parity: ts=@/core/panchanga/drik::samvatsara
 def samvatsara(panchanga_date,place,zodiac=0):
     """
         Returns Shaka Samvatsara
@@ -1122,6 +1166,7 @@ def samvatsara(panchanga_date,place,zodiac=0):
     #if sv==0:
     #    sv=60
     return sv
+# @parity: ts=@/core/panchanga/drik::ritu
 def ritu(maasa_index):
     """ returns ritu / season index. 
         @param maasa_index: [1..12] (use jhora.panchanga.drik.lunar_month function to get this) 
@@ -1129,6 +1174,7 @@ def ritu(maasa_index):
     """
     return (maasa_index - 1) // 2
 
+# @parity: ts=@/core/panchanga/drik::gauriChoghadiya
 def gauri_choghadiya(jd, place):
     """
         Get end times of gauri chogadiya for the given julian day
@@ -1156,8 +1202,10 @@ def gauri_choghadiya(jd, place):
         start_time = end_time
     
     return end_times
+# @parity: ts=@/core/panchanga/drik::amritKaalam
 def amrit_kaalam(jd,place):
     return [(gb,ge) for gc,gb,ge in gauri_choghadiya(jd, place) if gc==3]
+# @parity: ts=@/core/panchanga/drik::shubhaHora
 def shubha_hora(jd, place):
     """
         Get end times of Shubha Hora for the given julian day
@@ -1186,6 +1234,7 @@ def shubha_hora(jd, place):
     
     return end_times
 
+# @parity: ts=@/core/panchanga/drik::trikalam
 def trikalam(jd, place, option='raahu kaalam'):
     """
         Get tri kaalam (Raahu kaalam, yama kandam and Kuligai Kaalam) for the given Julian day
@@ -1219,6 +1268,7 @@ raahu_kaalam = lambda jd, place: trikalam(jd, place, 'raahu kaalam')
 yamaganda_kaalam = lambda jd, place: trikalam(jd, place, 'yamagandam')
 gulikai_kaalam = lambda jd, place: trikalam(jd, place, 'gulikai')
 
+# @parity: ts=@/core/panchanga/drik::durmuhurtam
 def durmuhurtam(jd, place):
     """
         Get dhur muhurtham timing for the given julian day
@@ -1261,6 +1311,7 @@ def durmuhurtam(jd, place):
             answer += [start_times[i],end_times[i]]
     return answer
 
+# @parity: ts=@/core/panchanga/drik::abhijitMuhurta
 def abhijit_muhurta(jd, place):
     """
         Get Abhijit muhurta timing for the given julian day
@@ -1282,6 +1333,7 @@ def abhijit_muhurta(jd, place):
 
 # 'jd' can be any time: ex, 2015-09-19 14:20 UTC
 # today = swe.julday(2015, 9, 19, 14 + 20./60)
+# @parity: ts=@/core/panchanga/drik::planetaryPositions
 def planetary_positions(jd, place):
     """
         Computes instantaneous planetary positions (i.e., which celestial object lies in which constellation)
@@ -1309,6 +1361,7 @@ def planetary_positions(jd, place):
         coordinates = nirayana_long-constellation*30
         positions.append([p_id,coordinates, constellation])        
     return positions
+# @parity: ts=@/core/panchanga/drik::assignPlanetsToHouses
 def _assign_planets_to_houses(planet_positions,bhava_houses,bhava_madhya_method=1):
     _bhava_houses = []#bhava_houses[:]
     for _bhava_house in bhava_houses:
@@ -1326,6 +1379,7 @@ def _assign_planets_to_houses(planet_positions,bhava_houses,bhava_madhya_method=
         elif bhava_madhya_method in [3,4]+list(const.western_house_systems.keys()): # Sripati / KP method / Western House System
             _bhava_houses.append([int(_bhava_start/30),(_bhava_start%360,_bhava_mid%360,_bhava_end%360),planets_in_house])
     return _bhava_houses
+# @parity: ts=@/core/panchanga/drik::bhaavaMadhyaNew
 def _bhaava_madhya_new(jd, place,bhava_madhya_method=const.bhaava_madhya_method):
     """
         returns house longitudes (start, cusp, end)
@@ -1387,6 +1441,7 @@ def _bhaava_madhya_new(jd, place,bhava_madhya_method=const.bhaava_madhya_method)
             _bhava_start = h1*30; _bhava_mid = _bhava_start + ascendant_longitude; _bhava_end = ((h1+1)%12)*30
             bhava_houses.append((_bhava_start%360,_bhava_mid%360,_bhava_end%360))
         return _assign_planets_to_houses(planet_positions, bhava_houses,bhava_madhya_method=bhava_madhya_method)
+# @parity: ts=@/core/panchanga/drik::bhaavaMadhya
 def bhaava_madhya(jd, place,bhava_method=const.bhaava_madhya_method):
     """
         returns house longitudes
@@ -1401,6 +1456,7 @@ def bhaava_madhya(jd, place,bhava_method=const.bhaava_madhya_method):
         return bhaava_madhya_kp(jd, place)
     else: # SRIPATI METHOD
         return bhaava_madhya_sripathi(jd, place)
+# @parity: ts=@/core/panchanga/drik::bhaavaMadhyaSwe
 def bhaava_madhya_swe(jd,place,house_code='P'):
     """
         Acceptable house system codes in Swiss Ephemeris
@@ -1433,6 +1489,7 @@ def bhaava_madhya_swe(jd,place,house_code='P'):
         flags = swe.FLG_SIDEREAL
         set_ayanamsa_mode(_ayanamsa_mode,_ayanamsa_value,jd) # needed for swe.houses_ex()
     return list(swe.houses_ex(jd_utc, lat, lon,hsys, flags = flags)[0])
+# @parity: ts=@/core/panchanga/drik::bhaavaMadhyaKP
 def bhaava_madhya_kp(jd,place):
     """
         Compute the mid angle / cusp of each of each house.
@@ -1447,6 +1504,7 @@ def bhaava_madhya_kp(jd,place):
         flags = swe.FLG_SIDEREAL
         set_ayanamsa_mode(_ayanamsa_mode,_ayanamsa_value,jd) # needed for swe.houses_ex()
     return list(swe.houses_ex(jd_utc, lat, lon, flags = flags)[0])
+# @parity: ts=@/core/panchanga/drik::bhaavaMadhyaSripathi
 def bhaava_madhya_sripathi(jd, place):
     bm = bhaava_madhya_kp(jd, place)
     #print(bm)
@@ -1465,6 +1523,7 @@ def bhaava_madhya_sripathi(jd, place):
         bm[(bi2-1)%12] = (bm[bi2%12]-bd)%360
         #print((bi1+1)%12,bm[(bi1+1)%12],(bi2-1)%12,bm[(bi2-1)%12])
     return bm
+# @parity: ts=@/core/panchanga/drik::ascendant
 def ascendant(jd, place):
     """
         Compute Lagna (=ascendant) position/longitude at any given time & place
@@ -1486,6 +1545,7 @@ def ascendant(jd, place):
     coordinates = nirayana_lagna-constellation*30
     reset_ayanamsa_mode()
     return [constellation, coordinates, nak_no, paadha_no]    
+# @parity: ts=@/core/panchanga/drik::dasavargaFromLong
 def dasavarga_from_long(longitude, divisional_chart_factor=1):
     """
         Calculates the dasavarga-sign in which given longitude falls
@@ -1515,6 +1575,7 @@ navamsa_from_long = lambda longitude: dasavarga_from_long(longitude,9)
 
 # http://www.oocities.org/talk2astrologer/LearnAstrology/Details/Navamsa.html
 # Useful for making D9 divisional chart
+# @parity: ts=@/core/panchanga/drik::navamsaFromLongOld
 def navamsa_from_long_old(longitude):
     """Calculates the navamsa-sign in which given longitude falls
     0 = Aries, 1 = Taurus, ..., 11 = Pisces
@@ -1525,6 +1586,7 @@ def navamsa_from_long_old(longitude):
     fraction_left = signs_elapsed % 1
     return int(fraction_left * 12)
 
+# @parity: ts=@/core/panchanga/drik::dhasavargaAsync
 def dhasavarga(jd, place,divisional_chart_factor=1):
     """
         Calculate planet positions for a given divisional chart index
@@ -1552,6 +1614,7 @@ def dhasavarga(jd, place,divisional_chart_factor=1):
         divisional_chart = dasavarga_from_long(nirayana_long,divisional_chart_factor)
         positions.append([p_id, divisional_chart])
     return positions
+# @parity: ts=@/core/panchanga/drik::declinationOfPlanets
 def declination_of_planets(jd,place):
     """
         return declination of planets
@@ -1597,6 +1660,7 @@ _vyatipaata_longitude = lambda sun_long: (360.0 - _dhuma_longitude(sun_long))%36
 _parivesha_longitude = lambda sun_long: (_vyatipaata_longitude(sun_long)+180.0) % 360
 _indrachaapa_longitude = lambda sun_long: (360.0-_parivesha_longitude(sun_long))%360
 _upaketu_longitude = lambda sun_long: (sun_long-30.0)%360
+# @parity: ts=@/core/panchanga/drik::solarUpagrahaLongitudes
 def solar_upagraha_longitudes(solar_longitude,upagraha,divisional_chart_factor=1):
     """
         Get logitudes of solar based upagrahas
@@ -1642,6 +1706,7 @@ maandi_longitude = lambda dob,tob,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MO
     upagraha_longitude(dob,tob,place,planet_index=6,ayanamsa_mode=ayanamsa_mode,
                        divisional_chart_factor=divisional_chart_factor,upagraha_part='middle')
 
+# @parity: ts=@/core/panchanga/drik::upagrahaLongitude
 def upagraha_longitude(dob,tob,place,planet_index,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,
                        divisional_chart_factor=1,upagraha_part='middle'):
     """
@@ -1733,6 +1798,7 @@ vighati_lagna = lambda jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divis
         special_ascendant(jd,place,ayanamsa_mode=ayanamsa_mode,divisional_chart_factor=divisional_chart_factor,\
                           chart_method=chart_method,lagna_rate_factor=15.0,
                           base_rasi=base_rasi,count_from_end_of_sign=count_from_end_of_sign) 
+# @parity: ts=@/core/panchanga/drik::specialAscendantAsync
 def special_ascendant(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                       lagna_rate_factor=1.0,base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1788,6 +1854,7 @@ ghati_lagna_mixed_chart = lambda jd,place,varga_factor_1=1,chart_method_1=1,varg
 vighati_lagna_mixed_chart = lambda jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1: \
         special_ascendant_mixed_chart(jd,place,varga_factor_1=varga_factor_1,chart_method_1=chart_method_1,
                           varga_factor_2=varga_factor_2,chart_method_2=chart_method_2,lagna_rate_factor=15.0) 
+# @parity: ts=@/core/panchanga/drik::specialAscendantMixedChart
 def special_ascendant_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1,
                                   lagna_rate_factor=1.0):
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -1807,6 +1874,7 @@ def special_ascendant_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,var
     spl_long = (sun_long + (time_diff_mins * lagna_rate_factor) ) % 360
     da = dasavarga_from_long(spl_long, mixed_dvf)
     return da    
+# @parity: ts=@/core/panchanga/drik::pranapadaLagnaMixedChart
 def pranapada_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     mixed_dvf = varga_factor_1*varga_factor_2
     birth_long = (utils.udhayadhi_nazhikai(jd, place)[1]*4)%12 #vighati/15=ghati*60/15 )
@@ -1827,6 +1895,7 @@ def pranapada_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga
     spl_long = pl1 % 360
     da = dasavarga_from_long(spl_long, mixed_dvf)
     return da
+# @parity: ts=@/core/panchanga/drik::pranapadaLagnaAsync
 def pranapada_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                                             base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1860,6 +1929,7 @@ def pranapada_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,division
     spl_long = pl1 % 360
     da = dasavarga_from_long(spl_long, divisional_chart_factor)
     return da
+# @parity: ts=@/core/panchanga/drik::induLagnaMixedChart
 def indu_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     il_factors = [30,16,6,8,10,12,1] # Sun to Saturn. Rahu/Ketu exempted
     from jhora.horoscope.chart import charts
@@ -1872,6 +1942,7 @@ def indu_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_fact
     if il1==0: il1 = 12
     _indu_rasi = (moon_house+il1-1)%12
     return _indu_rasi,planet_positions[2][1][1]
+# @parity: ts=@/core/panchanga/drik::induLagnaAsync
 def indu_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                                             base_rasi=None,count_from_end_of_sign=None):  # BV Raman Method
     """
@@ -1898,6 +1969,7 @@ def indu_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_ch
     if il1==0: il1 = 12
     _indu_rasi = (moon_house+il1-1)%12
     return _indu_rasi,planet_positions[2][1][1]
+# @parity: ts=@/core/panchanga/drik::kundaLagnaMixedChart
 def kunda_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     mixed_dvf = varga_factor_1*varga_factor_2
     from jhora.horoscope.chart import charts
@@ -1905,6 +1977,7 @@ def kunda_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_fac
     asc = planet_positions[0]; al = asc[1][0]*30+asc[1][1]; al1 = (al*81)%360
     spl = dasavarga_from_long(al1,divisional_chart_factor=mixed_dvf)
     return spl
+# @parity: ts=@/core/panchanga/drik::kundaLagnaAsync
 def kunda_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                                             base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1925,6 +1998,7 @@ def kunda_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_c
     asc = planet_positions[0]; al = asc[1][0]*30+asc[1][1]; al1 = (al*81)%360
     spl = dasavarga_from_long(al1,divisional_chart_factor=divisional_chart_factor)
     return spl
+# @parity: ts=@/core/panchanga/drik::bhriguBindhuLagnaMixedChart
 def bhrigu_bindhu_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1,
                                   lagna_rate_factor=1.0):
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -1935,6 +2009,7 @@ def bhrigu_bindhu_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,v
     moon_add = 0 if moon_long > rahu_long else 360
     bb = (0.5*(rahu_long+moon_long+moon_add))%360
     return dasavarga_from_long(bb)
+# @parity: ts=@/core/panchanga/drik::bhriguBindhuAsync
 def bhrigu_bindhu_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                                             base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1957,6 +2032,7 @@ def bhrigu_bindhu_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divi
     moon_add = 0 if moon_long > rahu_long else 360
     bb = (0.5*(rahu_long+moon_long+moon_add))%360
     return dasavarga_from_long(bb)
+# @parity: ts=@/core/panchanga/drik::sreeLagnaMixedChart
 def sree_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1,
                                   lagna_rate_factor=1.0):
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -1966,6 +2042,7 @@ def sree_lagna_mixed_chart(jd,place,varga_factor_1=1,chart_method_1=1,varga_fact
     moon_long = planet_positions[2][1][0]*30+planet_positions[2][1][1]
     sl = sree_lagna_from_moon_asc_longitudes(moon_long, asc_long, divisional_chart_factor=mixed_dvf)
     return sl
+# @parity: ts=@/core/panchanga/drik::sreeLagnaAsync
 def sree_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                                             base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1987,6 +2064,7 @@ def sree_lagna(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_ch
     moon_long = planet_positions[2][1][0]*30+planet_positions[2][1][1]
     sl = sree_lagna_from_moon_asc_longitudes(moon_long, asc_long, divisional_chart_factor=divisional_chart_factor)
     return sl
+# @parity: ts=@/core/panchanga/drik::sreeLagnaFromLongitudes
 def sree_lagna_from_moon_asc_longitudes(moon_longitude,ascendant_longitude,divisional_chart_factor=1):
     moon_long = moon_longitude
     asc_long = ascendant_longitude
@@ -1995,6 +2073,7 @@ def sree_lagna_from_moon_asc_longitudes(moon_longitude,ascendant_longitude,divis
     sree_long = asc_long + reminder_fraction
     constellation,coordinates = dasavarga_from_long(sree_long, divisional_chart_factor)
     return constellation,coordinates
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDateV438
 def tamil_solar_month_and_date_V4_3_8(panchanga_date,place):
     """
         Returns tamil month and date (e.g. Aadi 28 )
@@ -2016,6 +2095,7 @@ def tamil_solar_month_and_date_V4_3_8(panchanga_date,place):
         sunset_count+=1
     _tamil_day = sunset_count
     return _tamil_month, _tamil_day
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDateV435
 def tamil_solar_month_and_date_V4_3_5(panchanga_date,place): # _V4_3_5
     """
         Returns tamil month and date (e.g. Aadi 28 )
@@ -2039,6 +2119,7 @@ def tamil_solar_month_and_date_V4_3_5(panchanga_date,place): # _V4_3_5
         daycount+=1
     _tamil_day = daycount
     return _tamil_month, _tamil_day#, month_days
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDateRaviAnnaswamy
 def tamil_solar_month_and_date_RaviAnnnaswamy(panchanga_date,place): #_RaviAnnnaswamy V4.4.0
     jd = utils.julian_day_number(panchanga_date, (10,0,0))
     jd_set = sunset(jd, place)[2]
@@ -2053,6 +2134,7 @@ def tamil_solar_month_and_date_RaviAnnnaswamy(panchanga_date,place): #_RaviAnnna
         sr = solar_longitude(jd_utc)
         daycount+=1
     return tamil_month, daycount
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDate
 def tamil_solar_month_and_date(panchanga_date,place,tamil_month_method=const.tamil_month_method,base_time=0,use_utc=True):
     """
         Returns tamil month and date (e.g. Aadi 28 )
@@ -2073,6 +2155,7 @@ def tamil_solar_month_and_date(panchanga_date,place,tamil_month_method=const.tam
         return tamil_solar_month_and_date_V4_3_8(panchanga_date, place)
     else: #
         return tamil_solar_month_and_date_new(panchanga_date, place, base_time, use_utc)
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDateNew
 def tamil_solar_month_and_date_new(panchanga_date,place,base_time=0,use_utc=True): # V4.4.0
     """
         @param base_time: 0 => sunset time, 1 => sunrise time 2 => midday time
@@ -2093,6 +2176,7 @@ def tamil_solar_month_and_date_new(panchanga_date,place,base_time=0,use_utc=True
         sr = solar_longitude(jd_utc)
         daycount+=1
     return tamil_month, daycount
+# @parity: ts=@/core/panchanga/drik::tamilSolarMonthAndDateFromJd
 def tamil_solar_month_and_date_from_jd(jd,place):
     jd_set = sunset(jd, place)[2]
     jd_utc = jd_set - place.timezone/24
@@ -2106,6 +2190,7 @@ def tamil_solar_month_and_date_from_jd(jd,place):
         sr = solar_longitude(jd_utc)
         daycount+=1
     return tamil_month, daycount
+# @parity: ts=@/core/panchanga/drik::daysInTamilMonth
 def days_in_tamil_month(panchanga_date,place):
     """ get # of days in that tamil month """
     jd = utils.gregorian_to_jd(panchanga_date)
@@ -2152,6 +2237,7 @@ def _previous_sankranti_date_new(panchanga_date,place,zodiac=None):
     sank_date,solar_hour1 = utils._convert_to_tamil_date_and_time(sank_date, solar_hour1,place)
     #print('after tm call sank date',sank_date)
     return sank_date, solar_hour1,tamil_month,tamil_day
+# @parity: ts=@/core/panchanga/drik::previousSankrantiDate
 def previous_sankranti_date(panchanga_date,place):
     """
         Get the previous sankranti date (sun entry to a raasi)
@@ -2183,6 +2269,7 @@ def previous_sankranti_date(panchanga_date,place):
     solar_hour1 = (sank_sunrise + solar_hour - sank_jd_utc)*24+place.timezone
     sank_date,solar_hour1 = utils._convert_to_tamil_date_and_time(sank_date, solar_hour1,place)
     return sank_date, solar_hour1,tamil_month,tamil_day
+# @parity: ts=@/core/panchanga/drik::nextSankrantiDate
 def next_sankranti_date(panchanga_date,place):
     """
         Get the next sankranti date (sun entry to a raasi)
@@ -2242,6 +2329,7 @@ def __next_solar_jd(jd,place,sun_long):
     solar_hour1 = (sank_sunrise + solar_hour - sank_jd_utc)*24+place.timezone
     next_solar_jd = swe.julday(sank_date[0],sank_date[1],sank_date[2],solar_hour1)
     return next_solar_jd    
+# @parity: ts=@/core/panchanga/drik::nextSolarDate
 def next_solar_date(jd_at_dob,place,years=1,months=1,sixty_hours=1):
     """
         returns the next date at which sun's longitue is same as at jd_at_dob (at birth say)
@@ -2269,6 +2357,7 @@ def next_solar_date(jd_at_dob,place,years=1,months=1,sixty_hours=1):
     sun_long_next = (sun_long_at_dob+sun_long_extra)%360
     #print((years,months,sixty_hours),(int(sun_long_next/30),utils.to_dms(sun_long_next%30,is_lat_long='plong')),(y,m,d,utils.to_dms(fh)))
     return __next_solar_jd(jd_next,place, sun_long_next)
+# @parity: ts=@/core/panchanga/drik::nextAnnualSolarDateApproximate
 def next_annual_solar_date_approximate(dob,tob,years):
     week_days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
     tobh = (tob[0]+tob[1]/60+tob[2]/3600)/24
@@ -2290,6 +2379,7 @@ def next_annual_solar_date_approximate(dob,tob,years):
     #print(dday,utils.to_dms(nh))
     next_jd = utils.julian_day_number((dday.year,dday.month,dday.day), utils.to_dms(nh,as_string=False))
     return next_jd
+# @parity: ts=@/core/panchanga/drik::isSolarEclipseAsync
 def is_solar_eclipse(jd,place):
     y, m, d, h = jd_to_gregorian(jd)
     jd_utc = utils.gregorian_to_jd(Date(y, m, d))
@@ -2300,6 +2390,7 @@ def is_solar_eclipse(jd,place):
         flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL | _rise_flags
     ret,_ = swe.sol_eclipse_how(jd_utc,geopos=(lon, lat,0.0),flags=flags)
     return ret
+# @parity: ts=@/core/panchanga/drik::nextSolarEclipseAsync
 def next_solar_eclipse(jd,place):
     """
         @param jd: Julian number 
@@ -2344,6 +2435,7 @@ def next_solar_eclipse(jd,place):
     #fh_l = fh_ut + place.timezone
     #ecl_local = (y,m,d,fh_l)
     return [retflag,tret,attrs]
+# @parity: ts=@/core/panchanga/drik::nextLunarEclipseAsync
 def next_lunar_eclipse(jd,place):
     """
         @param jd: Julian number 
@@ -2381,6 +2473,7 @@ def next_lunar_eclipse(jd,place):
     #fh_l = fh_ut + place.timezone
     #ecl_local = (y,m,d,fh_l)
     return [retflag,tret,attrs]
+# @parity: ts=@/core/panchanga/drik::birthtimeRectificationNakshatraSuddhi
 def _birthtime_rectification_nakshathra_suddhi(jd,place):
     """
         !!!!!! EXPERIMENTAL WORK - RESULTS MAY NOT BE ACCURATE !!!!
@@ -2428,6 +2521,7 @@ def _birthtime_rectification_nakshathra_suddhi(jd,place):
                 return revised_birth_time
     print('Could not rectify birth time beyond',int(step_minutes*loop_count),'minutes')
     return [rectification_required, nak_close]
+# @parity: ts=@/core/panchanga/drik::birthtimeRectificationLagnaSuddhiAsync
 def _birthtime_rectification_lagna_suddhi(jd,place):
     """
         !!!!!! EXPERIMENTAL WORK - RESULTS MAY NOT BE ACCURATE !!!!
@@ -2451,6 +2545,7 @@ def _birthtime_rectification_lagna_suddhi(jd,place):
     if house.get_relative_house_of_planet(lagna,maandi) in [1,5,7,9]: return False
     #print('Navamsa lagna not in [1,5,7,9] from Maandi',lagna,maandi)
     return True
+# @parity: ts=@/core/panchanga/drik::birthtimeRectificationJanmaSuddhi
 def _birthtime_rectification_janma_suddhi(jd,place,gender):
     """
         Convert Ishtakaal Ghatikas to Phala (* 60)
@@ -2491,6 +2586,7 @@ def __next_conjunction_of_planet_pair(jd,panchanga_place:Place,p1,p2,direction=1
             return cur_jd,utils.norm360(p1_long),utils.norm360(p2_long)
         cur_jd += const.conjunction_increment*direction
     return None
+# @parity: ts=@/core/panchanga/drik::nextConjunctionOfPlanetPairAsync
 def next_conjunction_of_planet_pair(jd,panchanga_place:Place,p1,p2,direction=1,separation_angle=0,increment_speed_factor=0.25):
     """
         get the date when conjunction of given two planets occur
@@ -2586,13 +2682,17 @@ def next_conjunction_of_planet_pair(jd,panchanga_place:Place,p1,p2,direction=1,s
     return None
 def __previous_conjunction_of_planet_pair(p1,p2,panchanga_place:Place,start_jd,separation_angle=0):
     return __next_conjunction_of_planet_pair(p1, p2, panchanga_place, start_jd, direction=-1,separation_angle=separation_angle)
+# @parity: ts=@/core/panchanga/drik::previousConjunctionOfPlanetPairAsync
 def previous_conjunction_of_planet_pair(jd,panchanga_place:Place,p1,p2,separation_angle=0,increment_speed_factor=0.25):
     return next_conjunction_of_planet_pair(jd, panchanga_place, p1, p2, direction=-1, separation_angle=separation_angle,
                                            increment_speed_factor=increment_speed_factor)
+# @parity: ts=@/core/panchanga/drik::previousPlanetEntryDateAsync
 def previous_planet_entry_date(planet,jd,place,increment_days=0.01,precision=0.1,raasi=None):
     return next_planet_entry_date(planet,jd,place,direction=-1,increment_days=increment_days,precision=precision,raasi=raasi)
+# @parity: ts=@/core/panchanga/drik::previousAscendantEntryDateAsync
 def previous_ascendant_entry_date(jd,place,increment_days=0.01,precision=0.1,raasi=None,divisional_chart_factor=1):
     return next_ascendant_entry_date(jd, place, direction=-1, increment_days=increment_days, precision=precision, raasi=raasi,divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/panchanga/drik::nextAscendantEntryDateAsync
 def next_ascendant_entry_date(jd,place,direction=1,precision=1.0,raasi=None,divisional_chart_factor=1):
     """
         get the date when the ascendant enters a zodiac
@@ -2632,6 +2732,7 @@ def next_ascendant_entry_date(jd,place,direction=1,precision=1.0,raasi=None,divi
     sla = ascendant(jd, place); asc_long = (sla[0]*30+sla[1])*divisional_chart_factor%360
     if _DEBUG_: print('JD',utils.jd_to_gregorian(jd),'asc long',asc_long)
     return jd,asc_long
+# @parity: ts=@/core/panchanga/drik::nextPlanetEntryDateAsync
 def next_planet_entry_date(planet,jd,place,direction=1,increment_days=0.01,precision=0.1,raasi=None):
     """
         get the date when a planet enters a zodiac
@@ -2699,6 +2800,7 @@ def next_planet_entry_date(planet,jd,place,direction=1,increment_days=0.01,preci
         planet_long = sidereal_longitude(sank_jd_utc-place.timezone/24,pl)
     y,m,d,fh = jd_to_gregorian(sank_jd_utc); sank_date = Date(y,m,d); planet_hour1 = fh
     return sank_jd_utc,planet_long
+# @parity: ts=@/core/panchanga/drik::nextPlanetRetrogradeChangeDateAsync
 def next_planet_retrograde_change_date(planet,panchanga_date,place,increment_days=1,direction=1):
     """
         get the date when a retrograde planet changes its direction
@@ -2729,6 +2831,7 @@ def next_planet_retrograde_change_date(planet,panchanga_date,place,increment_day
         sl_sign_next = _get_planet_longitude_sign(pl, jd_utc)
     jd_utc += place.timezone/24.0
     return jd_utc,sl_sign_next
+# @parity: ts=@/core/panchanga/drik::nishekaTimeAsync
 def _nisheka_time(jd,place):
     """
         @param jd: Julian number 
@@ -2750,6 +2853,7 @@ def _nisheka_time(jd,place):
     d = (c1+moon_long%30)
     jd_nisheka = jd - (bm*const.sidereal_year/12+d)
     return jd_nisheka
+# @parity: ts=@/core/panchanga/drik::nishekaTime1Async
 def _nisheka_time_1(jd,place):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob = Date(y,m,d); tob = utils.to_dms(fh,as_string=False)
     from jhora.horoscope.chart.charts import rasi_chart
@@ -2768,9 +2872,11 @@ def _nisheka_time_1(jd,place):
     print('a',a,c,drishya)
     jd_nisheka = jd - (273 + drishya*c*27.3217/30)
     return jd_nisheka
+# @parity: ts=@/core/panchanga/drik::grahaDrekkana
 def graha_drekkana(jd,place,use_bv_raman_table=False):
     return [const.drekkana_table_bvraman[h][int(long//10)] for _,(h,long) in dhasavarga(jd, place)] if use_bv_raman_table \
         else [const.drekkana_table[h][int(long//10)] for _,(h,long) in dhasavarga(jd, place)]
+# @parity: ts=@/core/panchanga/drik::sahasraChandrodayamOld
 def sahasra_chandrodayam_old(dob,tob,place):
     """
         TODO: Does not support BCE dates as ephem supports only datetime
@@ -2796,6 +2902,7 @@ def sahasra_chandrodayam_old(dob,tob,place):
         current_date = next_full_moon.datetime()
     sahasra_date = current_date + timedelta(hours=place.timezone)
     return sahasra_date.timetuple()[:-3]
+# @parity: ts=@/core/panchanga/drik::sahasraChandrodayamAsync
 def sahasra_chandrodayam(jd,place):
     full_moons_count = 0
     tithi_ = tithi(jd,place)[0]
@@ -2807,6 +2914,7 @@ def sahasra_chandrodayam(jd,place):
         tithi_ = tithi(jd,place)[0]
     sahasra_date = utils.jd_to_gregorian(full_moon_jd)
     return sahasra_date[:-1]
+# @parity: ts=@/core/panchanga/drik::amritaGadiya
 def amrita_gadiya(jd,place):
     """ Ref: Panchangam Calculations: Karanam Ramakumar """
     nak,_,nak_beg,nak_end = nakshatra(jd,place)[:4]
@@ -2815,6 +2923,7 @@ def amrita_gadiya(jd,place):
     ag_start = nak_beg + nak_fac*nak_durn
     ag_durn = nak_durn * 1.6/24; ag_end = ag_start+ag_durn
     return ag_start,ag_end
+# @parity: ts=@/core/panchanga/drik::varjyam
 def varjyam(jd,place):
     """ Ref: Panchangam Calculations: Karanam Ramakumar """
     nak,_,nak_beg,nak_end = nakshatra(jd,place)[:4]
@@ -2833,14 +2942,17 @@ def varjyam(jd,place):
         ag_start = nak_beg + nak_fac*nak_durn
         ag_durn = nak_durn * 1.6/24; ag_end = ag_start+ag_durn
         return ag_start,ag_end
+# @parity: ts=@/core/panchanga/drik::anandhaadhiYoga
 def anandhaadhi_yoga(jd,place):
     nak = nakshatra(jd,place)
     day = vaara(jd)
     return const.anandhaadhi_yoga_day_star_list[day].index(nak[0]-1),nak[2]
+# @parity: ts=@/core/panchanga/drik::triguna
 def triguna(jd,place):
     _,_,_,fh = utils.jd_to_gregorian(jd)
     day = vaara(jd)
     return utils.triguna_of_the_day_time(day,fh)
+# @parity: ts=@/core/panchanga/drik::vivahChakraPalan
 def vivaha_chakra_palan(jd,place):
     jd_utc = jd - place.timezone/24
     sun_long = sidereal_longitude(jd, const._SUN)
@@ -2867,6 +2979,7 @@ def vivaha_chakra_palan(jd,place):
         mapping = {(1, 1): 1, (1, 2): 2, (2, 2): 3, (2, 1): 4, (2, 0): 5, (1, 0): 6, (0, 0): 7, (0, 1): 8, (0, 2): 9}
         return mapping[(r, c)]
     return None
+# @parity: ts=@/core/panchanga/drik::tamilYogam
 def tamil_yogam(jd, place,check_special_yogas=True,use_sringeri_panchanga_version=False):
     """
         @return tamil yoga index
@@ -2887,18 +3000,21 @@ def tamil_yogam(jd, place,check_special_yogas=True,use_sringeri_panchanga_versio
         if d[wday]==naks: return 4+ad.index(d),nak[2],nak[3],yi
     if naks in const.sarvartha_siddha_yoga[wday]: return len(const.tamil_yoga_names)-1,nak[2],nak[3]
     return yi,nak[2],nak[3],yi
+# @parity: ts=@/core/panchanga/drik::brahmaMuhurthaAsync
 def brahma_muhurtha(jd, place):
     dl = day_length(jd, place); nl = night_length(jd, place)
     dm = dl/15.0 ; nm = nl/15.0
     sunrise_hours = sunrise(jd, place)[0]
     bm_start = sunrise_hours-2*nm; bm_end = sunrise_hours-nm
     return bm_start,bm_end
+# @parity: ts=@/core/panchanga/drik::godhuliMuhurthaAsync
 def godhuli_muhurtha(jd, place):
     dl = day_length(jd, place); nl = night_length(jd, place)
     dm = dl/15.0 ; nm = nl/15.0
     sunset_hours = sunset(jd, place)[0]
     bm_start = sunset_hours-0.25*dm; bm_end = sunset_hours+0.25*nm
     return bm_start,bm_end
+# @parity: ts=@/core/panchanga/drik::sandhyaPeriodsAsync
 def sandhya_periods(jd,place):
     """
         returns three sandhya periods: - each (Ghati is 1/30th of day length)
@@ -2913,6 +3029,7 @@ def sandhya_periods(jd,place):
     ms = (noon-1.5*ghati, noon+1.5*ghati)
     ss = (sunset_hours-ghati,sunset_hours+2*ghati)
     return ps,ms,ss
+# @parity: ts=@/core/panchanga/drik::vijayaMuhurthaAsync
 def vijaya_muhurtha(jd,place):
     dl = day_length(jd, place); gd = dl/30.
     nl = night_length(jd, place); gn = nl/30.0
@@ -2921,11 +3038,13 @@ def vijaya_muhurtha(jd,place):
     vmd = (noon-gd, noon+gd)
     vmn = (_midnight-gn, _midnight+gn)
     return vmd,vmn
+# @parity: ts=@/core/panchanga/drik::nishitaKaalaAsync
 def nishita_kaala(jd,place):
     """ Eighth muhurtha of the night """
     nl = night_length(jd, place); gn = nl/30.0
     sunset_hours = sunset(jd, place)[0]
     return sunset_hours+7*gn, sunset_hours+8*gn
+# @parity: ts=@/core/panchanga/drik::tamilJaamam
 def tamil_jaamam(jd,place):
     """ 
         In Tamil 1 jaamam = 3 muhurthas. 10 jaamam = 1 day (5 jaamam) and night (5 jaamam)
@@ -2938,12 +3057,14 @@ def tamil_jaamam(jd,place):
     jaamam = [(sunrise_hours+j*day_jaamam,sunrise_hours+(j+1)*day_jaamam) for j in range(5)]
     jaamam += [(sunset_hours+j*night_jaamam,sunset_hours+(j+1)*night_jaamam) for j in range(5)]
     return jaamam
+# @parity: ts=@/core/panchanga/drik::nishitaMuhurthaAsync
 def nishita_muhurtha(jd,place):
     """ 2 ghathis around midnight """
     nl = night_length(jd, place); gn = nl/30.0
     sunset_hours = sunset(jd, place)[0]
     _midnight = sunset_hours+0.5*nl
     return _midnight-gn,_midnight+gn
+# @parity: ts=@/core/panchanga/drik::thaarabalam
 def thaaraabalam(jd,place,return_only_good_stars=True):
     """
     thaarabalam_names = [('Paramitra','Good'),('Janma','Not Good'),('Sampatha','Very Good'),('Vipatha','Bad'),
@@ -2959,6 +3080,7 @@ def thaaraabalam(jd,place,return_only_good_stars=True):
         if return_only_good_stars and tb_div in good_tharaabalam: gtb.append(birth_star)
         tb_dict[tb_div].append(birth_star) 
     return gtb if return_only_good_stars else tb_dict
+# @parity: ts=@/core/panchanga/drik::muhurthas
 def muhurthas(jd, place):
     dl = day_length(jd, place); day_muhurtha = dl/15
     nl = night_length(jd, place); night_muhurtha = nl/15
@@ -2968,6 +3090,7 @@ def muhurthas(jd, place):
     _muhurthas += [(sunset_hours+j*night_muhurtha,sunset_hours+(j+1)*night_muhurtha) for j in range(15)]#Fixed 4.3.6
     _mh_list = [(mk,const.muhurthas_of_the_day[mk],_muhurthas[mh]) for mh,mk in enumerate(const.muhurthas_of_the_day.keys()) ]
     return _mh_list
+# @parity: ts=@/core/panchanga/drik::udhayaLagnaMuhurthaAsync
 def udhaya_lagna_muhurtha(jd,place):
     """
         returns ascendant entry jd into each of 12 rasis from given date/time
@@ -2985,6 +3108,7 @@ def udhaya_lagna_muhurtha(jd,place):
         jd_start = jd_end
         jd = jd_end+const.conjunction_increment
     return ulm
+# @parity: ts=@/core/panchanga/drik::chandrabalamAsync
 def chandrabalam(jd,place):
     ascs = [(ulm[0],ulm[1]) for ulm in udhaya_lagna_muhurtha(jd, place)]
     moon = int(lunar_longitude(jd)/30)+1
@@ -2996,6 +3120,7 @@ def chandrabalam(jd,place):
         #print('moon in two rasis today')
         cb += [ah for ah,at in ascs if utils.count_rasis(ah,(moon+1)%12) in cb_good and at < next_sunrise]
     return cb
+# @parity: ts=@/core/panchanga/drik::panchakaRahithaAsync
 def panchaka_rahitha(jd,place):
     ulm = udhaya_lagna_muhurtha(jd, place)
     bad_panchakas = [1,2,4,6,8]
@@ -3011,6 +3136,7 @@ def panchaka_rahitha(jd,place):
         else:
             pr.append((0,asc_beg,asc_end))
     return pr
+# @parity: ts=@/core/panchanga/drik::nextPanchakaDaysAsync
 def next_panchaka_days(jd,place):
     """
         Added in V4.2.6
@@ -3023,16 +3149,19 @@ def next_panchaka_days(jd,place):
     panchaka_start_jd = next_planet_entry_date(const._MOON, jd, place, raasi=11)[0]
     panchaka_end_jd = next_planet_entry_date(const._MOON, jd, place, raasi=1)[0]
     return panchaka_start_jd, panchaka_end_jd
+# @parity: ts=@/core/panchanga/drik::chandrashtamaAsync
 def chandrashtama(jd, place):
     jd_utc = jd - place.timezone/24.
     moon_long = lunar_longitude(jd_utc); moon = dasavarga_from_long(moon_long)[0]
     _chandrashtama_rasi = (moon-7)%12+1
     next_moon_jd = next_planet_entry_date(const._MOON, jd, place)[0]
     return _chandrashtama_rasi, next_moon_jd
+# @parity: ts=@/core/panchanga/drik::navaThaara
 def nava_thaara(jd,place,from_lagna_or_moon=0):
     base_star = nakshatra(jd, place)[0]-1 if from_lagna_or_moon==1 else ascendant(jd,place)[2]-1
     ntl = [[(base_star+s)%27 for s in star_list] for _, star_list in const.nakshathra_lords.items()]
     return [(lord,sl) for sl in ntl for lord,csl in const.nakshathra_lords.items() if sorted(sl)==sorted(csl) ]
+# @parity: ts=@/core/panchanga/drik::specialThaara
 def special_thaara(jd,place,from_lagna_or_moon=0):
     """
         Note: the star list includes Abhijith as 21st star
@@ -3044,12 +3173,14 @@ def special_thaara(jd,place,from_lagna_or_moon=0):
     if base_star+1 > const._ABHIJITH_STAR_INDEX: base_star += 1
     #print(base_star,'base_star',_star_list[base_star],stl)
     return [(lord,star) for star in stl for lord, csl in const.special_thaara_lords_1.items() if star in csl]
+# @parity: ts=@/core/panchanga/drik::karakaTithi
 def karaka_tithi(jd,place):
     pp = [['L',(0,-10)]]+dhasavarga(jd, place) # Dummy Lagna Positions added
     from jhora.horoscope.chart import house
     ks = house.chara_karakas(pp); p1 = planet_list[ks[1]];p2 = planet_list[ks[0]]
     kt = tithi(jd, place, tithi_index=1, planet1=p1, planet2=p2)
     return kt
+# @parity: ts=@/core/panchanga/drik::karakaYogam
 def karaka_yogam(jd,place):
     """
         returns the yogam at julian day/time
@@ -3076,6 +3207,7 @@ def karaka_yogam(jd,place):
         _yn = _yoga[2]; _yn_start = _yoga_end; _yn_end = _yoga[3]
         result += [_yn,_yn_start,_yn_end]
     return result
+# @parity: ts=@/core/panchanga/drik::fractionMoonYetToTraverse
 def fraction_moon_yet_to_traverse(jd,place,round_to_digits=5):
     jd_utc = jd - place.timezone/24.
     one_star = 360/27
@@ -3083,6 +3215,7 @@ def fraction_moon_yet_to_traverse(jd,place,round_to_digits=5):
     _,_,rem = nakshatra_pada(moon_long)
     moon_fraction_yet_to_traverse = (one_star-rem)/one_star
     return round(moon_fraction_yet_to_traverse,round_to_digits)
+# @parity: ts=@/core/panchanga/drik::shivaVaasa
 def shiva_vaasa(jd,place,method=2):
     """ 
         Ref: https://vijayalur.com/2014/07/24/shiva-agni-vasa/
@@ -3113,6 +3246,7 @@ def shiva_vaasa(jd,place,method=2):
     _place_dict2 = {0:1,1:5,2:2,3:6,4:3,5:7,6:4}
     _place_dict = _place_dict1 if method==1 else _place_dict2
     return _place_dict1[tithi_index] if method==1 else _place_dict2[(tithi_index*2+5) % 7],t_end
+# @parity: ts=@/core/panchanga/drik::agniVaasa
 def agni_vaasa(jd,place):
     """
         
@@ -3125,6 +3259,7 @@ def agni_vaasa(jd,place):
     day = vaara(jd)+1
     _av_list = [1,2,3,1]
     return _av_list[(tithi_index+1+day)%4], t_end
+# @parity: ts=@/core/panchanga/drik::pushkaraYoga
 def pushkara_yoga(jd, place):
     """
         returns dwi/tri pushkara yoga if exists
@@ -3152,6 +3287,7 @@ def pushkara_yoga(jd, place):
         if chkn21 or chkn22:
             ptimes = (2,_n_start,srise2) if chkn11 else (2,srise1,_n_start)
     return ptimes
+# @parity: ts=@/core/panchanga/drik::aadalYoga
 def aadal_yoga(jd,place):
     jd_utc = jd - place.timezone/24.
     nak = nakshatra(jd, place); star_end = nak[3]
@@ -3161,6 +3297,7 @@ def aadal_yoga(jd,place):
     knt = utils.cyclic_count_of_stars_with_abhijit_in_22(const.abhijit_order_of_stars, sun_star-1,moon_star-1)
     #print(moon_star,sun_star,knt,'in',[2,7,9,14,16,21,23,28])
     return (srise,star_end) if knt in [2,7,9,14,16,21,23,28] else ()
+# @parity: ts=@/core/panchanga/drik::vidaalYoga
 def vidaal_yoga(jd,place):
     jd_utc = jd - place.timezone/24.
     nak = nakshatra(jd, place); star_end = nak[3]
@@ -3170,12 +3307,15 @@ def vidaal_yoga(jd,place):
     knt = utils.cyclic_count_of_stars_with_abhijit_in_22(const.abhijit_order_of_stars, sun_star-1,moon_star-1)
     #print(moon_star,sun_star,knt,'in',[3,6,10,13,17,20,24,27])
     return (srise,star_end) if knt in [3,6,10,13,17,20,24,27] else ()
+# @parity: ts=@/core/panchanga/drik::dishaShool
 def disha_shool(jd):
     return const.disha_shool_map[vaara(jd)]
+# @parity: ts=@/core/panchanga/drik::yoginiVaasa
 def yogini_vaasa(jd,place):
     tithi_index = tithi(jd,place)[0]
     return const.yogini_vaasa_tithi_map[tithi_index-1]
  # Convert to Ghati, Phala Vighati
+# @parity: ts=@/core/panchanga/drik::floatHoursToVedicTimeEqualDayNightGhati
 def float_hours_to_vedic_time_equal_day_night_ghati(jd,place,float_hours=None,
                                                     vedic_hours_per_day=60):
     """
@@ -3216,6 +3356,7 @@ def float_hours_to_vedic_time_equal_day_night_ghati(jd,place,float_hours=None,
     vighati = int(((total_ghati - ghati) * vedic_hours_per_day - phala) * vedic_hours_per_day)
 
     return int(ghati), int(phala), int(vighati)
+# @parity: ts=@/core/panchanga/drik::floatHoursToVedicTime
 def float_hours_to_vedic_time(jd, place, float_hours=None,force_equal_day_night_ghati=False,
                               vedic_hours_per_day=60):
     """
@@ -3249,26 +3390,31 @@ def float_hours_to_vedic_time(jd, place, float_hours=None,force_equal_day_night_
     vighati = int(((total_ghati - ghati) * vedic_hours_per_day - phala) * vedic_hours_per_day)
 
     return int(ghati), int(phala), int(vighati)
+# @parity: ts=@/core/panchanga/drik::nextSolarMonthAsync
 def next_solar_month(jd,place,raasi=None):
     """
         Next solar month is when Sun Enters a next zodiac/raasi
     """
     return next_planet_entry_date(0, jd, place,raasi=raasi)
+# @parity: ts=@/core/panchanga/drik::previousSolarMonthAsync
 def previous_solar_month(jd,place,raasi=None):
     """
         Previous solar month is when Sun Enters a previous/current zodiac/raasi
     """
     return previous_planet_entry_date(0, jd, place,raasi=raasi)
+# @parity: ts=@/core/panchanga/drik::nextSolarYearAsync
 def next_solar_year(jd,place):
     """
         Next solar month is when Sun Enters Aries
     """
     return next_planet_entry_date(0, jd, place,raasi=1)
+# @parity: ts=@/core/panchanga/drik::previousSolarYearAsync
 def previous_solar_year(jd,place):
     """
         Previous solar month is when Sun Enters Aries
     """
     return previous_planet_entry_date(0, jd, place, raasi=1)
+# @parity: ts=@/core/panchanga/drik::nextLunarYearAsync
 def next_lunar_year(jd,place,lunar_month_type=0,direction=1):
     """
         @param lunar_month_type: 0=>Amantha 1=>Purnimantha 2=>Solar month
@@ -3305,6 +3451,7 @@ def next_lunar_year(jd,place,lunar_month_type=0,direction=1):
             return Date(lmy,lmm,lmd),lmh
         jd += direction*14
     if _DEBUG_: print('next/prev lunar_year could not be found')
+# @parity: ts=@/core/panchanga/drik::previousLunarYearAsync
 def previous_lunar_year(jd,place,lunar_month_type=0):
     """
         @param lunar_month_type: 0=>Amantha 1=>Purnimantha 2=>Solar month

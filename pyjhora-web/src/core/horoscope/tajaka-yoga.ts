@@ -88,6 +88,7 @@ const combinations2 = <T>(arr: T[]): [T, T][] => {
  * @param planetToHouseDict - Map from planet/L to house index
  * @returns true if yoga is present
  */
+// @parity: py=ishkavala_yoga
 export const ishkavalaYoga = (
     planetToHouseDict: Record<string, number>
 ): boolean => {
@@ -114,6 +115,7 @@ export const ishkavalaYoga = (
  * @param planetToHouseDict - Map from planet/L to house index
  * @returns true if yoga is present
  */
+// @parity: py=induvara_yoga
 export const induvaraYoga = (
     planetToHouseDict: Record<string, number>
 ): boolean => {
@@ -139,6 +141,7 @@ export const induvaraYoga = (
  *
  * @returns [yogaPresent, ithasalaType] where type is 1=Varthamaana, 2=Poorna, 3=Bhavishya
  */
+// @parity: py=ithasala_yoga
 export const ithasalaYoga = (
     planetPositions: TajakaPlanetPosition[],
     planet1: number,
@@ -163,6 +166,7 @@ export const ithasalaYoga = (
  *
  * @returns true if yoga is present
  */
+// @parity: py=eesarpha_yoga
 export const eesarphaYoga = (
     planetPositions: TajakaPlanetPosition[],
     planet1: number,
@@ -219,6 +223,7 @@ const _checkNaktaYoga = (
  * Nakta yoga for a single planet.
  * @returns [yogaPresent, list of pair combinations]
  */
+// @parity: py=nakta_yoga
 export const naktaYoga = (
     planetPositions: TajakaPlanetPosition[],
     planet: number
@@ -275,6 +280,7 @@ const _getNakataTriples = (
  * Get all ithasala yoga planet pairs.
  * @returns Array of [planet1, planet2, ithasalaType] triples
  */
+// @parity: py=get_ithasala_yoga_planet_pairs
 export const getIthasalaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number, number | null][] => {
@@ -293,6 +299,7 @@ export const getIthasalaYogaPlanetPairs = (
  * Get all eesarpha yoga planet pairs.
  * @returns Array of [planet1, planet2] pairs
  */
+// @parity: py=get_eesarpha_yoga_planet_pairs
 export const getEesarphaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number][] => {
@@ -316,6 +323,7 @@ export const getEesarphaYogaPlanetPairs = (
  * but p2 and p3 have no aspects.
  * The mediating planet must be less advanced than both others.
  */
+// @parity: py=get_nakta_yoga_planet_triples
 export const getNaktaYogaPlanetTriples = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, [number, number]][] => {
@@ -344,6 +352,7 @@ export const getNaktaYogaPlanetTriples = (
 /**
  * Check Yamaya yoga for a specific triple.
  */
+// @parity: py=check_yamaya_yoga
 export const checkYamayaYoga = (
     planet: number,
     planet1: number,
@@ -377,6 +386,7 @@ export const checkYamayaYoga = (
  * Get yamaya yoga planet triples.
  * Same structure as nakta but mediating planet must be MORE advanced.
  */
+// @parity: py=get_yamaya_yoga_planet_triples
 export const getYamayaYogaPlanetTriples = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, [number, number]][] => {
@@ -407,6 +417,7 @@ export const getYamayaYogaPlanetTriples = (
  * If Mars or Saturn is in the same house as the faster planet in an ithasala pair
  * and within its deeptamsa range.
  */
+// @parity: py=get_manahoo_yoga_planet_pairs
 export const getManahooYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number, number][] => {
@@ -450,6 +461,7 @@ export const getManahooYogaPlanetPairs = (
  * Checks for ithasala pairs involving Moon (planet index 1).
  * @returns [hasKamboola, moonPairs, extendedPairs]
  */
+// @parity: py=get_kamboola_yoga_planet_pairs
 export const getKamboolaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [boolean, [number, number][], [number, number][]] => {
@@ -489,11 +501,13 @@ export const getKamboolaYogaPlanetPairs = (
 // ============================================================================
 
 /** Get gairi kamboola yoga planet pairs (not yet implemented). */
+// @parity: py=get_gairi_kamboola_yoga_planet_pairs
 export const getGairiKamboolaYogaPlanetPairs = (
     _planetPositions: TajakaPlanetPosition[]
 ): null => null;
 
 /** Get khallasara yoga planet pairs (not yet implemented). */
+// @parity: py=get_khallasara_yoga_planet_pairs
 export const getKhallasaraYogaPlanetPairs = (
     _planetPositions: TajakaPlanetPosition[]
 ): null => null;
@@ -532,6 +546,7 @@ const HOUSE_STRENGTHS_OF_PLANETS: number[][] = [
  * external chart functions for combustion/retrograde detection.
  * This version checks house strength weakness only.
  */
+// @parity: py=get_radda_yoga_planet_pairs
 export const getRaddaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number][] => {
@@ -569,6 +584,7 @@ const PANCHA_VARGEEYA_BALA_STRENGTH_THRESHOLD = 10;
  * and combustion checks which depend on full chart calculation.
  * This is a structural port that checks house strengths.
  */
+// @parity: py=get_duhphali_kutta_yoga_planet_pairs
 export const getDuhphaliKuttaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number][] => {

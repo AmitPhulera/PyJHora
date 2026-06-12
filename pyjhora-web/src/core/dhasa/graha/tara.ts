@@ -134,6 +134,7 @@ function getDhasaOrder(dhasaMethod: number): number[] {
  * Returns next lord after `lord` in the adhipati list.
  * Matches Python's _next_adhipati(lord, dirn=1, dhasa_method=1)
  */
+// @parity: py=_next_adhipati
 export function getNextTaraLord(lord: number, dirn = 1, dhasaMethod = 1): number {
   const order = getDhasaOrder(dhasaMethod);
   const current = order.indexOf(lord);
@@ -363,6 +364,7 @@ export function getTaraDashaBhuktiTuples(
  * This wraps the Python-compatible logic and returns the TaraResult interface
  * that the application UI expects.
  */
+// @parity: py=get_dhasa_bhukthi
 export function getTaraDashaBhukti(
   jd: number,
   place: Place,

@@ -237,6 +237,7 @@ export function cityToPlace(city: CityResult): Place {
  * @param cityName - City name
  * @returns Place or null
  */
+// @parity: py=get_location
 export function getLocation(cityName: string): Place | null {
   const city = lookupCity(cityName);
   if (!city) return null;
@@ -284,6 +285,7 @@ export function getTimezoneOffsetFromName(timezoneName: string, date: Date = new
  * @param date - Date for DST calculation
  * @returns Timezone offset in hours
  */
+// @parity: py=get_place_timezone_offset
 export function getTimezoneOffsetFromCoords(
   latitude: number,
   longitude: number,

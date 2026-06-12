@@ -199,6 +199,7 @@ const checkAssociation = (
  *   Example: ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8']
  * @returns Array of [planet1, planet2] pairs forming Raja Yoga
  */
+// @parity: py=get_raja_yoga_pairs
 export const getRajaYogaPairs = (chart: HouseChart): [number, number][] => {
   const pToH = getPlanetToHouseFromChart(chart);
   const ascHouse = pToH[ASCENDANT_SYMBOL];
@@ -252,6 +253,7 @@ export const getRajaYogaPairs = (chart: HouseChart): [number, number][] => {
  *   planet === -1, it is treated as the Ascendant.
  * @returns Array of [planet1, planet2] pairs forming Raja Yoga
  */
+// @parity: py=get_raja_yoga_pairs_from_planet_positions
 export const getRajaYogaPairsFromPositions = (
   positions: PlanetPosition[]
 ): [number, number][] => {
@@ -283,6 +285,7 @@ export const getRajaYogaPairsFromPositions = (
  * @param planet2 - Second raja yoga planet
  * @returns true if {planet1, planet2} are the lords of the 9th and 10th houses
  */
+// @parity: py=dharma_karmadhipati_raja_yoga
 export const dharmaKarmadhipatiRajaYoga = (
   planetToHouse: Record<number | string, number>,
   planet1: number,
@@ -327,6 +330,7 @@ export const dharmaKarmadhipatiRajaYoga = (
  * @returns false if not present, or [true, subType] where subType is one of
  *   "Harsh Raja Yoga", "Saral Raja Yoga", "Vimal Raja Yoga"
  */
+// @parity: py=vipareetha_raja_yoga
 export const vipareethaRajaYoga = (
   planetToHouse: Record<number | string, number>,
   planet1: number,
@@ -385,6 +389,7 @@ export const vipareethaRajaYoga = (
  * @returns false if not present, or [true, subType] where subType is one of
  *   "Harsh Raja Yoga", "Saral Raja Yoga", "Vimal Raja Yoga"
  */
+// @parity: py=vipareetha_raja_yoga_from_planet_positions
 export const vipareethaRajaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   planet1: number,
@@ -439,6 +444,7 @@ export const vipareethaRajaYogaFromPlanetPositions = (
  * @param planet2 - Second raja yoga planet
  * @returns true if {planet1, planet2} are the lords of the 9th and 10th houses
  */
+// @parity: py=dharma_karmadhipati_raja_yoga_from_planet_positions
 export const dharmaKarmadhipatiRajaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   planet1: number,
@@ -489,6 +495,7 @@ export const dharmaKarmadhipatiRajaYogaFromPlanetPositions = (
  * @param planet2 - Second raja yoga planet
  * @returns true if Neecha Bhanga Raja Yoga is present
  */
+// @parity: py=neecha_bhanga_raja_yoga
 export const neechaBhangaRajaYoga = (
   planetToHouse: Record<number | string, number>,
   planet1: number,
@@ -567,6 +574,7 @@ export const neechaBhangaRajaYoga = (
  * @param planet2 - Second raja yoga planet
  * @returns true if Neecha Bhanga Raja Yoga is present
  */
+// @parity: py=neecha_bhanga_raja_yoga_from_planet_positions
 export const neechaBhangaRajaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   planet1: number,
@@ -712,6 +720,7 @@ const getAspectedPlanetsOfRaasi = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
+// @parity: py=check_other_raja_yoga_1
 export const checkOtherRajaYoga1 = (
   positions: PlanetPosition[]
 ): boolean => {
@@ -768,6 +777,7 @@ export const checkOtherRajaYoga1 = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
+// @parity: py=check_other_raja_yoga_2
 export const checkOtherRajaYoga2 = (
   positions: PlanetPosition[]
 ): boolean => {
@@ -857,6 +867,7 @@ export const checkOtherRajaYoga2 = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
+// @parity: py=check_other_raja_yoga_3
 export const checkOtherRajaYoga3 = (
   positions: PlanetPosition[]
 ): boolean => {
@@ -939,6 +950,7 @@ export interface RajaYogaResult {
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns RajaYogaResult with all yoga findings
  */
+// @parity: py=get_raja_yoga_details
 export const getRajaYogaDetails = (
   chart: HouseChart,
   positions: PlanetPosition[]
@@ -1018,6 +1030,7 @@ export interface RajaYogaAllChartsResult {
  * @param chartMethod - Method for divisional chart calculation (default 0)
  * @returns RajaYogaAllChartsResult with combined results across charts
  */
+// @parity: py=get_raja_yoga_details_for_all_charts
 export const getRajaYogaDetailsForAllCharts = (
   d1Positions: PlanetPosition[],
   divisionalChartFactor?: number | null,

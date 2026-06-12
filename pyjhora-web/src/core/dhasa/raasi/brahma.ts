@@ -147,6 +147,7 @@ function getDhasaDuration(
  * @param options.divisionalChartFactor - Divisional chart factor (default 1 for D-1)
  * @param options.includeBhuktis - Whether to include sub-periods (default true)
  */
+// @parity: py=get_dhasa_antardhasa
 export function getBrahmaDashaBhukti(
   jd: number,
   place: Place,

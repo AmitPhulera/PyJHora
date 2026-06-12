@@ -95,6 +95,7 @@ const parsePlanetToHouseFromChart = (
  * @param chart - HouseChart (string[12]) with planet placements
  * @returns true if Kala Sarpa Dosha is present
  */
+// @parity: py=kala_sarpa
 export const kalaSarpa = (chart: HouseChart): boolean => {
   const pToH = parsePlanetToHouseFromChart(chart);
 
@@ -164,6 +165,7 @@ const RASI_SANDHI_DURATION = 1.0;
  * @param applyExceptions - Apply BV Raman exceptions (default: true)
  * @returns [isManglik, hasExceptions, exceptionIndices]
  */
+// @parity: py=manglik
 export const manglik = (
   positions: PlanetPosition[],
   referencePlanet: number | 'L' = 'L',
@@ -309,6 +311,7 @@ export const manglik = (
  * @param positions - Array of PlanetPosition (planet -1=Lagna, 0=Sun, ..., 8=Ketu)
  * @returns [hasPitruDosha, conditionIndices]
  */
+// @parity: py=pitru_dosha
 export const pitruDosha = (
   positions: PlanetPosition[]
 ): [boolean, number[]] => {
@@ -392,6 +395,7 @@ export const pitruDosha = (
  * @param positions - Array of PlanetPosition
  * @returns [hasDosha, jupiterIsStronger]
  */
+// @parity: py=guru_chandala_dosha
 export const guruChandalaDosha = (
   positions: PlanetPosition[]
 ): [boolean, boolean] => {
@@ -432,6 +436,7 @@ export const guruChandalaDosha = (
  * @param referencePlanet - Planet ID or 'L' for Lagna (default: 'L')
  * @returns true if Kalathra Dosha is present
  */
+// @parity: py=kalathra
 export const kalathra = (
   positions: PlanetPosition[],
   referencePlanet: number | 'L' = 'L'
@@ -474,6 +479,7 @@ export const kalathra = (
  * @param moonStar - 1-indexed nakshatra number of the Moon
  * @returns true if the nakshatra is a Ganda Moola nakshatra
  */
+// @parity: py=ganda_moola
 export const gandaMoola = (moonStar: number): boolean => {
   return GANDA_MOOLA_STARS.includes(moonStar);
 };
@@ -492,6 +498,7 @@ export const gandaMoola = (moonStar: number): boolean => {
  * @param positions - Array of PlanetPosition
  * @returns true if Ghata Dosha is present
  */
+// @parity: py=ghata
 export const ghata = (positions: PlanetPosition[]): boolean => {
   const marsPos = positions.find((p) => p.planet === MARS);
   const saturnPos = positions.find((p) => p.planet === SATURN);
@@ -514,6 +521,7 @@ export const ghata = (positions: PlanetPosition[]): boolean => {
  * @param positions - Array of PlanetPosition
  * @returns true if Shrapit Dosha is present
  */
+// @parity: py=shrapit
 export const shrapit = (positions: PlanetPosition[]): boolean => {
   const rahuPos = positions.find((p) => p.planet === RAHU);
   const saturnPos = positions.find((p) => p.planet === SATURN);
@@ -562,6 +570,7 @@ export interface DoshaDetails {
  * @param referencePlanet - Reference planet for manglik/kalathra (default: 'L')
  * @returns DoshaDetails with all dosha findings
  */
+// @parity: py=get_dosha_details
 export const getDoshaDetails = (
   chart: HouseChart,
   positions: PlanetPosition[],
@@ -762,6 +771,7 @@ const GURU_STRONGER_THAN_KETU = 'In your horoscope, Jupiter is stronger than Ket
  * @param keyStr - Label/key string (default: 'Kala Sarpa Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_kala_sarpa_results
 export const getKalaSarpaResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Kala Sarpa Dosha'
@@ -801,6 +811,7 @@ export const getKalaSarpaResults = (
  * @param keyStr - Label/key string (default: 'Manglik Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_manglik_results
 export const getManglikResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Manglik Dosha'
@@ -851,6 +862,7 @@ export const getManglikResults = (
  * @param keyStr - Label/key string (default: 'Pitru Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_pitru_results
 export const getPitruResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Pitru Dosha'
@@ -885,6 +897,7 @@ export const getPitruResults = (
  * @param keyStr - Label/key string (default: 'Guru Chandala Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_guru_chandala_results
 export const getGuruChandalaResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Guru Chandala Dosha'
@@ -937,6 +950,7 @@ export const getGuruChandalaResults = (
  * @param keyStr - Label/key string (default: 'Ganda Moola Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_ganda_moola_results
 export const getGandaMoolaResults = (
   moonStar: number,
   keyStr: string = 'Ganda Moola Dosha'
@@ -971,6 +985,7 @@ export const getGandaMoolaResults = (
  * @param referencePlanet - Reference planet for kalathra check (default: 'L')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_kalathra_results
 export const getKalathraResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Kalathra Dosha',
@@ -1001,6 +1016,7 @@ export const getKalathraResults = (
  * @param keyStr - Label/key string (default: 'Ghata Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_ghata_results
 export const getGhataResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Ghata Dosha'
@@ -1039,6 +1055,7 @@ export const getGhataResults = (
  * @param keyStr - Label/key string (default: 'Shrapit Dosha')
  * @returns Record with the key mapping to the HTML result string
  */
+// @parity: py=_get_shrapit_results
 export const getShrapitResults = (
   positions: PlanetPosition[],
   keyStr: string = 'Shrapit Dosha'

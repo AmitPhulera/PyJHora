@@ -169,6 +169,7 @@ function getTithiFraction(startTime: number, endTime: number, birthTimeHrs: numb
  * @param bhuktiStartJd - Start JD of the bhukti period
  * @returns Map of antara lord to start JD
  */
+// @parity: py=ashtottari_anthara
 export function ashtottariAnthara(
   dashaLord: number,
   bhuktiLord: number,
@@ -205,6 +206,7 @@ export function ashtottariAnthara(
  * @param options - Calculation options
  * @returns Tithi Ashtottari dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_ashtottari_dhasa_bhukthi
 export function getTithiAshtottariDashaBhukti(
   jd: number,
   place: Place,

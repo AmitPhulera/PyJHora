@@ -83,6 +83,7 @@ def varsha_vimsottari_bhukti(maha_lord, start_date):
 
 # North Indian tradition: dasa-antardasa-pratyantardasa
 # South Indian tradition: dasa-bhukti-antara-sukshma
+# @parity: ts=@/core/dhasa/annual/mudda::varshaVimsottariAntara
 def varsha_vimsottari_antara(maha_lord, bhukti_lord, start_date):
     """Compute all antaradasas from given bhukit's start date.
     The bhukti's lord and its lord (mahadasa lord) must be given"""
@@ -105,6 +106,7 @@ def _where_occurs(jd, some_dict):
         if some_dict[key] < jd: return key
 
 
+# @parity: ts=@/core/dhasa/annual/mudda::computeVarshaVimsottariAntaraFrom
 def compute_varsha_vimsottari_antara_from(jd, mahadashas):
     """Returns antaradasha within which given `jd` falls"""
     # Find mahadasa where this JD falls
@@ -145,6 +147,7 @@ def varsha_vimsottari_dhasa_bhukthi(jd,place,years,include_antardhasa=True,divis
             date_str = '%04d-%02d-%02d' %(y,m,d)+' '+utils.to_dms(h,as_string=True)
             dhasa_bukthi.append((dhasa_lord,date_str,round(durn,2)))             
     return dhasa_bukthi
+# @parity: ts=@/core/dhasa/annual/mudda::getMuddaDhasa
 def mudda_dhasa_bhukthi(jd,place,years,include_antardhasa=True,divisional_chart_factor=1):
     return varsha_vimsottari_dhasa_bhukthi(jd,place,years,include_antardhasa,divisional_chart_factor=divisional_chart_factor)
 '------ main -----------'

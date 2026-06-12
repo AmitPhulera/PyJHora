@@ -141,6 +141,7 @@ function countRasis(start: number, end: number): number {
   return ((end - start) % 12 + 12) % 12 + 1;
 }
 
+// @parity: py=_dhasa_duration
 export function getNarayanaDashaDuration(
   planetPositions: PlanetPosition[],
   sign: number,
@@ -188,6 +189,7 @@ export function getNarayanaDashaDuration(
   return dhasaPeriod;
 }
 
+// @parity: py=_narayana_antardhasa
 export function getNarayanaAntardhasa(planetPositions: PlanetPosition[], dhasaRasi: number): number[] {
   // Logic from _narayana_antardhasa in narayana.py
 
@@ -359,6 +361,7 @@ function narayanaDhasaCalculation(
 // MAIN FUNCTIONS
 // ============================================================================
 
+// @parity: py=narayana_dhasa_for_divisional_chart
 export function getNarayanaDashaBhukti(
   jd: number,
   place: Place,
@@ -402,6 +405,7 @@ export function getNarayanaDashaBhukti(
  *   - Duration multiplied by 3
  *   - Factor divided by 360 (annual days instead of years)
  */
+// @parity: py=varsha_narayana_dhasa_bhukthi
 export function getVarshaNarayanaDashaBhukti(
   jd: number,
   place: Place,

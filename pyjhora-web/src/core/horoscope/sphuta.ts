@@ -54,6 +54,7 @@ const LAGNA = -1;
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Tri Sphuta
  */
+// @parity: py=tri_sphuta
 export const triSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -72,6 +73,7 @@ export const triSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Chatur Sphuta
  */
+// @parity: py=chatur_sphuta
 export const chaturSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -91,6 +93,7 @@ export const chaturSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Pancha Sphuta
  */
+// @parity: py=pancha_sphuta
 export const panchaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -110,6 +113,7 @@ export const panchaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Prana Sphuta
  */
+// @parity: py=prana_sphuta
 export const pranaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -127,6 +131,7 @@ export const pranaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Deha Sphuta
  */
+// @parity: py=deha_sphuta
 export const dehaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -144,6 +149,7 @@ export const dehaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Mrityu Sphuta
  */
+// @parity: py=mrityu_sphuta
 export const mrityuSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -161,6 +167,7 @@ export const mrityuSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Sookshma Tri Sphuta
  */
+// @parity: py=sookshma_tri_sphuta
 export const sookshmaTriSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -187,6 +194,7 @@ export const sookshmaTriSphuta = (
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Beeja Sphuta
  */
+// @parity: py=beeja_sphuta
 export const beejaSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const sunLong = getAbsLong(positions, SUN);
   const jupiterLong = getAbsLong(positions, JUPITER);
@@ -202,6 +210,7 @@ export const beejaSphuta = (positions: PlanetPosition[]): { rasi: number; longit
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Kshetra Sphuta
  */
+// @parity: py=kshetra_sphuta
 export const kshetraSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const moonLong = getAbsLong(positions, MOON);
   const jupiterLong = getAbsLong(positions, JUPITER);
@@ -217,6 +226,7 @@ export const kshetraSphuta = (positions: PlanetPosition[]): { rasi: number; long
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Tithi Sphuta
  */
+// @parity: py=tithi_sphuta
 export const tithiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const moonLong = getAbsLong(positions, MOON);
   const sunLong = getAbsLong(positions, SUN);
@@ -233,6 +243,7 @@ export const tithiSphuta = (positions: PlanetPosition[]): { rasi: number; longit
  * @param addYogiLongitude - Whether to add the yogi longitude offset (default false)
  * @returns Rasi and longitude of the Yoga Sphuta
  */
+// @parity: py=yoga_sphuta
 export const yogaSphuta = (
   positions: PlanetPosition[],
   addYogiLongitude: boolean = false
@@ -251,6 +262,7 @@ export const yogaSphuta = (
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Yogi Sphuta
  */
+// @parity: py=yogi_sphuta
 export const yogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   return yogaSphuta(positions, true);
 };
@@ -262,6 +274,7 @@ export const yogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitu
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Avayogi Sphuta
  */
+// @parity: py=avayogi_sphuta
 export const avayogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const yogi = yogiSphuta(positions);
   const avayogiLong = (yogi.rasi * 30 + yogi.longitude + 186 + 40 / 60) % 360;
@@ -275,6 +288,7 @@ export const avayogiSphuta = (positions: PlanetPosition[]): { rasi: number; long
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Rahu Tithi Sphuta
  */
+// @parity: py=rahu_tithi_sphuta
 export const rahuTithiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const rahuLong = getAbsLong(positions, RAHU);
   const sunLong = getAbsLong(positions, SUN);
@@ -297,6 +311,7 @@ export const rahuTithiSphuta = (positions: PlanetPosition[]): { rasi: number; lo
  * @param gulikaLongitude - Absolute longitude of Gulika (computed with mixed dvf)
  * @param mixedDvf - Mixed divisional chart factor (vargaFactor1 * vargaFactor2)
  */
+// @parity: py=tri_sphuta_mixed_chart
 export const triSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -312,6 +327,7 @@ export const triSphotaMixedChart = (
  * Chatur Sphuta for mixed chart.
  * Formula: (Sun + triSphutaMixedChart) % 360
  */
+// @parity: py=chatur_sphuta_mixed_chart
 export const chaturSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -328,6 +344,7 @@ export const chaturSphotaMixedChart = (
  * Pancha Sphuta for mixed chart.
  * Formula: (Rahu + chaturSphutaMixedChart) % 360
  */
+// @parity: py=pancha_sphuta_mixed_chart
 export const panchaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -344,6 +361,7 @@ export const panchaSphotaMixedChart = (
  * Prana Sphuta for mixed chart.
  * Formula: (Ascendant * 5 + Gulika) % 360
  */
+// @parity: py=prana_sphuta_mixed_chart
 export const pranaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -358,6 +376,7 @@ export const pranaSphotaMixedChart = (
  * Deha Sphuta for mixed chart.
  * Formula: (Moon * 8 + Gulika) % 360
  */
+// @parity: py=deha_sphuta_mixed_chart
 export const dehaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -372,6 +391,7 @@ export const dehaSphotaMixedChart = (
  * Mrityu Sphuta for mixed chart.
  * Formula: (Gulika * 7 + Sun) % 360
  */
+// @parity: py=mrityu_sphuta_mixed_chart
 export const mrityuSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -386,6 +406,7 @@ export const mrityuSphotaMixedChart = (
  * Sookshma Tri Sphuta for mixed chart.
  * Formula: (Prana + Deha + Mrityu) % 360
  */
+// @parity: py=sookshma_tri_sphuta_mixed_chart
 export const sookshmaTriSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -406,6 +427,7 @@ export const sookshmaTriSphotaMixedChart = (
  * Beeja Sphuta for mixed chart.
  * Formula: (Sun + Jupiter + Venus) % 360
  */
+// @parity: py=beeja_sphuta_mixed_chart
 export const beejaSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -421,6 +443,7 @@ export const beejaSphotaMixedChart = (
  * Kshetra Sphuta for mixed chart.
  * Formula: (Moon + Jupiter + Mars) % 360
  */
+// @parity: py=kshetra_sphuta_mixed_chart
 export const kshetraSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -436,6 +459,7 @@ export const kshetraSphotaMixedChart = (
  * Tithi Sphuta for mixed chart.
  * Formula: (Moon - Sun) % 360
  */
+// @parity: py=tithi_sphuta_mixed_chart
 export const tithiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -450,6 +474,7 @@ export const tithiSphotaMixedChart = (
  * Yoga Sphuta for mixed chart.
  * Formula: (Moon + Sun + yogiOffset) % 360
  */
+// @parity: py=yoga_sphuta_mixed_chart
 export const yogaSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number,
@@ -466,6 +491,7 @@ export const yogaSphotaMixedChart = (
  * Yogi Sphuta for mixed chart.
  * Simply calls yogaSphotaMixedChart with addYogiLongitude=true.
  */
+// @parity: py=yogi_sphuta_mixed_chart
 export const yogiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -477,6 +503,7 @@ export const yogiSphotaMixedChart = (
  * Avayogi Sphuta for mixed chart.
  * Formula: (yogiSphutaMixedChart + 186 + 40/60) % 360
  */
+// @parity: py=avayogi_sphuta_mixed_chart
 export const avayogiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -490,6 +517,7 @@ export const avayogiSphotaMixedChart = (
  * Rahu Tithi Sphuta for mixed chart.
  * Formula: (Rahu - Sun) % 360
  */
+// @parity: py=rahu_tithi_sphuta_mixed_chart
 export const rahuTithiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number

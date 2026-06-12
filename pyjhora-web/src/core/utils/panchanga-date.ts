@@ -28,6 +28,7 @@ export const SIDEREAL_YEAR = 365.256363;
  * @param addDays - Number of days to add (default 1)
  * @returns New date
  */
+// @parity: py=next_panchanga_day
 export function nextPanchangaDay(date: JhoraDate, addDays = 1): JhoraDate {
   const jd = gregorianToJulianDay(date, { hour: 12, minute: 0, second: 0 });
   const newJd = jd + addDays;
@@ -44,6 +45,7 @@ export function nextPanchangaDay(date: JhoraDate, addDays = 1): JhoraDate {
  * @param minusDays - Number of days to subtract (default 1)
  * @returns New date
  */
+// @parity: py=previous_panchanga_day
 export function previousPanchangaDay(date: JhoraDate, minusDays = 1): JhoraDate {
   return nextPanchangaDay(date, -minusDays);
 }
@@ -61,6 +63,7 @@ export function previousPanchangaDay(date: JhoraDate, minusDays = 1): JhoraDate 
  * @param date2 - Second date
  * @returns Object with years, months, days
  */
+// @parity: py=panchanga_date_diff
 export function panchangaDateDiff(
   date1: JhoraDate,
   date2: JhoraDate,
@@ -86,6 +89,7 @@ export function panchangaDateDiff(
  * @param date2 - Second date
  * @returns Difference in days (date1 - date2)
  */
+// @parity: py=panchanga_time_delta
 export function panchangaTimeDelta(date1: JhoraDate, date2: JhoraDate): number {
   const jd1 = gregorianToJulianDay(date1, { hour: 12, minute: 0, second: 0 });
   const jd2 = gregorianToJulianDay(date2, { hour: 12, minute: 0, second: 0 });
@@ -105,6 +109,7 @@ export function panchangaTimeDelta(date1: JhoraDate, date2: JhoraDate): number {
  * @param dateText - Date string like "2025-01-15", "15/01/2025", "2025,01,15"
  * @returns JhoraDate or null if unparseable
  */
+// @parity: py=get_year_month_day_from_date_format
 export function parseDateString(dateText: string): JhoraDate | null {
   let text = dateText.trim();
   let isBce = false;
@@ -178,6 +183,7 @@ export function parseDateString(dateText: string): JhoraDate | null {
  * @param currentDate - Current date (default: today)
  * @returns Object with years, months, and 60-hour periods
  */
+// @parity: py=get_dob_years_months_60hrs_from_today
 export function getAgeFrom(
   dob: JhoraDate,
   tob: JhoraTime,
@@ -218,6 +224,7 @@ export function getAgeFrom(
  * @param end - End date
  * @returns Object with years, months, days
  */
+// @parity: py=date_diff_in_years_months_days
 export function dateDiffYMD(
   start: JhoraDate,
   end: JhoraDate,

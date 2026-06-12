@@ -87,6 +87,7 @@ def ashtottari_bhukthi(dhasa_lord, start_date,antardhasa_option=3):
         start_date += factor * year_duration
         lord = ashtottari_next_adhipati(lord,dirn)
     return retval
+# @parity: ts=@/core/dhasa/graha/tithi-ashtottari::ashtottariAnthara
 def ashtottari_anthara(dhasa_lord, bhukthi_lord,bhukthi_lord_start_date):
     """
         Compute all bhukthis of given nakshatra-lord of Mahadasa, its bhukthi lord and bhukthi_lord's start date
@@ -101,6 +102,7 @@ def ashtottari_anthara(dhasa_lord, bhukthi_lord,bhukthi_lord_start_date):
         bhukthi_lord_start_date += factor * year_duration
         lord = ashtottari_next_adhipati(lord)
     return retval
+# @parity: ts=@/core/dhasa/graha/tithi-ashtottari::getTithiAshtottariDashaBhukti
 def get_ashtottari_dhasa_bhukthi(jd, place,use_tribhagi_variation=False,include_antardhasa=True,
                                  tithi_index=1,antardhasa_option=3): #antardhasa starts from next lord
     """

@@ -18,6 +18,7 @@
  * @param ya - Target y value to find x for
  * @returns Interpolated x value
  */
+// @parity: py=inverse_lagrange
 export function inverseLagrange(x: number[], y: number[], ya: number): number {
   let total = 0;
   for (let i = 0; i < x.length; i++) {
@@ -46,6 +47,7 @@ export function inverseLagrange(x: number[], y: number[], ya: number): number {
  * @param angles - Array of angles in degrees
  * @returns Unwrapped angles (monotonically increasing)
  */
+// @parity: py=unwrap_angles
 export function unwrapAngles(angles: number[]): number[] {
   if (angles.length === 0) return [];
   const result = [angles[0]];
@@ -69,6 +71,7 @@ export function unwrapAngles(angles: number[]): number[] {
  * @param target - Minimum range to cover
  * @returns Extended array of angles
  */
+// @parity: py=extend_angle_range
 export function extendAngleRange(angles: number[], target: number): number[] {
   let extended = [...angles];
   while (Math.max(...extended) - Math.min(...extended) < target) {
@@ -88,6 +91,7 @@ export function extendAngleRange(angles: number[], target: number): number[] {
  * @param x - Evaluation point
  * @returns Interpolated y value at x
  */
+// @parity: py=newton_polynomial
 export function newtonPolynomial(xData: number[], yData: number[], x: number): number {
   const m = xData.length;
 
@@ -120,6 +124,7 @@ export function newtonPolynomial(xData: number[], yData: number[], x: number): n
  * @param epsilon - Convergence tolerance (default 5e-10)
  * @returns Approximate root
  */
+// @parity: py=_bisection_search
 export function bisectionSearch(
   func: (x: number) => number,
   start: number,

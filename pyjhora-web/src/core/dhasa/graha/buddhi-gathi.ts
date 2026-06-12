@@ -96,6 +96,7 @@ function getHouseDistance(planetRasi: number, ascRasi: number): number {
  * @param options - Calculation options
  * @returns Buddhi Gathi dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_bhukthi
 export function getBuddhiGathiDashaBhukti(
   jd: number,
   place: Place,

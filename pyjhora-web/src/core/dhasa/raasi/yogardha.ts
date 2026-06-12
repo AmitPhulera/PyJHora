@@ -140,6 +140,7 @@ function getYogardhaDuration(planetPositions: PlanetPosition[], sign: number): n
 /**
  * Get Yogardha Dasha periods
  */
+// @parity: py=get_dhasa_antardhasa
 export function getYogardhaDashaBhukti(
   jd: number,
   place: Place,

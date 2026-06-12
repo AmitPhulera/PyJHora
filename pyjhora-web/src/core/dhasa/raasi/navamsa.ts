@@ -95,6 +95,7 @@ function formatJdAsDate(jd: number): string {
 // MAIN FUNCTION
 // ============================================================================
 
+// @parity: py=get_dhasa_antardhasa
 export function getNavamsaDashaBhukti(
   jd: number,
   place: Place,

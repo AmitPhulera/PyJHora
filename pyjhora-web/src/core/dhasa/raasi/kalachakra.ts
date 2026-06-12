@@ -293,6 +293,7 @@ function getDhasaProgression(planetLongitude: number): {
  *   Use 4 for Kshema Star, 5 for Utpanna Star, 8 for Adhana Star.
  *   Only applied when startingPlanet is Moon (1).
  */
+// @parity: py=get_dhasa_bhukthi
 export function getKalachakraDashaBhukti(
   jd: number,
   place: Place,

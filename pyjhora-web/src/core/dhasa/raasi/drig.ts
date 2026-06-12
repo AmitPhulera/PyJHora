@@ -186,6 +186,7 @@ function getAntardhasa(antardhasaSeedRasi: number, pToH: Map<number, number>): n
  * Get Drig Dasha periods
  * Starts from 9th house and uses aspected kendras
  */
+// @parity: py=drig_dhasa_bhukthi
 export function getDrigDashaBhukti(
   jd: number,
   place: Place,

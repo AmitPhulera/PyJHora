@@ -72,6 +72,7 @@ function formatJdAsDate(jd: number): string {
  * @param positions - D1 (or divisional) planet positions
  * @returns Charts rotated from Lagna, Moon, and Sun houses + retrograde planets
  */
+// @parity: py=sudharshana_chakra_chart
 export function sudharsanaChakraChart(
   positions: PlanetPosition[],
 ): SudharsanaChakraChart {
@@ -157,6 +158,7 @@ function sudharsanaDhasaCalculation(
  * @param yearsFromDob - Number of years from birth (for annual charts)
  * @returns Lagna, Moon, and Sun dhasa periods
  */
+// @parity: py=sudharsana_chakra_dhasa_for_divisional_chart
 export function getSudharsanaChakraDhasa(
   positions: PlanetPosition[],
   jd: number,
@@ -186,6 +188,7 @@ export function getSudharsanaChakraDhasa(
  * @param antardhasaSeedSign - Seed sign of the antardhasa
  * @returns 12 pratyantardasas
  */
+// @parity: py=sudharsana_pratyantardasas
 export function sudharsanaPratyantardasas(
   antardhasaStartJd: number,
   antardhasaSeedSign: number,

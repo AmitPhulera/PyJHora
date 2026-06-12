@@ -158,6 +158,7 @@ function computeHaranaGlobals(
  * Does not apply to Venus (5) and Saturn (6).
  * This harana does not depend on the method (same for Santhanam and Varahamihira).
  */
+// @parity: py=_astangata_harana
 export function astangataHarana(positions: PlanetPosition[]): HaranaFactors {
   const factors: HaranaFactors = { [ASCENDANT_SYMBOL]: 1.0 };
   for (let p = 0; p < 7; p++) factors[p] = 1.0;
@@ -183,6 +184,7 @@ export function astangataHarana(positions: PlanetPosition[]): HaranaFactors {
  *                            If false (Santhanam/method=1), Mars loses in enemy sign too.
  * @param method - 1=Santhanam (Mars NOT exempt), 2=Varahamihira (Mars exempt)
  */
+// @parity: py=_shatru_kshetra_harana
 export function shatruKshetraHarana(
   positions: PlanetPosition[],
   treatMarsAsStrong: boolean = true,
@@ -214,6 +216,7 @@ export function shatruKshetraHarana(
  * Same as generic but Mars is NOT treated as strong in enemy sign.
  * "Mars also does lose in an enemy's sign" - per Santhanam.
  */
+// @parity: py=_shatru_kshetra_harana_santhanam
 export function shatruKshetraHaranaSanthanam(
   positions: PlanetPosition[],
 ): HaranaFactors {
@@ -225,6 +228,7 @@ export function shatruKshetraHaranaSanthanam(
  * Houses 7-12 (relative to Asc) get progressive reduction.
  * Benefics get less reduction than malefics.
  */
+// @parity: py=_chakrapata_harana
 export function chakrapataHarana(
   positions: PlanetPosition[],
   subhaGrahas: number[],
@@ -275,6 +279,7 @@ export function chakrapataHarana(
  * @param bhavaHouses - Map of planet id -> relative house (1-12)
  * @param bhavaStartsWithAscendant - If true, bhava starts at ascendant degree
  */
+// @parity: py=_chakrapata_harana_santhanam
 export function chakrapataHaranaSanthanam(
   positions: PlanetPosition[],
   bhavaHouses: Record<number | string, number>,
@@ -326,6 +331,7 @@ export function chakrapataHaranaSanthanam(
  *
  * Uses subha_grahas and asubha_grahas for benefic/malefic classification.
  */
+// @parity: py=_krurodaya_harana
 export function krurodayaHarana(
   positions: PlanetPosition[],
   subhaGrahas: number[],
@@ -404,6 +410,7 @@ export function krurodayaHarana(
  * @param subhaGrahas - Benefic planets list
  * @param asubhaGrahas - Malefic planets list
  */
+// @parity: py=_krurodaya_harana_santhanam
 export function krurodayaHaranaSanthanam(
   positions: PlanetPosition[],
   subhaGrahas: number[],
@@ -477,6 +484,7 @@ export function krurodayaHaranaSanthanam(
  * Bharana (increase factors) -- only for Amsayu.
  * Multiply by 3 for retrograde/exalted/owner; by 2 for vargottama.
  */
+// @parity: py=_bharana
 export function bharana(positions: PlanetPosition[]): HaranaFactors {
   const factors: HaranaFactors = { [ASCENDANT_SYMBOL]: 1.0 };
   for (let p = 0; p < 7; p++) factors[p] = 1.0;
@@ -620,6 +628,7 @@ function santhanamBaseLongevity(
  *
  * @param dhasaMethod - 1=Santhanam haranas, 2=Varahamihira haranas (default)
  */
+// @parity: py=_pindayu
 export function pindayu(
   positions: PlanetPosition[],
   applyHaranas: boolean = true,
@@ -644,6 +653,7 @@ export function pindayu(
  *
  * @param dhasaMethod - 1=Santhanam haranas, 2=Varahamihira haranas (default)
  */
+// @parity: py=_nisargayu
 export function nisargayu(
   positions: PlanetPosition[],
   applyHaranas: boolean = true,
@@ -667,6 +677,7 @@ export function nisargayu(
  * @param method - 1=Santhanam formula (planetLong*108)%12, 2=Varahamihira (planetLong*60/200)%12
  * @param dhasaMethod - 1=Santhanam haranas, 2=Varahamihira haranas (default)
  */
+// @parity: py=_amsayu
 export function amsayu(
   positions: PlanetPosition[],
   applyHaranas: boolean = true,
@@ -716,6 +727,7 @@ export function amsayu(
  * @param divisionalChartFactor - Divisional chart factor for navamsa comparison (default 9)
  * @param chartMethod - Chart method for divisional chart (default 1)
  */
+// @parity: py=_lagna_longevity
 export function lagnaLongevity(
   d1Positions: PlanetPosition[],
   divisionalChartFactor: number = 9,
@@ -748,6 +760,7 @@ export function lagnaLongevity(
  *
  * @param d1Positions - D1 (rasi chart) planet positions
  */
+// @parity: py=_lagna_longevity_santhanam
 export function lagnaLongevitySanthanam(
   d1Positions: PlanetPosition[],
 ): number {
@@ -780,6 +793,7 @@ export function lagnaLongevitySanthanam(
  *
  * Returns: 0 (Sun stronger), 1 (Moon stronger), or ASCENDANT_SYMBOL (Lagna stronger)
  */
+// @parity: py=_stronger_of_lagna_sun_moon
 export function strongerOfLagnaSunMoon(
   positions: PlanetPosition[],
 ): number | string {
@@ -808,6 +822,7 @@ export function strongerOfLagnaSunMoon(
  * This is the simplified version that uses house strength comparison.
  * For Python parity, the main API now uses strongerOfLagnaSunMoon.
  */
+// @parity: py=_get_aayur_type
 export function getAayurType(positions: PlanetPosition[]): number {
   // Compare lagna lord strength, sun position strength, moon position strength
   const ascRasi = positions[0]!.rasi;
@@ -853,6 +868,7 @@ export type DhasaTupleNoAntardasha = [number | string, string, number];
  * @param chartMethod - For lagna longevity divisional chart (default 1)
  * @returns [dhasaType, dhasas] matching Python's return format
  */
+// @parity: py=get_dhasa_antardhasa
 export function getDhasaAnterdhasa(
   d1Positions: PlanetPosition[],
   jd: number,
@@ -970,6 +986,7 @@ function formatHMS(h: number): string {
  * Pindayu dhasa bhukthi.
  * Matches Python's pindayu_dhasa_bhukthi.
  */
+// @parity: py=pindayu_dhasa_bhukthi
 export function pindayuDhasaBhukthi(
   d1Positions: PlanetPosition[],
   jd: number,
@@ -989,6 +1006,7 @@ export function pindayuDhasaBhukthi(
  * Nisargayu dhasa bhukthi.
  * Matches Python's nisargayu_dhasa_bhukthi.
  */
+// @parity: py=nisargayu_dhasa_bhukthi
 export function nisargayuDhasaBhukthi(
   d1Positions: PlanetPosition[],
   jd: number,
@@ -1008,6 +1026,7 @@ export function nisargayuDhasaBhukthi(
  * Amsayu dhasa bhukthi.
  * Matches Python's amsayu_dhasa_bhukthi.
  */
+// @parity: py=amsayu_dhasa_bhukthi
 export function amsayuDhasaBhukthi(
   d1Positions: PlanetPosition[],
   jd: number,
@@ -1029,6 +1048,7 @@ export function amsayuDhasaBhukthi(
  *
  * @returns [totalLongevity, aayurType] where aayurType: 0=Pindayu, 1=Nisargayu, 2=Amsayu
  */
+// @parity: py=longevity
 export function longevity(
   d1Positions: PlanetPosition[],
   jd: number,

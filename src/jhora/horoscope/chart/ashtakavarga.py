@@ -24,6 +24,7 @@ from jhora import const, utils
 planet_list = ['sun','moon','mars','mercury','jupiter','venus','saturn','lagnam']
 raasi_list=['Mesham','Rishabam','Mithunam','Katakam','Simmam','Kanni','Thulaam','Vrichigam','Dhanusu','Makaram','Kumbam','Meenam']
 raasi_index = lambda planet,planet_positions_in_chart: [i for i,raasi in enumerate(planet_positions_in_chart) if planet !=const._ascendant_symbol and planet.lower() in raasi.lower() ][0]
+# @parity: ts=@/core/horoscope/ashtakavarga::getAshtakavarga
 def get_ashtaka_varga(house_to_planet_list):
     """
         get binna, samudhaya and prastara varga from the given horoscope chart
@@ -56,6 +57,7 @@ def get_ashtaka_varga(house_to_planet_list):
     prastara_ashtaka_varga = prastara_ashtaka_varga[0:8][0:9][:]
     samudhaya_ashtaka_varga = np.asarray(binna_ashtaka_varga[:-1]).sum(axis=0).tolist() # [0:-1] to exlcude Lagnam
     return binna_ashtaka_varga, samudhaya_ashtaka_varga,prastara_ashtaka_varga
+# @parity: ts=@/core/horoscope/ashtakavarga::trikonaSodhana
 def _trikona_sodhana(binna_ashtaka_varga):
     bav = binna_ashtaka_varga[:]
     for p in range(7):
@@ -77,6 +79,7 @@ def _trikona_sodhana(binna_ashtaka_varga):
                 bav[p][r+8] -= min_value
                 #print('after',p,r,min_value,bav[p][r],bav[p][r+4],bav[p][r+8])
     return bav
+# @parity: ts=@/core/horoscope/ashtakavarga::ekadhipatyaSodhana
 def _ekadhipatya_sodhana(binna_ashtaka_varga_after_trikona,chart_1d):
     bav = binna_ashtaka_varga_after_trikona[:]
     rasi_owners=[4,3,(0,7),(2,5),(8,11),(1,6),(9,10)]
@@ -137,6 +140,7 @@ def _sodhya_pindas(binna_ashtaka_varga_after_ekadhipatya,chart_1d):
         graha_pindas[p] = sum([ grahamana_multipliers[i]*bav[p][pr] for i,pr in enumerate(planet_houses)])
         sodhya_pindas[p] = raasi_pindas[p]+graha_pindas[p]
     return raasi_pindas,graha_pindas,sodhya_pindas
+# @parity: ts=@/core/horoscope/ashtakavarga::sodhayaPindas
 def sodhaya_pindas(binna_ashtaka_varga,house_to_planet_chart):
     """
         Get sodhaya pindas from binna ashtaka varga

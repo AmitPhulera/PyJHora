@@ -149,6 +149,7 @@ function getDhasaDurationKNRao(
 /**
  * Get Mandooka Dasha periods
  */
+// @parity: py=get_dhasa_antardhasa
 export function getMandookaDashaBhukti(
   jd: number,
   place: Place,

@@ -101,6 +101,7 @@ function buildNakshatraDict(seedStar = 8): Map<number, number> {
 /**
  * Get the Shodasottari lord for a nakshatra
  */
+// @parity: py=_maha_dhasa
 export function getShodasottariDhasaLord(nakshatra: number, seedStar = 8): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? SUN;
@@ -112,6 +113,7 @@ export function getShodasottariDhasaLord(nakshatra: number, seedStar = 8): [numb
 /**
  * Get the next lord in the Shodasottari sequence
  */
+// @parity: py=_next_adhipati
 export function getNextShodasottariLord(lord: number, direction = 1): number {
   const currentIndex = SHODASOTTARI_LORDS.indexOf(lord);
   if (currentIndex === -1) {
@@ -141,6 +143,7 @@ function formatJdAsDate(jd: number): string {
  * Calculate the start date of the Shodasottari mahadasha at birth
  * @param startingPlanet - 0-8 for planets, 'L' for Lagna. For M/G/B/I/P/T use async version.
  */
+// @parity: py=_dhasa_start
 export function shodasottariDashaStart(
   jd: number,
   place: Place,
@@ -206,6 +209,7 @@ export async function shodasottariDashaStartAsync(
 /**
  * Get complete Shodasottari dasha-bhukti data
  */
+// @parity: py=get_dhasa_bhukthi
 export function getShodasottariDashaBhukti(
   jd: number,
   place: Place,

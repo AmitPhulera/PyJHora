@@ -97,6 +97,7 @@ export function julianDayToGregorian(jd: number): { date: JhoraDate; time: Jhora
  * @param time - Time of day
  * @returns Julian Day Number
  */
+// @parity: py=julian_day_number
 export function julianDayNumber(date: JhoraDate, time: JhoraTime): number {
   return gregorianToJulianDay(date, time);
 }
@@ -107,6 +108,7 @@ export function julianDayNumber(date: JhoraDate, time: JhoraTime): number {
  * @param timezoneOffset - Timezone offset in hours
  * @returns UTC Julian Day Number
  */
+// @parity: py=julian_day_utc
 export function toUtc(jd: number, timezoneOffset: number): number {
   return jd - timezoneOffset / 24;
 }

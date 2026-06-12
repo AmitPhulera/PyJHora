@@ -43,6 +43,7 @@ function getPositions(jd: number, place: Place, divisionalChartFactor: number): 
  * Seed = Ascendant in Navamsa (D-9)
  * Logic = Narayana Dasha
  */
+// @parity: py=get_dhasa_antardhasa
 export function getLagnamsakaDashaBhukti(
   jd: number,
   place: Place,

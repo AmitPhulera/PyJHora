@@ -37,6 +37,7 @@ human_life_span_for_ashtottari_dhasa = 108
 ashtottari_adhipathi_list = [0,1,2,3,6,4,7,5]
 ashtottari_adhipathi_dict_seed = {0:[(6,9),6],1:[(10,12),15],2:[(13,16),8],3:[(17,19),17],
                              6:[(20,22),10],4:[(23,25),19],7:[(26,2),12],5:[(3,5),21]}
+# @parity: ts=@/core/dhasa/graha/applicability::isAshtottariApplicable
 def applicability_check(planet_positions):
     asc_house = planet_positions[0][1][0]
     lagna_lord = house.house_owner_from_planet_positions(planet_positions, asc_house)
@@ -55,6 +56,7 @@ def _get_dhasa_dict(seed_star=6):
         ashtottari_adhipathi_dict[p] = [(nsb,nse),durn]
         nak = (nse+1)%28
     return ashtottari_adhipathi_dict
+# @parity: ts=@/core/dhasa/graha/ashtottari::getAshtottariAdhipati
 def ashtottari_adhipathi(nak):
     for key,value in ashtottari_adhipathi_dict.items():
         starting_star = value[0][0]
@@ -66,6 +68,7 @@ def ashtottari_adhipathi(nak):
                 nak1 += 27
         if nak1 >= starting_star and nak1 <= ending_star:
             return key,value
+# @parity: ts=@/core/dhasa/graha/ashtottari::ashtottariDashaStartDate
 def ashtottari_dasha_start_date(jd,place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,
                                 dhasa_starting_planet=1):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob=drik.Date(y,m,d); tob=(fh,0,0)
@@ -107,6 +110,7 @@ def ashtottari_dasha_start_date(jd,place,divisional_chart_factor=1,chart_method=
     period_elapsed *= (period*year_duration)        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date]
+# @parity: ts=@/core/dhasa/graha/ashtottari::getNextAshtottariAdhipati
 def ashtottari_next_adhipati(lord,dirn=1):
     """Returns next lord after `lord` in the adhipati_list"""
     current = ashtottari_adhipathi_list.index(lord)
@@ -114,6 +118,7 @@ def ashtottari_next_adhipati(lord,dirn=1):
     next_index = (current + dirn) % len(ashtottari_adhipathi_list)
     #print(next_index)
     return ashtottari_adhipathi_list[next_index]
+# @parity: ts=@/core/dhasa/graha/ashtottari::ashtottariMahadasha
 def ashtottari_mahadasa(jd,place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,
                         dhasa_starting_planet=1):
     """
@@ -130,6 +135,7 @@ def ashtottari_mahadasa(jd,place,divisional_chart_factor=1,chart_method=1,star_p
         start_date += lord_duration * year_duration
         lord = ashtottari_next_adhipati(lord)
     return retval
+# @parity: ts=@/core/dhasa/graha/ashtottari::ashtottariBhukti
 def ashtottari_bhukthi(dhasa_lord, start_date,antardhasa_option=1):
     """
         Compute all bhukthis of given nakshatra-lord of Mahadasa and its start date
@@ -164,6 +170,7 @@ def ashtottari_anthara(dhasa_lord, bhukthi_lord,bhukthi_lord_start_date):
         bhukthi_lord_start_date += factor * year_duration
         lord = ashtottari_next_adhipati(lord)
     return retval
+# @parity: ts=@/core/dhasa/graha/ashtottari::getAshtottariDashaBhukti
 def get_ashtottari_dhasa_bhukthi(jd, place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,
                                  use_tribhagi_variation=False,include_antardhasa=True,
                                  antardhasa_option=1,dhasa_starting_planet=1,seed_star=6):

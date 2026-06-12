@@ -127,6 +127,7 @@ export function formatPlanetLongitude(longitude: number): string {
  * @param isLatLong - Type: 'lat', 'long', or 'plong' (planet longitude)
  * @returns Formatted string
  */
+// @parity: py=to_dms
 export function toDmsString(longitude: number, isLatLong: 'lat' | 'long' | 'plong' = 'plong'): string {
   const dms = toDMS(Math.abs(longitude));
   

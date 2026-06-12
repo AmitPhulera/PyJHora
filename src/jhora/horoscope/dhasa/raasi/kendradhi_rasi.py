@@ -25,6 +25,7 @@ from jhora.horoscope.dhasa.raasi import narayana
 """ This file also finds Karaka Kendraddi Rasi Dasa - See karaka_kendradhi_rasi_dhasa() """
 def lagna_kendradhi_rasi_dhasa(dob,tob,place,divisional_chart_factor=1):
     return kendradhi_rasi_dhasa(dob,tob,place,divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/dhasa/raasi/kendradhi::getKendradhiDashaBhukti
 def kendradhi_rasi_dhasa(dob,tob,place,divisional_chart_factor=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, divisional_chart_factor=divisional_chart_factor)
@@ -87,6 +88,7 @@ def kendradhi_rasi_dhasa(dob,tob,place,divisional_chart_factor=1,include_antardh
         if total_dhasa_duration >= const.human_life_span_for_narayana_dhasa:
             break
     return dhasa_info
+# @parity: ts=@/core/dhasa/raasi/kendradhi::getKarakaKendradhiDashaBhukti
 def karaka_kendradhi_rasi_dhasa(dob,tob,place,divisional_chart_factor=1,karaka_index=1,include_antardhasa=True):
     if karaka_index not in range(1,9):
         print('Karaka Index should be in the range (1..8). Index 1 assumed')

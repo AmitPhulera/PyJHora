@@ -257,7 +257,6 @@ export async function siderealLongitudeAsync(jdUtc: number, planet: number): Pro
   // Set ayanamsa mode
   const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
   swe.set_sid_mode(modeId, 0, 0);
-  const ayanamsa = swe.get_ayanamsa(jdUtc);
 
   // Handle Ketu specially
   if (planet === 8) {
@@ -274,7 +273,10 @@ export async function siderealLongitudeAsync(jdUtc: number, planet: number): Pro
   // Call swe_calc_ut via direct ccall to avoid the buggy JS wrapper.
   // The wrapper intermittently returns zeroed data due to WASM buffer issues.
   // C signature: int swe_calc_ut(double tjd_ut, int ipl, int iflag, double *xx, char *serr)
-  const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+  // FLG_SIDEREAL: let Swiss Ephemeris apply the ayanamsa internally (incl.
+  // nutation), matching Python's FLG_SWIEPH|FLG_SIDEREAL|_rise_flags. Manual
+  // "tropical - get_ayanamsa" misses nutation (~14 arcsec error).
+  const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SIDEREAL;
   const SweModule = (swe as any).SweModule;
   const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
   const serrPtr = SweModule._malloc(256);
@@ -289,9 +291,7 @@ export async function siderealLongitudeAsync(jdUtc: number, planet: number): Pro
 
     // Read result immediately and copy before any other WASM call
     const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
-    const tropical = normalizeDegrees(xx[0]);
-    const sidereal = normalizeDegrees(tropical - ayanamsa);
-    return sidereal;
+    return normalizeDegrees(xx[0]);
   } catch (err) {
     console.error(`Error calculating planet ${planet} (sweIndex=${sweIndex}):`, err);
     return 0;
@@ -317,14 +317,14 @@ export function siderealLongitude(jdUtc: number, planet: number): number {
     // Accurate WASM calculation
     const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
     _sweInstance!.set_sid_mode(modeId, 0, 0);
-    const ayanamsa = _sweInstance!.get_ayanamsa(jdUtc);
 
     const sweIndex = PYJHORA_TO_SWE[planet];
     if (sweIndex === undefined || sweIndex === -1) {
       throw new Error(`Unknown planet index: ${planet}`);
     }
 
-    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+    // FLG_SIDEREAL: internal ayanamsa incl. nutation — matches Python flags.
+    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SIDEREAL;
     const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
     const serrPtr = SweModule._malloc(256);
 
@@ -336,8 +336,7 @@ export function siderealLongitude(jdUtc: number, planet: number): number {
         [jdUtc, sweIndex, flags, xxPtr, serrPtr]
       );
       const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
-      const tropical = normalizeDegrees(xx[0]);
-      return normalizeDegrees(tropical - ayanamsa);
+      return normalizeDegrees(xx[0]);
     } finally {
       SweModule._free(xxPtr);
       SweModule._free(serrPtr);
@@ -927,7 +926,6 @@ export async function planetSpeedInfoAsync(jd: number, place: Place, planet: num
 
   const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
   swe.set_sid_mode(modeId, 0, 0);
-  const ayanamsa = swe.get_ayanamsa(jdUtc);
 
   const sweIndex = PYJHORA_TO_SWE[planet];
   if (sweIndex === undefined || sweIndex === -1) {
@@ -943,8 +941,9 @@ export async function planetSpeedInfoAsync(jd: number, place: Place, planet: num
     };
   }
 
-  // Use direct ccall to avoid buggy JS wrapper buffer issues
-  const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+  // Use direct ccall to avoid buggy JS wrapper buffer issues.
+  // FLG_SIDEREAL: internal ayanamsa incl. nutation — matches Python flags.
+  const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SIDEREAL;
   const SweModule = (swe as any).SweModule;
   const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
   const serrPtr = SweModule._malloc(256);
@@ -959,7 +958,7 @@ export async function planetSpeedInfoAsync(jd: number, place: Place, planet: num
 
     const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
     return {
-      longitude: normalizeDegrees(xx[0] - ayanamsa),
+      longitude: normalizeDegrees(xx[0]),
       latitude: xx[1],
       distance: xx[2],
       longitudeSpeed: xx[3],
@@ -1009,14 +1008,14 @@ export function planetSpeedInfo(jd: number, place: Place, planet: number): {
   if (SweModule) {
     const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
     _sweInstance!.set_sid_mode(modeId, 0, 0);
-    const ayanamsa = _sweInstance!.get_ayanamsa(jdUtc);
 
     const sweIndex = PYJHORA_TO_SWE[planet];
     if (sweIndex === undefined || sweIndex === -1) {
       return { longitude: 0, latitude: 0, distance: 1, longitudeSpeed: 0, latitudeSpeed: 0, distanceSpeed: 0 };
     }
 
-    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS;
+    // FLG_SIDEREAL: internal ayanamsa incl. nutation — matches Python flags.
+    const flags = SWE_FLAGS.FLG_MOSEPH | SWE_FLAGS.FLG_SPEED | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SIDEREAL;
     const xxPtr = SweModule._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
     const serrPtr = SweModule._malloc(256);
 
@@ -1028,7 +1027,7 @@ export function planetSpeedInfo(jd: number, place: Place, planet: number): {
       );
       const xx = new Float64Array(SweModule.HEAPF64.buffer, xxPtr, 6);
       return {
-        longitude: normalizeDegrees(xx[0] - ayanamsa),
+        longitude: normalizeDegrees(xx[0]),
         latitude: xx[1],
         distance: xx[2],
         longitudeSpeed: xx[3],

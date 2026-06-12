@@ -114,6 +114,7 @@ function buildNakshatraDict(seedStar = 1): Map<number, number> {
  * @param seedStar - Starting nakshatra (default 1 = Ashwini)
  * @returns [lord, durationYears]
  */
+// @parity: py=_maha_dhasa
 export function getShastihayaniDhasaLord(nakshatra: number, seedStar = 1): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? JUPITER;
@@ -125,6 +126,7 @@ export function getShastihayaniDhasaLord(nakshatra: number, seedStar = 1): [numb
 /**
  * Get the next lord in the Shastihayani sequence
  */
+// @parity: py=_next_adhipati
 export function getNextShastihayaniLord(lord: number, direction = 1): number {
   const currentIndex = SHASTIHAYANI_LORDS.indexOf(lord);
   if (currentIndex === -1) {
@@ -153,6 +155,7 @@ function formatJdAsDate(jd: number): string {
 /**
  * Calculate the start date of the Shastihayani mahadasha at birth
  */
+// @parity: py=_dhasa_start
 export function shastihayaniDashaStart(
   jd: number,
   place: Place,
@@ -196,6 +199,7 @@ export function shastihayaniDashaStart(
 /**
  * Get complete Shastihayani dasha-bhukti data
  */
+// @parity: py=get_dhasa_bhukthi
 export function getShastihayaniDashaBhukti(
   jd: number,
   place: Place,

@@ -91,6 +91,7 @@ function buildNakshatraDict(seedStar = 22): Map<number, number> {
   return nakToLord;
 }
 
+// @parity: py=_maha_dhasa
 export function getShattrimsaDhasaLord(nakshatra: number, seedStar = 22): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? MOON;
@@ -98,6 +99,7 @@ export function getShattrimsaDhasaLord(nakshatra: number, seedStar = 22): [numbe
   return [lord, duration];
 }
 
+// @parity: py=_next_adhipati
 export function getNextShattrimsaLord(lord: number, direction = 1): number {
   const currentIndex = SHATTRIMSA_LORDS.indexOf(lord);
   if (currentIndex === -1) return SHATTRIMSA_LORDS[0]!;
@@ -114,6 +116,7 @@ function formatJdAsDate(jd: number): string {
   return `${yearStr}-${pad(date.month)}-${pad(date.day)} ${pad(hour12)}:${pad(time.minute)}:${pad(time.second)} ${ampm}`;
 }
 
+// @parity: py=_dhasa_start
 export function shattrimsaDashaStart(
   jd: number,
   place: Place,
@@ -149,6 +152,7 @@ export function shattrimsaDashaStart(
   return [lord, startDate, duration];
 }
 
+// @parity: py=get_dhasa_bhukthi
 export function getShattrimsaDashaBhukti(
   jd: number,
   place: Place,

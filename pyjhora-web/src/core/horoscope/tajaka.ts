@@ -137,6 +137,7 @@ export const munthaHouse = (ascendantHouse: number, years: number): number =>
  * Trinal aspects of the raasi (5th and 9th houses from raasi).
  * Strong benefic aspect.
  */
+// @parity: py=trinal_aspects_of_the_raasi
 export const trinalAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -149,6 +150,7 @@ export const trinalAspectsOfTheRaasi = (
 /**
  * Trinal aspects of the planet (strong benefic aspect).
  */
+// @parity: py=trinal_aspects_of_the_planet
 export const trinalAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -163,6 +165,7 @@ export const trinalAspectsOfThePlanet = (
  * Sextile aspects of the raasi (3rd and 11th houses from raasi).
  * Weak benefic aspect.
  */
+// @parity: py=sextile_aspects_of_the_raasi
 export const sextileAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -175,6 +178,7 @@ export const sextileAspectsOfTheRaasi = (
 /**
  * Sextile aspects of the planet (weak benefic aspect).
  */
+// @parity: py=sextile_aspects_of_the_planet
 export const sextileAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -189,6 +193,7 @@ export const sextileAspectsOfThePlanet = (
  * Square aspects of the raasi (4th and 10th houses from raasi).
  * Weak malefic aspect.
  */
+// @parity: py=square_aspects_of_the_raasi
 export const squareAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -201,6 +206,7 @@ export const squareAspectsOfTheRaasi = (
 /**
  * Square aspects of the planet (weak malefic aspect).
  */
+// @parity: py=square_aspects_of_the_planet
 export const squareAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -218,6 +224,7 @@ export const squareAspectsOfThePlanet = (
 /**
  * Benefic aspects of the raasi = trinal + sextile aspects.
  */
+// @parity: py=benefic_aspects_of_the_raasi
 export const beneficAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -230,6 +237,7 @@ export const beneficAspectsOfTheRaasi = (
 /**
  * Benefic aspects of the planet = trinal + sextile aspects.
  */
+// @parity: py=benefic_aspects_of_the_planet
 export const beneficAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -242,6 +250,7 @@ export const beneficAspectsOfThePlanet = (
 /**
  * Return true if planet has benefic aspect on the given house.
  */
+// @parity: py=planet_has_benefic_aspect_on_house
 export const planetHasBeneficAspectOnHouse = (
     housePlanetDict: HousePlanetDict,
     planet: string | number,
@@ -258,6 +267,7 @@ export const planetHasBeneficAspectOnHouse = (
 /**
  * Semi-sextile aspects of the raasi (2nd and 12th houses from raasi).
  */
+// @parity: py=semi_sextile_aspects_of_the_raasi
 export const semiSextileAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -270,6 +280,7 @@ export const semiSextileAspectsOfTheRaasi = (
 /**
  * Semi-sextile aspects of the planet (neutral aspect).
  */
+// @parity: py=semi_sextile_aspects_of_the_planet
 export const semiSextileAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -283,11 +294,13 @@ export const semiSextileAspectsOfThePlanet = (
 /**
  * Neutral aspects of the raasi (same as semi-sextile).
  */
+// @parity: py=neutral_aspects_of_the_raasi
 export const neutralAspectsOfTheRaasi = semiSextileAspectsOfTheRaasi;
 
 /**
  * Neutral aspects of the planet (same as semi-sextile).
  */
+// @parity: py=neutral_aspects_of_the_planet
 export const neutralAspectsOfThePlanet = semiSextileAspectsOfThePlanet;
 
 // ============================================================================
@@ -298,6 +311,7 @@ export const neutralAspectsOfThePlanet = semiSextileAspectsOfThePlanet;
  * Opposition aspects of the raasi (7th house from raasi).
  * Strong malefic aspect.
  */
+// @parity: py=opposition_aspects_of_the_raasi
 export const oppositionAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -310,6 +324,7 @@ export const oppositionAspectsOfTheRaasi = (
 /**
  * Opposition aspects of the planet (strong malefic aspect).
  */
+// @parity: py=opposition_aspects_of_the_planet
 export const oppositionAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -327,6 +342,7 @@ export const oppositionAspectsOfThePlanet = (
 /**
  * Conjunction aspects of the raasi (same house, excluding the planet itself).
  */
+// @parity: py=conjunction_aspects_of_the_raasi
 export const conjunctionAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -350,6 +366,7 @@ export const conjunctionAspectsOfTheRaasi = (
 /**
  * Conjunction aspects of the planet (same house, strong malefic aspect).
  */
+// @parity: py=conjunction_aspects_of_the_planet
 export const conjunctionAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -380,6 +397,7 @@ export const conjunctionAspectsOfThePlanet = (
 /**
  * Malefic aspects of the raasi = square + conjunction + opposition.
  */
+// @parity: py=malefic_aspects_of_the_raasi
 export const maleficAspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -396,6 +414,7 @@ export const maleficAspectsOfTheRaasi = (
 /**
  * Malefic aspects of the planet = square + conjunction + opposition.
  */
+// @parity: py=malefic_aspects_of_the_planet
 export const maleficAspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -412,6 +431,7 @@ export const maleficAspectsOfThePlanet = (
 /**
  * Return true if planet has malefic aspect on the given house.
  */
+// @parity: py=planet_has_malefic_aspect_on_house
 export const planetHasMaleficAspectOnHouse = (
     housePlanetDict: HousePlanetDict,
     planet: string | number,
@@ -428,6 +448,7 @@ export const planetHasMaleficAspectOnHouse = (
 /**
  * Return true if planet1 and planet2 have benefic aspects on each other.
  */
+// @parity: py=planets_have_benefic_aspects
 export const planetsHaveBeneficAspects = (
     housePlanetDict: HousePlanetDict,
     planet1: number,
@@ -440,6 +461,7 @@ export const planetsHaveBeneficAspects = (
 /**
  * Return true if planet1 and planet2 have malefic aspects on each other.
  */
+// @parity: py=planets_have_malefic_aspects
 export const planetsHaveMaleficAspects = (
     housePlanetDict: HousePlanetDict,
     planet1: number,
@@ -452,6 +474,7 @@ export const planetsHaveMaleficAspects = (
 /**
  * Return true if planet1 and planet2 have neutral aspects on each other.
  */
+// @parity: py=planets_have_neutral_aspects
 export const planetsHaveNeutralAspects = (
     housePlanetDict: HousePlanetDict,
     planet1: number,
@@ -464,6 +487,7 @@ export const planetsHaveNeutralAspects = (
 /**
  * Return true if planet1 and planet2 have ANY aspect on each other.
  */
+// @parity: py=planets_have_aspects
 export const planetsHaveAspects = (
     housePlanetDict: HousePlanetDict,
     planet1: number,
@@ -478,6 +502,7 @@ export const planetsHaveAspects = (
 /**
  * Get all aspect pairs from a chart. Returns map of planet -> list of aspected planets.
  */
+// @parity: py=planet_aspects_from_chart
 export const planetAspectsFromChart = (
     chart: HousePlanetDict
 ): Record<number, number[]> => {
@@ -502,6 +527,7 @@ export const planetAspectsFromChart = (
 /**
  * Return all (benefic, malefic, neutral) aspected houses and planets of the raasi.
  */
+// @parity: py=aspects_of_the_raasi
 export const aspectsOfTheRaasi = (
     housePlanetDict: HousePlanetDict,
     raasi: number
@@ -518,6 +544,7 @@ export const aspectsOfTheRaasi = (
 /**
  * Return all (benefic, malefic, neutral) aspected houses and planets of the planet.
  */
+// @parity: py=aspects_of_the_planet
 export const aspectsOfThePlanet = (
     housePlanetDict: HousePlanetDict,
     planet: string | number
@@ -542,6 +569,7 @@ export const aspectsOfThePlanet = (
  *   2 = Poorna ithasala
  *   3 = Bhavishya ithasala
  */
+// @parity: py=both_planets_within_their_deeptamsa
 export const bothPlanetsWithinTheirDeeptamsa = (
     planetPositions: TajakaPlanetPosition[],
     planet1: number,
@@ -591,6 +619,7 @@ export const bothPlanetsWithinTheirDeeptamsa = (
  * Check if two planets are approaching each other.
  * The faster planet should be less advanced (lower longitude in rasi).
  */
+// @parity: py=both_planets_approaching
 export const bothPlanetsApproaching = (
     planetPositions: TajakaPlanetPosition[],
     planet1: number,

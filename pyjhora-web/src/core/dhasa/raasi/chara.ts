@@ -52,6 +52,7 @@ const countRasis = (fromHouse: number, toHouse: number): number => {
  * Calculate duration of Chara Dasha for a sign (KN Rao Method)
  * Also used by Yogardha as chara component.
  */
+// @parity: py=_dhasa_duration_knrao_method
 export const getCharaDhasaDuration = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
   sign: number
@@ -95,6 +96,7 @@ export const getCharaDhasaDuration = (
  * - Uses const.house_owners for basic lord (no co-lordship resolution)
  * - No exalted/debilitated exceptions
  */
+// @parity: py=_dhasa_duration_pvnrao_method
 export const getCharaDhasaDurationPvnRao = (
     planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
     sign: number
@@ -171,6 +173,7 @@ export const getCharaDhasaDurationPvnRao = (
 /**
  * KN Rao progression: from ascendant, direction based on 9th house footedness
  */
+// @parity: py=_dhasa_progression_knrao_method
 export const getCharaDhasaProgression = (ascendantRasi: number): number[] => {
     const seedHouse = ascendantRasi;
     const ninthHouse = (seedHouse + 8) % 12;
@@ -220,6 +223,7 @@ function getPvnRaoProgression(
  * Antardhasa: rotate dasha progression list by 1 (KN Rao method)
  * Python: _antardhasas = dhasas[1:]+[dhasas[0]]
  */
+// @parity: py=_antardhasa
 export function getCharaAntardhasa(dhasaProgression: number[]): number[] {
     if (dhasaProgression.length <= 1) return [...dhasaProgression];
     return [...dhasaProgression.slice(1), dhasaProgression[0]!];
@@ -287,6 +291,7 @@ export const calculateCharaDasha = (
  * chara_method=1 (default): PVN Rao progression, KN Rao duration, 2 cycles
  * chara_method=2: KN Rao single cycle
  */
+// @parity: py=get_dhasa_antardhasa
 export function getCharaDashaBhukti(
     jd: number,
     place: Place,

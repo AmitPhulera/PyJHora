@@ -58,6 +58,7 @@ def _dhasa_lords(planet_positions,dhasa_seed):
         if sr in const.even_footed_signs:
             dhasa_lords = [(sr-h+13)%12 for h in [1,7,2,8,3,9,4,10,5,11,6,12]]
     return dhasa_lords
+# @parity: ts=@/core/dhasa/raasi/paryaaya::getParyaayaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=6,years=1,months=1,sixty_hours=1,include_antardhasa=True,
                          use_tribhagi_variation=False):
     _dhasa_cycles = 2

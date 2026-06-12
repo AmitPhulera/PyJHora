@@ -117,6 +117,7 @@ function getYoginiDashaDict(seedStar: number = 7, seedLord: number = SUN): Map<n
   return dict;
 }
 
+// @parity: py=_next_adhipati
 export function getNextYoginiLord(lord: number, direction: number = 1): number {
   const idx = YOGINI_LORDS_ORDER.indexOf(lord);
   const len = YOGINI_LORDS_ORDER.length;
@@ -124,6 +125,7 @@ export function getNextYoginiLord(lord: number, direction: number = 1): number {
   return YOGINI_LORDS_ORDER[nextIdx]!;
 }
 
+// @parity: py=_maha_dhasa
 export function getYoginiDhasaLord(nakshatra: number, seedStar: number = 7): [number, number] {
   const dict = getYoginiDashaDict(seedStar, SUN);
   let lord = SUN;
@@ -149,6 +151,7 @@ function formatJdAsDate(jd: number): string {
 // MAIN CALCULATIONS
 // ============================================================================
 
+// @parity: py=get_dhasa_bhukthi
 export function getYoginiDashaBhukti(
   jd: number,
   place: Place,
