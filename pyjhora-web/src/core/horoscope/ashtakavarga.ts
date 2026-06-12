@@ -82,6 +82,7 @@ export const getPlanetToHouseFromChart = (
  *                     Example: ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8']
  * @returns AshtakavargaResult containing BAV, SAV, and Prastara
  */
+// @parity: py=get_ashtaka_varga
 export const getAshtakavarga = (houseChart: HouseChart): AshtakavargaResult => {
   const pToH = getPlanetToHouseFromChart(houseChart);
 
@@ -161,6 +162,7 @@ export const getAshtakavarga = (houseChart: HouseChart): AshtakavargaResult => {
  * @param binnaAshtakavarga - 2D array [planet][rasi] from BAV
  * @returns Reduced BAV after trikona sodhana
  */
+// @parity: py=_trikona_sodhana
 export const trikonaSodhana = (binnaAshtakavarga: number[][]): number[][] => {
   // Deep copy
   const bav = binnaAshtakavarga.map(row => [...row]);
@@ -223,6 +225,7 @@ export const trikonaSodhana = (binnaAshtakavarga: number[][]): number[][] => {
  * @param houseChart - Original house chart to check occupancy
  * @returns Reduced BAV after ekadhipatya sodhana (also called Sodhita Ashtakavarga)
  */
+// @parity: py=_ekadhipatya_sodhana
 export const ekadhipatyaSodhana = (
   bavAfterTrikona: number[][],
   houseChart: HouseChart
@@ -389,6 +392,7 @@ const calculateSodhyaPindas = (
  * @param houseChart - Original house chart
  * @returns Rasi Pindas, Graha Pindas, and Sodhya Pindas
  */
+// @parity: py=sodhaya_pindas
 export const sodhayaPindas = (
   binnaAshtakavarga: number[][],
   houseChart: HouseChart
