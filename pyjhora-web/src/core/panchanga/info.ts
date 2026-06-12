@@ -75,6 +75,7 @@ export function formatDms(hours: number): string {
  * Get basic panchangam information for a given Julian Day and place.
  * Returns a dictionary of key-value pairs suitable for display.
  */
+// @parity: py=get_panchangam_resources_basic
 export function getPanchangamBasic(jd: number, place: Place): PanchangamInfo {
   const results: PanchangamInfo = {};
   const { date, time } = julianDayToGregorian(jd);
@@ -161,6 +162,7 @@ export function getPanchangamBasic(jd: number, place: Place): PanchangamInfo {
  * Get panchangam information with a specified resource type.
  * @param resourceType - null for all, 1=basic, 2=special tithis, 3=gowri, 4=muhurtham, 5=horai, 6=misc
  */
+// @parity: py=get_panchangam_resources
 export function getPanchangamResources(
   jd: number,
   place: Place,
