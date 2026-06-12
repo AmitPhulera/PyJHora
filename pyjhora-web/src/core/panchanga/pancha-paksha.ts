@@ -164,6 +164,7 @@ export interface PanchaPakshiResult {
 /**
  * Get the birth nakshatra number (1-based) for a given julian day and place.
  */
+// @parity: py=_get_birth_nakshathra
 export function getBirthNakshatra(jd: number, place: Place): number {
   return nakshatraNew(jd, place)[0];
 }
@@ -171,6 +172,7 @@ export function getBirthNakshatra(jd: number, place: Place): number {
 /**
  * Get the paksha (1 = shukla, 2 = krishna) for a given julian day and place.
  */
+// @parity: py=_get_paksha
 export function getPaksha(jd: number, place: Place): number {
   const tithi = calculateTithi(jd, place).number;
   return tithi <= 15 ? 1 : 2;
@@ -182,6 +184,7 @@ export function getPaksha(jd: number, place: Place): number {
  * @param paksha - 1 for shukla, 2 for krishna
  * @returns Bird number (1-indexed: 1=Vulture, 2=Owl, 3=Crow, 4=Cock, 5=Peacock)
  */
+// @parity: py=_get_birth_bird_from_nakshathra
 export function getBirthBirdFromNakshatra(birthStar: number, paksha: number): number {
   return PANCHA_PAKSHI_STARS_BIRDS_PAKSHA[birthStar - 1][paksha - 1];
 }
@@ -196,6 +199,7 @@ export function getBirthBirdFromNakshatra(birthStar: number, paksha: number): nu
  * @param pakshaIndex - Paksha (1-indexed, 1=shukla, 2=krishna)
  * @returns Matching rows from the database
  */
+// @parity: py=get_matching_pancha_pakshi_data_from_db
 export function getMatchingPanchaPakshiData(
   birdIndex: number,
   weekdayIndex: number,
@@ -235,6 +239,7 @@ function formatJdToDateTime(jd: number): string {
  * @param nakshatraBirdIndex - The nakshatra bird index (1-indexed)
  * @returns Full pancha pakshi analysis with periods and sub-periods
  */
+// @parity: py=construct_pancha_pakshi_information
 export function constructPanchaPakshiInformation(
   dob: JhoraDate,
   tob: JhoraTime,

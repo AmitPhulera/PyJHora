@@ -58,13 +58,17 @@ pancha_pakshi_stars_birds_paksha = [(1,5),(1,5),(1,5),(1,5),(1,5),(2,4),(2,4),(2
 # Each duration is respectively for activities: Rule, Eat, Walk, Sleep, Death
 _pancha_pakshi_duration_list = [[48,30,36,18,12],[24,30,30,24,36]]
 pancha_pakshi_duration_list = [[ele/144 for ele in row] for row in _pancha_pakshi_duration_list ]
+# @parity: ts=@/core/panchanga/pancha-paksha::getBirthNakshatra
 def _get_birth_nakshathra(jd,place):
     return drik.nakshatra(jd, place)[0]
+# @parity: ts=@/core/panchanga/pancha-paksha::getPaksha
 def _get_paksha(jd,place):
     _tithi = drik.tithi(jd, place)[0]
     return 1 if _tithi <= 15 else 2
+# @parity: ts=@/core/panchanga/pancha-paksha::getBirthBirdFromNakshatra
 def _get_birth_bird_from_nakshathra(birth_star,_paksha):
     return pancha_pakshi_stars_birds_paksha[birth_star-1][_paksha-1]
+# @parity: ts=@/core/panchanga/pancha-paksha::getMatchingPanchaPakshiData
 def get_matching_pancha_pakshi_data_from_db(bird_index,weekday_index,paksha_index):
     pp_db = pd.read_csv(PP_DB_FILE,index_col=None, encoding='utf-8',usecols=range(_LAST_COL_FOR_READING+1))
     search_criteria = (
@@ -75,6 +79,7 @@ def get_matching_pancha_pakshi_data_from_db(bird_index,weekday_index,paksha_inde
     search_results = pp_db[search_criteria]
     result_list = search_results.values.tolist()
     return result_list
+# @parity: ts=@/core/panchanga/pancha-paksha::constructPanchaPakshiInformation
 def construct_pancha_pakshi_information(dob=None,tob=None,place=None,nakshathra_bird_index=None):
     jd = utils.julian_day_number(dob,tob)
     sunrise_jd = drik.sunrise(jd, place)[-1]
