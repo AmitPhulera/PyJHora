@@ -21,6 +21,7 @@
 from jhora.panchanga import drik
 from jhora import const,utils
 from jhora.horoscope.chart import house, charts
+# @parity: ts=@/core/horoscope/sphuta::triSphotaMixedChart
 def tri_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -32,6 +33,7 @@ def tri_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga
     _tri_sphuta = (moon_long+asc_long+gulika_long)%360
     return drik.dasavarga_from_long(_tri_sphuta, divisional_chart_factor=mixed_dvf)
     
+# @parity: ts=@/core/horoscope/sphuta::triSphuta
 def tri_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                chart_method=1,years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -44,6 +46,7 @@ def tri_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisio
     gulika_long = gulika[0]*30+gulika[1]
     _tri_sphuta = (moon_long+asc_long+gulika_long)%360
     return drik.dasavarga_from_long(_tri_sphuta, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::chaturSphotaMixedChart
 def chatur_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -52,6 +55,7 @@ def chatur_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,va
     _tri_sphuta= tri_sphuta_mixed_chart(dob, tob, place,varga_factor_1,chart_method_1,varga_factor_2,chart_method_2)
     _chatur_sphuta = (sun_long+_tri_sphuta[0]*30+_tri_sphuta[1])%360
     return drik.dasavarga_from_long(_chatur_sphuta, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::chaturSphuta
 def chatur_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                chart_method=1,years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -63,6 +67,7 @@ def chatur_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divi
                             years, months, sixty_hours)
     _chatur_sphuta = (sun_long+_tri_sphuta[0]*30+_tri_sphuta[1])%360
     return drik.dasavarga_from_long(_chatur_sphuta, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::panchaSphotaMixedChart
 def pancha_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -71,6 +76,7 @@ def pancha_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,va
     _chatur_sphuta= chatur_sphuta_mixed_chart(dob, tob, place,varga_factor_1,chart_method_1,varga_factor_2,chart_method_2)
     _pancha_sphuta = (rahu_long+_chatur_sphuta[0]*30+_chatur_sphuta[1])%360
     return drik.dasavarga_from_long(_pancha_sphuta, divisional_chart_factor=mixed_dvf)    
+# @parity: ts=@/core/horoscope/sphuta::panchaSphuta
 def pancha_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                chart_method=1,years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -82,6 +88,7 @@ def pancha_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divi
                                   years, months, sixty_hours)
     _pancha_sphuta = (rahu_long+_chatur_sphuta[0]*30+_chatur_sphuta[1])%360
     return drik.dasavarga_from_long(_pancha_sphuta, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::pranaSphotaMixedChart
 def prana_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -91,6 +98,7 @@ def prana_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,var
     gulika_long = gulika[0]*30+gulika[1]
     _prana_long = (asc_long*5 + gulika_long) %360
     return drik.dasavarga_from_long(_prana_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::pranaSphuta
 def prana_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                  years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -102,6 +110,7 @@ def prana_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divis
     gulika_long = gulika[0]*30+gulika[1]
     _prana_long = (asc_long*5 + gulika_long) %360
     return drik.dasavarga_from_long(_prana_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::dehaSphotaMixedChart
 def deha_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -111,6 +120,7 @@ def deha_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varg
     gulika_long = gulika[0]*30+gulika[1]
     _deha_long = (moon_long*8 + gulika_long) %360
     return drik.dasavarga_from_long(_deha_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::dehaSphuta
 def deha_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                 years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -122,6 +132,7 @@ def deha_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisi
     gulika_long = gulika[0]*30+gulika[1]
     _deha_long = (moon_long*8 + gulika_long) %360
     return drik.dasavarga_from_long(_deha_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::mrityuSphotaMixedChart
 def mrityu_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -131,6 +142,7 @@ def mrityu_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,va
     gulika_long = gulika[0]*30+gulika[1]
     _mrityu_long = (gulika_long*7 + sun_long) %360
     return drik.dasavarga_from_long(_mrityu_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::mrityuSphuta
 def mrityu_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                   years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -143,6 +155,7 @@ def mrityu_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divi
     gulika_long = gulika[0]*30+gulika[1]
     _mrityu_long = (gulika_long*7 + sun_long) %360
     return drik.dasavarga_from_long(_mrityu_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::sookshmaTriSphotaMixedChart
 def sookshma_tri_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -151,6 +164,7 @@ def sookshma_tri_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_
     _mrityu_long = mrityu_sphuta_mixed_chart(dob, tob, place,varga_factor_1,chart_method_1,varga_factor_2,chart_method_2)
     _sookshma_long = (_prana_long[0]*30+_prana_long[1] + _deha_long[0]*30+_deha_long[1] + _mrityu_long[0]*30+_mrityu_long[1]) %360
     return drik.dasavarga_from_long(_sookshma_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::sookshmaTriSphuta
 def sookshma_tri_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                         chart_method=1,years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     _prana_long = prana_sphuta(dob, tob, place, ayanamsa_mode, divisional_chart_factor, chart_method,years, months, sixty_hours,
@@ -161,6 +175,7 @@ def sookshma_tri_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MOD
                                         base_rasi=base_rasi,count_from_end_of_sign=count_from_end_of_sign)
     _sookshma_long = (_prana_long[0]*30+_prana_long[1] + _deha_long[0]*30+_deha_long[1] + _mrityu_long[0]*30+_mrityu_long[1]) %360
     return drik.dasavarga_from_long(_sookshma_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::beejaSphotaMixedChart
 def beeja_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -170,6 +185,7 @@ def beeja_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,var
     venus_long = planet_positions[6][1][0]*30+planet_positions[6][1][1]
     _beeja_long = (sun_long + jupiter_long + venus_long)%360
     return drik.dasavarga_from_long(_beeja_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::beejaSphuta
 def beeja_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                  years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -182,6 +198,7 @@ def beeja_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divis
     venus_long = planet_positions[6][1][0]*30+planet_positions[6][1][1]
     _beeja_long = (sun_long + jupiter_long + venus_long)%360
     return drik.dasavarga_from_long(_beeja_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::kshetraSphotaMixedChart
 def kshetra_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -191,6 +208,7 @@ def kshetra_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,v
     mars_long = planet_positions[3][1][0]*30+planet_positions[3][1][1]
     _kshetra_long = (moon_long + jupiter_long + mars_long)%360
     return drik.dasavarga_from_long(_kshetra_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::kshetraSphuta
 def kshetra_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                    years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -203,6 +221,7 @@ def kshetra_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,div
     mars_long = planet_positions[3][1][0]*30+planet_positions[3][1][1]
     _kshetra_long = (moon_long + jupiter_long + mars_long)%360
     return drik.dasavarga_from_long(_kshetra_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::tithiSphotaMixedChart
 def tithi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -211,6 +230,7 @@ def tithi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,var
     sun_long = planet_positions[1][1][0]*30+planet_positions[1][1][1]
     _tithi_long = (moon_long - sun_long) %360
     return drik.dasavarga_from_long(_tithi_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::tithiSphuta
 def tithi_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                  years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -222,6 +242,7 @@ def tithi_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divis
     sun_long = planet_positions[1][1][0]*30+planet_positions[1][1][1]
     _tithi_long = (moon_long - sun_long) %360
     return drik.dasavarga_from_long(_tithi_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::yogaSphotaMixedChart
 def yoga_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1,
                             add_yogi_longitude=False):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -232,6 +253,7 @@ def yoga_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varg
     yogi_long = 93+20/60 if add_yogi_longitude else 0
     _yoga_long = (moon_long + sun_long + yogi_long) %360
     return drik.dasavarga_from_long(_yoga_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::yogaSphuta
 def yoga_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                 years=1,months=1,sixty_hours=1,add_yogi_longitude=False,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -244,25 +266,30 @@ def yoga_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisi
     yogi_long = 93+20/60 if add_yogi_longitude else 0
     _yoga_long = (moon_long + sun_long + yogi_long) %360
     return drik.dasavarga_from_long(_yoga_long, divisional_chart_factor=divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::yogiSphotaMixedChart
 def yogi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     return yoga_sphuta_mixed_chart(dob, tob, place, varga_factor_1, chart_method_1, varga_factor_2, chart_method_2, 
                                    add_yogi_longitude=True)
+# @parity: ts=@/core/horoscope/sphuta::yogiSphuta
 def yogi_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                 years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     return yoga_sphuta(dob,tob,place,ayanamsa_mode,divisional_chart_factor,chart_method,
                        years,months,sixty_hours,add_yogi_longitude=True,
                                         base_rasi=base_rasi,count_from_end_of_sign=count_from_end_of_sign)
+# @parity: ts=@/core/horoscope/sphuta::avayogiSphotaMixedChart
 def avayogi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     mixed_dvf = varga_factor_1*varga_factor_2
     yl = yogi_sphuta_mixed_chart(dob, tob, place, varga_factor_1, chart_method_1, varga_factor_2, chart_method_2)
     ayl = (yl[0]*30+yl[1]+186+40/60)%360
     return drik.dasavarga_from_long(ayl, mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::avayogiSphuta
 def avayogi_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                    years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     yl = yogi_sphuta(dob,tob,place,ayanamsa_mode,divisional_chart_factor,chart_method,years,months,sixty_hours,
                                         base_rasi=base_rasi,count_from_end_of_sign=count_from_end_of_sign)
     ayl = (yl[0]*30+yl[1]+186+40/60)%360
     return drik.dasavarga_from_long(ayl, divisional_chart_factor)
+# @parity: ts=@/core/horoscope/sphuta::rahuTithiSphotaMixedChart
 def rahu_tithi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     jd_at_dob = utils.julian_day_number(dob, tob)
     mixed_dvf = varga_factor_1*varga_factor_2
@@ -271,6 +298,7 @@ def rahu_tithi_sphuta_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=
     sun_long = planet_positions[1][1][0]*30+planet_positions[1][1][1]
     _tithi_long = (rahu_long - sun_long) %360
     return drik.dasavarga_from_long(_tithi_long, divisional_chart_factor=mixed_dvf)
+# @parity: ts=@/core/horoscope/sphuta::rahuTithiSphuta
 def rahu_tithi_sphuta(dob,tob,place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1,
                       years=1,months=1,sixty_hours=1,base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
