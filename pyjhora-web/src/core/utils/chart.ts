@@ -23,6 +23,7 @@
  * houseToPlanetList({ 0: 0, 1: 1, 2: 1 })
  * // => ['0', '1/2', '', '', '', '', '', '', '', '', '', '']
  */
+// @parity: py=get_house_to_planet_dict_from_planet_to_house_dict
 export function houseToPlanetList(planetToHouse: Record<number, number>): string[] {
   const h2p: string[] = Array.from({ length: 12 }, () => '');
 
@@ -53,6 +54,7 @@ export function houseToPlanetList(planetToHouse: Record<number, number>): string
  * planetToHouseFromChart(['L/0', '1/2', '', '', '', '', '', '', '', '', '', ''])
  * // => { 0: 0, 1: 1, 2: 1, L: 0 }
  */
+// @parity: py=get_planet_to_house_dict_from_chart
 export function planetToHouseFromChart(
   houseChart: string[],
   ascendantSymbol = 'L',
@@ -82,6 +84,7 @@ export function planetToHouseFromChart(
  * @param planetPositions - Array of [planetIndex, [rasiIndex, longitude]] tuples
  * @returns Map of planet index to house index
  */
+// @parity: py=get_planet_house_dictionary_from_planet_positions
 export function planetToHouseFromPositions(
   planetPositions: Array<[number, [number, number]]>,
 ): Record<number, number> {
@@ -100,6 +103,7 @@ export function planetToHouseFromPositions(
  * @param planetPositions - Array of [planetIndex, [rasiIndex, longitude]] tuples
  * @returns Array of 12 strings with planet indices separated by '/'
  */
+// @parity: py=get_house_planet_list_from_planet_positions
 export function housePlanetListFromPositions(
   planetPositions: Array<[number, [number, number]]>,
 ): string[] {
@@ -135,6 +139,7 @@ export type ParivrittiEntry = [number, number, number];
  * @param dirn - Direction: 1 for forward, -1 for backward
  * @returns Array of [rasiSign, horaPortion, vargaSign] tuples
  */
+// @parity: py=parivritti_even_reverse
 export function parivrittiEvenReverse(dcf: number, dirn = 1): ParivrittiEntry[] {
   const pc: ParivrittiEntry[] = [];
   let hs = 0;
@@ -165,6 +170,7 @@ export function parivrittiEvenReverse(dcf: number, dirn = 1): ParivrittiEntry[] 
  * @param dirn - Direction
  * @returns Array of tuples, one per rasi, each containing dcf varga signs
  */
+// @parity: py=parivritti_cyclic
 export function parivrittiCyclic(dcf: number, dirn = 1): number[][] {
   const pc: number[][] = [];
   let hs = 0;
@@ -192,6 +198,7 @@ export function parivrittiCyclic(dcf: number, dirn = 1): number[][] {
  * @param dirn - Direction
  * @returns Array of tuples, one per rasi
  */
+// @parity: py=parivritti_alternate
 export function parivrittiAlternate(dcf: number, dirn = 1): number[][] {
   const pc: number[][] = [];
   let hs1 = 0;
@@ -227,6 +234,7 @@ export function parivrittiAlternate(dcf: number, dirn = 1): number[][] {
  * @param replace - Replacement string
  * @returns New array with replacements applied
  */
+// @parity: py=search_replace
 export function searchReplace(list: string[], search: string, replace: string): string[];
 export function searchReplace(list: string[][], search: string, replace: string): string[][];
 export function searchReplace(
@@ -277,6 +285,7 @@ const EAST_INDIAN_MAP = [
  * @param chartType - 'south_indian' or 'east_indian'
  * @returns 2D string array for chart rendering
  */
+// @parity: py=_convert_1d_house_data_to_2d
 export function convertTo2dChart(
   rasi1d: string[],
   chartType: 'south_indian' | 'east_indian' = 'south_indian',
@@ -330,6 +339,7 @@ export function convertTo2dChart(
  * @param longitudeInRasi - Planet longitude within the rasi (0-30)
  * @returns [minimum, maximum] of deeptaamsa range
  */
+// @parity: py=deeptaamsa_range_of_planet
 export function deeptaamsaRange(
   deeptaamsa: number,
   longitudeInRasi: number,
@@ -352,6 +362,7 @@ export function deeptaamsaRange(
  * @param birthTime - Birth time in hours
  * @returns Fraction of the period remaining (0 to 1)
  */
+// @parity: py=get_fraction
 export function getFraction(startTime: number, endTime: number, birthTime: number): number {
   let duration = endTime - startTime;
 
@@ -439,6 +450,7 @@ export function cyclicCountNumbers(
  * @param arr2 - Second array of numbers
  * @returns The pair [a1, a2] with minimum absolute difference
  */
+// @parity: py=closest_elements
 export function closestElements(arr1: number[], arr2: number[]): [number, number] | null {
   if (arr1.length === 0 || arr2.length === 0) return null;
 

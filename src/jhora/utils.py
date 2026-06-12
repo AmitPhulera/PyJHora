@@ -147,6 +147,7 @@ def _validate_data(place,latitude,longitude,time_zone_offset,dob,tob,division_ch
         warnings.warn(w_msg)
         divisional_chart_factor = 1
     return place,latitude,longitude,time_zone_offset,dob,tob,division_chart_factor
+# @parity: ts=@/core/utils/cities::getLocation
 def get_location(place_name=None):
     """
         function to get place's latitude, longitude and timezone
@@ -304,6 +305,7 @@ def _get_timezone_from_pytz(timezone_str_from_geocoder):
     from pytz import timezone
     tz = datetime.datetime.now(timezone(timezone_str_from_geocoder)).utcoffset().total_seconds()/60/60
     return tz
+# @parity: ts=@/core/utils/cities::getTimezoneOffsetFromCoords
 def get_place_timezone_offset(latitude, longitude):
     """
         This can be used when latitude/longitude are known but not the time zone offset of the place.
@@ -326,6 +328,7 @@ def get_place_timezone_offset(latitude, longitude):
         print('Error in get_place_timezone_offset',err)
         print('WARNING: Time Zone returned as default +5.0. Need to change it')
         return 5.0
+# @parity: ts=@/core/utils/chart::houseToPlanetList
 def get_house_to_planet_dict_from_planet_to_house_dict(planet_to_house_dict):
     """
         function to get house_to_planet list from planet_to_house dictionary 
@@ -338,6 +341,7 @@ def get_house_to_planet_dict_from_planet_to_house_dict(planet_to_house_dict):
         h_to_p[h] += str(p) + '/'
     h_to_p = [p[:-1] for p in h_to_p]
     return h_to_p
+# @parity: ts=@/core/utils/chart::planetToHouseFromChart
 def get_planet_to_house_dict_from_chart(house_to_planet_list):
     """
         function to get planet_to_house dictionary from house_to_planet list  
@@ -350,6 +354,7 @@ def get_planet_to_house_dict_from_chart(house_to_planet_list):
     """
     p_to_h = {p:h for p in [*range(9)]+[const._ascendant_symbol] for h,planets in enumerate(house_to_planet_list) if str(p) in planets }
     return p_to_h
+# @parity: ts=@/core/utils/chart::planetToHouseFromPositions
 def get_planet_house_dictionary_from_planet_positions(planet_positions):
     """ 
         Get Planet_to_House Dictionary {p:h}  from Planet_Positions {p:(h,long)}
@@ -358,6 +363,7 @@ def get_planet_house_dictionary_from_planet_positions(planet_positions):
     """ 
     p_to_h = {p:h for p,(h,_) in planet_positions}
     return p_to_h
+# @parity: ts=@/core/utils/chart::housePlanetListFromPositions
 def get_house_planet_list_from_planet_positions(planet_positions):
     """
         to convert from the format [planet,(house,planet_longitude,...]
@@ -445,6 +451,7 @@ def get_resource_lists(language_list_file=const._LANGUAGE_PATH + const._DEFAULT_
 # Convert 23d 30' 30" to 23.508333 degrees
 from_dms = lambda degs, mins, secs: degs + mins/60 + secs/3600
 from_dms_to_str = lambda dms_list: str(dms_list[0])+const._degree_symbol + str(dms_list[1])+const._minute_symbol + str(dms_list[2])+const._second_symbol
+# @parity: ts=@/core/utils/angle::fromDmsStrToDms
 def from_dms_str_to_dms(dms_str):
     if '+1' in dms_str:
         dmsh = 24
@@ -454,10 +461,12 @@ def from_dms_str_to_dms(dms_str):
         dmsh = 0
     dms = dms_str.replace('(+1)','').replace('(-1)','').replace(' AM','').replace(' PM','').split(':')
     return dmsh+int(dms[0]),int(dms[1]),int(dms[2])
+# @parity: ts=@/core/utils/angle::fromDmsStrToDegrees
 def from_dms_str_to_degrees(dms_str):
     dms = from_dms_str_to_dms(dms_str)
     return dms[0]+dms[1]/60.+dms[2]/3600.
 # the inverse
+# @parity: ts=@/core/utils/angle::toDmsPrec
 def to_dms_prec(deg):
   """
       convert float degrees to (int)degrees, (int) minutes, (float) seconds tuple
@@ -468,6 +477,7 @@ def to_dms_prec(deg):
   s = round((mins - m) * 60, 2) # changed from 6 digit precision in 2.0.3
   return [d, m, s]
 
+# @parity: ts=@/core/utils/format::toDmsString
 def to_dms(deg,as_string=True, is_lat_long=None,round_seconds_to_digits=None,round_to_minutes=None,
            use_24hour_format=None):
     """
@@ -550,6 +560,7 @@ def to_dms(deg,as_string=True, is_lat_long=None,round_seconds_to_digits=None,rou
 def _to_dms_old(deg):
   d, m, s = to_dms_prec(deg)
   return [d, m, int(s)]
+# @parity: ts=@/core/utils/angle::normalizeAngle
 def normalize_angle(angle, start=0):
     """
     Normalize angle to be within the range from start to start + 360 degrees.
@@ -559,6 +570,7 @@ def normalize_angle(angle, start=0):
     while angle < start:
         angle += 360
     return angle
+# @parity: ts=@/core/utils/interpolation::extendAngleRange
 def extend_angle_range(angles, target):
     """
     Extend angles to cover a wider range if needed for interpolation.
@@ -568,6 +580,7 @@ def extend_angle_range(angles, target):
         extended_angles = extended_angles + [angle + 360 for angle in angles]
     return extended_angles
 
+# @parity: ts=@/core/utils/interpolation::unwrapAngles
 def unwrap_angles(angles):
     """
     Normalize angles to handle circular continuity.
@@ -611,6 +624,7 @@ def _function(point):
     # fval = swe.fixstar_ut(",deCnc", point, flag = swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0] - (106)
     return fval
 
+# @parity: ts=@/core/utils/interpolation::bisectionSearch
 def _bisection_search(func, start, stop):
   left = start
   right = stop
@@ -629,6 +643,7 @@ def _bisection_search(func, start, stop):
 
   return (right + left) / 2
 
+# @parity: ts=@/core/utils/interpolation::inverseLagrange
 def inverse_lagrange(x, y, ya):
   """Given two lists x and y, find the value of x = xa when y = ya, i.e., f(xa) = ya"""
   assert(len(x) == len(y))
@@ -644,6 +659,7 @@ def inverse_lagrange(x, y, ya):
     total += numer * x[i] / denom
 
   return total
+# @parity: ts=@/core/utils/interpolation::newtonPolynomial
 def newton_polynomial(x_data, y_data, x):
     """
     x_data: data points at x
@@ -673,6 +689,7 @@ def newton_polynomial(x_data, y_data, x):
         p = a[n - k] + (x - x_data[n - k])*p
 
     return p
+# @parity: ts=@/core/utils/julian::toUtc
 def julian_day_utc(julian_day,place):
      return julian_day - (place.timezone / 24.)
 def julian_day_number_new(date_of_birth_as_tuple,time_of_birth_as_tuple):
@@ -682,6 +699,7 @@ def julian_day_number_new(date_of_birth_as_tuple,time_of_birth_as_tuple):
     jdt =  h + mm/60 + s/3600
     jd = jdn+(jdt-12)/24,3
     return jd
+# @parity: ts=@/core/utils/julian::julianDayNumber
 def julian_day_number(date_of_birth_as_tuple,time_of_birth_as_tuple):
     """
         return julian day number for give Date of birth and time of birth as tuples
@@ -703,6 +721,7 @@ def jd_to_local(jd,place):
     jd_utc = gregorian_to_jd(drik.Date(y, m, d))
     fhl = (jd - jd_utc) * 24 + place.timezone
     return y,m,d,fhl
+# @parity: ts=@/core/utils/chart::deeptaamsaRange
 def deeptaamsa_range_of_planet(planet,planet_longitude_within_raasi):
     """
         get deeptaaamsa range of the planet
@@ -746,6 +765,7 @@ def _convert_to_tamil_date_and_time(panchanga_date,time_of_day_in_hours,place=No
             panchanga_date = new_panchanga_date
     #print('panchanga data returned',panchanga_date)
     return panchanga_date,time_of_day_in_hours
+# @parity: ts=@/core/utils/panchanga-date::previousPanchangaDay
 def previous_panchanga_day(panchanga_date,minus_days=1):
     np_date = np.datetime64(panchanga_date)
     prev_date = np_date - np.timedelta64(minus_days,"D")
@@ -755,6 +775,7 @@ def previous_panchanga_day(panchanga_date,minus_days=1):
     else:
         p_date = drig_panchanga.Date(int(p_date_str[0]),int(p_date_str[1]),int(p_date_str[2]))
     return p_date 
+# @parity: ts=@/core/utils/panchanga-date::nextPanchangaDay
 def next_panchanga_day(panchanga_date,add_days=1):
     np_date = np.datetime64(panchanga_date)
     add_days_int = int(add_days)
@@ -766,6 +787,7 @@ def next_panchanga_day(panchanga_date,add_days=1):
     else:
         p_date = drig_panchanga.Date(int(p_date_str[0]),int(p_date_str[1]),int(p_date_str[2]))
     return p_date 
+# @parity: ts=@/core/utils/panchanga-date::panchangaDateDiff
 def panchanga_date_diff(panchanga_date1,panchanga_date2):
     npdate1 = np.datetime64(panchanga_date1) ; npdate2 = np.datetime64(panchanga_date2)
     days_diff = (npdate2-npdate1)/np.timedelta64(1,"D")
@@ -773,6 +795,7 @@ def panchanga_date_diff(panchanga_date1,panchanga_date2):
     months_diff,days_diff = divmod(days_diff,(const.sidereal_year/12))
     days_diff = round(days_diff,0)
     return int(years_diff),int(months_diff),int(days_diff)
+# @parity: ts=@/core/utils/panchanga-date::panchangaTimeDelta
 def panchanga_time_delta(panchanga_date1, panchanga_date2):#,**kwargs=None):
     np_date1 = np.datetime64(panchanga_date1)
     np_date2 = np.datetime64(panchanga_date2)
@@ -780,11 +803,13 @@ def panchanga_time_delta(panchanga_date1, panchanga_date2):#,**kwargs=None):
     return diff_days
 def panchanga_date_to_tuple(panchanga_date): #V2.3.0
     return panchanga_date[0],panchanga_date[1],panchanga_date[2]
+# @parity: ts=@/core/utils/panchanga-date::dateDiffYMD
 def date_diff_in_years_months_days(start_date_str,end_date_str,date_format_str='%Y-%m%-d'):
     start_date = datetime.datetime.strptime(start_date_str,date_format_str)
     end_date = datetime.datetime.strptime(end_date_str,date_format_str)
     delta = relativedelta.relativedelta(end_date, start_date)
     return delta.years,delta.months, delta.days
+# @parity: ts=@/core/utils/panchanga-date::getAgeFrom
 def get_dob_years_months_60hrs_from_today(dob,tob):
     jd_dob = julian_day_number(dob, tob)
     current_date_str,_ = datetime.datetime.now().strftime('%Y,%m,%d;%H:%M:%S').split(';')
@@ -799,6 +824,7 @@ def get_dob_years_months_60hrs_from_today(dob,tob):
         return years+1,months+1,_60hrs
     else:
         return 1,1,1
+# @parity: ts=@/core/utils/chart::closestElements
 def closest_elements(arr1, arr2):
     """
         Returns closest elements between arr1 and arr2
@@ -840,6 +866,7 @@ def udhayadhi_nazhikai(jd,place):
     tharparai = math.floor(tharparai1 - naazhigai*3600 - vinadigal*60)
     return [str(naazhigai)+':'+str(vinadigal)+':'+str(tharparai),tharparai1/3600.0]
 closest_element_from_list = lambda list_array, value: list_array[min(range(len(list_array)), key = lambda i: abs(list_array[i]-value))]
+# @parity: ts=@/core/utils/chart::getFraction
 def get_fraction(start_time_hrs,end_time_hrs,birth_time_hrs):
     tl = end_time_hrs - start_time_hrs
     if start_time_hrs < 0:
@@ -859,6 +886,7 @@ def get_fraction_old(start_time_hrs,end_time_hrs,birth_time_hrs):
 
 count_stars = lambda from_star,to_star,dir=1,total=27: ((to_star + total - from_star) % total)+1 if dir==1 else ((from_star + total - to_star) % total)+1
 count_rasis = lambda from_rasi,to_rasi,dir=1,total=12: ((to_rasi + total - from_rasi) % total)+1 if dir==1 else ((from_rasi + total - to_rasi) % total)+1
+# @parity: ts=@/core/utils/chart::parivrittiEvenReverse
 def parivritti_even_reverse(dcf,dirn=1):
     """
         generates parivritti tuple (rasi_sign, hora_portion_of_varga, varga_sign)
@@ -884,6 +912,7 @@ def parivritti_even_reverse(dcf,dirn=1):
         for h in range(dcf-1,-1,-1):
             pc.append((r,h,hs)); hs = (hs+dirn)%12
     return pc
+# @parity: ts=@/core/utils/chart::parivrittiCyclic
 def parivritti_cyclic(dcf,dirn=1):
     """
         generates parivritti tuple (rasi_sign, hora_portion_of_varga, varga_sign)
@@ -905,6 +934,7 @@ def parivritti_cyclic(dcf,dirn=1):
             t += (hs%12,); hs = (hs+dirn)%12
         pc.append(t)
     return pc
+# @parity: ts=@/core/utils/chart::parivrittiAlternate
 def parivritti_alternate(dcf,dirn=1):
     """
         Generates alternate parivritti tuple. Used for Somanatha method
@@ -982,6 +1012,7 @@ def _index_containing_substring(the_list, substring):
         if substring in s:
             return i
     return -1
+# @parity: ts=@/core/utils/chart::convertTo2dChart
 def _convert_1d_house_data_to_2d(rasi_1d,chart_type='south_indian'):
     separator = '/'
     if 'south' in chart_type.lower():
@@ -1039,6 +1070,7 @@ get_KP_details_from_planet_longitude = lambda planet_longitude: \
     {kp_no:[r,n,sd,ed,rl,sl,ssl] for kp_no,[r,n,sd,ed,rl,sl,ssl] in const.prasna_kp_249_dict.items() \
      if planet_longitude >= (r*30+sd) and planet_longitude <= (r*30+ed)}
 # Search and replace a string from element of 1d/2d list
+# @parity: ts=@/core/utils/chart::searchReplace
 def search_replace(input_list, s1, s2):
     if isinstance(input_list[0], list):  # Check if the input_list is a 2D list
         return [[element.replace(s1, s2) if s1 in element else element for element in row] for row in input_list]
@@ -1070,6 +1102,7 @@ def get_nakshathra_list_with_abhijith():
 karana_lord = lambda karana_index: [_karana_lord for _karana_lord,kar_list in const.karana_lords.items() if karana_index in kar_list[0]][0]
 nakshathra_lord = lambda nak_no: const.nakshatra_lords[nak_no-1]
 kali_yuga_jd = lambda jd: jd - swe.julday(-3101,1,23,12,cal=swe.JUL_CAL)
+# @parity: ts=@/core/utils/panchanga-date::parseDateString
 def get_year_month_day_from_date_format(date_text):
     # Detect BCE year based on the count of hyphens
     is_bce = False
