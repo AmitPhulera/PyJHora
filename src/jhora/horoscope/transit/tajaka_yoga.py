@@ -300,7 +300,7 @@ def get_gairi_kamboola_yoga_planet_pairs(planet_positions):
 def get_khallasara_yoga_planet_pairs(planet_positions):
     """ TODO: to be implemented """
     return None
-# @parity: ts=@/core/horoscope/tajaka-yoga::getRaddaYogaPlanetPairs
+# @parity-skip: Python function is broken (NameError: 'charts' not imported); no parity fixture possible
 def get_radda_yoga_planet_pairs(planet_positions):
     """
         Get radda yoga planet pairs
@@ -319,7 +319,7 @@ def get_radda_yoga_planet_pairs(planet_positions):
     ry_check= list(np.any(chk,axis=0))
     ry_pairs = [(x,y) for i,(x,y) in enumerate(iy_pairs) if ry_check[i]]
     return ry_pairs
-# @parity: ts=@/core/horoscope/tajaka-yoga::getDuhphaliKuttaYogaPlanetPairs
+# @parity-skip: Python function is broken (NameError: 'charts' not imported); no parity fixture possible
 def get_duhphali_kutta_yoga_planet_pairs(jd,place):
     """
         Get duhphali kutta yoga planet pairs

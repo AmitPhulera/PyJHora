@@ -5,26 +5,43 @@
  * Each saham follows formula: A - B + C
  * If C is not between B and A zodiacally, add 30 degrees.
  * For night births, most sahams swap A and B.
+ *
+ * All functions take Python-style planet positions:
+ *   [['L', [rasi, longitude]], [0, [rasi, longitude]], ... [8, [rasi, longitude]]]
+ * where index 0 is Lagna and index p+1 is planet p (Sun=0 .. Ketu=8),
+ * longitude is within-rasi (0-30).
  */
 
-import {
-    SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN,
-} from '../constants';
+import { MARS, JUPITER } from '../constants';
 import { getHouseOwnerFromPlanetPositions } from './house';
 
-// Minimal planet position type for saham calculations
-type SahamPlanetPos = { planet: number; rasi: number; longitude: number };
+/** Python-style planet positions: [planetId|'L', [rasi, longitudeWithinRasi]] */
+export type SahamPlanetPositions = Array<[string | number, [number, number]]>;
 
 // ============================================================================
 // HELPERS
 // ============================================================================
 
-/** Get absolute longitude for a planet from positions array */
-const getPlanetLong = (positions: SahamPlanetPos[], planet: number): number => {
-    const pos = positions.find(p => p.planet === planet);
-    if (!pos) throw new Error(`Planet ${planet} not found in positions`);
-    return pos.longitude;
-};
+/** Python: saham_longitude = lambda pp,p: pp[p][1][0]*30+pp[p][1][1] */
+const sahamLongitude = (pp: SahamPlanetPositions, i: number): number =>
+    pp[i][1][0] * 30 + pp[i][1][1];
+
+const lagnaLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 0);
+const sunLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 1);
+const moonLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 2);
+const marsLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 3);
+const mercuryLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 4);
+const jupiterLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 5);
+const venusLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 6);
+const saturnLongitude = (pp: SahamPlanetPositions): number => sahamLongitude(pp, 7);
+
+/** Convert Python-style positions to object-style for house owner helpers */
+const toObjectPositions = (
+    pp: SahamPlanetPositions
+): Array<{ planet: number; rasi: number; longitude: number }> =>
+    pp
+        .filter(([p]) => p !== 'L')
+        .map(([p, [rasi, longitude]]) => ({ planet: Number(p), rasi, longitude }));
 
 /**
  * Check if C's rasi lies zodiacally between B and A.
@@ -79,98 +96,92 @@ const computeSahamNoSwap = (
 /** 1. Punya (Fortune) - Moon - Sun + Lagna */
 // @parity: py=punya_saham
 export const punyaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MOON), getPlanetLong(positions, SUN), lagnaLong, nightTimeBirth
+    moonLongitude(pp), sunLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 2. Vidya (Education) - Sun - Moon + Lagna */
 // @parity: py=vidya_saham
 export const vidyaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, SUN), getPlanetLong(positions, MOON), lagnaLong, nightTimeBirth
+    sunLongitude(pp), moonLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 3. Yasas (Fame) - Jupiter - PunyaSaham + Lagna */
 // @parity: py=yasas_saham
 export const yasasSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER),
-    punyaSaham(positions, lagnaLong, nightTimeBirth),
-    lagnaLong, nightTimeBirth
+    jupiterLongitude(pp), punyaSaham(pp, nightTimeBirth), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 4. Mitra (Friend) - Jupiter - PunyaSaham + Venus */
 // @parity: py=mitra_saham
 export const mitraSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER),
-    punyaSaham(positions, lagnaLong, nightTimeBirth),
-    getPlanetLong(positions, VENUS), nightTimeBirth
+    jupiterLongitude(pp), punyaSaham(pp, nightTimeBirth), venusLongitude(pp), nightTimeBirth
 );
 
 /** 5. Mahatmya (Greatness) - PunyaSaham - Mars + Lagna */
 // @parity: py=mahatmaya_saham
 export const mahatmyaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    punyaSaham(positions, lagnaLong, nightTimeBirth),
-    getPlanetLong(positions, MARS),
-    lagnaLong, nightTimeBirth
+    punyaSaham(pp, nightTimeBirth), marsLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 6. Asha (Desires) - Saturn - Mars + Lagna */
 // @parity: py=asha_saham
 export const ashaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, SATURN), getPlanetLong(positions, MARS), lagnaLong, nightTimeBirth
+    saturnLongitude(pp), marsLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 7. Samartha (Enterprise) - Mars - LagnaLord + Lagna
  *  If Mars owns lagna, use Jupiter as LagnaLord and flip night_time_birth */
 // @parity: py=samartha_saham
 export const samarthaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => {
-    let lagnaLord = getHouseOwnerFromPlanetPositions(positions, lagnaRasi);
+    const lagnaHouse = pp[0][1][0];
+    let lagnaLord = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), lagnaHouse);
     let effectiveNight = nightTimeBirth;
     if (lagnaLord === MARS) {
         lagnaLord = JUPITER;
         effectiveNight = !effectiveNight;
     }
-    const lagnaLordLong = getPlanetLong(positions, lagnaLord);
+    const lagnaLordLong = sahamLongitude(pp, lagnaLord + 1);
     return computeSaham(
-        getPlanetLong(positions, MARS), lagnaLordLong, lagnaLong, effectiveNight
+        marsLongitude(pp), lagnaLordLong, lagnaLongitude(pp), effectiveNight
     );
 };
 
 /** 8. Bhratri (Brothers) - Jupiter - Saturn + Lagna (same day/night) */
 // @parity: py=bhratri_saham
 export const bhratriSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number
+    pp: SahamPlanetPositions
 ): number => computeSahamNoSwap(
-    getPlanetLong(positions, JUPITER), getPlanetLong(positions, SATURN), lagnaLong
+    jupiterLongitude(pp), saturnLongitude(pp), lagnaLongitude(pp)
 );
 
 /** 9. Gaurava (Respect) - Jupiter - Moon + Sun */
 // @parity: py=gaurava_saham
 export const gauravaSaham = (
-    positions: SahamPlanetPos[], nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER), getPlanetLong(positions, MOON),
-    getPlanetLong(positions, SUN), nightTimeBirth
+    jupiterLongitude(pp), moonLongitude(pp), sunLongitude(pp), nightTimeBirth
 );
 
 /** 10. Pithri (Father) - Saturn - Sun + Lagna */
 // @parity: py=pithri_saham
 export const pithriSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, SATURN), getPlanetLong(positions, SUN), lagnaLong, nightTimeBirth
+    saturnLongitude(pp), sunLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 11. Rajya (Kingdom) - same as Pithri */
@@ -180,147 +191,142 @@ export const rajyaSaham = pithriSaham;
 /** 12. Maathri (Mother) - Moon - Venus + Lagna */
 // @parity: py=maathri_saham
 export const maathriSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MOON), getPlanetLong(positions, VENUS), lagnaLong, nightTimeBirth
+    moonLongitude(pp), venusLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 13. Puthra (Children) - Jupiter - Moon + Lagna */
 // @parity: py=puthra_saham
 export const puthraSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER), getPlanetLong(positions, MOON), lagnaLong, nightTimeBirth
+    jupiterLongitude(pp), moonLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 14. Jeeva (Life) - Saturn - Jupiter + Lagna */
 // @parity: py=jeeva_saham
 export const jeevaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, SATURN), getPlanetLong(positions, JUPITER), lagnaLong, nightTimeBirth
+    saturnLongitude(pp), jupiterLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 15. Karma (Action) - Mars - Mercury + Lagna */
 // @parity: py=karma_saham
 export const karmaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MARS), getPlanetLong(positions, MERCURY), lagnaLong, nightTimeBirth
+    marsLongitude(pp), mercuryLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 16. Roga (Disease) - Lagna - Moon + Lagna (same day/night, no between check) */
 // @parity: py=roga_saham
 export const rogaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number
+    pp: SahamPlanetPositions, _nightTimeBirth = false
 ): number => {
-    const moonLong = getPlanetLong(positions, MOON);
-    return ((lagnaLong - moonLong + lagnaLong) % 360 + 360) % 360;
+    const lagnaLong = lagnaLongitude(pp);
+    return ((lagnaLong - moonLongitude(pp) + lagnaLong) % 360 + 360) % 360;
 };
 
 /** 16a. Roga alternate - Saturn - Moon + Lagna */
 // @parity: py=roga_sagam_1
 export const rogaSaham1 = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, SATURN), getPlanetLong(positions, MOON), lagnaLong, nightTimeBirth
+    saturnLongitude(pp), moonLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 17. Kali (Great misfortune) - Jupiter - Mars + Lagna */
 // @parity: py=kali_saham
 export const kaliSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER), getPlanetLong(positions, MARS), lagnaLong, nightTimeBirth
+    jupiterLongitude(pp), marsLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 18. Sastra (Sciences) - Jupiter - Saturn + Mercury */
 // @parity: py=sastra_saham
 export const sastraSaham = (
-    positions: SahamPlanetPos[], nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, JUPITER), getPlanetLong(positions, SATURN),
-    getPlanetLong(positions, MERCURY), nightTimeBirth
+    jupiterLongitude(pp), saturnLongitude(pp), mercuryLongitude(pp), nightTimeBirth
 );
 
 /** 19. Bandhu (Relatives) - Mercury - Moon + Lagna */
 // @parity: py=bandhu_saham
 export const bandhuSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MERCURY), getPlanetLong(positions, MOON), lagnaLong, nightTimeBirth
+    mercuryLongitude(pp), moonLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 20. Mrithyu (Death) - 8th house - Moon + Lagna (same day/night) */
 // @parity: py=mrithyu_saham
 export const mrithyuSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number
+    pp: SahamPlanetPositions
 ): number => {
-    const eighthHouseLong = lagnaLong + 210; // (8-1)*30
-    return computeSahamNoSwap(
-        eighthHouseLong, getPlanetLong(positions, MOON), lagnaLong
-    );
+    const lagnaLong = lagnaLongitude(pp);
+    return computeSahamNoSwap(lagnaLong + 210, moonLongitude(pp), lagnaLong);
 };
 
-/** 21. Paradesa (Foreign countries) - 9th house - 9th lord + Lagna */
+/** 21. Paradesa (Foreign countries) - 9th house - 9th lord + Lagna (same day/night) */
 // @parity: py=paradesa_saham
 export const paradesaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number
+    pp: SahamPlanetPositions, _nightTimeBirth = false
 ): number => {
-    const ninthHouse = (lagnaRasi + 8) % 12;
-    const ninthLord = getHouseOwnerFromPlanetPositions(positions, ninthHouse);
-    const longNinthHouse = lagnaLong + 240; // (9-1)*30
-    const longNinthLord = getPlanetLong(positions, ninthLord);
-    return computeSahamNoSwap(longNinthHouse, longNinthLord, lagnaLong);
+    const ascHouse = pp[0][1][0];
+    const ninthHouse = (ascHouse + 8) % 12;
+    const ninthLord = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), ninthHouse);
+    const lagnaLong = lagnaLongitude(pp);
+    return computeSahamNoSwap(lagnaLong + 240, sahamLongitude(pp, ninthLord + 1), lagnaLong);
 };
 
-/** 22. Artha (Money) - 2nd house - 2nd lord + Lagna */
+/** 22. Artha (Money) - 2nd house - 2nd lord + Lagna (same day/night) */
 // @parity: py=artha_saham
 export const arthaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number
+    pp: SahamPlanetPositions, _nightTimeBirth = false
 ): number => {
-    const secondHouse = (lagnaRasi + 1) % 12;
-    const secondLord = getHouseOwnerFromPlanetPositions(positions, secondHouse);
-    const longSecondHouse = lagnaLong + 30;
-    const longSecondLord = getPlanetLong(positions, secondLord);
-    return computeSahamNoSwap(longSecondHouse, longSecondLord, lagnaLong);
+    const ascHouse = pp[0][1][0];
+    const secondHouse = (ascHouse + 1) % 12;
+    const secondLord = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), secondHouse);
+    const lagnaLong = lagnaLongitude(pp);
+    return computeSahamNoSwap(lagnaLong + 30, sahamLongitude(pp, secondLord + 1), lagnaLong);
 };
 
 /** 23. Paradara (Adultery) - Venus - Sun + Lagna */
 // @parity: py=paradara_saham
 export const paradaraSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, VENUS), getPlanetLong(positions, SUN), lagnaLong, nightTimeBirth
+    venusLongitude(pp), sunLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 24. Vanika (Commerce) - Moon - Mercury + Lagna */
 // @parity: py=vanika_saham
 export const vanikaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MOON), getPlanetLong(positions, MERCURY), lagnaLong, nightTimeBirth
+    moonLongitude(pp), mercuryLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 25. Karyasiddhi (Success) - Saturn - Sun + Lord(SunSign); Night: Saturn - Moon + Lord(MoonSign) */
 // @parity: py=karyasiddhi_saham
 export const karyasiddhiSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => {
-    const saturnLong = getPlanetLong(positions, SATURN);
+    const saturnLong = saturnLongitude(pp);
     if (nightTimeBirth) {
-        const moonLong = getPlanetLong(positions, MOON);
-        const moonRasi = Math.floor(moonLong / 30);
-        const lordOfMoonSign = getHouseOwnerFromPlanetPositions(positions, moonRasi);
-        const signLong = getPlanetLong(positions, lordOfMoonSign);
+        const moonLong = moonLongitude(pp);
+        const lordOfMoonSign = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), pp[2][1][0]);
+        const signLong = sahamLongitude(pp, lordOfMoonSign + 1);
         let result = saturnLong - moonLong + signLong;
         if (!isCBetweenBToA(saturnLong, moonLong, signLong)) result += 30;
         return ((result % 360) + 360) % 360;
     }
-    const sunLong = getPlanetLong(positions, SUN);
-    const sunRasi = Math.floor(sunLong / 30);
-    const lordOfSunSign = getHouseOwnerFromPlanetPositions(positions, sunRasi);
-    const signLong = getPlanetLong(positions, lordOfSunSign);
+    const sunLong = sunLongitude(pp);
+    const lordOfSunSign = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), pp[1][1][0]);
+    const signLong = sahamLongitude(pp, lordOfSunSign + 1);
     let result = saturnLong - sunLong + signLong;
     if (!isCBetweenBToA(saturnLong, sunLong, signLong)) result += 30;
     return ((result % 360) + 360) % 360;
@@ -329,39 +335,34 @@ export const karyasiddhiSaham = (
 /** 26. Vivaha (Marriage) - Venus - Saturn + Lagna */
 // @parity: py=vivaha_saham
 export const vivahaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, VENUS), getPlanetLong(positions, SATURN), lagnaLong, nightTimeBirth
+    venusLongitude(pp), saturnLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 27. Santapa (Sadness) - Saturn - Moon + 6th house */
 // @parity: py=santapa_saham
 export const santapaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
-): number => {
-    const sixthHouseLong = lagnaLong + 150; // (6-1)*30
-    return computeSaham(
-        getPlanetLong(positions, SATURN), getPlanetLong(positions, MOON),
-        sixthHouseLong, nightTimeBirth
-    );
-};
+    pp: SahamPlanetPositions, nightTimeBirth = false
+): number => computeSaham(
+    saturnLongitude(pp), moonLongitude(pp), lagnaLongitude(pp) + 150, nightTimeBirth
+);
 
 /** 28. Sraddha (Devotion) - Venus - Mars + Lagna */
 // @parity: py=sraddha_saham
 export const sraddhaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, VENUS), getPlanetLong(positions, MARS), lagnaLong, nightTimeBirth
+    venusLongitude(pp), marsLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 29. Preethi (Love) - SastraSaham - PunyaSaham + Lagna */
 // @parity: py=preethi_saham
 export const preethiSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    sastraSaham(positions, nightTimeBirth),
-    punyaSaham(positions, lagnaLong, nightTimeBirth),
-    lagnaLong, nightTimeBirth
+    sastraSaham(pp, nightTimeBirth), punyaSaham(pp, nightTimeBirth),
+    lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 30. Jadya (Chronic disease) - Mars - Saturn + Mercury
@@ -369,11 +370,11 @@ export const preethiSaham = (
  *  We replicate this behavior for parity. */
 // @parity: py=jadya_saham
 export const jadyaSaham = (
-    positions: SahamPlanetPos[], nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => {
-    const marsLong = getPlanetLong(positions, MARS);
-    const saturnLong = getPlanetLong(positions, SATURN);
-    const mercuryLong = getPlanetLong(positions, MERCURY);
+    const marsLong = marsLongitude(pp);
+    const saturnLong = saturnLongitude(pp);
+    const mercuryLong = mercuryLongitude(pp);
     let result = marsLong - saturnLong + mercuryLong;
     if (!isCBetweenBToA(marsLong, saturnLong, mercuryLong)) result += 30;
     if (nightTimeBirth) {
@@ -387,57 +388,56 @@ export const jadyaSaham = (
 /** 31. Vyaapaara (Business) - Mars - Saturn + Lagna (same day/night) */
 // @parity: py=vyaapaara_saham
 export const vyaapaaraSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number
+    pp: SahamPlanetPositions
 ): number => computeSahamNoSwap(
-    getPlanetLong(positions, MARS), getPlanetLong(positions, SATURN), lagnaLong
+    marsLongitude(pp), saturnLongitude(pp), lagnaLongitude(pp)
 );
 
 /** 32. Sathru (Enemy) - Mars - Saturn + Lagna */
 // @parity: py=sathru_saham
 export const sathruSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    getPlanetLong(positions, MARS), getPlanetLong(positions, SATURN), lagnaLong, nightTimeBirth
+    marsLongitude(pp), saturnLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 33. Jalapatna (Ocean crossing) - Cancer 15 deg - Saturn + Lagna */
 // @parity: py=jalapatna_saham
 export const jalapatnaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
     105.0, // Cancer 15 degrees = 3*30 + 15
-    getPlanetLong(positions, SATURN), lagnaLong, nightTimeBirth
+    saturnLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 34. Bandhana (Imprisonment) - PunyaSaham - Saturn + Lagna */
 // @parity: py=bandhana_saham
 export const bandhanaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    punyaSaham(positions, lagnaLong, nightTimeBirth),
-    getPlanetLong(positions, SATURN),
-    lagnaLong, nightTimeBirth
+    punyaSaham(pp, nightTimeBirth), saturnLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 35. Apamrithyu (Bad death) - 8th house - Mars + Lagna */
 // @parity: py=apamrithyu_saham
 export const apamrithyuSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => computeSaham(
-    lagnaLong + 210, // 8th house
-    getPlanetLong(positions, MARS), lagnaLong, nightTimeBirth
+    lagnaLongitude(pp) + 210, // 8th house
+    marsLongitude(pp), lagnaLongitude(pp), nightTimeBirth
 );
 
 /** 36. Laabha (Material gains) - 11th house - 11th lord + Lagna */
 // @parity: py=laabha_saham
 export const laabhaSaham = (
-    positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number,
-    nightTimeBirth = false
+    pp: SahamPlanetPositions, nightTimeBirth = false
 ): number => {
-    const eleventhHouse = (lagnaRasi + 10) % 12;
-    const eleventhLord = getHouseOwnerFromPlanetPositions(positions, eleventhHouse);
+    const ascHouse = pp[0][1][0];
+    const eleventhHouse = (ascHouse + 10) % 12;
+    const eleventhLord = getHouseOwnerFromPlanetPositions(toObjectPositions(pp), eleventhHouse);
+    const lagnaLong = lagnaLongitude(pp);
     const longEleventhHouse = lagnaLong + 300; // (11-1)*30
-    const longEleventhLord = getPlanetLong(positions, eleventhLord);
+    const longEleventhLord = sahamLongitude(pp, eleventhLord + 1);
     if (nightTimeBirth) {
         let result = longEleventhLord - longEleventhHouse + lagnaLong;
         if (!isCBetweenBToA(longEleventhLord, longEleventhHouse, lagnaLong)) result += 30;
