@@ -124,6 +124,7 @@ function getAntardhasa(antardhasaSeedRasi: number, pToH: Map<number, number>): n
 /**
  * Get Shoola Dasha periods
  */
+// @parity: py=shoola_dhasa_bhukthi
 export function getShoolaDashaBhukti(
   jd: number,
   place: Place,

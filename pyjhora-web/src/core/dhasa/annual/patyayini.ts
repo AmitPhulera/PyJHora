@@ -55,6 +55,7 @@ function formatJdAsDate(jd: number): string {
  * @param d1Positions - Planet positions (from divisional chart)
  * @returns PatyayiniResult with mahadashas and bhuktis
  */
+// @parity: py=patyayini_dhasa
 export function getPatyayiniDhasa(
   jdYear: number,
   d1Positions: PlanetPosition[],

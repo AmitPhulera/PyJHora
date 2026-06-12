@@ -30,6 +30,7 @@ year_duration = const.sidereal_year
     But same example data in JHora give different dhasa/bhukthi values
     Not Clear what JHora's algorithm is
 """
+# @parity: ts=@/core/dhasa/raasi/sudasa::getSudasaDashaBhukti
 def sudasa_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,include_antardhasa=True):
     jd = utils.julian_day_number(dob, tob)
     sl = drik.sree_lagna(jd, place, divisional_chart_factor=divisional_chart_factor)

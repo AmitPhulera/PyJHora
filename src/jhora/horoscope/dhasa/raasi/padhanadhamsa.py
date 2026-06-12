@@ -22,6 +22,7 @@ from jhora import const, utils
 from jhora.horoscope.chart import charts, house,arudhas
 from jhora.horoscope.dhasa.raasi import narayana
 """ TODO logic not fully implemented """
+# @parity: ts=@/core/dhasa/raasi/padhanadhamsa::getPadhanadhamsaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, divisional_chart_factor=divisional_chart_factor)

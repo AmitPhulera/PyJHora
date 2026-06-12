@@ -22,6 +22,7 @@ from jhora import const,utils
 from jhora.horoscope.chart import charts, house
 from jhora.panchanga import drik
 year_duration = const.sidereal_year
+# @parity: ts=@/core/dhasa/raasi/narayana::getNarayanaDashaDuration
 def _dhasa_duration(planet_positions,sign,varsha_narayana=False):
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
     h_to_p = utils.get_house_to_planet_dict_from_planet_to_house_dict(p_to_h)
@@ -103,6 +104,7 @@ def _narayana_dhasa_calculation(planet_positions,dhasa_seed_sign,dob,tob,place,y
             if total_dhasa_duration >= const.human_life_span_for_narayana_dhasa:
                 break
     return dhasa_periods
+# @parity: ts=@/core/dhasa/raasi/narayana::getNarayanaDashaBhukti
 def narayana_dhasa_for_divisional_chart(dob,tob,place,years=1, months=1, sixty_hours=1,divisional_chart_factor=1,include_antardhasa=True):
     if divisional_chart_factor==1:
         return narayana_dhasa_for_rasi_chart(dob, tob, place, years, months, sixty_hours, include_antardhasa)
@@ -136,6 +138,7 @@ def narayana_dhasa_for_rasi_chart(dob,tob,place,years=1,months=1,sixty_hours=1,i
     seventh_house = (asc_house+7-1)%12
     dhasa_seed_sign = house.stronger_rasi_from_planet_positions(planet_positions, asc_house, seventh_house)
     return _narayana_dhasa_calculation(planet_positions,dhasa_seed_sign,dob,tob,place,years=years,months=months,sixty_hours=sixty_hours,include_antardhasa=include_antardhasa,varsha_narayana=False)
+# @parity: ts=@/core/dhasa/raasi/narayana::getNarayanaAntardhasa
 def _narayana_antardhasa(planet_positions,dhasa_rasi):
     _DEBUG_ = False
     if _DEBUG_:print('dhasa_rasi',utils.RAASI_LIST[dhasa_rasi])
@@ -158,6 +161,7 @@ def _narayana_antardhasa_old(antardhasa_seed_rasi,p_to_h):
     if p_to_h[8]==antardhasa_seed_rasi:
         direction *= -1
     return [(antardhasa_seed_rasi+direction*i)%12 for i in range(12)]
+# @parity: ts=@/core/dhasa/raasi/narayana::getVarshaNarayanaDashaBhukti
 def varsha_narayana_dhasa_bhukthi(dob,tob,place,years=1,months=1,sixty_hours=1,divisional_chart_factor=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     jd_at_years = drik.next_solar_date(jd_at_dob, place, years=years)

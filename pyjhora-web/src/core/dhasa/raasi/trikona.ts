@@ -139,6 +139,7 @@ function getDhasaDuration(
  * Get Trikona Dasha periods
  * Uses the strongest of the trine signs as seed
  */
+// @parity: py=get_dhasa_antardhasa
 export function getTrikonaDashaBhukti(
   jd: number,
   place: Place,

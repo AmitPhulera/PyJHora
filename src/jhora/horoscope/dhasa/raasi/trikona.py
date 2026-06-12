@@ -24,6 +24,7 @@ from jhora.horoscope.dhasa.raasi import narayana
 """ Mahadhasa lord and period matches with JHora. Antardasa does not match """
 sidereal_year = const.sidereal_year
 
+# @parity: ts=@/core/dhasa/raasi/trikona::getTrikonaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, divisional_chart_factor=divisional_chart_factor)

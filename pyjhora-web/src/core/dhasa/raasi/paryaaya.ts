@@ -179,6 +179,7 @@ function getDhasaLords(
  * @param options.useTribhagiVariation - Use Tribhagi variation (1/3 durations)
  * @param options.cycles - Number of cycles (default 2)
  */
+// @parity: py=get_dhasa_antardhasa
 export function getParyaayaDashaBhukti(
   jd: number,
   place: Place,

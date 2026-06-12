@@ -124,6 +124,7 @@ function getAntardhasa(antardhasaSeedRasi: number, pToH: Map<number, number>): n
  * Get Nirayana Shoola Dasha periods
  * Uses 2nd and 8th houses as seed
  */
+// @parity: py=nirayana_shoola_dhasa_bhukthi
 export function getNirayanaShoolaDashaBhukti(
   jd: number,
   place: Place,

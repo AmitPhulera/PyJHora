@@ -161,6 +161,7 @@ function varshaVimsottariBhukti(
  * @param startDate - Start date (JD) of the bhukti
  * @returns Array of [lord, startJd, durationDays] tuples
  */
+// @parity: py=varsha_vimsottari_antara
 export function varshaVimsottariAntara(
   mahaLord: number,
   bhuktiLord: number,
@@ -201,6 +202,7 @@ function whereOccurs(jd: number, dict: Map<number, number>): number | undefined 
  * @param mahadashas - Map of lord -> start JD (ordered)
  * @returns Tuple of [mahaLord, bhuktiLord, antaraPeriods] or undefined if JD is before all periods
  */
+// @parity: py=compute_varsha_vimsottari_antara_from
 export function computeVarshaVimsottariAntaraFrom(
   jd: number,
   mahadashas: Map<number, number>,
@@ -237,6 +239,7 @@ export function computeVarshaVimsottariAntaraFrom(
  * @param includeBhuktis - Whether to include bhukti sub-periods
  * @returns MuddaResult
  */
+// @parity: py=mudda_dhasa_bhukthi
 export function getMuddaDhasa(
   jd: number,
   d1Positions: PlanetPosition[],

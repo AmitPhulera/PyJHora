@@ -32,6 +32,7 @@ def _dhasa_duration(lord):
     else:
         return 9
     
+# @parity: ts=@/core/dhasa/raasi/sthira::getSthiraDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, 

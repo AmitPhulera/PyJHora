@@ -273,6 +273,7 @@ function computeKendradhiFromSeed(
  * Get Kendradhi Rasi Dasha periods (Lagna variant)
  * Uses kendras from stronger of Asc/7th
  */
+// @parity: py=kendradhi_rasi_dhasa
 export function getKendradhiDashaBhukti(
   jd: number,
   place: Place,
@@ -313,6 +314,7 @@ export function getKendradhiDashaBhukti(
  * @param options.includeBhuktis - Whether to include bhukti sub-periods (default true)
  * @returns KendradhiResult with mahadashas and optional bhuktis
  */
+// @parity: py=karaka_kendradhi_rasi_dhasa
 export function getKarakaKendradhiDashaBhukti(
   jd: number,
   place: Place,

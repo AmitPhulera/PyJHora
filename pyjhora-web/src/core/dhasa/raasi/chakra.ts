@@ -152,6 +152,7 @@ function getDhasaSeed(
  * @param options.months - Solar return months (default 1, no advancement)
  * @param options.sixtyHours - Solar return 60-hour count (default 1, no advancement)
  */
+// @parity: py=get_dhasa_antardhasa
 export function getChakraDashaBhukti(
   jd: number,
   place: Place,

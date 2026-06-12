@@ -110,6 +110,7 @@ function getDhasaSeed(planetPositions: PlanetPosition[]): number {
  * @param options.includeBhuktis - Whether to include sub-periods (default true)
  * @param options.usePanchakaVariation - Use Panchaka duration variation (default false)
  */
+// @parity: py=get_dhasa_antardhasa
 export function getSandhyaDashaBhukti(
   jd: number,
   place: Place,

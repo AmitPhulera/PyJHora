@@ -37,6 +37,7 @@ def _dhasa_duration(planet_positions, sign):
     elif const.house_strengths_of_planets[lord_of_6th][lord_house] == const._EXALTED_UCCHAM:
         _dd += 1
     return _dd
+# @parity: ts=@/core/dhasa/raasi/brahma::getBrahmaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, 

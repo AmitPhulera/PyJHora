@@ -21,6 +21,7 @@
 from jhora import const, utils
 from jhora.panchanga import drik
 from jhora.horoscope.chart import charts
+# @parity: ts=@/core/dhasa/annual/patyayini::getPatyayiniDhasa
 def patyayini_dhasa(jd_years,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,chart_method=1):
     """
         Compute Patyaayini Dhasa
