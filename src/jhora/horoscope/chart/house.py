@@ -39,6 +39,7 @@ lords_of_trines = lambda h_to_p, raasi:[house_owner(h_to_p,h) for h in trines_of
 lords_of_quadrants_from_planet_positions = lambda planet_positions,raasi:[house_owner_from_planet_positions(planet_positions,int(h)) for h in quadrants_of_the_raasi(raasi)] #V2.3.1
 lords_of_trines_from_planet_positions = lambda planet_positions, raasi:[house_owner_from_planet_positions(planet_positions,int(h)) for h in trines_of_the_raasi(raasi)] #V2.3.1
 
+# @parity: ts=@/core/horoscope/house::isYogaKaaraka
 def is_yoga_kaaraka(asc_house,planet,planet_house):
     """
         Check if a planet is yoga kaaraka
@@ -50,6 +51,7 @@ def is_yoga_kaaraka(asc_house,planet,planet_house):
     return planet_house in quadrants_of_the_raasi(asc_house) and planet_house in trines_of_the_raasi(asc_house) and \
             const.house_strengths_of_planets[planet][planet_house]==5
 
+# @parity: ts=@/core/horoscope/house::trikonas
 def trikonas():
     """ Get All trikonas of all houses """
     trikonas = []
@@ -61,6 +63,7 @@ def trikonas():
 """ Get All dushthana aspects of the given raasi"""
 dushthana_aspects_of_the_raasi = lambda raasi:[int(raasi+const.HOUSE_6)%12, int(raasi+const.HOUSE_8)%12, int(raasi+const.HOUSE_12)%12]
 dushthanas_of_the_raasi = lambda raasi: dushthana_aspects_of_the_raasi(raasi)
+# @parity: ts=@/core/horoscope/house::dushthanas
 def dushthanas():
     """ Get All dushthanas of all houses """
     dushthanas = []
@@ -72,6 +75,7 @@ def dushthanas():
 """ Get All chathusra aspects of the given raasi"""
 chathusra_aspects_of_the_raasi = lambda raasi:[(raasi+2)%12, (raasi+4)%12]    
 chathusras_of_the_raasi = lambda raasi: chathusra_aspects_of_the_raasi(raasi)
+# @parity: ts=@/core/horoscope/house::chathusras
 def chathusras():
     """ Get All chathusras of all houses """
     chathusras = []
@@ -86,8 +90,10 @@ quadrants_of_the_raasi = lambda raasi:kendra_aspects_of_the_raasi(raasi)
 panaphras_of_the_raasi = lambda raasi:kendra_aspects_of_the_raasi((raasi+1)%12)
 apoklimas_of_the_raasi = lambda raasi:kendra_aspects_of_the_raasi((raasi+2)%12)
 
+# @parity: ts=@/core/horoscope/house::quadrants
 def quadrants():
     return kendras()
+# @parity: ts=@/core/horoscope/house::kendras
 def kendras():
     """ Get All kendras of all houses """
     kendras = []
@@ -96,6 +102,7 @@ def kendras():
         ken = [x+1 for x in ken[1]]
         kendras.append(ken)
     return kendras
+# @parity: ts=@/core/horoscope/house::getAspectedKendrasOfRaasi
 def aspected_kendras_of_raasi(raasi,reverse_direction=False):
     """ 
         @param raasi: 0 .. 11
@@ -115,6 +122,7 @@ def aspected_kendras_of_raasi(raasi,reverse_direction=False):
 """ Get All kendra aspects of the given raasi"""
 upachaya_aspects_of_the_raasi = lambda raasi:[(raasi+const.HOUSE_3)%12, (raasi+const.HOUSE_6)%12, (raasi+const.HOUSE_10)%12,(raasi+const.HOUSE_11)%12]    
 upachayas_of_the_raasi = lambda raasi: upachaya_aspects_of_the_raasi(raasi)
+# @parity: ts=@/core/horoscope/house::upachayas
 def upachayas():
     """ Get All upachayas of all houses """
     upachayas = []
@@ -123,6 +131,7 @@ def upachayas():
         upa = [x+1 for x in upa[1]]
         upachayas.append(upa)
     return upachayas
+# @parity: ts=@/core/horoscope/house::getCharaKarakas
 def chara_karakas(planet_positions):
     """
         get chara karakas for a dasa varga chart
@@ -141,6 +150,7 @@ def chara_karakas(planet_positions):
     #print('sorted by long',pp1)
     pp2 = [pi[0] for _,pi in enumerate(pp1)]
     return pp2
+# @parity: ts=@/core/horoscope/house::getGrahaDrishtiFromChart
 def graha_drishti_from_chart(house_to_planet_dict,separator='/'):
     """
         get graha drishti from the chart positions of the planet
@@ -225,6 +235,7 @@ def _get_raasi_drishti_dual():
                 rd.append(ms)
         raasi_drishti[fs] = rd
     return raasi_drishti
+# @parity: ts=@/core/horoscope/house::getRaasiDrishtiMap
 def _get_raasi_drishti():
     #print('movable rasi drishti',_get_raasi_drishti_movable())
     #print('fixed rasi drishti',_get_raasi_drishti_fixed())
@@ -234,6 +245,7 @@ def _get_raasi_drishti():
     return _raasi_drishti
 #raasi_drishti = _get_raasi_drishti()    
 #print('raasi_drishti_map',raasi_drishti)
+# @parity: ts=@/core/horoscope/house::getRaasiDrishtiFromChart
 def raasi_drishti_from_chart(house_to_planet_dict,separator='/'):
     """
         get raasi drishti from the chart positions of the planet
@@ -266,9 +278,11 @@ def raasi_drishti_from_chart(house_to_planet_dict,separator='/'):
         app[p] = sum([h_to_p[ar].split(separator) for ar in arp[p] if h_to_p[ar] !=''],[])
         app[p] = [int(pp) for pp in app[p] if pp != '' and pp != const._ascendant_symbol]
     return arp,ahp,app
+# @parity: ts=@/core/horoscope/house::getRaasiDrishtiOfPlanet
 def raasi_drishti_of_the_planet(house_to_planet_dict,planet,separator='/'):
     arp,_,_ = raasi_drishti_from_chart(house_to_planet_dict,separator=separator)
     return arp[planet]
+# @parity: ts=@/core/horoscope/house::getGrahaDrishtiPlanetsOfPlanet
 def aspected_planets_of_the_planet(house_to_planet_dict,planet,separator='/'):
     """
         Uses Graha Drishti
@@ -278,6 +292,7 @@ def aspected_planets_of_the_planet(house_to_planet_dict,planet,separator='/'):
     #print('app',app)
     aspected_planets = utils.flatten_list([map(int,value) for key,value in app.items() if planet == key])
     return aspected_planets
+# @parity: ts=@/core/horoscope/house::getGrahaDrishtiRasisOfPlanet
 def aspected_rasis_of_the_planet(house_to_planet_dict,planet,separator='/'):
     """
         Uses Graha Drishti
@@ -286,6 +301,7 @@ def aspected_rasis_of_the_planet(house_to_planet_dict,planet,separator='/'):
     arp,_,_ = graha_drishti_from_chart(house_to_planet_dict, separator)
     aspected_rasis = utils.flatten_list([map(int,value) for key,value in arp.items() if planet == key])
     return aspected_rasis
+# @parity: ts=@/core/horoscope/house::getGrahaDrishtiHousesOfPlanet
 def aspected_houses_of_the_planet(house_to_planet_dict,planet,separator='/'):
     """
         Uses Graha Drishti
@@ -294,6 +310,7 @@ def aspected_houses_of_the_planet(house_to_planet_dict,planet,separator='/'):
     _,ahp,_ = graha_drishti_from_chart(house_to_planet_dict, separator)
     aspected_houses = utils.flatten_list([map(int,value) for key,value in ahp.items() if planet == key])
     return aspected_houses
+# @parity: ts=@/core/horoscope/house::getAspectedPlanetsOfRaasi
 def aspected_planets_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     """
         get planets, from the raasi drishti from the chart, that has drishti on the given raasi
@@ -301,6 +318,7 @@ def aspected_planets_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     arp,_,_ = raasi_drishti_from_chart(house_to_planet_dict,separator=separator)
     aspected_planets = [key for key,value in arp.items() if raasi in value]
     return aspected_planets
+# @parity: ts=@/core/horoscope/house::getAspectedHousesOfRaasi
 def aspected_houses_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     """
         get aspected houses of the given rasi from the chart
@@ -308,6 +326,7 @@ def aspected_houses_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     _,ahp,_ = raasi_drishti_from_chart(house_to_planet_dict,separator=separator)
     aspected_houses = [key for key,value in ahp.items() if str(raasi) in value]
     return aspected_houses
+# @parity: ts=@/core/horoscope/house::getAspectedRasisOfRaasi
 def aspected_raasis_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     """
         get aspected raasis of the given rasi from the chart
@@ -315,6 +334,7 @@ def aspected_raasis_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     arr,_,_ = raasi_drishti_from_chart(house_to_planet_dict,separator=separator)
     aspected_raasis = [key for key,value in arr.items() if str(raasi) in value]
     return aspected_raasis
+# @parity: ts=@/core/horoscope/house::getArgala
 def get_argala(house_to_planet_dict,separator='\n'):
     """
         Get argala and Virodhargala from the chart
@@ -331,6 +351,7 @@ def get_argala(house_to_planet_dict,separator='\n'):
     argala = [[h_to_p[(r+asc_house+a-1)%12].replace(const._ascendant_symbol,'').replace(separator,'/').replace('//','/') for a in const.argala_houses] for r in range(12)]
     virodhargala = [[h_to_p[(r+asc_house+a-1)%12].replace(const._ascendant_symbol,'').replace(separator,'/').replace('//','/') for a in const.virodhargala_houses] for r in range(12)]
     return argala,virodhargala
+# @parity: ts=@/core/horoscope/house::getStrongerPlanetFromPositions
 def stronger_planet_from_planet_positions(planet_positions,planet1=const._SATURN,planet2=7,check_during_dhasa=False):
     """
         To find stronger planet between Rahu/Saturn/Aquarius or Ketu/Mars/Scorpio 
@@ -643,6 +664,7 @@ def stronger_planet(house_to_planet_dict,planet1=const._SATURN,planet2=7,check_d
         else:
             #print('Rule 5(b)',planet_list[planet2],' is stronger than',planet_list[planet2])
             return planet2
+# @parity: ts=@/core/horoscope/house::getStrongerRasi
 def stronger_rasi_from_planet_positions(planet_positions,rasi1,rasi2):
     house_to_planet_dict = utils.get_house_planet_list_from_planet_positions(planet_positions)
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
@@ -757,6 +779,7 @@ def stronger_rasi(house_to_planet_dict,rasi1,rasi2):
     return None
     #import sys
     #sys.exit('No Stronger Rasi found. Use stronger_rasi_from_planet_positions instead.')
+# @parity: ts=@/core/horoscope/house::naturalFriendsOfPlanets
 def natural_friends_of_planets(h_to_p=None):
     """
         Take the moolatrikona of the planet. Lord of the rasi where it is exalted is its friend. 
@@ -777,10 +800,13 @@ def natural_friends_of_planets(h_to_p=None):
         #print(p,mtr,er,nf[p])
         nf[p] = list(set(nf[p]))
     return nf # const.friendly_planets
+# @parity: ts=@/core/horoscope/house::naturalNeutralOfPlanets
 def natural_neutral_of_planets(h_to_p=None):
     return const.neutral_planets
+# @parity: ts=@/core/horoscope/house::naturalEnemiesOfPlanets
 def natural_enemies_of_planets(h_to_p=None):
     return const.enemy_planets
+# @parity: ts=@/core/horoscope/house::getTemporaryFriendsOfPlanets
 def _get_temporary_friends_of_planets(h_to_p):
     p_to_h = utils.get_planet_to_house_dict_from_chart(h_to_p)
     p_temp_friends = {}
@@ -791,6 +817,7 @@ def _get_temporary_friends_of_planets(h_to_p):
         _temp_friends = list(set(map(int,_temp_friends)))
         p_temp_friends[p] = _temp_friends
     return p_temp_friends
+# @parity: ts=@/core/horoscope/house::getTemporaryEnemiesOfPlanets
 def _get_temporary_enemies_of_planets(h_to_p):
     p_to_h = utils.get_planet_to_house_dict_from_chart(h_to_p)
     p_temp_enemies = {}
@@ -801,6 +828,7 @@ def _get_temporary_enemies_of_planets(h_to_p):
         _temp_enemies = list(set(map(int,_temp_enemies)))
         p_temp_enemies[p] = _temp_enemies
     return p_temp_enemies
+# @parity: ts=@/core/horoscope/house::getCompoundRelationshipsOfPlanets
 def _get_compound_relationships_of_planets(h_to_p):
     p_to_h = utils.get_planet_to_house_dict_from_chart(h_to_p)
     tf = _get_temporary_friends_of_planets(h_to_p)
@@ -838,6 +866,7 @@ def _get_compound_relationships_of_planets(h_to_p):
                 #ae.append(p1)
         #p_compound[p] = [am,m,n,e,ae]
     return p_compound
+# @parity: ts=@/core/horoscope/house::getVargaViswaOfPlanets
 def _get_varga_viswa_of_planets(h_to_p):
     p_to_h = utils.get_planet_to_house_dict_from_chart(h_to_p)
     cs = _get_compound_relationships_of_planets(h_to_p)
@@ -852,6 +881,7 @@ def _get_varga_viswa_of_planets(h_to_p):
             d = const.house_owners[p_to_h[p]]
             vv[p] = scores[cs[p][d]]
     return vv    
+# @parity: ts=@/core/horoscope/house::getHouseOwnerFromPlanetPositions
 def house_owner_from_planet_positions(planet_positions,sign,check_during_dhasa=False):
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
     lord_of_sign = house_owner(h_to_p, sign)
@@ -860,6 +890,7 @@ def house_owner_from_planet_positions(planet_positions,sign,check_during_dhasa=F
     elif sign == 10:
         lord_of_sign = stronger_planet_from_planet_positions(planet_positions, 6, 7, check_during_dhasa=check_during_dhasa)
     return lord_of_sign
+# @parity: ts=@/core/horoscope/house::getHouseOwnerFromChart
 def house_owner(h_to_p,sign):
     lord_of_sign = const.house_owners[sign]
     l_o_s = lord_of_sign
@@ -876,6 +907,7 @@ def house_owner(h_to_p,sign):
         return l_o_s #None # 
         #exit()
     return lord_of_sign
+# @parity: ts=@/core/horoscope/house::getMarakasFromPlanetPositions
 def marakas_from_planet_positions(planet_positions):
     """
         If a malefic planet powerfully conjoins or aspects, using graha drishti, 
@@ -896,6 +928,7 @@ def marakas_from_planet_positions(planet_positions):
         maraka_planets += mpls
     maraka_planets = list(set(maraka_planets))
     return maraka_planets    
+# @parity: ts=@/core/horoscope/house::getMarakas
 def marakas(h_to_p):
     p_to_h = utils.get_planet_to_house_dict_from_chart(h_to_p)
     """
@@ -931,6 +964,7 @@ def rudra_based_on_planet_positions(dob,tob,place,divisional_chart_factor=1):
     _rudra_sign = p_to_h[_rudra]
     trishoola_rasis = trines_of_the_raasi(_rudra_sign)
     return _rudra, _rudra_sign,trishoola_rasis
+# @parity: ts=@/core/horoscope/house::getBrahma
 def brahma(planet_positions):
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
     asc_house = planet_positions[0][1][0]
@@ -961,6 +995,7 @@ def brahma(planet_positions):
         b1 = stronger_planet_from_planet_positions(planet_positions, list(lords_scores.keys())[0], list(lords_scores.keys())[1])
         brahma = stronger_planet_from_planet_positions(planet_positions, brahma, list(lords_scores.keys())[2])
     return brahma
+# @parity: ts=@/core/horoscope/house::getRudra
 def rudra(planet_positions):
     """ Stronger of lord of the 8th house from (i) lagna and (ii) the 7th house - is Rudra """
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
@@ -976,8 +1011,10 @@ def rudra(planet_positions):
     _rudra_sign = p_to_h[_rudra]
     trishoola_rasis = trines_of_the_raasi(_rudra_sign)
     return _rudra, _rudra_sign,trishoola_rasis
+# @parity: ts=@/core/horoscope/house::getTrishoolaRasis
 def trishoola_rasis(planet_positions):
     return trines_of_the_raasi(rudra(planet_positions)[1])
+# @parity: ts=@/core/horoscope/house::getMaheshwara
 def maheshwara_from_planet_positions(planet_positions):
     pp = planet_positions
     _chara_karakas = chara_karakas(pp) #jd, place, divisional_chart_factor)
@@ -1016,6 +1053,7 @@ def maheshwara(dob,tob,place,divisional_chart_factor=1):
     pp = charts.divisional_chart(jd, place, divisional_chart_factor=divisional_chart_factor)
     return maheshwara_from_planet_positions(pp)
 longevity_of_pair = lambda rasi1,rasi2: [key for key,value in const.longevity.items() if (rasi1,rasi2) in value][0]
+# @parity: ts=@/core/horoscope/house::getLongevity
 def longevity(dob,tob,place,divisional_chart_factor=1):
     jd = utils.julian_day_number(dob, tob)
     planet_positions = drik.dhasavarga(jd, place, divisional_chart_factor=divisional_chart_factor)
@@ -1131,6 +1169,7 @@ def _associations_of_the_planet(planet_positions, planet, restrict_to_kendra_tri
 
     return sorted(associated)
 
+# @parity: ts=@/core/horoscope/house::getAssociationsOfThePlanet
 def associations_of_the_planet(planet_positions,planet):
     """ There are 3 important associations:
         (1) The two planets are conjoined,
@@ -1168,9 +1207,11 @@ def associations_of_the_planet(planet_positions,planet):
     ap = list(set(ap))
     #print("Associations of planet",planet,ap)
     return ap
+# @parity: ts=@/core/horoscope/house::arePlanetsAssociated
 def _are_planets_associated(planet_positions,planet1,planet2):
     planet1_association = _associations_of_the_planet(planet_positions, planet1)
     return planet2 in planet1_association
+# @parity: ts=@/core/horoscope/house::getAssociatedPlanetPairs
 def _get_associated_planet_pairs(planet_positions):
     """Return unique unordered associated planet pairs for integer items 0..8."""
     unique_pairs = set()
@@ -1194,13 +1235,16 @@ def _get_associated_planet_pairs(planet_positions):
     # Return as a sorted list of tuples for stable output
     return sorted(unique_pairs)
 
+# @parity: ts=@/core/horoscope/house::getBadhakasOfRaasi
 def baadhakas_of_raasi(raasi):
     """ return [Baadhaka Sthaana/rasi, [baadhaka planets]]  of the given raasi"""
     return const.baadhakas[raasi]
+# @parity: ts=@/core/horoscope/house::getPlanetsAspectingPlanet
 def planets_aspecting_the_planet(house_to_planet_dict,planet,separator='/'):
     _,_,app = graha_drishti_from_chart(house_to_planet_dict)
     aspecting_planets = [k for k,v in app.items() if planet in v]
     return aspecting_planets
+# @parity: ts=@/core/horoscope/house::getOrderOfPlanetsByStrength
 def order_of_planets_by_strength(planet_positions):
     from functools import cmp_to_key
     planets = [*range(9)]

@@ -36,6 +36,7 @@ import {
  * @returns Object containing argala and virodhargala lists for each house (0-11)
  *          argala[h] = list of planets causing Argala on House h+1
  */
+// @parity: py=get_argala
 export const getArgala = (
     planetToHouse: Record<number | string, number>,
     ascendantRasi: number
@@ -209,6 +210,7 @@ const getRaasiDrishtiDual = (): Record<number, number[]> => {
 /**
  * Get map of which signs are aspected by each sign (Rasi Drishti)
  */
+// @parity: py=_get_raasi_drishti
 export const getRaasiDrishtiMap = (): Record<number, number[]> => {
   return {
     ...getRaasiDrishtiMovable(),
@@ -222,6 +224,7 @@ export const getRaasiDrishtiMap = (): Record<number, number[]> => {
  * @param planetToHouse - Map of planet ID to rasi index (0-11)
  * @returns Objects containing aspect data
  */
+// @parity: py=raasi_drishti_from_chart
 export const getRaasiDrishtiFromChart = (
   planetToHouse: Record<number, number>
 ): {
@@ -296,6 +299,7 @@ export const getRaasiDrishtiFromChart = (
  * @param planetPositions - Array of planets with longitudes
  * @returns Array of planet IDs ordered by minutes descending
  */
+// @parity: py=chara_karakas
 export const getCharaKarakas = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
@@ -422,6 +426,7 @@ export const getHouseToPlanetList = (
  * @param sign 
  * @param checkDuringDhasa 
  */
+// @parity: py=house_owner_from_planet_positions
 export const getHouseOwnerFromPlanetPositions = (
     planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
     sign: number,
@@ -448,6 +453,7 @@ export const getHouseOwnerFromPlanetPositions = (
  * @param p2 
  * @param checkDuringDhasa 
  */
+// @parity: py=stronger_planet_from_planet_positions
 export const getStrongerPlanetFromPositions = (
     planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
     p1: number,
@@ -560,6 +566,7 @@ export const getStrongerPlanetFromPositions = (
  * @param r1 
  * @param r2 
  */
+// @parity: py=stronger_rasi_from_planet_positions
 export const getStrongerRasi = (
     planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
     r1: number,
@@ -682,6 +689,7 @@ export const getStrongerRasi = (
  * @param planetPositions - Array of planet positions
  * @returns Planet ID of Brahma
  */
+// @parity: py=brahma
 export const getBrahma = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number => {
@@ -790,6 +798,7 @@ const getFullGrahaDrishti = (planet: number): number[] => {
  *   ahp[p] = houses aspected (relative to ascendant)
  *   app[p] = planets aspected by planet p via graha drishti
  */
+// @parity: py=graha_drishti_from_chart
 export const getGrahaDrishtiFromChart = (
   chart: string[]
 ): {
@@ -946,6 +955,7 @@ const getCombinedDrishtiOfPlanet = (
  * @param planet - Planet index (0-8)
  * @returns Array of associated planet indices
  */
+// @parity: py=associations_of_the_planet
 export const getAssociationsOfThePlanet = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
   planet: number
@@ -1024,6 +1034,7 @@ export const buildHouseChart = (
  * From Python const.friendly_planets derived from planet_relations matrix.
  * Python result: [[1,2,4],[0,3],[0,1,4],[0,5],[0,1,2],[3,6,7],[3,5,7],[5,6],[0,2]]
  */
+// @parity: py=natural_friends_of_planets
 export const naturalFriendsOfPlanets = (): number[][] => {
   return [
     [1, 2, 4],        // Sun: Moon, Mars, Jupiter
@@ -1043,6 +1054,7 @@ export const naturalFriendsOfPlanets = (): number[][] => {
  * From Python const.enemy_planets derived from planet_relations matrix.
  * Python result: [[5,6,7],[],[3],[1,8],[3,5,7],[0,1],[0,1,2,8],[0,1,2],[5,6]]
  */
+// @parity: py=natural_enemies_of_planets
 export const naturalEnemiesOfPlanets = (): number[][] => {
   return [
     [5, 6, 7],         // Sun: Venus, Saturn, Rahu
@@ -1062,6 +1074,7 @@ export const naturalEnemiesOfPlanets = (): number[][] => {
  * From Python const.neutral_planets derived from planet_relations matrix.
  * Python result: [[3,8],[2,4,5,6,7,8],[5,6,7,8],[2,4,6,7],[6,8],[2,4,8],[4],[3,4,8],[1,3,4,7]]
  */
+// @parity: py=natural_neutral_of_planets
 export const naturalNeutralOfPlanets = (): number[][] => {
   return [
     [3, 8],            // Sun: Mercury, Ketu
@@ -1107,6 +1120,7 @@ const BAADHAKAS: [number, number[]][] = [
  * @param raasi - Rasi index (0-11)
  * @returns [baadhaka_house_rasi, baadhaka_planet_ids]
  */
+// @parity: py=baadhakas_of_raasi
 export const getBadhakasOfRaasi = (raasi: number): [number, number[]] => {
   return BAADHAKAS[raasi % 12];
 };
@@ -1125,6 +1139,7 @@ export const getBadhakasOfRaasi = (raasi: number): [number, number[]] => {
  * @param planetPositions - Array of planet positions (first element is Ascendant with planet=-1)
  * @returns Array of maraka planet indices
  */
+// @parity: py=marakas_from_planet_positions
 export const getMarakasFromPlanetPositions = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
@@ -1184,6 +1199,7 @@ export const getMarakasFromPlanetPositions = (
  * @param planetPositions - Array of planet positions
  * @returns Array of planet indices ordered strongest to weakest
  */
+// @parity: py=order_of_planets_by_strength
 export const getOrderOfPlanetsByStrength = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
@@ -1225,6 +1241,7 @@ export const trikonasOfHouse = (house: number): number[] => {
  *
  * @returns Array of 12 arrays, each containing 3 trikona house numbers (1-based)
  */
+// @parity: py=trikonas
 export const trikonas = (): number[][] => {
   return Array.from({ length: 12 }, (_, house) => trikonasOfHouse(house));
 };
@@ -1251,6 +1268,7 @@ export const getDushthanasOfRaasi = (raasi: number): number[] => {
  *
  * @returns Array of 12 arrays, each containing 3 dushthana house numbers (1-based)
  */
+// @parity: py=dushthanas
 export const dushthanas = (): number[][] => {
   return Array.from({ length: 12 }, (_, house) => {
     const dushts = getDushthanasOfRaasi(house);
@@ -1279,6 +1297,7 @@ export const getChathusrasOfRaasi = (raasi: number): number[] => {
  *
  * @returns Array of 12 arrays, each containing 2 chathusra house numbers (1-based)
  */
+// @parity: py=chathusras
 export const chathusras = (): number[][] => {
   return Array.from({ length: 12 }, (_, house) => {
     const chats = getChathusrasOfRaasi(house);
@@ -1304,6 +1323,7 @@ export const getKendrasOfRaasi = (raasi: number): number[] => {
  *
  * @returns Array of 12 arrays, each containing 4 kendra house numbers (1-based)
  */
+// @parity: py=kendras
 export const kendras = (): number[][] => {
   return Array.from({ length: 12 }, (_, house) => {
     const kens = getKendrasOfRaasi(house);
@@ -1315,6 +1335,7 @@ export const kendras = (): number[][] => {
  * Alias for kendras().
  * Mirrors Python's quadrants() function.
  */
+// @parity: py=quadrants
 export const quadrants = (): number[][] => kendras();
 
 /**
@@ -1345,6 +1366,7 @@ export const getApoklimasOfRaasi = (raasi: number): number[] => {
  *
  * @returns Array of 12 arrays, each containing 4 upachaya house numbers (1-based)
  */
+// @parity: py=upachayas
 export const upachayas = (): number[][] => {
   return Array.from({ length: 12 }, (_, house) => {
     // Python: upa = [house,[(house)%12, (house+3)%12, (house+7)%12,(house+8)%12]]
@@ -1368,6 +1390,7 @@ export const upachayas = (): number[][] => {
  * @param reverseDirection - If true, reverse the order (used in drig dhasa)
  * @returns Array of rasi indices aspected via raasi drishti
  */
+// @parity: py=aspected_kendras_of_raasi
 export const getAspectedKendrasOfRaasi = (raasi: number, reverseDirection: boolean = false): number[] => {
   const rdMap = getRaasiDrishtiMap();
   const rd = rdMap[raasi] ?? [];
@@ -1436,6 +1459,7 @@ export const getFunctionalNeutralLordHouses = (ascHouse: number): number[] => {
  * @param planetHouse - Rasi where the planet is placed (0-11)
  * @returns True if the planet is yoga karaka
  */
+// @parity: py=is_yoga_kaaraka
 export const isYogaKaaraka = (ascHouse: number, planet: number, planetHouse: number): boolean => {
   const kends = getKendrasOfRaasi(ascHouse);
   const trines = getTrinesOfRaasi(ascHouse);
@@ -1524,6 +1548,7 @@ const parseChartToPlanetHouseDict = (chart: string[]): Record<number | string, n
  * @param chart - HouseChart string array (12 elements)
  * @returns Record mapping each planet (0-8) to array of temporary friend planet IDs
  */
+// @parity: py=_get_temporary_friends_of_planets
 export const getTemporaryFriendsOfPlanets = (chart: string[]): Record<number, number[]> => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const result: Record<number, number[]> = {};
@@ -1566,6 +1591,7 @@ export const getTemporaryFriendsOfPlanets = (chart: string[]): Record<number, nu
  * @param chart - HouseChart string array (12 elements)
  * @returns Record mapping each planet (0-8) to array of temporary enemy planet IDs
  */
+// @parity: py=_get_temporary_enemies_of_planets
 export const getTemporaryEnemiesOfPlanets = (chart: string[]): Record<number, number[]> => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const result: Record<number, number[]> = {};
@@ -1614,6 +1640,7 @@ export const getTemporaryEnemiesOfPlanets = (chart: string[]): Record<number, nu
  * @param chart - HouseChart string array (12 elements)
  * @returns 9x9 matrix where [p][p1] = compound relationship code
  */
+// @parity: py=_get_compound_relationships_of_planets
 export const getCompoundRelationshipsOfPlanets = (chart: string[]): number[][] => {
   const tf = getTemporaryFriendsOfPlanets(chart);
   const te = getTemporaryEnemiesOfPlanets(chart);
@@ -1731,6 +1758,7 @@ export const getCompoundNeutralOfPlanets = (chart: string[]): Record<number, num
  * @param planet - Planet index (0-8)
  * @returns Array of rasi indices aspected by the planet via graha drishti
  */
+// @parity: py=aspected_rasis_of_the_planet
 export const getGrahaDrishtiRasisOfPlanet = (chart: string[], planet: number): number[] => {
   const { arp } = getGrahaDrishtiFromChart(chart);
   return arp[planet] ?? [];
@@ -1744,6 +1772,7 @@ export const getGrahaDrishtiRasisOfPlanet = (chart: string[], planet: number): n
  * @param planet - Planet index (0-8)
  * @returns Array of house numbers (1-12) aspected by the planet via graha drishti
  */
+// @parity: py=aspected_houses_of_the_planet
 export const getGrahaDrishtiHousesOfPlanet = (chart: string[], planet: number): number[] => {
   const { ahp } = getGrahaDrishtiFromChart(chart);
   return ahp[planet] ?? [];
@@ -1757,6 +1786,7 @@ export const getGrahaDrishtiHousesOfPlanet = (chart: string[], planet: number): 
  * @param planet - Planet index (0-8)
  * @returns Array of planet indices aspected by the given planet via graha drishti
  */
+// @parity: py=aspected_planets_of_the_planet
 export const getGrahaDrishtiPlanetsOfPlanet = (chart: string[], planet: number): number[] => {
   const { app } = getGrahaDrishtiFromChart(chart);
   return app[planet] ?? [];
@@ -1791,6 +1821,7 @@ export const getGrahaDrishtiOnPlanet = (chart: string[], planet: number): number
  * @param planet - Planet index (0-8)
  * @returns Array of rasi indices aspected via raasi drishti
  */
+// @parity: py=raasi_drishti_of_the_planet
 export const getRaasiDrishtiOfPlanet = (chart: string[], planet: number): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const planetToHouseMap: Record<number, number> = {};
@@ -1809,6 +1840,7 @@ export const getRaasiDrishtiOfPlanet = (chart: string[], planet: number): number
  * @param raasi - Rasi index (0-11) being aspected
  * @returns Array of planet indices whose rasi aspects the given rasi
  */
+// @parity: py=aspected_planets_of_the_raasi
 export const getAspectedPlanetsOfRaasi = (chart: string[], raasi: number): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const planetToHouseMap: Record<number, number> = {};
@@ -1836,6 +1868,7 @@ export const getAspectedPlanetsOfRaasi = (chart: string[], raasi: number): numbe
  * @param planetPositions - Array of planet positions (first element is Ascendant with planet=-1)
  * @returns [rudra_planet, rudra_sign, trishoola_rasis]
  */
+// @parity: py=rudra
 export const getRudra = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): [number, number, number[]] => {
@@ -1874,6 +1907,7 @@ export const getRudra = (
  * @param planetPositions - Array of planet positions
  * @returns Array of 3 rasi indices (trines of Rudra's sign)
  */
+// @parity: py=trishoola_rasis
 export const getTrishoolaRasis = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
@@ -1884,6 +1918,7 @@ export const getTrishoolaRasis = (
  * Get house owner from a chart (string[12]) format.
  * Handles co-lord exceptions for Scorpio and Aquarius.
  */
+// @parity: py=house_owner
 export const getHouseOwnerFromChart = (chart: string[], sign: number): number => {
   let lord = SIGN_LORDS[sign % 12] ?? 0;
 
@@ -1962,6 +1997,7 @@ const getStrongerPlanetFromChart = (chart: string[], p1: number, p2: number): nu
  * @param planetPositions - Array of planet positions (first element is Ascendant with planet=-1)
  * @returns Planet ID of Maheshwara
  */
+// @parity: py=maheshwara_from_planet_positions
 export const getMaheshwara = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number => {
@@ -2147,6 +2183,7 @@ export const longevityPairCheck = (
  * @param horaLagnaRasi - Rasi of the Hora Lagna (0-11)
  * @returns Longevity in years
  */
+// @parity: py=longevity
 export const getLongevity = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
   horaLagnaRasi: number
@@ -2172,6 +2209,7 @@ export const getLongevity = (
  * @param chart - HouseChart string array (12 elements)
  * @returns Array of 9 scores (one per planet, Sun=0 to Ketu=8)
  */
+// @parity: py=_get_varga_viswa_of_planets
 export const getVargaViswaOfPlanets = (chart: string[]): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const cs = getCompoundRelationshipsOfPlanets(chart);
@@ -2209,6 +2247,7 @@ export const getVargaViswaOfPlanets = (chart: string[]): number[] => {
  * @param raasi - Rasi index (0-11) being aspected
  * @returns Array of planet indices whose house aspects include the given rasi
  */
+// @parity: py=aspected_houses_of_the_raasi
 export const getAspectedHousesOfRaasi = (chart: string[], raasi: number): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const planetToHouseMap: Record<number, number> = {};
@@ -2230,6 +2269,7 @@ export const getAspectedHousesOfRaasi = (chart: string[], raasi: number): number
  * @param raasi - Rasi index (0-11) being aspected
  * @returns Array of planet indices whose rasi's raasi-drishti includes the given rasi
  */
+// @parity: py=aspected_raasis_of_the_raasi
 export const getAspectedRasisOfRaasi = (chart: string[], raasi: number): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const planetToHouseMap: Record<number, number> = {};
@@ -2253,6 +2293,7 @@ export const getAspectedRasisOfRaasi = (chart: string[], raasi: number): number[
  * @param chart - HouseChart string array (12 elements)
  * @returns Array of maraka planet indices
  */
+// @parity: py=marakas
 export const getMarakas = (chart: string[]): number[] => {
   const pToH = parseChartToPlanetHouseDict(chart);
   const lagnaHouse = pToH['L'] ?? 0;
@@ -2299,6 +2340,7 @@ export const getMarakas = (chart: string[]): number[] => {
  * @param planet - Planet index (0-8) being aspected
  * @returns Array of planet indices that aspect the given planet
  */
+// @parity: py=planets_aspecting_the_planet
 export const getPlanetsAspectingPlanet = (chart: string[], planet: number): number[] => {
   const { app } = getGrahaDrishtiFromChart(chart);
   return Object.entries(app)
@@ -2320,6 +2362,7 @@ export const getPlanetsAspectingPlanet = (chart: string[], planet: number): numb
  * @param planet2 - Second planet index (0-8)
  * @returns True if the two planets are associated
  */
+// @parity: py=_are_planets_associated
 export const arePlanetsAssociated = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
   planet1: number,
@@ -2337,6 +2380,7 @@ export const arePlanetsAssociated = (
  * @param planetPositions - Array of planet positions
  * @returns Array of [planet1, planet2] tuples
  */
+// @parity: py=_get_associated_planet_pairs
 export const getAssociatedPlanetPairs = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): [number, number][] => {
