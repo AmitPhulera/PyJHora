@@ -39,6 +39,7 @@ venus_longitude = lambda pp: saham_longitude(pp,6)
 saturn_longitude = lambda pp: saham_longitude(pp,7)
 
 # Saham Meaning Formula
+# @parity: ts=@/core/horoscope/saham::punyaSaham
 def punya_saham(planet_positions,night_time_birth=False):
 # 1 Punya Fortune/good deeds Moon – Sun + Lagna
     moon_long = moon_longitude(planet_positions)
@@ -55,6 +56,7 @@ def punya_saham(planet_positions,night_time_birth=False):
     punya_sagam_long %= 360
     return punya_sagam_long
     
+# @parity: ts=@/core/horoscope/saham::vidyaSaham
 def vidya_saham(planet_positions,night_time_birth=False):
 # 2 Vidya Education Sun – Moon + Lagna
     sun_long = sun_longitude(planet_positions)
@@ -70,6 +72,7 @@ def vidya_saham(planet_positions,night_time_birth=False):
             vidya_sagam_long += 30
     vidya_sagam_long %= 360
     return vidya_sagam_long
+# @parity: ts=@/core/horoscope/saham::yasasSaham
 def yasas_saham(planet_positions,night_time_birth=False):
 # 3 Yasas Fame Jupiter – PunyaSaham + Lagna
     jupiter_long = jupiter_longitude(planet_positions)
@@ -85,6 +88,7 @@ def yasas_saham(planet_positions,night_time_birth=False):
             yasas_sagam_long += 30
     yasas_sagam_long %= 360
     return yasas_sagam_long
+# @parity: ts=@/core/horoscope/saham::mitraSaham
 def mitra_saham(planet_positions,night_time_birth=False):
 # 4 Mitra Friend Jupiter – PunyaSaham + Venus
     jupiter_long = jupiter_longitude(planet_positions)
@@ -100,6 +104,7 @@ def mitra_saham(planet_positions,night_time_birth=False):
             mitra_sagam_long += 30
     mitra_sagam_long %= 360
     return mitra_sagam_long
+# @parity: ts=@/core/horoscope/saham::mahatmyaSaham
 def mahatmaya_saham(planet_positions,night_time_birth=False):
 # 5 Mahatmya Greatness PunyaSaham – Mars + Lagna
     punya_long = punya_saham(planet_positions, night_time_birth)
@@ -115,6 +120,7 @@ def mahatmaya_saham(planet_positions,night_time_birth=False):
             mahatmaya_sagam_long += 30
     mahatmaya_sagam_long %= 360
     return mahatmaya_sagam_long
+# @parity: ts=@/core/horoscope/saham::ashaSaham
 def asha_saham(planet_positions,night_time_birth=False):
 # 6 Asha Desires Saturn – Mars + Lagna
     saturn_long = saturn_longitude(planet_positions)
@@ -130,6 +136,7 @@ def asha_saham(planet_positions,night_time_birth=False):
             asha_sagam_long += 30
     asha_sagam_long %= 360
     return asha_sagam_long
+# @parity: ts=@/core/horoscope/saham::samarthaSaham
 def samartha_saham(planet_positions,night_time_birth=False):
 # 7 Samartha Enterprise/ability    Mars – Lagna Lord + Lagna (Jupiter – Mars + Lagna, if Mars owns lagna)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -153,6 +160,7 @@ def samartha_saham(planet_positions,night_time_birth=False):
             samartha_sagam_long += 30
     samartha_sagam_long %= 360
     return samartha_sagam_long
+# @parity: ts=@/core/horoscope/saham::bhratriSaham
 def bhratri_saham(planet_positions):
 # 8 Bhratri Brothers Jupiter – Saturn + Lagna (same for day & night)
     jupiter_long = jupiter_longitude(planet_positions)
@@ -164,6 +172,7 @@ def bhratri_saham(planet_positions):
         bhratri_sagam_long += 30
     bhratri_sagam_long %= 360
     return bhratri_sagam_long
+# @parity: ts=@/core/horoscope/saham::gauravaSaham
 def gaurava_saham(planet_positions,night_time_birth=False):
     """
         TODO: JHora book says jupiter-moon+sun
@@ -183,6 +192,7 @@ def gaurava_saham(planet_positions,night_time_birth=False):
             gaurava_sagam_long += 30
     gaurava_sagam_long %= 360
     return gaurava_sagam_long
+# @parity: ts=@/core/horoscope/saham::pithriSaham
 def pithri_saham(planet_positions,night_time_birth=False):
     # 10 Pitri Father Saturn – Sun + Lagna
     saturn_long = saturn_longitude(planet_positions)
@@ -198,10 +208,12 @@ def pithri_saham(planet_positions,night_time_birth=False):
             pithri_sagam_long += 30
     pithri_sagam_long %= 360
     return pithri_sagam_long
+# @parity: ts=@/core/horoscope/saham::rajyaSaham
 def rajya_saham(planet_positions,night_time_birth=False):
 # 11 Rajya Kingdom Saturn – Sun + Lagna
     return pithri_saham(planet_positions,night_time_birth)
 
+# @parity: ts=@/core/horoscope/saham::maathriSaham
 def maathri_saham(planet_positions,night_time_birth=False):
 # 12 Matri Mother Moon – Venus + Lagna
     moon_long = moon_longitude(planet_positions)
@@ -217,6 +229,7 @@ def maathri_saham(planet_positions,night_time_birth=False):
             maathri_sagam_long += 30
     maathri_sagam_long %= 360
     return maathri_sagam_long
+# @parity: ts=@/core/horoscope/saham::puthraSaham
 def puthra_saham(planet_positions,night_time_birth=False):
 # 13 Putra Children Jupiter – Moon + Lagna
     jupiter_long = jupiter_longitude(planet_positions)
@@ -232,6 +245,7 @@ def puthra_saham(planet_positions,night_time_birth=False):
             puthra_sagam_long += 30
     puthra_sagam_long %= 360
     return puthra_sagam_long
+# @parity: ts=@/core/horoscope/saham::jeevaSaham
 def jeeva_saham(planet_positions,night_time_birth=False):
 # 14 Jeeva Life Saturn – Jupiter + Lagna
     saturn_long = saturn_longitude(planet_positions)
@@ -247,6 +261,7 @@ def jeeva_saham(planet_positions,night_time_birth=False):
             jeeva_sagam_long += 30
     jeeva_sagam_long %= 360
     return jeeva_sagam_long
+# @parity: ts=@/core/horoscope/saham::karmaSaham
 def karma_saham(planet_positions,night_time_birth=False):
 # 15 Karma Action (work) Mars – Mercury + Lagna
     mars_long = mars_longitude(planet_positions)
@@ -262,6 +277,7 @@ def karma_saham(planet_positions,night_time_birth=False):
             karma_sagam_long += 30
     karma_sagam_long %= 360
     return karma_sagam_long
+# @parity: ts=@/core/horoscope/saham::rogaSaham
 def roga_saham(planet_positions,night_time_birth=False):
 # 16 Roga Disease Lagna – Moon + Lagna (Same for night/day)
     lagna_long = lagna_longitude(planet_positions)
@@ -271,6 +287,7 @@ def roga_saham(planet_positions,night_time_birth=False):
     roga_sagam_long = lagna_long - moon_long + lagna_long
     roga_sagam_long %= 360
     return roga_sagam_long
+# @parity: ts=@/core/horoscope/saham::rogaSaham1
 def roga_sagam_1(planet_positions,night_time_birth=False):
 # 16 Roga Disease - Another Version -  Saturn – Moon + Lagna
     saturn_long = saturn_longitude(planet_positions)
@@ -286,6 +303,7 @@ def roga_sagam_1(planet_positions,night_time_birth=False):
             roga_sagam_long += 30
     roga_sagam_long %= 360
     return roga_sagam_long
+# @parity: ts=@/core/horoscope/saham::kaliSaham
 def kali_saham(planet_positions,night_time_birth=False):
 # 17 Kali Great misfortune Jupiter – Mars + Lagna
     jupiter_long = jupiter_longitude(planet_positions)
@@ -301,6 +319,7 @@ def kali_saham(planet_positions,night_time_birth=False):
             kali_sagam_long += 30
     kali_sagam_long %= 360
     return kali_sagam_long
+# @parity: ts=@/core/horoscope/saham::sastraSaham
 def sastra_saham(planet_positions,night_time_birth=False):
 # 18 Sastra Sciences Jupiter – Saturn + Mercury
     jupiter_long = jupiter_longitude(planet_positions)
@@ -316,6 +335,7 @@ def sastra_saham(planet_positions,night_time_birth=False):
             sastra_sagam_long += 30
     sastra_sagam_long %= 360
     return sastra_sagam_long
+# @parity: ts=@/core/horoscope/saham::bandhuSaham
 def bandhu_saham(planet_positions,night_time_birth=False):
 # 19 Bandhu Relatives Mercury – Moon + Lagna
     mercury_long = mercury_longitude(planet_positions)
@@ -331,6 +351,7 @@ def bandhu_saham(planet_positions,night_time_birth=False):
             bandhu_sagam_long += 30
     bandhu_sagam_long %= 360
     return bandhu_sagam_long
+# @parity: ts=@/core/horoscope/saham::mrithyuSaham
 def mrithyu_saham(planet_positions):
 # 20 Mrityu Death 8th house – Moon + Lagna (same for day & night)
     lagna_long = lagna_longitude(planet_positions)
@@ -342,6 +363,7 @@ def mrithyu_saham(planet_positions):
         mrithyu_sagam_long += 30
     mrithyu_sagam_long %= 360
     return mrithyu_sagam_long
+# @parity: ts=@/core/horoscope/saham::paradesaSaham
 def paradesa_saham(planet_positions,night_time_birth=False):
 # 21 Paradesa Foreign countries 9th house – 9th lord + Lagna (same for day & night)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -357,6 +379,7 @@ def paradesa_saham(planet_positions,night_time_birth=False):
         paradesa_saham_long += 30
     paradesa_saham_long %= 360
     return paradesa_saham_long
+# @parity: ts=@/core/horoscope/saham::arthaSaham
 def artha_saham(planet_positions,night_time_birth=False):
 # 22 Artha Money 2nd house – 2nd lord + Lagna (same for day & night)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -373,6 +396,7 @@ def artha_saham(planet_positions,night_time_birth=False):
         artha_saham_long += 30
     artha_saham_long %= 360
     return artha_saham_long
+# @parity: ts=@/core/horoscope/saham::paradaraSaham
 def paradara_saham(planet_positions,night_time_birth=False):
 # 23 Paradara Adultery Venus – Sun + Lagna
     venus_long = venus_longitude(planet_positions)
@@ -388,6 +412,7 @@ def paradara_saham(planet_positions,night_time_birth=False):
             paradara_sagam_long += 30
     paradara_sagam_long %= 360
     return paradara_sagam_long
+# @parity: ts=@/core/horoscope/saham::vanikaSaham
 def vanika_saham(planet_positions,night_time_birth=False):
 # 24 Vanik Commerce Moon – Mercury + Lagna
     moon_long = moon_longitude(planet_positions) #345-14 11-15-14
@@ -403,6 +428,7 @@ def vanika_saham(planet_positions,night_time_birth=False):
             vanika_sagam_long += 30
     vanika_sagam_long %= 360
     return vanika_sagam_long
+# @parity: ts=@/core/horoscope/saham::karyasiddhiSaham
 def karyasiddhi_saham(planet_positions,night_time_birth=False):
 # 25 Karyasiddhi Success in endeavours Saturn – Sun + Lord of sunsign (Night: Saturn – Moon + Lord of Moonsign)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -424,6 +450,7 @@ def karyasiddhi_saham(planet_positions,night_time_birth=False):
     karyasiddhi_sagam_long %= 360
     return karyasiddhi_sagam_long
     
+# @parity: ts=@/core/horoscope/saham::vivahaSaham
 def vivaha_saham(planet_positions,night_time_birth=False):
 # 26 Vivaha Marriage Venus – Saturn + Lagna
     venus_long = venus_longitude(planet_positions)
@@ -439,6 +466,7 @@ def vivaha_saham(planet_positions,night_time_birth=False):
             vivaha_saham_long += 30
     vivaha_saham_long %= 360
     return vivaha_saham_long
+# @parity: ts=@/core/horoscope/saham::santapaSaham
 def santapa_saham(planet_positions,night_time_birth=False):
 # 27 Santapa Sadness Saturn – Moon + 6th house
     saturn_long = saturn_longitude(planet_positions)
@@ -454,6 +482,7 @@ def santapa_saham(planet_positions,night_time_birth=False):
             santapa_saham_long += 30
     santapa_saham_long %= 360
     return santapa_saham_long
+# @parity: ts=@/core/horoscope/saham::sraddhaSaham
 def sraddha_saham(planet_positions,night_time_birth=False):
 # 28 Sraddha Devotion/sincerity Venus – Mars + Lagna
     venus_long = venus_longitude(planet_positions)
@@ -469,6 +498,7 @@ def sraddha_saham(planet_positions,night_time_birth=False):
             sraddha_sagam_long += 30
     sraddha_sagam_long %= 360
     return sraddha_sagam_long
+# @parity: ts=@/core/horoscope/saham::preethiSaham
 def preethi_saham(planet_positions,night_time_birth=False):
 # 29 Preeti Love/attachment SastraSaham – PunyaSaham + Lagna
     sastra_long = sastra_saham(planet_positions, night_time_birth)
@@ -484,6 +514,7 @@ def preethi_saham(planet_positions,night_time_birth=False):
             preethi_sagam_long += 30
     preethi_sagam_long %= 360
     return preethi_sagam_long
+# @parity: ts=@/core/horoscope/saham::jadyaSaham
 def jadya_saham(planet_positions,night_time_birth=False):
 # 30 Jadya Chronic disease Mars – Saturn + Mercury
     mars_long = mars_longitude(planet_positions)
@@ -499,6 +530,7 @@ def jadya_saham(planet_positions,night_time_birth=False):
             jadya_sagam_long += 30
         jadya_sagam_long %= 360
     return jadya_sagam_long
+# @parity: ts=@/core/horoscope/saham::vyaapaaraSaham
 def vyaapaara_saham(planet_positions):
 # 31 Vyapara Business Mars – Saturn + Lagna (same for day & night)
     mars_long = mars_longitude(planet_positions)
@@ -510,6 +542,7 @@ def vyaapaara_saham(planet_positions):
         vyaapaara_sagam_long += 30
     vyaapaara_sagam_long %= 360
     return vyaapaara_sagam_long
+# @parity: ts=@/core/horoscope/saham::sathruSaham
 def sathru_saham(planet_positions,night_time_birth=False):
 # 32 Satru Enemy Mars – Saturn + Lagna
     mars_long = mars_longitude(planet_positions)
@@ -525,6 +558,7 @@ def sathru_saham(planet_positions,night_time_birth=False):
             sathru_sagam_long += 30
     sathru_sagam_long %= 360
     return sathru_sagam_long
+# @parity: ts=@/core/horoscope/saham::jalapatnaSaham
 def jalapatna_saham(planet_positions,night_time_birth=False):
 # 33 Jalapatana Crossing an ocean Cancer 15º– Saturn + Lagna
     cancer_long = 105.0
@@ -540,6 +574,7 @@ def jalapatna_saham(planet_positions,night_time_birth=False):
             jalapatna_sagam_long += 30
     jalapatna_sagam_long %= 360
     return jalapatna_sagam_long
+# @parity: ts=@/core/horoscope/saham::bandhanaSaham
 def bandhana_saham(planet_positions,night_time_birth=False):
 # 34 Bandhana Imprisonment PunyaSaham – Saturn + Lagna
     punya_long = punya_saham(planet_positions, night_time_birth)
@@ -555,6 +590,7 @@ def bandhana_saham(planet_positions,night_time_birth=False):
             bandhana_sagam_long += 30
     bandhana_sagam_long %= 360
     return bandhana_sagam_long
+# @parity: ts=@/core/horoscope/saham::apamrithyuSaham
 def apamrithyu_saham(planet_positions,night_time_birth=False):
 # 35 Apamrityu Bad death 8th house – Mars + Lagna
     eigth_house_long = lagna_longitude(planet_positions)+210
@@ -570,6 +606,7 @@ def apamrithyu_saham(planet_positions,night_time_birth=False):
             apamrithyu_sagam_long += 30
     apamrithyu_sagam_long %= 360
     return apamrithyu_sagam_long
+# @parity: ts=@/core/horoscope/saham::laabhaSaham
 def laabha_saham(planet_positions,night_time_birth=False):
 # 36 Labha Material gains 11th house – 11th lord + Lagna (same for day & night)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -589,6 +626,7 @@ def laabha_saham(planet_positions,night_time_birth=False):
             laabha_saham_long += 30
     laabha_saham_long %= 360
     return laabha_saham_long
+# @parity: ts=@/core/horoscope/saham::isCBetweenBToA
 def _is_C_between_B_to_A(a_long,b_long,c_long):
     a_rasi = int(a_long/30)
     b_rasi = int(b_long/30)

@@ -77,6 +77,7 @@ const computeSahamNoSwap = (
 // ============================================================================
 
 /** 1. Punya (Fortune) - Moon - Sun + Lagna */
+// @parity: py=punya_saham
 export const punyaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -84,6 +85,7 @@ export const punyaSaham = (
 );
 
 /** 2. Vidya (Education) - Sun - Moon + Lagna */
+// @parity: py=vidya_saham
 export const vidyaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -91,6 +93,7 @@ export const vidyaSaham = (
 );
 
 /** 3. Yasas (Fame) - Jupiter - PunyaSaham + Lagna */
+// @parity: py=yasas_saham
 export const yasasSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -100,6 +103,7 @@ export const yasasSaham = (
 );
 
 /** 4. Mitra (Friend) - Jupiter - PunyaSaham + Venus */
+// @parity: py=mitra_saham
 export const mitraSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -109,6 +113,7 @@ export const mitraSaham = (
 );
 
 /** 5. Mahatmya (Greatness) - PunyaSaham - Mars + Lagna */
+// @parity: py=mahatmaya_saham
 export const mahatmyaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -118,6 +123,7 @@ export const mahatmyaSaham = (
 );
 
 /** 6. Asha (Desires) - Saturn - Mars + Lagna */
+// @parity: py=asha_saham
 export const ashaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -126,6 +132,7 @@ export const ashaSaham = (
 
 /** 7. Samartha (Enterprise) - Mars - LagnaLord + Lagna
  *  If Mars owns lagna, use Jupiter as LagnaLord and flip night_time_birth */
+// @parity: py=samartha_saham
 export const samarthaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number, nightTimeBirth = false
 ): number => {
@@ -142,6 +149,7 @@ export const samarthaSaham = (
 };
 
 /** 8. Bhratri (Brothers) - Jupiter - Saturn + Lagna (same day/night) */
+// @parity: py=bhratri_saham
 export const bhratriSaham = (
     positions: SahamPlanetPos[], lagnaLong: number
 ): number => computeSahamNoSwap(
@@ -149,6 +157,7 @@ export const bhratriSaham = (
 );
 
 /** 9. Gaurava (Respect) - Jupiter - Moon + Sun */
+// @parity: py=gaurava_saham
 export const gauravaSaham = (
     positions: SahamPlanetPos[], nightTimeBirth = false
 ): number => computeSaham(
@@ -157,6 +166,7 @@ export const gauravaSaham = (
 );
 
 /** 10. Pithri (Father) - Saturn - Sun + Lagna */
+// @parity: py=pithri_saham
 export const pithriSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -164,9 +174,11 @@ export const pithriSaham = (
 );
 
 /** 11. Rajya (Kingdom) - same as Pithri */
+// @parity: py=rajya_saham
 export const rajyaSaham = pithriSaham;
 
 /** 12. Maathri (Mother) - Moon - Venus + Lagna */
+// @parity: py=maathri_saham
 export const maathriSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -174,6 +186,7 @@ export const maathriSaham = (
 );
 
 /** 13. Puthra (Children) - Jupiter - Moon + Lagna */
+// @parity: py=puthra_saham
 export const puthraSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -181,6 +194,7 @@ export const puthraSaham = (
 );
 
 /** 14. Jeeva (Life) - Saturn - Jupiter + Lagna */
+// @parity: py=jeeva_saham
 export const jeevaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -188,6 +202,7 @@ export const jeevaSaham = (
 );
 
 /** 15. Karma (Action) - Mars - Mercury + Lagna */
+// @parity: py=karma_saham
 export const karmaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -195,6 +210,7 @@ export const karmaSaham = (
 );
 
 /** 16. Roga (Disease) - Lagna - Moon + Lagna (same day/night, no between check) */
+// @parity: py=roga_saham
 export const rogaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number
 ): number => {
@@ -203,6 +219,7 @@ export const rogaSaham = (
 };
 
 /** 16a. Roga alternate - Saturn - Moon + Lagna */
+// @parity: py=roga_sagam_1
 export const rogaSaham1 = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -210,6 +227,7 @@ export const rogaSaham1 = (
 );
 
 /** 17. Kali (Great misfortune) - Jupiter - Mars + Lagna */
+// @parity: py=kali_saham
 export const kaliSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -217,6 +235,7 @@ export const kaliSaham = (
 );
 
 /** 18. Sastra (Sciences) - Jupiter - Saturn + Mercury */
+// @parity: py=sastra_saham
 export const sastraSaham = (
     positions: SahamPlanetPos[], nightTimeBirth = false
 ): number => computeSaham(
@@ -225,6 +244,7 @@ export const sastraSaham = (
 );
 
 /** 19. Bandhu (Relatives) - Mercury - Moon + Lagna */
+// @parity: py=bandhu_saham
 export const bandhuSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -232,6 +252,7 @@ export const bandhuSaham = (
 );
 
 /** 20. Mrithyu (Death) - 8th house - Moon + Lagna (same day/night) */
+// @parity: py=mrithyu_saham
 export const mrithyuSaham = (
     positions: SahamPlanetPos[], lagnaLong: number
 ): number => {
@@ -242,6 +263,7 @@ export const mrithyuSaham = (
 };
 
 /** 21. Paradesa (Foreign countries) - 9th house - 9th lord + Lagna */
+// @parity: py=paradesa_saham
 export const paradesaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number
 ): number => {
@@ -253,6 +275,7 @@ export const paradesaSaham = (
 };
 
 /** 22. Artha (Money) - 2nd house - 2nd lord + Lagna */
+// @parity: py=artha_saham
 export const arthaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number
 ): number => {
@@ -264,6 +287,7 @@ export const arthaSaham = (
 };
 
 /** 23. Paradara (Adultery) - Venus - Sun + Lagna */
+// @parity: py=paradara_saham
 export const paradaraSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -271,6 +295,7 @@ export const paradaraSaham = (
 );
 
 /** 24. Vanika (Commerce) - Moon - Mercury + Lagna */
+// @parity: py=vanika_saham
 export const vanikaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -278,6 +303,7 @@ export const vanikaSaham = (
 );
 
 /** 25. Karyasiddhi (Success) - Saturn - Sun + Lord(SunSign); Night: Saturn - Moon + Lord(MoonSign) */
+// @parity: py=karyasiddhi_saham
 export const karyasiddhiSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => {
@@ -301,6 +327,7 @@ export const karyasiddhiSaham = (
 };
 
 /** 26. Vivaha (Marriage) - Venus - Saturn + Lagna */
+// @parity: py=vivaha_saham
 export const vivahaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -308,6 +335,7 @@ export const vivahaSaham = (
 );
 
 /** 27. Santapa (Sadness) - Saturn - Moon + 6th house */
+// @parity: py=santapa_saham
 export const santapaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => {
@@ -319,6 +347,7 @@ export const santapaSaham = (
 };
 
 /** 28. Sraddha (Devotion) - Venus - Mars + Lagna */
+// @parity: py=sraddha_saham
 export const sraddhaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -326,6 +355,7 @@ export const sraddhaSaham = (
 );
 
 /** 29. Preethi (Love) - SastraSaham - PunyaSaham + Lagna */
+// @parity: py=preethi_saham
 export const preethiSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -337,6 +367,7 @@ export const preethiSaham = (
 /** 30. Jadya (Chronic disease) - Mars - Saturn + Mercury
  *  Note: Python has a subtle bug where %360 is inside the night block only.
  *  We replicate this behavior for parity. */
+// @parity: py=jadya_saham
 export const jadyaSaham = (
     positions: SahamPlanetPos[], nightTimeBirth = false
 ): number => {
@@ -354,6 +385,7 @@ export const jadyaSaham = (
 };
 
 /** 31. Vyaapaara (Business) - Mars - Saturn + Lagna (same day/night) */
+// @parity: py=vyaapaara_saham
 export const vyaapaaraSaham = (
     positions: SahamPlanetPos[], lagnaLong: number
 ): number => computeSahamNoSwap(
@@ -361,6 +393,7 @@ export const vyaapaaraSaham = (
 );
 
 /** 32. Sathru (Enemy) - Mars - Saturn + Lagna */
+// @parity: py=sathru_saham
 export const sathruSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -368,6 +401,7 @@ export const sathruSaham = (
 );
 
 /** 33. Jalapatna (Ocean crossing) - Cancer 15 deg - Saturn + Lagna */
+// @parity: py=jalapatna_saham
 export const jalapatnaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -376,6 +410,7 @@ export const jalapatnaSaham = (
 );
 
 /** 34. Bandhana (Imprisonment) - PunyaSaham - Saturn + Lagna */
+// @parity: py=bandhana_saham
 export const bandhanaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -385,6 +420,7 @@ export const bandhanaSaham = (
 );
 
 /** 35. Apamrithyu (Bad death) - 8th house - Mars + Lagna */
+// @parity: py=apamrithyu_saham
 export const apamrithyuSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, nightTimeBirth = false
 ): number => computeSaham(
@@ -393,6 +429,7 @@ export const apamrithyuSaham = (
 );
 
 /** 36. Laabha (Material gains) - 11th house - 11th lord + Lagna */
+// @parity: py=laabha_saham
 export const laabhaSaham = (
     positions: SahamPlanetPos[], lagnaLong: number, lagnaRasi: number,
     nightTimeBirth = false
@@ -412,4 +449,5 @@ export const laabhaSaham = (
 };
 
 // Re-export helper for testing
+// @parity: py=_is_C_between_B_to_A
 export { isCBetweenBToA };
