@@ -23,6 +23,7 @@ from jhora import const,utils
 from jhora.horoscope.chart import house
 from jhora.horoscope.transit import tajaka
 """ Tajaka Yogas """
+# @parity: ts=@/core/horoscope/tajaka-yoga::ishkavalaYoga
 def ishkavala_yoga(planet_to_house_dict):
     """
          Ishkavala Yoga
@@ -39,6 +40,7 @@ def ishkavala_yoga(planet_to_house_dict):
     sph = list(set([house.get_relative_house_of_planet(asc_house,h)-1 for h in list(planet_to_house_dict.values())[:-1]]))
     yoga_present = all(el in slq for el in sph)
     return yoga_present
+# @parity: ts=@/core/horoscope/tajaka-yoga::induvaraYoga
 def induvara_yoga(planet_to_house_dict):
     """
         Induvara Yoga
@@ -55,6 +57,7 @@ def induvara_yoga(planet_to_house_dict):
     yoga_present = all(el in slq for el in sph)
     #print('sph',sph,'slq',slq)
     return yoga_present
+# @parity: ts=@/core/horoscope/tajaka-yoga::ithasalaYoga
 def ithasala_yoga(planet_positions,planet1,planet2):
     """
         Ithasala Yoga
@@ -71,6 +74,7 @@ def ithasala_yoga(planet_positions,planet1,planet2):
     chk3 = tajaka.both_planets_approaching(planet_positions,planet1,planet2)
     yoga_present = chk1 and chk2 and chk3
     return yoga_present, ithasala_type
+# @parity: ts=@/core/horoscope/tajaka-yoga::eesarphaYoga
 def eesarpha_yoga(planet_positions,planet1,planet2):
     """
         @param planet_positions: [ ['L',(7,12,3456)], [0,(4,112,3456)],...]]
@@ -130,6 +134,7 @@ def _get_nakta_triples(ithasala_pairs):
     print('_get_nakta_triples iy_list',iy_list)
     _nakta_triples = iy_list # utils.flatten_list(iy_list)
     return _nakta_triples
+# @parity: ts=@/core/horoscope/tajaka-yoga::getNaktaYogaPlanetTriples
 def get_nakta_yoga_planet_triples(planet_positions):
     """
         nakta yoga between p2 and p3 if 
@@ -157,6 +162,7 @@ def get_nakta_yoga_planet_triples(planet_positions):
     _nakta_triples = utils.flatten_list(nt)
     #print('natka planet triples',_nakta_triples)
     return _nakta_triples
+# @parity: ts=@/core/horoscope/tajaka-yoga::checkYamayaYoga
 def check_yamaya_yoga(planet,planet1,planet2,planet_positions):
     planet_house_dict = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
     #print(planet_house_dict)
@@ -185,6 +191,7 @@ def check_yamaya_yoga(planet,planet1,planet2,planet_positions):
     chk4 = p_long > p1_long and p_long > p2_long
     #print(p_long,p1_long,p2_long,chk3)
     return chk4
+# @parity: ts=@/core/horoscope/tajaka-yoga::getYamayaYogaPlanetTriples
 def get_yamaya_yoga_planet_triples(planet_positions):
     """
         yamaya yoga between p2 and p3 if 
@@ -212,6 +219,7 @@ def get_yamaya_yoga_planet_triples(planet_positions):
     _yamaya_triples = utils.flatten_list(nt)
     print('yamaya planet triples',_yamaya_triples)
     return _yamaya_triples
+# @parity: ts=@/core/horoscope/tajaka-yoga::getEesarphaYogaPlanetPairs
 def get_eesarpha_yoga_planet_pairs(planet_positions):
     """
         Get eeasrpha yoga planet pairs
@@ -225,6 +233,7 @@ def get_eesarpha_yoga_planet_pairs(planet_positions):
         if iy:
            com1.append((p1,p2))
     return com1 
+# @parity: ts=@/core/horoscope/tajaka-yoga::getIthasalaYogaPlanetPairs
 def get_ithasala_yoga_planet_pairs(planet_positions):
     """
         Get ithasala yoga planet pairs
@@ -239,6 +248,7 @@ def get_ithasala_yoga_planet_pairs(planet_positions):
         if iy:
            com1.append((p1,p2,iyt))
     return com1 
+# @parity: ts=@/core/horoscope/tajaka-yoga::getManahooYogaPlanetPairs
 def get_manahoo_yoga_planet_pairs(planet_positions):
     """
         Get manahoo yoga planet pairs
@@ -265,6 +275,7 @@ def get_manahoo_yoga_planet_pairs(planet_positions):
             if m_s_long > faster_planet_deeptaamsa_start and m_s_long < faster_planet_deeptaamsa_end:
                 my.append([p1,p2,mars_or_saturn_houses[m_s_index]])
     return my
+# @parity: ts=@/core/horoscope/tajaka-yoga::getKamboolaYogaPlanetPairs
 def get_kamboola_yoga_planet_pairs(planet_positions):
     """
         Get kamboola yoga planet pairs
@@ -281,12 +292,15 @@ def get_kamboola_yoga_planet_pairs(planet_positions):
     iy_ky_pairs = [(x,y) for kyp in ky_planets for x,y in iy_pairs if kyp==x or kyp==y]
     ky_check =any([kyp == x or kyp ==y for kyp in ky_planets for x,y in iy_pairs])
     return (ky_check,ky_pairs,iy_ky_pairs)
+# @parity: ts=@/core/horoscope/tajaka-yoga::getGairiKamboolaYogaPlanetPairs
 def get_gairi_kamboola_yoga_planet_pairs(planet_positions):
     """ TODO: to be implemented """
     return None
+# @parity: ts=@/core/horoscope/tajaka-yoga::getKhallasaraYogaPlanetPairs
 def get_khallasara_yoga_planet_pairs(planet_positions):
     """ TODO: to be implemented """
     return None
+# @parity: ts=@/core/horoscope/tajaka-yoga::getRaddaYogaPlanetPairs
 def get_radda_yoga_planet_pairs(planet_positions):
     """
         Get radda yoga planet pairs
@@ -305,6 +319,7 @@ def get_radda_yoga_planet_pairs(planet_positions):
     ry_check= list(np.any(chk,axis=0))
     ry_pairs = [(x,y) for i,(x,y) in enumerate(iy_pairs) if ry_check[i]]
     return ry_pairs
+# @parity: ts=@/core/horoscope/tajaka-yoga::getDuhphaliKuttaYogaPlanetPairs
 def get_duhphali_kutta_yoga_planet_pairs(jd,place):
     """
         Get duhphali kutta yoga planet pairs
@@ -349,6 +364,7 @@ def get_duhphali_kutta_yoga_planet_pairs(jd,place):
             dky_pairs.append((x,y))
     print('duhphali_kutta_yoga_planet_pairs',dky_pairs)
     return dky_pairs
+# @parity: ts=@/core/horoscope/tajaka-yoga::naktaYoga
 def nakta_yoga(planet_positions,planet):
     house_planet_dict = utils.get_house_planet_list_from_planet_positions(planet_positions)
     #print(house_planet_dict)
