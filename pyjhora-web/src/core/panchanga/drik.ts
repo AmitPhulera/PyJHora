@@ -93,6 +93,7 @@ import type { Place } from '../types';
 import { normalizeDegrees } from '../utils/angle';
 import { extendAngleRange, inverseLagrange, unwrapAngles } from '../utils/interpolation';
 import { gregorianToJulianDay, julianDayToGregorian, toUtc } from '../utils/julian';
+import { getFraction } from '../utils/chart';
 import { getMixedDivisionalChart, getDivisionalChart } from '../horoscope/charts';
 import type { PlanetPosition } from '../horoscope/charts';
 import { getCharaKarakas, getRelativeHouseOfPlanet } from '../horoscope/house';
@@ -4752,6 +4753,111 @@ export function yogamOld(
 
   // Python: result = [_yoga_no, _yoga_start, _yoga_end] + _yoga[2:]
   return [yogaNo, yogaStart, yogaEnd, ...yoga.slice(2)];
+}
+
+// ============================================================================
+// PYTHON-DEFAULT (PLANET SPEED) PANCHANGA VARIANTS
+// Python const.use_planet_speed_for_panchangam_end_timings defaults to True,
+// so drik.tithi/yogam/karana dispatch to the planet-speed implementations.
+// These exports mirror that default path for parity with Python.
+// ============================================================================
+
+/**
+ * Yogam using planet speeds (Python default path).
+ * Python: yogam(jd, place, tithi_index, planet1, planet2, cycle)
+ * with const.use_planet_speed_for_panchangam_end_timings = True.
+ *
+ * @returns [yogamNo, startTime, endTime, fracLeft, ...optional next yogam quad]
+ */
+export function yogamUsingPlanetSpeed(
+  jd: number, place: Place,
+  tithiIndex: number = 1, planet1: number = MOON, planet2: number = SUN,
+  cycle: number = 1
+): number[] {
+  const { time } = julianDayToGregorian(jd);
+  const jdHours = time.hour + time.minute / 60 + time.second / 3600;
+
+  function getYogamNew(jd_: number): number[] {
+    const jdUtc = jd_ - place.timezone / 24;
+    // Python _special_yoga_phase: (tithi_index*(p1 + p2) + (cycle-1)*180) % 360
+    const p1Long = siderealLongitude(jdUtc, planet1);
+    const p2Long = siderealLongitude(jdUtc, planet2);
+    const yogaPhase = ((tithiIndex * (p1Long + p2Long) + (cycle - 1) * 180) % 360 + 360) % 360;
+    const total = yogaPhase % 360;
+    const oneYoga = 360 / 27;
+    const yog = Math.ceil(total / oneYoga);
+    const yogamNo = yog;
+    const degreesLeft = yog * oneYoga - total;
+    // Python: use only Moon/Sun speeds for end time calculations
+    const dailyPlanet1Motion = dailyMoonSpeed(jd_, place);
+    const dailyPlanet2Motion = dailySunSpeed(jd_, place);
+    const endTime = jdHours + (degreesLeft / (dailyPlanet1Motion + dailyPlanet2Motion)) * 24;
+    const fracLeft = degreesLeft / oneYoga;
+    const startTime = endTime - (endTime - jdHours) / fracLeft;
+    return [yogamNo, startTime, endTime, fracLeft];
+  }
+
+  const result = getYogamNew(jd);
+  if (result[2]! < 24) {
+    // NOTE: Python adds result[2] (hours) directly to jd (days) — replicated verbatim.
+    const nextRes = getYogamNew(jd + result[2]!);
+    nextRes[1] = result[2]!;
+    nextRes[2]! += 24;
+    nextRes[3] = getFraction(nextRes[1]!, nextRes[2]!, jdHours);
+    result.push(...nextRes);
+  }
+  return result;
+}
+
+/**
+ * Karana via the Python-default (planet speed) tithi path.
+ * Python: karana(jd, place) — which calls tithi(), dispatching to
+ * tithi_using_planet_speed when use_planet_speed_for_panchangam_end_timings=True.
+ *
+ * @returns [karanaNo (1..60), startTime, endTime]
+ */
+export function karana(jd: number, place: Place): [number, number, number] {
+  const { time } = julianDayToGregorian(jd);
+  const birthTimeHrs = time.hour + time.minute / 60 + time.second / 3600;
+
+  const _tithi = tithiUsingPlanetSpeed(jd, place);
+  const tStart = _tithi[1]!;
+  const tEnd = _tithi[2]!;
+  const tMid = 0.5 * (tStart + tEnd);
+  let karanaNo = _tithi[0]! * 2 - 1;
+  let kStart: number;
+  let kEnd: number;
+  if (birthTimeHrs > tMid) {
+    karanaNo += 1;
+    kStart = tMid;
+    kEnd = tEnd;
+  } else {
+    kStart = tStart;
+    kEnd = tMid;
+  }
+  return [karanaNo, kStart, kEnd];
+}
+
+/**
+ * Full nakshatra with start time, matching Python's public nakshatra().
+ * Python: nakshatra(jd, place) — wraps _get_nakshathra for jd and jd-1 to
+ * derive the start time (negative => started previous day).
+ *
+ * @returns [nakNo, padamNo, startTime, endTime, nextNakNo, nextPadamNo, nextEndTime]
+ */
+export async function nakshatraAsync(jd: number, place: Place): Promise<number[]> {
+  const _nak = await _getNakshatraAsync(jd, place);
+  const _nakPrev = await _getNakshatraAsync(jd - 1, place);
+  const nakNo = _nak[0]!;
+  const padNo = _nak[1]!;
+  let nakStart = _nakPrev[2]!;
+  const nakEnd = _nak[2]!;
+  if (nakStart < 24.0) {
+    nakStart = -nakStart;
+  } else if (nakStart > 24) {
+    nakStart -= 24.0;
+  }
+  return [nakNo, padNo, nakStart, nakEnd, ..._nak.slice(3)];
 }
 
 // ============================================================================

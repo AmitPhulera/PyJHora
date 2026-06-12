@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.panchanga.drik.vaara",
-  "typescript_target": "@/core/panchanga/drik::calculateVara",
+  "typescript_target": "@/core/panchanga/drik::vaara",
   "setup": {"ayanamsa": "LAHIRI"},
   "cases": [
     {
