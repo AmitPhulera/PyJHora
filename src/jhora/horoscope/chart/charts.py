@@ -215,6 +215,7 @@ def bhava_chart_houses(jd_at_dob,place_as_tuple,ayanamsa_mode=const._DEFAULT_AYA
             if p_long < asc_start:
                 pp_bhava[p]=((h - 1)%12,p_long)
     return pp_bhava
+# @parity: ts=@/core/horoscope/varga-utils::calculateParivrittiEvenReverse
 def __parivritti_even_reverse(planet_positions_in_rasi,dvf,dirn=1):
     f1 = 30.0/dvf
     _hora_list = utils.parivritti_even_reverse(dvf,dirn)
@@ -225,6 +226,7 @@ def __parivritti_even_reverse(planet_positions_in_rasi,dvf,dirn=1):
         hora = int(long // f1)
         dp.append([planet,[hora_sign(rasi_sign,hora),d_long]])
     return dp
+# @parity: ts=@/core/horoscope/varga-utils::calculateD2_Hora_Raman
 def _hora_chart_raman_method(planet_positions_in_rasi):
     """ Hora Chart - D2 Chart Raman Method"""
     dvf = 2
@@ -235,6 +237,7 @@ def _hora_chart_raman_method(planet_positions_in_rasi):
         hora_sign = const.hora_list_raman[rasi_sign][hora]
         dp.append([planet,[hora_sign,d_long]])
     return dp
+# @parity: ts=@/core/horoscope/varga-utils::calculateCyclicVarga
 def __parivritti_cyclic(planet_positions_in_rasi,dvf,dirn=1):
     f1 = 30.0/dvf
     _hora_list = utils.parivritti_cyclic(dvf,dirn)
@@ -264,6 +267,7 @@ def _hora_chart_kashinath(planet_positions_in_rasi):
 TODO: Another Hora Chart Method from https://jyotish-blog.blogspot.com/2005/08/
     
 """    
+# @parity: ts=@/core/horoscope/varga-utils::calculateD2_Hora_Traditional
 def _hora_traditional_parasara_chart(planet_positions_in_rasi):
     # Sun's Hora is Leo and Moon's Hora is Cancer - Traditional Parasara
     dvf = 2
@@ -305,6 +309,7 @@ def hora_chart(planet_positions_in_rasi,chart_method=2):
         return _hora_chart_kashinath(planet_positions_in_rasi)
     elif chart_method==6:
         return __parivritti_alternate(planet_positions_in_rasi, 2)
+# @parity: ts=@/core/horoscope/varga-utils::calculateD3_Drekkana_Jagannatha
 def _drekkana_chart_jagannatha(planet_positions_in_rasi):
     """ Drekkana Chart - D3 Chart Jagannatha Method"""
     dvf = 3; f1 = 30.0/dvf
@@ -315,6 +320,7 @@ def _drekkana_chart_jagannatha(planet_positions_in_rasi):
         hora_sign = const.drekkana_jagannatha[rasi_sign][hora]
         dp.append([planet,[hora_sign,d_long]])
     return dp
+# @parity: ts=@/core/horoscope/varga-utils::calculateParivrittiAlternate
 def __parivritti_alternate(planet_positions_in_rasi,dvf,dirn=1):
     f1 = 30.0/dvf; _hora_list = utils.parivritti_alternate(dvf,dirn)
     dp = []
@@ -324,6 +330,7 @@ def __parivritti_alternate(planet_positions_in_rasi,dvf,dirn=1):
         hora_sign = _hora_list[rasi_sign][hora]
         dp.append([planet,[hora_sign,d_long]])
     return dp
+# @parity: ts=@/core/horoscope/varga-utils::calculateD3_Drekkana_Parashara
 def _drekkana_chart_parasara(planet_positions_in_rasi):
     """ Drekkana Chart - PVR/Traditional Parasara Method """
     dvf = 3; f1 = 30.0/dvf
@@ -360,6 +367,7 @@ def drekkana_chart(planet_positions_in_rasi,chart_method=1):
         return _drekkana_chart_jagannatha(planet_positions_in_rasi)
     elif chart_method==5:
         return __parivritti_even_reverse(planet_positions_in_rasi, dvf)
+# @parity: ts=@/core/horoscope/varga-utils::calculateD4_Chaturthamsa_Parashara
 def _chaturthamsa_parasara(planet_positions_in_rasi):
     dvf = 4; f1 = 30.0/dvf
     dp = []
@@ -524,6 +532,7 @@ def ashtamsa_chart(planet_positions_in_rasi,chart_method=1):
             r = (l+8)%12
         dp.append([planet,[r,d_long]])
     return dp
+# @parity: ts=@/core/horoscope/varga-utils::calculateD9_Navamsa_Kalachakra
 def _navamsa_kalachakra(planet_positions_in_rasi, dvf=9):
     dp =[]
     for planet,[sign,long] in planet_positions_in_rasi:
@@ -1013,6 +1022,7 @@ def nadiamsa_chart(planet_positions_in_rasi,chart_method=1):
     """
     return divisional_positions_from_rasi_positions(planet_positions_in_rasi, divisional_chart_factor=150,
                                                     chart_method=chart_method)
+# @parity: ts=@/core/horoscope/charts::customDivisionalChart
 def custom_divisional_chart(planet_positions_in_rasi,divisional_chart_factor,chart_method=0,
                             base_rasi=None,count_from_end_of_sign=False):
     """ 
@@ -1056,6 +1066,7 @@ def custom_divisional_chart(planet_positions_in_rasi,divisional_chart_factor,cha
         hora_sign = _hora_list[rasi_sign][hora]
         dp.append([planet,[hora_sign,d_long]])
     return dp
+# @parity: ts=@/core/horoscope/charts::getMixedDivisionalChart
 def mixed_chart(jd,place,varga_factor_1=None,chart_method_1=1,varga_factor_2=None,chart_method_2=1):
     planet_positions_in_rasi = rasi_chart(jd,place)
     if varga_factor_1==1 and varga_factor_2==1: return planet_positions_in_rasi
@@ -1063,6 +1074,7 @@ def mixed_chart(jd,place,varga_factor_1=None,chart_method_1=1,varga_factor_2=Non
             eval(divisional_chart_functions[varga_factor_1]+'(planet_positions_in_rasi,chart_method=chart_method_1)')
     pp2 = pp1 if varga_factor_2==2 else eval(divisional_chart_functions[varga_factor_2]+'(pp1,chart_method=chart_method_2)')
     return pp2
+# @parity: ts=@/core/horoscope/charts::mixedChartFromRasiPositions
 def mixed_chart_from_rasi_positions(planet_positions_in_rasi,varga_factor_1=None,chart_method_1=1,varga_factor_2=None,chart_method_2=1):
     pp1 = eval(divisional_chart_functions[varga_factor_1]+'(planet_positions_in_rasi,chart_method=chart_method_1)')
     pp2 = eval(divisional_chart_functions[varga_factor_2]+'(pp1,chart_method=chart_method_2)')
@@ -1082,6 +1094,7 @@ def divisional_positions_from_rasi_positions(planet_positions_in_rasi,divisional
             print('Chart division factor',divisional_chart_factor,'not supported')
             return None
     
+# @parity: ts=@/core/horoscope/charts::getDivisionalChart
 def divisional_chart(jd_at_dob,place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                      chart_method=1,years=1,months=1,sixty_hours=1,calculation_type='drik',pravesha_type=0,
                      base_rasi=None,count_from_end_of_sign=None):
@@ -1162,6 +1175,7 @@ def _planets_in_retrograde_old(planet_positions):
                 #print('planet',p,'planet_house',planet_house,'sun_house',sun_house,'relative house from sun',house.get_relative_house_of_planet(sun_house,planet_house),'4-10')
                 retrograde_planets.append(p)
     return retrograde_planets
+# @parity: ts=@/core/horoscope/charts::planetsInRetrograde
 def planets_in_retrograde(planet_positions):
     """
         Get the list of planets that are in retrograde - based on the planet positions returned by the divisional_chart()
@@ -1183,6 +1197,7 @@ def planets_in_retrograde(planet_positions):
         if planet_long > p_long_from_sun_1 and planet_long < p_long_from_sun_2:
             retrograde_planets.append(p)
     return retrograde_planets
+# @parity: ts=@/core/horoscope/charts::planetsInCombustion
 def planets_in_combustion(planet_positions,use_absolute_longitude=True):
     """
         Get the list of planets that are in combustion - based on the planet positions returned by the divisional_chart()
@@ -1200,6 +1215,7 @@ def planets_in_combustion(planet_positions,use_absolute_longitude=True):
         if p_long >= sun_long-combustion_range[p-2] and p_long <= sun_long+combustion_range[p-2]:
             combustion_planets.append(p)
     return combustion_planets
+# @parity: ts=@/core/horoscope/charts::vaiseshikamsaDhasavargaOfPlanets
 def vaiseshikamsa_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many dhasa varga charts the planets are in their own raasi or exalted
@@ -1215,6 +1231,7 @@ def vaiseshikamsa_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode
             Sreedhaamaamsa – 10.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.dhasavarga_amsa_vaiseshikamsa)
+# @parity: ts=@/core/horoscope/charts::vaiseshikamsaShadvargaOfPlanets
 def vaiseshikamsa_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shad varga charts the planets are in their own raasi or exalted
@@ -1228,6 +1245,7 @@ def vaiseshikamsa_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5,  Kundalaamsa – 6.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shadvarga_amsa_vaiseshikamsa)
+# @parity: ts=@/core/horoscope/charts::vaiseshikamsaSapthavargaOfPlanets
 def vaiseshikamsa_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many saptha varga charts the planets are in their own raasi or exalted
@@ -1241,6 +1259,7 @@ def vaiseshikamsa_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mod
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5, Kundalaamsa – 6, Mukutaamsa – 7.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.sapthavarga_amsa_vaiseshikamsa)
+# @parity: ts=@/core/horoscope/charts::vaiseshikamsaShodhasavargaOfPlanets
 def vaiseshikamsa_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shodhasa varga charts the planets are in their own raasi or exalted
@@ -1257,6 +1276,7 @@ def vaiseshikamsa_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_m
             Vidrumaamsa – 13, Indraasanaamsa – 14, Golokaamsa – 15, Sree Vallabhaamsa – 16.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shodhasa_varga_amsa_vaiseshikamsa)
+# @parity: ts=@/core/horoscope/charts::vaiseshikamsaBalaOfPlanets
 def _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,
                                    amsa_vaiseshikamsa=None):
     p_d = [0 for _ in range(9)]
@@ -1277,6 +1297,7 @@ def _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const
         p_d_c[p] = p_d_c[p][:-1]
         pdc[p] = [p_d[p],p_d_c[p],p_d_s[p]]
     return pdc
+# @parity: ts=@/core/horoscope/charts::vimsopakaBalaOfPlanets
 def _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,amsa_vimsopaka=None):
     p_d = [0 for _ in range(9)]
     p_d_s = [0 for _ in range(9)]
@@ -1306,6 +1327,7 @@ def _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DE
         #print(house.planet_list[p],pdc[p])
     return pdc
     
+# @parity: ts=@/core/horoscope/charts::vimsopakaDhasavargaOfPlanets
 def vimsopaka_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many dhasa varga charts the planets are in their own raasi or exalted
@@ -1321,6 +1343,7 @@ def vimsopaka_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=con
             Sreedhaamaamsa – 10.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.dhasavarga_amsa_vimsopaka)
+# @parity: ts=@/core/horoscope/charts::vimsopakaShadvargaOfPlanets
 def vimsopaka_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shad varga charts the planets are in their own raasi or exalted
@@ -1334,6 +1357,7 @@ def vimsopaka_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=cons
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5,  Kundalaamsa – 6.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shadvarga_amsa_vimsopaka)
+# @parity: ts=@/core/horoscope/charts::vimsopakaSapthavargaOfPlanets
 def vimsopaka_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many saptha varga charts the planets are in their own raasi or exalted
@@ -1347,6 +1371,7 @@ def vimsopaka_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=co
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5, Kundalaamsa – 6, Mukutaamsa – 7.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.sapthavarga_amsa_vimsopaka)
+# @parity: ts=@/core/horoscope/charts::vimsopakaShodhasavargaOfPlanets
 def vimsopaka_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shodhasa varga charts the planets are in their own raasi or exalted
@@ -1363,6 +1388,7 @@ def vimsopaka_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=
             Vidrumaamsa – 13, Indraasanaamsa – 14, Golokaamsa – 15, Sree Vallabhaamsa – 16.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shodhasa_varga_amsa_vimsopaka)
+# @parity: ts=@/core/horoscope/charts::vimsamsavargaOfPlanets
 def vimsamsavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many vimsamsa varga charts the planets are in their own raasi or exalted
@@ -1506,6 +1532,7 @@ def _varnada_lagna_jha_pandey(dob,tob, place,house_index=1,ayanamsa_mode=const._
     #print(asc_long,hora_long,count_is_odd,vl)
     dl = drik.dasavarga_from_long(vl, divisional_chart_factor=1)
     return dl
+# @parity: ts=@/core/horoscope/charts::varnadaLagnaMixedChart
 def varnada_lagna_mixed_chart(dob,tob,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,house_index=1,varga_factor_1=1,
                               chart_method_1=1,varga_factor_2=1,chart_method_2=1,varnada_method=1):
     """
@@ -1543,6 +1570,7 @@ def varnada_lagna_mixed_chart(dob,tob,place,ayanamsa_mode=const._DEFAULT_AYANAMS
         return _varnada_lagna_jha_pandey_mixed_chart(dob, tob, place, house_index=house_index,
                         varga_factor_1=varga_factor_1, chart_method_1=chart_method_2, varga_factor_2=varga_factor_2,
                         chart_method_2=chart_method_2)
+# @parity: ts=@/core/horoscope/charts::varnadaLagnaAsync
 def varnada_lagna(dob,tob,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                   chart_method=1,house_index=1,varnada_method=1,base_rasi=None,count_from_end_of_sign=None):
     """
@@ -1684,6 +1712,7 @@ def _varnada_lagna_sharma(dob,tob,place,house_index=1,ayanamsa_mode=const._DEFAU
     #print(count1,count2,count,count_is_odd,_varnada_lagna)
     _varnada_lagna -= 1 ## Keep in 0..11 range instead of 1..12
     return _varnada_lagna, asc_long #hl
+# @parity: ts=@/core/horoscope/charts::beneficsAndMalefics
 def benefics_and_malefics(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,method=2,
                           exclude_rahu_ketu=False):
     """
@@ -1741,6 +1770,7 @@ def benefics_and_malefics(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,di
             malefics += [3] 
     benefics = sorted(set(benefics)) ; malefics = sorted(set(malefics))
     return benefics, malefics
+# @parity: ts=@/core/horoscope/charts::getBenefics
 def benefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,exclude_rahu_ketu=False):
     """
         From BV Raman - Hindu Predictive Astrology - METHOD=1
@@ -1762,6 +1792,7 @@ def benefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DE
     """
     return benefics_and_malefics(jd, place, method=method,ayanamsa_mode=ayanamsa_mode,divisional_chart_factor=divisional_chart_factor,
                                  exclude_rahu_ketu=exclude_rahu_ketu)[0]
+# @parity: ts=@/core/horoscope/charts::getMalefics
 def malefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,exclude_rahu_ketu=False):
     """
         From BV Raman - Hindu Predictive Astrology - METHOD=1
@@ -1783,6 +1814,7 @@ def malefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DE
     """
     return benefics_and_malefics(jd, place, method=method,ayanamsa_mode=ayanamsa_mode,divisional_chart_factor=divisional_chart_factor,
                                  exclude_rahu_ketu=exclude_rahu_ketu)[1]
+# @parity: ts=@/core/horoscope/charts::orderPlanetsFromKendrasOfRaasi
 def order_planets_from_kendras_of_raasi(planet_positions,raasi=None,include_lagna=False):
     base_house = raasi
     if raasi==None: base_house = planet_positions[0][1][0]
@@ -1819,6 +1851,7 @@ def _order_stronger_planets(planet_positions,reverse=False):
     planet_list.sort(key=cmp_to_key(_compare))
     if reverse: planet_list = list(reversed(planet_list))
     return planet_list
+# @parity: ts=@/core/horoscope/charts::specialPlanetLongitudesMixedChartAsync
 def special_planet_longitudes_mixed_chart(dob,tob,place,varga_factor_1=1,chart_method_1=1,varga_factor_2=1,chart_method_2=1):
     spl_planet_positions_in_rasi = special_planet_longitudes(dob, tob, place)
     if varga_factor_1==1 and varga_factor_2==1: return spl_planet_positions_in_rasi
@@ -1826,6 +1859,7 @@ def special_planet_longitudes_mixed_chart(dob,tob,place,varga_factor_1=1,chart_m
             eval(divisional_chart_functions[varga_factor_1]+'(spl_planet_positions_in_rasi,chart_method=chart_method_1)')
     pp2 = pp1 if varga_factor_2==2 else eval(divisional_chart_functions[varga_factor_2]+'(pp1,chart_method=chart_method_2)')
     return pp2
+# @parity: ts=@/core/horoscope/charts::specialPlanetLongitudesAsync
 def special_planet_longitudes(dob,tob,place,divisional_chart_factor=1,chart_method=None,
                               base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -1853,6 +1887,7 @@ def special_planet_longitudes(dob,tob,place,divisional_chart_factor=1,chart_meth
     else:
         print('Chart division factor',divisional_chart_factor,'not supported')
         return None
+# @parity: ts=@/core/horoscope/charts::specialLagnaLongitudes
 def special_lagna_longitudes(dob,tob,place,divisional_chart_factor=1,chart_method=1,
                              base_rasi=None,count_from_end_of_sign=None):
     jd_at_dob = utils.julian_day_number(dob, tob)
@@ -1862,6 +1897,7 @@ def special_lagna_longitudes(dob,tob,place,divisional_chart_factor=1,chart_metho
     from jhora.horoscope.chart import arudhas
     if divisional_chart_factor==1: spl_rasi_positions=arudhas.bhava_arudhas_from_planet_positions(spl_rasi_positions)
     """
+# @parity: ts=@/core/horoscope/charts::solarUpagrahaLongitudes
 def solar_upagraha_longitudes(planet_positions,upagraha,divisional_chart_factor=1):
     """
         Get logitudes of solar based upagrahas
@@ -1963,12 +1999,14 @@ def _get_KP_lords_from_planet_longitude(planet,rasi,rasi_longitude):
         kp_info[p] += [sub_sub_lord]
         sub_lord = sub_sub_lord
     return kp_info
+# @parity: ts=@/core/horoscope/charts::getKPLordsFromPlanetPositions
 def get_KP_lords_from_planet_positions(planet_positions):
     kp_info = {}
     for p,(h,long) in planet_positions:
         kp_info_planet = _get_KP_lords_from_planet_longitude(p, h, long)
         kp_info = {**kp_info, **kp_info_planet}
     return kp_info
+# @parity: ts=@/core/horoscope/charts::getPachakadiSambhandha
 def get_pachakadi_sambhandha(planet_positions):
     prd = {planet:[(planet_positions[_pre[0]+1][1][0]==(planet_positions[planet+1][1][0]+_pre[1]-1)%12,_pre[2]) for _pre in _pr] for planet,_pr in const.paachakaadi_sambhandha.items()}
     #pachakadi_relation_dict = {key: (index, char) for key, value in prd.items() for index, (flag, char) in enumerate(value) if flag}
@@ -1980,6 +2018,7 @@ def get_pachakadi_sambhandha(planet_positions):
     }
     #"""
     return pachakadi_relation_dict
+# @parity: ts=@/core/horoscope/charts::planetsInPushkaraNavamsaBhaga
 def planets_in_pushkara_navamsa_bhaga(planet_positions):
     pna = [planet for planet, (sign,long) in planet_positions[1:const._pp_count_upto_ketu] \
            if (long >= const.pushkara_navamsa[sign] and long < const.pushkara_navamsa[sign]+(30/9)) or \
@@ -2019,6 +2058,7 @@ def planets_in_mrityu_bhaga(dob,tob,place,planet_positions):
         
         return result
     return compare_planet_positions(planet_positions)
+# @parity: ts=@/core/horoscope/charts::getPlanetsInMaranaKarakaSthana
 def get_planets_in_marana_karaka_sthana(planet_positions,consider_ketu_4th_house=True):
     mks_planets = []; asc_house = planet_positions[0][1][0]
     p_end = const._pp_count_upto_ketu if consider_ketu_4th_house else const._pp_count_upto_rahu
@@ -2222,6 +2262,7 @@ def next_conjunction_of_planet_pair_divisional_chart(jd,place:drik.Place,p1,p2,d
         search_counter += 1
     print('Could not find planetary conjunctions for sep angle',separation_angle,' Try increasing search range')
     return None
+# @parity: ts=@/core/horoscope/charts::latthaStarsPlanets
 def lattha_stars_planets(planet_positions,include_abhijith=True):
     """
         returns latta star of the planet based on its positions
@@ -2259,6 +2300,7 @@ def _amsa_d150(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_ch
         #print(pstr,msgs[str(150)][_amsa])
         _ap.append(_amsa)
     return _ap
+# @parity: ts=@/core/horoscope/charts::get64thNavamsa
 def get_64th_navamsa(navamsa_planet_positions):
     d64 = {}
     for p,(h,long) in navamsa_planet_positions:
@@ -2266,6 +2308,7 @@ def get_64th_navamsa(navamsa_planet_positions):
         _64th_navamsa_lord = const._house_owners_list[_64th_navamsa]
         d64[p] = (_64th_navamsa,_64th_navamsa_lord)
     return d64
+# @parity: ts=@/core/horoscope/charts::get22ndDrekkana
 def get_22nd_drekkana(drekkana_planet_positions):
     d22 = {}
     for p,(h,long) in drekkana_planet_positions:
