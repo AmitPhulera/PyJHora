@@ -28,9 +28,12 @@ import { countRasis } from '../utils/angle';
 
 import {
   getHouseOwnerFromPlanetPositions,
+  getHouseOwnerFromChart,
   getPlanetToHouseDict,
   getHouseToPlanetList,
   getStrongerRasi,
+  getStrongerRasiFromChart,
+  normalizePlanetPositions,
 } from './house';
 
 /**
@@ -66,7 +69,7 @@ export function bhavaArudhasFromPlanetPositions(
 ): number[] {
   // Restrict to planets up to Ketu (exclude Uranus/Neptune/Pluto)
   // This is crucial for correct results as per PyJHora V3.6.4
-  const positions = planetPositions.slice(0, PP_COUNT_UPTO_KETU);
+  const positions = normalizePlanetPositions(planetPositions).slice(0, PP_COUNT_UPTO_KETU);
 
   // Build helper dictionaries
   const houseToPlanetList = getHouseToPlanetList(positions);
@@ -151,7 +154,7 @@ export function chandraArudhasFromPlanetPositions(
 export function grahaArudhasFromPlanetPositions(
   planetPositions: ArudhaPlanetPosition[]
 ): number[] {
-  const positions = planetPositions.slice(0, PP_COUNT_UPTO_KETU);
+  const positions = normalizePlanetPositions(planetPositions).slice(0, PP_COUNT_UPTO_KETU);
   const planetToHouse = getPlanetToHouseDict(positions);
 
   // First element is Lagna's position (Lagna Pada = Lagna's house)
@@ -335,7 +338,8 @@ export function bhavaArudhas(chart: string[]): number[] {
   const bhavaArudhasOfHouses: number[] = [];
 
   for (const h of houses) {
-    const lordOfTheHouse = getHouseOwnerFromPlanetPositions(positions, h, false);
+    // Python bhava_arudhas uses the chart-based house_owner
+    const lordOfTheHouse = getHouseOwnerFromChart(chart, h);
     const houseOfTheLord = pToH[lordOfTheHouse] ?? 0;
     const signsBetweenHouseAndLord = countRasis(h, houseOfTheLord);
     let bhavaArudhaOfHouse = (houseOfTheLord + signsBetweenHouseAndLord - 1) % 12;
@@ -385,7 +389,9 @@ export function grahaArudhas(chart: string[]): number[] {
 
     let strongerSign: number;
     if (signOwnedByPlanet.length > 1) {
-      strongerSign = getStrongerRasi(positions, signOwnedByPlanet[0], signOwnedByPlanet[1]);
+      // Python graha_arudhas uses the chart-based stronger_rasi
+      strongerSign = getStrongerRasiFromChart(chart, signOwnedByPlanet[0], signOwnedByPlanet[1])
+        ?? signOwnedByPlanet[0];
     } else {
       strongerSign = signOwnedByPlanet[0];
     }

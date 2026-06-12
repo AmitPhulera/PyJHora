@@ -24,7 +24,6 @@ from jhora import const, utils
 planet_list = ['sun','moon','mars','mercury','jupiter','venus','saturn','lagnam']
 raasi_list=['Mesham','Rishabam','Mithunam','Katakam','Simmam','Kanni','Thulaam','Vrichigam','Dhanusu','Makaram','Kumbam','Meenam']
 raasi_index = lambda planet,planet_positions_in_chart: [i for i,raasi in enumerate(planet_positions_in_chart) if planet !=const._ascendant_symbol and planet.lower() in raasi.lower() ][0]
-# @parity: ts=@/core/horoscope/ashtakavarga::getAshtakavarga
 def get_ashtaka_varga(house_to_planet_list):
     """
         get binna, samudhaya and prastara varga from the given horoscope chart
