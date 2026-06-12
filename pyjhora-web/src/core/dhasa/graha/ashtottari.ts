@@ -112,6 +112,7 @@ const ASHTOTTARI_NAK_RANGES: Record<number, NakshatraRange> = {
  * @param nakshatra - Nakshatra number (1-27)
  * @returns [lord, nakRangeInfo] or undefined
  */
+// @parity: py=ashtottari_adhipathi
 export function getAshtottariAdhipati(nakshatra: number): [number, NakshatraRange] | undefined {
   for (const [lordStr, range] of Object.entries(ASHTOTTARI_NAK_RANGES)) {
     const lord = parseInt(lordStr, 10);
@@ -139,6 +140,7 @@ export function getAshtottariAdhipati(nakshatra: number): [number, NakshatraRang
  * @param direction - 1 for forward, -1 for backward
  * @returns Next lord
  */
+// @parity: py=ashtottari_next_adhipati
 export function getNextAshtottariAdhipati(lord: number, direction = 1): number {
   const currentIndex = ASHTOTTARI_LORDS.indexOf(lord);
   if (currentIndex === -1) {
@@ -173,6 +175,7 @@ function formatJdAsDate(jd: number): string {
  * @param startingPlanet - Planet to calculate from
  * @returns [lord, startDate JD]
  */
+// @parity: py=ashtottari_dasha_start_date
 export function ashtottariDashaStartDate(
   jd: number,
   place: Place,
@@ -247,6 +250,7 @@ export function ashtottariDashaStartDate(
  * @param startingPlanet - Starting planet
  * @returns Map of lord to start date
  */
+// @parity: py=ashtottari_mahadasa
 export function ashtottariMahadasha(
   jd: number,
   place: Place,
@@ -281,6 +285,7 @@ export function ashtottariMahadasha(
  * @param antardashaOption - Variation option (1-6)
  * @returns Map of bhukti lord to start date
  */
+// @parity: py=ashtottari_bhukthi
 export function ashtottariBhukti(
   mahaLord: number,
   startDate: number,
@@ -326,6 +331,7 @@ export function ashtottariBhukti(
  * @param options - Calculation options
  * @returns Ashtottari result with periods
  */
+// @parity: py=get_ashtottari_dhasa_bhukthi
 export function getAshtottariDashaBhukti(
   jd: number,
   place: Place,

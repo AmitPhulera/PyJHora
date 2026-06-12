@@ -28,6 +28,7 @@ seed_lord = 0
 dhasa_adhipathi_list = {k:12 for k in range(7)} # duration 12 years Total 84 years
 #dhasa_adhipathi_dict = {0: [15, 22, 2, 9], 1: [16, 23, 3, 10], 2: [17, 24, 4, 11], 3: [18, 25, 5, 12], 4: [19, 26, 6, 13], 5: [20, 27, 7, 14], 6: [21, 1, 8]}
 count_direction = 1 # 1> base star to birth star zodiac -1> base star to birth star antizodiac
+# @parity: ts=@/core/dhasa/graha/applicability::isChaturaseethiApplicable
 def applicability_check(planet_positions):
     """ 10th Lord in 10th House """
     from jhora.horoscope.chart import house
@@ -37,6 +38,7 @@ def applicability_check(planet_positions):
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
     #print('tenth_house',tenth_house,'tenth_lord',tenth_lord,p_to_h[tenth_lord])
     return p_to_h[tenth_lord]==tenth_house
+# @parity: ts=@/core/dhasa/graha/chaturaseethi::getNextChaturaseethiLord
 def _next_adhipati(lord,dirn=1):
     """Returns next lord after `lord` in the adhipati_list"""
     current = list(dhasa_adhipathi_list.keys()).index(lord)
@@ -55,6 +57,7 @@ def _get_dhasa_dict(seed_star=15):
     return dhasa_dict
 #dhasa_adhipathi_dict = _get_dhasa_dict()
 
+# @parity: ts=@/core/dhasa/graha/chaturaseethi::getChaturaseethiDhasaLord
 def _maha_dhasa(nak,seed_star=15):
     dhasa_adhipathi_dict = _get_dhasa_dict(seed_star)
     return [(_dhasa_lord, dhasa_adhipathi_list[_dhasa_lord]) for _dhasa_lord,_star_list in dhasa_adhipathi_dict.items() if nak in _star_list][0]
@@ -69,6 +72,7 @@ def _antardhasa(lord,antardhasa_option=1):
         _bhukthis.append(lord)
         lord = _next_adhipati(lord,dirn)
     return _bhukthis
+# @parity: ts=@/core/dhasa/graha/chaturaseethi::chaturaseethiDashaStart
 def _dhasa_start(jd,place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,
                  seed_star=15,dhasa_starting_planet=1):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob=drik.Date(y,m,d); tob=(fh,0,0)
@@ -111,6 +115,7 @@ def _dhasa_start(jd,place,divisional_chart_factor=1,chart_method=1,star_position
     period_elapsed *= sidereal_year        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
+# @parity: ts=@/core/dhasa/graha/chaturaseethi::getChaturaseethiDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,include_antardhasa=True,
                       star_position_from_moon=1,use_tribhagi_variation=False,
                       seed_star=15,dhasa_starting_planet=1,antardhasa_option=1):

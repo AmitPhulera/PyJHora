@@ -37,6 +37,7 @@ seed_lord = 1 # Moon
 dhasa_adhipathi_list = {1:1,0:2,4:3,2:4,3:5,6:6,5:7,7:8} #  Total 36 years each cycle
 #dhasa_adhipathi_dict = {1: [22, 3, 11, 19], 0: [23, 4, 12, 20], 4: [24, 5, 13, 21], 2: [25, 6, 14], 3: [26, 7, 15], 6: [27, 8, 16], 5: [1, 9, 17], 7: [2, 10, 18]}
 count_direction = 1 # 1> base star to birth star zodiac -1> base star to birth star antizodiac
+# @parity: ts=@/core/dhasa/graha/shattrimsa::getNextShattrimsaLord
 def _next_adhipati(lord,dirn=1):
     """Returns next lord after `lord` in the adhipati_list"""
     current = list(dhasa_adhipathi_list.keys()).index(lord)
@@ -55,6 +56,7 @@ def _get_dhasa_dict(seed_star=22):
     return dhasa_dict
 #dhasa_adhipathi_dict = _get_dhasa_dict()
 
+# @parity: ts=@/core/dhasa/graha/shattrimsa::getShattrimsaDhasaLord
 def _maha_dhasa(nak,seed_star=22):
     dhasa_adhipathi_dict = _get_dhasa_dict(seed_star)
     return [(_dhasa_lord, dhasa_adhipathi_list[_dhasa_lord]) for _dhasa_lord,_star_list in dhasa_adhipathi_dict.items() if nak in _star_list][0]
@@ -70,6 +72,7 @@ def _antardhasa(dhasa_lord,antardhasa_option=1):
         _bhukthis.append(lord)
         lord = _next_adhipati(lord,dirn)
     return _bhukthis
+# @parity: ts=@/core/dhasa/graha/shattrimsa::shattrimsaDashaStart
 def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,chart_method=1,seed_star=22,
                  dhasa_starting_planet=1):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob=drik.Date(y,m,d); tob=(fh,0,0)
@@ -111,6 +114,7 @@ def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,ch
     period_elapsed *= sidereal_year        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
+# @parity: ts=@/core/dhasa/graha/shattrimsa::getShattrimsaDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,star_position_from_moon=1,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,seed_star=22,dhasa_starting_planet=1,antardhasa_option=1):
     """

@@ -74,6 +74,7 @@ def _dhasa_start(jd,place,tithi_index=1):
     period_elapsed = (1-t_frac)*res*year_duration
     start_jd = jd - period_elapsed      # so many days before current day
     return [lord, start_jd,res]
+# @parity: ts=@/core/dhasa/graha/tithi-yogini::getTithiYoginiDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,use_tribhagi_variation=False,tithi_index=1,
                       antardhasa_option=1):
     """

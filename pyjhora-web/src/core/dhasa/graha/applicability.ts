@@ -23,6 +23,7 @@ import {
  * Ashtottari: Rahu in trines or quadrants of Lagna Lord's house,
  * and Rahu not in Ascendant.
  */
+// @parity: py=applicability_check
 export function isAshtottariApplicable(positions: PlanetPosition[]): boolean {
   const ascHouse = positions[0]!.rasi;
   const lagnaLord = getHouseOwnerFromPlanetPositions(positions, ascHouse);
@@ -40,6 +41,7 @@ export function isAshtottariApplicable(positions: PlanetPosition[]): boolean {
 /**
  * Chaturaseethi Sama: 10th Lord in 10th House.
  */
+// @parity: py=applicability_check
 export function isChaturaseethiApplicable(positions: PlanetPosition[]): boolean {
   const ascHouse = positions[0]!.rasi;
   const tenthHouse = (ascHouse + 9) % 12;
@@ -52,6 +54,7 @@ export function isChaturaseethiApplicable(positions: PlanetPosition[]): boolean 
  * Dwadasottari: Lagna in Taurus or Libra Navamsa.
  * Takes navamsa positions as input.
  */
+// @parity: py=applicability_check
 export function isDwadasottariApplicable(navamsaPositions: PlanetPosition[]): boolean {
   const navamsaLagna = navamsaPositions[0]!.rasi;
   return navamsaLagna === 1 || navamsaLagna === 6; // Taurus or Libra
@@ -60,6 +63,7 @@ export function isDwadasottariApplicable(navamsaPositions: PlanetPosition[]): bo
 /**
  * Dwisatpathi: Lagna Lord in 7th or 7th Lord in Lagna.
  */
+// @parity: py=applicability_check
 export function isDwisatpathiApplicable(positions: PlanetPosition[]): boolean {
   const lagna = positions[0]!.rasi;
   const lagnaLord = getHouseOwnerFromPlanetPositions(positions, lagna);
@@ -76,6 +80,7 @@ export function isDwisatpathiApplicable(positions: PlanetPosition[]): boolean {
  * Panchottari: Lagna in Cancer Dwadasamsa.
  * Takes dwadasamsa positions as input.
  */
+// @parity: py=applicability_check
 export function isPanchottariApplicable(dwadasamsaPositions: PlanetPosition[]): boolean {
   return dwadasamsaPositions[0]!.rasi === CANCER;
 }
@@ -84,6 +89,7 @@ export function isPanchottariApplicable(dwadasamsaPositions: PlanetPosition[]): 
  * Sataabdika: Lagna in same sign in Rasi and Navamsa.
  * Takes both rasi and navamsa positions.
  */
+// @parity: py=applicability_check
 export function isSataabdikaApplicable(
   rasiPositions: PlanetPosition[],
   navamsaPositions: PlanetPosition[],
@@ -94,6 +100,7 @@ export function isSataabdikaApplicable(
 /**
  * Shastihayani: Sun in Lagna (Sun and Ascendant in same house).
  */
+// @parity: py=applicability_check
 export function isShastihayaniApplicable(positions: PlanetPosition[]): boolean {
   return positions[0]!.rasi === positions[1]!.rasi;
 }
@@ -116,6 +123,7 @@ export type ApplicableDhasa =
  * @param d1Positions - D1 (rasi) planet positions
  * @returns Array of applicable dhasa names
  */
+// @parity: py=applicability_check
 export function getApplicableDhasas(d1Positions: PlanetPosition[]): ApplicableDhasa[] {
   const result: ApplicableDhasa[] = [];
 

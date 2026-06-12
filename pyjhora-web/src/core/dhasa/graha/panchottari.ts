@@ -98,6 +98,7 @@ function buildNakshatraDict(seedStar = 17): Map<number, number> {
 /**
  * Get the Panchottari lord for a nakshatra
  */
+// @parity: py=_maha_dhasa
 export function getPanchottariDhasaLord(nakshatra: number, seedStar = 17): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? SUN;
@@ -109,6 +110,7 @@ export function getPanchottariDhasaLord(nakshatra: number, seedStar = 17): [numb
 /**
  * Get the next lord in the Panchottari sequence
  */
+// @parity: py=_next_adhipati
 export function getNextPanchottariLord(lord: number, direction = 1): number {
   const currentIndex = PANCHOTTARI_LORDS.indexOf(lord);
   if (currentIndex === -1) {
@@ -138,6 +140,7 @@ function formatJdAsDate(jd: number): string {
  * Calculate the start date of the Panchottari mahadasha at birth
  * @param startingPlanet - 0-8 for planets, 'L' for Lagna. For M/G/B/I/P/T use async version.
  */
+// @parity: py=_dhasa_start
 export function panchottariDashaStart(
   jd: number,
   place: Place,
@@ -203,6 +206,7 @@ export async function panchottariDashaStartAsync(
 /**
  * Get complete Panchottari dasha-bhukti data
  */
+// @parity: py=get_dhasa_bhukthi
 export function getPanchottariDashaBhukti(
   jd: number,
   place: Place,

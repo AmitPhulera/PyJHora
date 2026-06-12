@@ -124,6 +124,7 @@ function getAntardhasa(dashaLord: number, antardashaOption: number): number[] {
   return bhuktiLords;
 }
 
+// @parity: py=get_dhasa_bhukthi
 export function getSaptharishiDashaBhukti(
   jd: number,
   place: Place,

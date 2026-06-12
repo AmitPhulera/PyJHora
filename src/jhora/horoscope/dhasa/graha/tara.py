@@ -35,6 +35,7 @@ dhasa_adhipathi_dict_parasara = {5:20,0:6,1:10,2:7,7:18,4:16,6:19,3:17,8:7}
 human_life_span = sum(dhasa_adhipathi_dict_parasara.values())
 year_duration = const.sidereal_year
 
+# @parity: ts=@/core/dhasa/graha/tara::getNextTaraLord
 def _next_adhipati(lord,dirn=1,dhasa_method=1):
     dhasa_adhipathi_dict = dhasa_adhipathi_dict_sanjay_rath if dhasa_method==1 else dhasa_adhipathi_dict_parasara
     """Returns next lord after `lord` in the adhipati_list"""
@@ -59,6 +60,7 @@ def _dhasa_start(jd,place,period,star_position_from_moon=1,divisional_chart_fact
     start_date = jd - period_elapsed      # so many days before current day
     return start_date
         
+# @parity: ts=@/core/dhasa/graha/tara::getTaraDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,years=1,months=1,sixty_hours=1,
                       include_antardasa=True,dhasa_method=1):
     """

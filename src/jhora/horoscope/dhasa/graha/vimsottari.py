@@ -30,12 +30,14 @@ vimsottari_adhipati = lambda nak,seed_star=3: const.vimsottari_adhipati_list[(na
 vimsottari_dict = const.vimsottari_dict
 human_life_span_for_vimsottari_dhasa = const.human_life_span_for_vimsottari_dhasa
 ### --- Vimoshatari functions
+# @parity: ts=@/core/dhasa/graha/vimsottari::getNextAdhipati
 def vimsottari_next_adhipati(lord,dir=1):
     """Returns next guy after `lord` in the adhipati_list"""
     current = const.vimsottari_adhipati_list.index(lord)
     next_index = (current + dir) % len(const.vimsottari_adhipati_list)
     return const.vimsottari_adhipati_list[next_index]
 
+# @parity: ts=@/core/dhasa/graha/vimsottari::vimsottariDashaStartDate
 def vimsottari_dasha_start_date(jd,place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,seed_star=3,
                                 dhasa_starting_planet=1):
     """Returns the start date of the mahadasa which occured on or before `jd`"""
@@ -79,6 +81,7 @@ def vimsottari_dasha_start_date(jd,place,divisional_chart_factor=1,chart_method=
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date]
 
+# @parity: ts=@/core/dhasa/graha/vimsottari::vimsottariMahadasha
 def vimsottari_mahadasa(jd,place,divisional_chart_factor=1,chart_method=1,star_position_from_moon=1,
                         seed_star=3,dhasa_starting_planet=1):
     """List all mahadashas and their start dates"""
@@ -102,6 +105,7 @@ def _vimsottari_rasi_bhukthi(maha_lord,maha_lord_rasi,start_date):
         start_date += bhukthi_duration * year_duration
     return retval
     
+# @parity: ts=@/core/dhasa/graha/vimsottari::vimsottariBhukti
 def _vimsottari_bhukti(maha_lord, start_date,antardhasa_option=1):
     """Compute all bhuktis of given nakshatra-lord of Mahadasa
     and its start date"""
@@ -122,6 +126,7 @@ def _vimsottari_bhukti(maha_lord, start_date,antardhasa_option=1):
 
 # North Indian tradition: dasa-antardasa-pratyantardasa
 # South Indian tradition: dasa-bhukti-antara-sukshma
+# @parity: ts=@/core/dhasa/graha/vimsottari::vimsottariAntardasha
 def _vimsottari_antara(maha_lord, bhukti_lord, start_date):
     """Compute all antaradasas from given bhukit's start date.
     The bhukti's lord and its lord (mahadasa lord) must be given"""
@@ -158,6 +163,7 @@ def compute_vimsottari_antara_from(jd, mahadashas):
     antara = _vimsottari_antara(i, j, bhuktis[j])
     return (i, j, antara)
 
+# @parity: ts=@/core/dhasa/graha/vimsottari::getVimsottariDashaBhukti
 def get_vimsottari_dhasa_bhukthi(jd,place,star_position_from_moon=1,use_tribhagi_variation=False,
                                  use_rasi_bhukthi_variation=False, include_antardhasa=True,
                                  divisional_chart_factor=1,chart_method=1,seed_star=3,antardhasa_option=1,

@@ -84,6 +84,7 @@ function getHouseDistance(planetRasi: number, ascRasi: number): number {
  * @param options - Calculation options
  * @returns Karaka dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_antardhasa
 export function getKarakaDashaBhukti(
   jd: number,
   place: Place,

@@ -210,6 +210,7 @@ function getDashaStartDate(jd: number, place: Place): {
  * @param startDate - Start JD of the bhukti
  * @returns Map of antara lord to start JD
  */
+// @parity: py=_vimsottari_antara
 export function vimsottariAntara(
   mahaLord: number,
   bhuktiLord: number,
@@ -291,6 +292,7 @@ function vimsottariBhuktiMap(
  * @param mahadashas - Map of mahadasha lord to start JD (from vimsottariMahadasa)
  * @returns Tuple of [mahaLord, bhuktiLord, antaraMap] or undefined if not found
  */
+// @parity: py=compute_vimsottari_antara_from
 export function computeVimsottariAntaraFrom(
   jd: number,
   mahadashas: Map<number, number>
@@ -323,6 +325,7 @@ export function computeVimsottariAntaraFrom(
  * @param options - Calculation options
  * @returns Yoga Vimsottari dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_bhukthi
 export function getYogaVimsottariDashaBhukti(
   jd: number,
   place: Place,

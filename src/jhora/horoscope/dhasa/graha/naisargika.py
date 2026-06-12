@@ -25,6 +25,7 @@ _bhukthi_house_list = [0,3,6,9,1,4,7,10,2,5,8,11]
 _bhukthi_exempt_list_1 = [2,9]
 _bhukthi_exempt_list_2 = [1,5,10,11] 
 dhasa_adhipathi_dict = {1:1,2:2,3:9,5:20,4:18,0:20,6:50,'L':12} 
+# @parity: ts=@/core/dhasa/graha/naisargika::getNaisargikaDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,years=1,months=1,sixty_hours=1,
                       include_antardhasa=True,mahadhasa_lord_has_no_antardhasa=True,
                       antardhasa_option1=False,antardhasa_option2=False):

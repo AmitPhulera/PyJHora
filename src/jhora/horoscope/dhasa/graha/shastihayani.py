@@ -29,9 +29,11 @@ seed_lord = 4
 dhasa_adhipathi_star_count = {4:3,0:4,2:3,1:4,3:3,5:4,6:3,7:4}
 dhasa_adhipathi_list = {4:10,0:10,2:10,1:6,3:6,5:6,6:6,7:6} #  Total 60 years
 count_direction = 1 # 1> base star to birth star zodiac -1> base star to birth star antizodiac
+# @parity: ts=@/core/dhasa/graha/applicability::isShastihayaniApplicable
 def applicability_check(planet_positions):
     """ Sun in lagna """
     return planet_positions[0][1][0]==planet_positions[1][1][0]
+# @parity: ts=@/core/dhasa/graha/shastihayani::getNextShastihayaniLord
 def _next_adhipati(lord,dirn=1):
     """Returns next lord after `lord` in the adhipati_list"""
     current = list(dhasa_adhipathi_list.keys()).index(lord)
@@ -48,6 +50,7 @@ def _get_dhasa_dict(seed_star):
     return dhasa_dict
 #dhasa_adhipathi_dict = _get_dhasa_dict()
 
+# @parity: ts=@/core/dhasa/graha/shastihayani::getShastihayaniDhasaLord
 def _maha_dhasa(nak,seed_star=1):
     dhasa_adhipathi_dict = _get_dhasa_dict(seed_star)
     return [(_dhasa_lord, dhasa_adhipathi_list[_dhasa_lord]) for _dhasa_lord,_star_list in dhasa_adhipathi_dict.items() if nak in _star_list][0]
@@ -63,6 +66,7 @@ def _antardhasa(dhasa_lord,antardhasa_option=1):
         _bhukthis.append(lord)
         lord = _next_adhipati(lord,dirn)
     return _bhukthis
+# @parity: ts=@/core/dhasa/graha/shastihayani::shastihayaniDashaStart
 def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,chart_method=1,seed_star=1,
                  dhasa_starting_planet=1):
     y,m,d,fh = utils.jd_to_gregorian(jd); dob=drik.Date(y,m,d); tob=(fh,0,0)
@@ -105,6 +109,7 @@ def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,ch
     period_elapsed *= year_duration        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
+# @parity: ts=@/core/dhasa/graha/shastihayani::getShastihayaniDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,star_position_from_moon=1,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,seed_star=1,dhasa_starting_planet=1,antardhasa_option=1):
     """

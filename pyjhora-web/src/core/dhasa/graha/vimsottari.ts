@@ -109,6 +109,7 @@ export function getVimsottariAdhipati(nakshatra: number, seedStar = 3): number {
  * @param direction - 1 for forward, -1 for backward
  * @returns Next lord
  */
+// @parity: py=vimsottari_next_adhipati
 export function getNextAdhipati(lord: number, direction = 1): number {
   const currentIndex = ADHIPATI_LIST.indexOf(lord);
   if (currentIndex === -1) {
@@ -146,6 +147,7 @@ function formatJdAsDate(jd: number): string {
  *   If provided, overrides startingPlanet. For M/G/B/I/P/T use the async version.
  * @returns [lord, startDate JD]
  */
+// @parity: py=vimsottari_dasha_start_date
 export function vimsottariDashaStartDate(
   jd: number,
   place: Place,
@@ -223,6 +225,7 @@ export async function vimsottariDashaStartDateAsync(
  * @param startingPlanet - Starting planet
  * @returns Map of lord to start date
  */
+// @parity: py=vimsottari_mahadasa
 export function vimsottariMahadasha(
   jd: number,
   place: Place,
@@ -258,6 +261,7 @@ export function vimsottariMahadasha(
  * @param antardashaOption - Variation option (1-6)
  * @returns Map of bhukti lord to start date
  */
+// @parity: py=_vimsottari_bhukti
 export function vimsottariBhukti(
   mahaLord: number,
   startDate: number,
@@ -304,6 +308,7 @@ export function vimsottariBhukti(
  * @param antardashaOption - Variation option
  * @returns Map of antara lord to start date
  */
+// @parity: py=_vimsottari_antara
 export function vimsottariAntardasha(
   mahaLord: number,
   bhuktiLord: number,
@@ -398,6 +403,7 @@ export function vimsottariPratyantardasha(
  * @param options - Calculation options
  * @returns Vimsottari result with balance and periods
  */
+// @parity: py=get_vimsottari_dhasa_bhukthi
 export function getVimsottariDashaBhukti(
   jd: number,
   place: Place,

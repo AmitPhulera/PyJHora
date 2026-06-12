@@ -58,6 +58,7 @@ def _dhasa_start(jd,place):
     period_elapsed = (1-k_frac)*res*year_duration
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
+# @parity: ts=@/core/dhasa/graha/karana-chathuraaseethi::getKaranaChathuraaseethiDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,antardhasa_option=1):
     """

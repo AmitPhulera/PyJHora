@@ -36,6 +36,7 @@ _DEBUG = False
     Method = 1 => Santhanam (Ref: Santhanam, Brihat Parasara Hora Shastra)
     Method = 2 => Varahamihira (Ref: https://medium.com/thoughts-on-jyotish/thoughts-on-the-mathematical-ayur-models-and-their-usage-in-the-dasas-such-as-moola-and-naisargika-517dee1396ae)
 """
+# @parity: ts=@/core/dhasa/graha/aayu::astangataHarana
 def _astangata_harana(planet_positions):
     """
     •    When a graha is located near to Surya, this Harana is applied.
@@ -59,6 +60,7 @@ def _astangata_harana(planet_positions):
     temp_dict.update(temp_dict1)
     _harana_factors.update(temp_dict)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::shatruKshetraHarana
 def _shatru_kshetra_harana(planet_positions,treat_mars_as_strong_in_enemy_sign=True,method=2):
     """
     •    When a Graha occupies its enemy sign, this Harana is applied.
@@ -82,6 +84,7 @@ def _shatru_kshetra_harana(planet_positions,treat_mars_as_strong_in_enemy_sign=T
     temp_dict = {p:2/3 for p in planets_in_enemy_sign if p not in planets_in_retrograde}
     _harana_factors.update(temp_dict)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::shatruKshetraHaranaSanthanam
 def _shatru_kshetra_harana_santhanam(planet_positions,treat_mars_as_strong_in_enemy_sign=False):
     """
         2. Satru Kshetra Haraoa: If a planet is in its enemy's sign, reduce one third of the basic years and take only two third. 
@@ -92,6 +95,7 @@ def _shatru_kshetra_harana_santhanam(planet_positions,treat_mars_as_strong_in_en
         Needless to mention, a planet in neutral’s Sign (or in friend's sign)is not subjected to this reduction.
     """
     return _shatru_kshetra_harana(planet_positions, treat_mars_as_strong_in_enemy_sign=False, method=1)
+# @parity: ts=@/core/dhasa/graha/aayu::chakrapataHarana
 def _chakrapata_harana(planet_positions,method=2):
     """
     •    When a Graha is located above the horizon (visible hemisphere), this Harana is applied.
@@ -119,6 +123,7 @@ def _chakrapata_harana(planet_positions,method=2):
     asubha_dict = {p:subha_asubha_factors[((house.get_relative_house_of_planet(asc_house,h)))][1] for p,(h,_) in planet_positions if p in asubha_grahas and (house.get_relative_house_of_planet(asc_house,h))>6}
     _harana_factors.update(subha_dict); _harana_factors.update(asubha_dict)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::chakrapataHaranaSanthanam
 def _chakrapata_harana_santhanam(planet_positions,bhava_starts_with_ascendant=False): #jd,place,bhava_starts_with_ascendant=False):
     """
     3. Vyayadi Harana: Planets entail reduction if placed anywhere between the 12th and 7th (reckoned in descending order).
@@ -156,6 +161,7 @@ def _chakrapata_harana_santhanam(planet_positions,bhava_starts_with_ascendant=Fa
             vh[p] = 1.0 - (1.0/((14-bh)-(dp/bhava_length)))
     _harana_factors.update(vh)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::krurodayaHaranaSanthanam
 def _krurodaya_harana_santhanam(planet_positions):
     """
         4. Kroorodaya Harana: Only malefic (i.e. Saturn, the Sm and Mars) entail this check if in the ascendant. Mercury, 
@@ -185,6 +191,7 @@ def _krurodaya_harana_santhanam(planet_positions):
         kh1.update({mp:0.5*kh_fraction})
     _harana_factors.update(kh1)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::krurodayaHarana
 def _krurodaya_harana(planet_positions,method=2):
     """
         Reduce by Sum of Graha Aayu of all the Grahas arrived at previous steps * Lagna Longitude in the Rasi / 360º
@@ -223,6 +230,7 @@ def _krurodaya_harana(planet_positions,method=2):
     _harana_factors.update(kh1)
     #print('_krurodaya_harana',_harana_factors)
     return _harana_factors
+# @parity: ts=@/core/dhasa/graha/aayu::bharana
 def _bharana(planet_positions):
     """ This is only needed for Amsayu """
     """
@@ -296,6 +304,7 @@ def _pindayu_santhanam(planet_positions,apply_haranas=True,method=1):
     else:
         return planet_base_longevity
     
+# @parity: ts=@/core/dhasa/graha/aayu::pindayu
 def _pindayu(planet_positions,apply_haranas=True,method=2):
     return _pindayu_santhanam(planet_positions, apply_haranas, method)
     planet_base_longevity = {}
@@ -326,6 +335,7 @@ def _nisargayu_santhanam(planet_positions,apply_haranas=True,method=1):
         return _apply_harana(planet_positions,planet_base_longevity,method=method)
     else:
         return planet_base_longevity
+# @parity: ts=@/core/dhasa/graha/aayu::nisargayu
 def _nisargayu(planet_positions,apply_haranas=True,method=2):
     return _nisargayu_santhanam(planet_positions, apply_haranas, method)
     if method==1: return _nisargayu_santhanam(planet_positions, apply_haranas, method)
@@ -345,6 +355,7 @@ def _nisargayu(planet_positions,apply_haranas=True,method=2):
     else:
         return planet_base_longevity
     
+# @parity: ts=@/core/dhasa/graha/aayu::amsayu
 def _amsayu(planet_positions,apply_haranas=True,method=1):
     planet_base_longevity = {}
     for planet,(h,p_long) in planet_positions[1:8]: #range(7):
@@ -359,6 +370,7 @@ def _amsayu(planet_positions,apply_haranas=True,method=1):
         return graha_aayu
     else:
         return planet_base_longevity
+# @parity: ts=@/core/dhasa/graha/aayu::strongerOfLagnaSunMoon
 def _stronger_of_lagna_sun_moon(planet_positions):
     sp = house.stronger_planet_from_planet_positions(planet_positions, 0, 1)
     p_to_h = utils.get_planet_house_dictionary_from_planet_positions(planet_positions)
@@ -368,6 +380,7 @@ def _stronger_of_lagna_sun_moon(planet_positions):
         return const._ascendant_symbol
     else:
         return sp
+# @parity: ts=@/core/dhasa/graha/aayu::lagnaLongevitySanthanam
 def _lagna_longevity_santhanam(jd,place):
     pp_rasi = charts.rasi_chart(jd, place)
     asc_rasi = pp_rasi[0][1][0]; asc_rasi_lord = house.house_owner_from_planet_positions(pp_rasi, asc_rasi)
@@ -382,6 +395,7 @@ def _lagna_longevity_santhanam(jd,place):
     if sp==asc_navamsa_lord:
         _lagna_aayu = asc_nava_long/30.0;
     return _lagna_aayu
+# @parity: ts=@/core/dhasa/graha/aayu::lagnaLongevity
 def _lagna_longevity(jd,place,divisional_chart_factor=9,chart_method=1):
     pp_chart = charts.rasi_chart(jd, place)
     asc_chart = pp_chart[0][1][0]; asc_chart_lord = house.house_owner_from_planet_positions(pp_chart, asc_chart)
@@ -393,6 +407,7 @@ def _lagna_longevity(jd,place,divisional_chart_factor=9,chart_method=1):
     if const.house_strengths_of_planets[asc_navamsa_lord][asc_nava] > const.house_strengths_of_planets[asc_chart_lord][asc_chart]:
         _lagna_aayu = asc_nava_long/30.0;
     return _lagna_aayu
+# @parity: ts=@/core/dhasa/graha/aayu::getAayurType
 def _get_aayur_type(planet_positions):
     return _stronger_of_lagna_sun_moon(planet_positions)
 def _get_global_constants(jd,place):
@@ -406,6 +421,7 @@ def _get_global_constants(jd,place):
     bhava_starts = [(bhava_madhya[i]-0.5*bhava_lengths[i])%30 for i in range(12) ]
     """
     return
+# @parity: ts=@/core/dhasa/graha/aayu::getDhasaAnterdhasa
 def get_dhasa_antardhasa(jd,place,aayur_type=None,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                          divisional_chart_factor=9,chart_method=1):
     """
@@ -476,21 +492,25 @@ def get_dhasa_antardhasa(jd,place,aayur_type=None,include_antardhasa=True,apply_
             dhasas.append((lord,dhasa_start,round(dd,2)))
             start_jd += dd * one_year_days
     return _dhasa_type, dhasas
+# @parity: ts=@/core/dhasa/graha/aayu::pindayuDhasaBhukthi
 def pindayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=0, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
+# @parity: ts=@/core/dhasa/graha/aayu::nisargayuDhasaBhukthi
 def nisargayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=1, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
+# @parity: ts=@/core/dhasa/graha/aayu::amsayuDhasaBhukthi
 def amsayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=2, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
+# @parity: ts=@/core/dhasa/graha/aayu::longevity
 def longevity(jd,place,aayu_type=None,dhasa_method=2):
     _at,_adb = get_dhasa_antardhasa(jd, place, aayur_type=aayu_type, include_antardhasa=False, apply_haranas=True, dhasa_method=dhasa_method)
     _longevity = sum(d for _,_,d in _adb)

@@ -167,6 +167,7 @@ function calculateKaalaProgression(jd: number, place: Place): {
  * @param options - Calculation options
  * @returns Kaala dasha result with mahadashas and optional bhuktis
  */
+// @parity: py=get_dhasa_antardhasa
 export function getKaalaDashaBhukti(
   jd: number,
   place: Place,

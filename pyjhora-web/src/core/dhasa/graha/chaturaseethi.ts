@@ -81,12 +81,14 @@ function buildNakshatraDict(seedStar = 15): Map<number, number> {
   return nakToLord;
 }
 
+// @parity: py=_maha_dhasa
 export function getChaturaseethiDhasaLord(nakshatra: number, seedStar = 15): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? SUN;
   return [lord, CHATURASEETHI_YEARS];
 }
 
+// @parity: py=_next_adhipati
 export function getNextChaturaseethiLord(lord: number, direction = 1): number {
   const currentIndex = CHATURASEETHI_LORDS.indexOf(lord);
   if (currentIndex === -1) return CHATURASEETHI_LORDS[0]!;
@@ -103,6 +105,7 @@ function formatJdAsDate(jd: number): string {
   return `${yearStr}-${pad(date.month)}-${pad(date.day)} ${pad(hour12)}:${pad(time.minute)}:${pad(time.second)} ${ampm}`;
 }
 
+// @parity: py=_dhasa_start
 export function chaturaseethiDashaStart(
   jd: number,
   place: Place,
@@ -138,6 +141,7 @@ export function chaturaseethiDashaStart(
   return [lord, startDate, CHATURASEETHI_YEARS];
 }
 
+// @parity: py=get_dhasa_bhukthi
 export function getChaturaseethiDashaBhukti(
   jd: number,
   place: Place,

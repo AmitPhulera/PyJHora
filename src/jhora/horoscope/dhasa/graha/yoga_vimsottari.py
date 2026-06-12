@@ -82,6 +82,7 @@ def _vimsottari_bhukti(maha_lord, start_date,antardhasa_option=1):
 
 # North Indian tradition: dasa-antardasa-pratyantardasa
 # South Indian tradition: dasa-bhukti-antara-sukshma
+# @parity: ts=@/core/dhasa/graha/yoga-vimsottari::vimsottariAntara
 def _vimsottari_antara(maha_lord, bhukti_lord, start_date):
     """Compute all antaradasas from given bhukit's start date.
     The bhukti's lord and its lord (mahadasa lord) must be given"""
@@ -105,6 +106,7 @@ def _where_occurs(jd, some_dict):
         if some_dict[key] < jd: return key
 
 
+# @parity: ts=@/core/dhasa/graha/yoga-vimsottari::computeVimsottariAntaraFrom
 def compute_vimsottari_antara_from(jd, mahadashas):
     """Returns antaradasha within which given `jd` falls"""
     # Find mahadasa where this JD falls
@@ -118,6 +120,7 @@ def compute_vimsottari_antara_from(jd, mahadashas):
     antara = _vimsottari_antara(i, j, bhuktis[j])
     return (i, j, antara)
 
+# @parity: ts=@/core/dhasa/graha/yoga-vimsottari::getYogaVimsottariDashaBhukti
 def get_dhasa_bhukthi(jd,place,use_tribhagi_variation=False,antardhasa_option=1):
     """
         provides Yoga Vimsottari dhasa bhukthi for a given date in julian day (includes birth time)

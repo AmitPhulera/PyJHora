@@ -129,6 +129,7 @@ function getHousePlanetList(planetPositions: PlanetPosition[], ascendantRasi: nu
  * This is age-based: starts from birth and runs through fixed periods.
  * Bhuktis are determined by planets' house positions relative to the dasha lord.
  */
+// @parity: py=get_dhasa_bhukthi
 export function getNaisargikaDashaBhukti(
   jd: number,
   place: Place,

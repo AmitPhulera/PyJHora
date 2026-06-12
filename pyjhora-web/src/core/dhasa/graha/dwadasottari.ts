@@ -99,6 +99,7 @@ function buildNakshatraDict(seedStar = 27): Map<number, number> {
   return nakToLord;
 }
 
+// @parity: py=_maha_dhasa
 export function getDwadasottariDhasaLord(nakshatra: number, seedStar = 27): [number, number] {
   const nakToLord = buildNakshatraDict(seedStar);
   const lord = nakToLord.get(nakshatra) ?? SUN;
@@ -106,6 +107,7 @@ export function getDwadasottariDhasaLord(nakshatra: number, seedStar = 27): [num
   return [lord, duration];
 }
 
+// @parity: py=_next_adhipati
 export function getNextDwadasottariLord(lord: number, direction = 1): number {
   const currentIndex = DWADASOTTARI_LORDS.indexOf(lord);
   if (currentIndex === -1) return DWADASOTTARI_LORDS[0]!;
@@ -122,6 +124,7 @@ function formatJdAsDate(jd: number): string {
   return `${yearStr}-${pad(date.month)}-${pad(date.day)} ${pad(hour12)}:${pad(time.minute)}:${pad(time.second)} ${ampm}`;
 }
 
+// @parity: py=_dhasa_start
 export function dwadasottariDashaStart(
   jd: number,
   place: Place,
@@ -176,6 +179,7 @@ export async function dwadasottariDashaStartAsync(
   return [lord, startDate, duration];
 }
 
+// @parity: py=get_dhasa_bhukthi
 export function getDwadasottariDashaBhukti(
   jd: number,
   place: Place,
