@@ -191,7 +191,8 @@ _EXPORT_NAMED_RE = re.compile(
     r'^\s*export\s+(?:async\s+)?'
     r'(?:function|const|let|var|class|type|interface|enum)\s+(\w+)'
 )
-_EXPORT_BRACES_RE = re.compile(r'^\s*export\s*\{\s*([^}]+)\s*\}')
+# export { a, b, c } blocks may span multiple lines
+_EXPORT_BRACES_MULTILINE_RE = re.compile(r'\bexport\s*\{([^}]+)\}', re.MULTILINE)
 
 
 def ts_export_exists(target: str) -> bool:
@@ -200,15 +201,15 @@ def ts_export_exists(target: str) -> bool:
     if not file_path.exists():
         return False
     want = info["export_name"]
-    for line in file_path.read_text().splitlines():
+    text = file_path.read_text()
+    for line in text.splitlines():
         m = _EXPORT_NAMED_RE.match(line)
         if m and m.group(1) == want:
             return True
-        m = _EXPORT_BRACES_RE.match(line)
-        if m:
-            names = [n.split(" as ")[-1].strip() for n in m.group(1).split(",")]
-            if want in names:
-                return True
+    for m in _EXPORT_BRACES_MULTILINE_RE.finditer(text):
+        names = [n.split(" as ")[-1].strip() for n in m.group(1).split(",")]
+        if want in names:
+            return True
     return False
 
 

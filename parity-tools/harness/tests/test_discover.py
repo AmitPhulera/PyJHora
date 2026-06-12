@@ -166,3 +166,9 @@ def test_run_discovery_finds_drik_functions(tmp_path):
     result = run_discovery(output_path=out)
     targets = [f["python_target"] for f in result["functions"]]
     assert "jhora.panchanga.drik.tithi" in targets
+
+
+def test_ts_export_exists_true_for_multiline_reexport_block():
+    # drik.ts re-exports sunrise/sunset etc. via a multi-line `export { ... }` block
+    assert ts_export_exists("@/core/panchanga/drik::sunrise") is True
+    assert ts_export_exists("@/core/panchanga/drik::setAyanamsaMode") is True
