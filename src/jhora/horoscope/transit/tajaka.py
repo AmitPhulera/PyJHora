@@ -30,6 +30,7 @@ apoklimas = lambda asc_house:[(asc_house+h-1)%12 for h in [3,6,9,12] ]
 """ Muntha house at x years after birth is xth house from Lagna. For example at 51th year, 50th house (i.e 4x12+2, 2nd house) from lagna """
 muntha_house = lambda ascendant_house,years: (ascendant_house+years)%12
 """ Aspects followed in Tajaka Analysis """
+# @parity: ts=@/core/horoscope/tajaka::trinalAspectsOfTheRaasi
 def trinal_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Trinal Aspects of the Raasi
@@ -43,6 +44,7 @@ def trinal_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets    
+# @parity: ts=@/core/horoscope/tajaka::trinalAspectsOfThePlanet
 def trinal_aspects_of_the_planet(house_planet_dict,planet):
     """
         Trinal Aspects of the planet (strong benefic aspect)
@@ -54,6 +56,7 @@ def trinal_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return trinal_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::sextileAspectsOfTheRaasi
 def sextile_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Sextile Aspects of the Raasi
@@ -67,6 +70,7 @@ def sextile_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets
+# @parity: ts=@/core/horoscope/tajaka::sextileAspectsOfThePlanet
 def sextile_aspects_of_the_planet(house_planet_dict,planet):
     """
         Sextile Aspects of the planet (weak benefic aspect)
@@ -78,6 +82,7 @@ def sextile_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return sextile_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::squareAspectsOfTheRaasi
 def square_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Square Aspects of the Raasi
@@ -91,6 +96,7 @@ def square_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets
+# @parity: ts=@/core/horoscope/tajaka::squareAspectsOfThePlanet
 def square_aspects_of_the_planet(house_planet_dict,planet):
     """
         Square Aspects of the planet (weak maleefic aspect)
@@ -102,6 +108,7 @@ def square_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return square_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::beneficAspectsOfTheRaasi
 def benefic_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Benefic Aspects of the Raasi
@@ -115,6 +122,7 @@ def benefic_aspects_of_the_raasi(house_planet_dict,raasi):
     bah = trh + sqh
     bap = trp+sqp#sum(trp+sqp,[])
     return bah,bap
+# @parity: ts=@/core/horoscope/tajaka::beneficAspectsOfThePlanet
 def benefic_aspects_of_the_planet(house_planet_dict,planet):
     """
         Benefic Aspects of the planet (weak maleefic aspect)
@@ -128,6 +136,7 @@ def benefic_aspects_of_the_planet(house_planet_dict,planet):
     bah = trh + sqh
     bap = trp+sqp#sum(trp+sqp,[])
     return bah,bap
+# @parity: ts=@/core/horoscope/tajaka::planetHasBeneficAspectOnHouse
 def planet_has_benefic_aspect_on_house(house_planet_dict,planet,house):
     """
         Return True/False if planet has benefic on a house
@@ -139,6 +148,7 @@ def planet_has_benefic_aspect_on_house(house_planet_dict,planet,house):
     """
     bh,_ = benefic_aspects_of_the_planet(house_planet_dict, planet)
     return house in bh
+# @parity: ts=@/core/horoscope/tajaka::semiSextileAspectsOfTheRaasi
 def semi_sextile_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Semi sextile Aspects of the Raasi
@@ -152,6 +162,7 @@ def semi_sextile_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets
+# @parity: ts=@/core/horoscope/tajaka::semiSextileAspectsOfThePlanet
 def semi_sextile_aspects_of_the_planet(house_planet_dict,planet):
     """
         Semi sextile Aspects of the planet (Neutral aspect)
@@ -163,6 +174,7 @@ def semi_sextile_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return semi_sextile_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::neutralAspectsOfTheRaasi
 def neutral_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Neutral Aspects of the Raasi
@@ -172,6 +184,7 @@ def neutral_aspects_of_the_raasi(house_planet_dict,raasi):
         @return: aspected Raasis, aspected planets - as a list 
     """
     return semi_sextile_aspects_of_the_raasi(house_planet_dict,raasi)
+# @parity: ts=@/core/horoscope/tajaka::neutralAspectsOfThePlanet
 def neutral_aspects_of_the_planet(house_planet_dict,planet):
     """
         Neutral Aspects of the Planet
@@ -181,6 +194,7 @@ def neutral_aspects_of_the_planet(house_planet_dict,planet):
         @return: aspected Raasis, aspected planets - as a list 
     """
     return semi_sextile_aspects_of_the_planet(house_planet_dict,planet)
+# @parity: ts=@/core/horoscope/tajaka::oppositionAspectsOfTheRaasi
 def opposition_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Opposition Aspects of the Raasi (Strong Malefic Aspect)
@@ -194,6 +208,7 @@ def opposition_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets
+# @parity: ts=@/core/horoscope/tajaka::oppositionAspectsOfThePlanet
 def opposition_aspects_of_the_planet(house_planet_dict,planet):
     """
         Opposition Aspects of the Planet (Strong Malefic Aspect)
@@ -205,6 +220,7 @@ def opposition_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return opposition_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::conjunctionAspectsOfTheRaasi
 def conjunction_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Conjunction Aspects of the Raasi
@@ -220,6 +236,7 @@ def conjunction_aspects_of_the_raasi(house_planet_dict,raasi):
     aspected_planets = sum(aspected_planets,[])
     aspected_planets = [ap for ap in aspected_planets if ap.strip() != '']
     return aspected_houses,aspected_planets
+# @parity: ts=@/core/horoscope/tajaka::conjunctionAspectsOfThePlanet
 def conjunction_aspects_of_the_planet(house_planet_dict,planet):
     """
         Conjunction Aspects of the Planet (strong malefic aspect)
@@ -231,6 +248,7 @@ def conjunction_aspects_of_the_planet(house_planet_dict,planet):
     planet_to_house_dict = utils.get_planet_to_house_dict_from_chart(house_planet_dict)
     planet_house = planet_to_house_dict[planet]
     return conjunction_aspects_of_the_raasi(house_planet_dict,planet_house)
+# @parity: ts=@/core/horoscope/tajaka::maleficAspectsOfTheRaasi
 def malefic_aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Malefic Aspects of the Raasi
@@ -245,6 +263,7 @@ def malefic_aspects_of_the_raasi(house_planet_dict,raasi):
     mah = sqh + coh + oph
     mapp = sqp+cop+opp#sum(sqp+cop+opp,[])
     return mah,mapp
+# @parity: ts=@/core/horoscope/tajaka::maleficAspectsOfThePlanet
 def malefic_aspects_of_the_planet(house_planet_dict,planet):
     """
         Malefic Aspects of the Planet
@@ -259,6 +278,7 @@ def malefic_aspects_of_the_planet(house_planet_dict,planet):
     mah = sqh + coh + oph
     mapp = sqp+cop+opp#sum(sqp+cop+opp,[])
     return mah,mapp
+# @parity: ts=@/core/horoscope/tajaka::planetsHaveBeneficAspects
 def planets_have_benefic_aspects(house_planet_dict,planet1,planet2):
     """
         Return True/False if planet1 and planet2 have benefic aspects on each other
@@ -269,6 +289,7 @@ def planets_have_benefic_aspects(house_planet_dict,planet1,planet2):
         @return: True/False if both planets have benefic aspect on each other
     """
     return str(planet2) in benefic_aspects_of_the_planet(house_planet_dict, planet1)[1]
+# @parity: ts=@/core/horoscope/tajaka::planetsHaveMaleficAspects
 def planets_have_malefic_aspects(house_planet_dict,planet1,planet2):
     """
         Return True/False if planet1 and planet2 have malefic aspects on each other
@@ -279,6 +300,7 @@ def planets_have_malefic_aspects(house_planet_dict,planet1,planet2):
         @return: True/False if both planets have malefic aspect on each other
     """
     return str(planet2) in malefic_aspects_of_the_planet(house_planet_dict, planet1)[1]
+# @parity: ts=@/core/horoscope/tajaka::planetsHaveNeutralAspects
 def planets_have_neutral_aspects(house_planet_dict,planet1,planet2):
     """
         Return True/False if planet1 and planet2 have neutral aspects on each other
@@ -289,6 +311,7 @@ def planets_have_neutral_aspects(house_planet_dict,planet1,planet2):
         @return: True/False if both planets have neutral aspect on each other
     """
     return str(planet2) in neutral_aspects_of_the_planet(house_planet_dict, planet1)[1]
+# @parity: ts=@/core/horoscope/tajaka::planetAspectsFromChart
 def planet_aspects_from_chart(chart):
     planet_aspects = {k:[] for k in range(9)}
     for planet1 in range(9):
@@ -297,6 +320,7 @@ def planet_aspects_from_chart(chart):
                 planet_aspects[planet1].append(planet2)
     return planet_aspects
     
+# @parity: ts=@/core/horoscope/tajaka::planetsHaveAspects
 def planets_have_aspects(house_planet_dict,planet1,planet2):
     """
         Return True/False if planet1 and planet2 have ANY aspects on each other
@@ -310,6 +334,7 @@ def planets_have_aspects(house_planet_dict,planet1,planet2):
     chk2 = planets_have_malefic_aspects(house_planet_dict,planet1,planet2)
     chk3 = planets_have_neutral_aspects(house_planet_dict,planet1,planet2)
     return chk1 or chk2 or chk3
+# @parity: ts=@/core/horoscope/tajaka::planetHasMaleficAspectOnHouse
 def planet_has_malefic_aspect_on_house(house_planet_dict,planet,house):
     """
         Return True/False if planet has malefic aspect on the house
@@ -321,6 +346,7 @@ def planet_has_malefic_aspect_on_house(house_planet_dict,planet,house):
     """
     bh,_ = malefic_aspects_of_the_planet(house_planet_dict, planet)
     return house in bh
+# @parity: ts=@/core/horoscope/tajaka::aspectsOfTheRaasi
 def aspects_of_the_raasi(house_planet_dict,raasi):
     """
         Return benefic, malefic and neutral aspected of the rasi
@@ -336,6 +362,7 @@ def aspects_of_the_raasi(house_planet_dict,raasi):
     ap = bap + map + nap
     #ap = utils.flatten_list(ap)
     return ah,ap
+# @parity: ts=@/core/horoscope/tajaka::aspectsOfThePlanet
 def aspects_of_the_planet(house_planet_dict,planet):
     """
         Return benefic, malefic and neutral aspects of the planet
@@ -564,6 +591,7 @@ def lord_of_the_month(jd_at_dob,place,years_from_dob,months_from_dob):
     candidates = _get_lord_candidates(rasi_chart,years_from_dob,natal_lagna_house,night_time_birth)
     candidates += [lord_of_year]
     return _get_the_lord_of_tajaka_chart(jd_at_years, place,candidates)
+# @parity: ts=@/core/horoscope/tajaka::bothPlanetsWithinTheirDeeptamsa
 def both_planets_within_their_deeptamsa(planet_positions,planet1,planet2):
     """
         Check if two planets are within their deeptamsa
@@ -597,6 +625,7 @@ def both_planets_within_their_deeptamsa(planet_positions,planet1,planet2):
     if abs(planet1_long_within_raasi-planet2_long_within_raasi) <= 1.0:
         ithasala_type = 2 # Poorna ithasala
     return ithasala,ithasala_type
+# @parity: ts=@/core/horoscope/tajaka::bothPlanetsApproaching
 def both_planets_approaching(planet_positions,planet1,planet2):
     """
         Check if two planets are approaching each other
