@@ -141,6 +141,7 @@ function tupleToDate(t: [number, number, number]): JhoraDate {
  * Find dates when given tithis occur between start and end dates.
  * If endDate is null, finds the next occurrence only.
  */
+// @parity: py=tithi_dates
 export function tithiDates(
   place: Place,
   startDate: JhoraDate,
@@ -188,6 +189,7 @@ export function tithiDates(
 /**
  * Find dates when given nakshatras occur between start and end dates.
  */
+// @parity: py=nakshathra_dates
 export function nakshatraDates(
   place: Place,
   startDate: JhoraDate,
@@ -229,6 +231,7 @@ export function nakshatraDates(
 /**
  * Find dates when given yogas occur between start and end dates.
  */
+// @parity: py=yoga_dates
 export function yogaDates(
   place: Place,
   startDate: JhoraDate,
@@ -311,6 +314,7 @@ export function srarthaYogaDates(place: Place, start: JhoraDate, end: JhoraDate 
  * Find pradosham dates between start and end dates.
  * Pradosham occurs on Trayodashi (13th tithi of each paksha).
  */
+// @parity: py=pradosham_dates
 export function pradoshamDates(
   place: Place,
   startDate: JhoraDate,
@@ -357,10 +361,12 @@ export interface ConjunctionResult {
 // DURGASHTAMI / KAALASHTAMI
 // ============================================================================
 
+// @parity: py=durgashtami_dates
 export function durgashtamiDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, [SUKLA_ASHTAMI], 'Durgashtami');
 }
 
+// @parity: py=kaalashtami_dates
 export function kaalashtamiDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, [KRISHNA_ASHTAMI], 'Kaalashtami');
 }
@@ -369,6 +375,7 @@ export function kaalashtamiDates(place: Place, start: JhoraDate, end: JhoraDate 
 // SATHYANARAYANA PUJA
 // ============================================================================
 
+// @parity: py=sathyanarayana_puja_dates
 export function sathyanarayanaPujaDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, POURNAMI_TITHI, 'Sathyanarayana Puja');
 }
@@ -381,6 +388,7 @@ export function sathyanarayanaPujaDates(place: Place, start: JhoraDate, end: Jho
  * Find special vratha dates by type.
  * @param vrathaType - One of the keys in SPECIAL_VRATHA_MAP
  */
+// @parity: py=special_vratha_dates
 export function specialVrathaDates(
   place: Place,
   startDate: JhoraDate,
@@ -429,6 +437,7 @@ export { lookupFestivals, searchFestivals, getFestivalName, FESTIVAL_DATA } from
  *
  * @param festivalNameContains - Optional substring filter on English festival name
  */
+// @parity: py=get_festivals_of_the_day
 export function getFestivalsOfTheDay(
   jd: number,
   place: Place,
