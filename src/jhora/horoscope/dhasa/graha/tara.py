@@ -60,7 +60,6 @@ def _dhasa_start(jd,place,period,star_position_from_moon=1,divisional_chart_fact
     start_date = jd - period_elapsed      # so many days before current day
     return start_date
         
-# @parity: ts=@/core/dhasa/graha/tara::getTaraDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,years=1,months=1,sixty_hours=1,
                       include_antardasa=True,dhasa_method=1):
     """

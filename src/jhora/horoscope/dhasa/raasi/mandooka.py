@@ -64,7 +64,6 @@ def _dhasa_duration(lord):
         return 8
     else:
         return 9
-# @parity: ts=@/core/dhasa/raasi/mandooka::getMandookaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     method = 2 # KN Rao Method - Working 1=< Sanjay Rath - yet to be implemented
     jd_at_dob = utils.julian_day_number(dob, tob)

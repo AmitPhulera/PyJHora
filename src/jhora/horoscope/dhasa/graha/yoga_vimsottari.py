@@ -120,7 +120,6 @@ def compute_vimsottari_antara_from(jd, mahadashas):
     antara = _vimsottari_antara(i, j, bhuktis[j])
     return (i, j, antara)
 
-# @parity: ts=@/core/dhasa/graha/yoga-vimsottari::getYogaVimsottariDashaBhukti
 def get_dhasa_bhukthi(jd,place,use_tribhagi_variation=False,antardhasa_option=1):
     """
         provides Yoga Vimsottari dhasa bhukthi for a given date in julian day (includes birth time)

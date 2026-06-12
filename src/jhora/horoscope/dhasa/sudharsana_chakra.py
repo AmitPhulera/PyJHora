@@ -21,7 +21,6 @@
 from jhora.horoscope.chart import charts
 from jhora import const, utils
 from jhora.panchanga import drik
-# @parity: ts=@/core/dhasa/sudharsana-chakra::sudharsanaChakraChart
 def sudharshana_chakra_chart(jd_at_dob,place,dob,years_from_dob=0,divisional_chart_factor=1):
     jd_at_years = jd_at_dob + (years_from_dob * const.sidereal_year)
     planet_positions = charts.divisional_chart(jd_at_years,place,divisional_chart_factor=divisional_chart_factor)
@@ -40,7 +39,6 @@ def sudharshana_chakra_chart(jd_at_dob,place,dob,years_from_dob=0,divisional_cha
     sun_chart = [((p+sun_house)%12,natal_chart[(p+sun_house)%12]) for p in range(12)]
     #print('sun_chart',sun_chart)
     return [lagna_chart,moon_chart,sun_chart,retrograde_planets]
-# @parity: ts=@/core/dhasa/sudharsana-chakra::getSudharsanaChakraDhasa
 def sudharsana_chakra_dhasa_for_divisional_chart(jd_at_dob,place,dob,years_from_dob=0,divisional_chart_factor=1):
     """
         calculate sudharsana chakra dhasa for divisional charts / annual charts

@@ -22,7 +22,6 @@
 from jhora import const,utils
 from jhora.horoscope.chart import house,charts
 from jhora.horoscope.dhasa.raasi import narayana
-# @parity: ts=@/core/dhasa/raasi/drig::getDrigDashaBhukti
 def drig_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,include_antardhasa=True):
     jd = utils.julian_day_number(dob,tob)
     planet_positions = charts.divisional_chart(jd, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, divisional_chart_factor=divisional_chart_factor)

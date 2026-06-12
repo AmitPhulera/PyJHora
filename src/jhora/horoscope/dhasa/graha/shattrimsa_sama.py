@@ -114,7 +114,6 @@ def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,ch
     period_elapsed *= sidereal_year        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
-# @parity: ts=@/core/dhasa/graha/shattrimsa::getShattrimsaDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,star_position_from_moon=1,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,seed_star=22,dhasa_starting_planet=1,antardhasa_option=1):
     """

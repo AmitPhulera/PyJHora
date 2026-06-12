@@ -24,7 +24,6 @@ from jhora.horoscope.chart import charts, house
 """ Maha dasa and antardasa are OK but dhasa periods do not match with JHora """
 sidereal_year = const.sidereal_year
 
-# @parity: ts=@/core/dhasa/raasi/varnada::getVarnadaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd_at_dob, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, 

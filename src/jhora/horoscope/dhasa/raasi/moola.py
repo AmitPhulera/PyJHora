@@ -22,7 +22,6 @@ from jhora import const, utils
 from jhora.horoscope.chart import house, charts
 from jhora.horoscope.dhasa.raasi import narayana
 """ Also called Lagna Kendradi Rasi Dhasa """
-# @parity: ts=@/core/dhasa/raasi/moola::getMoolaDashaBhukti
 def moola_dhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     """
         calculate Lagna Kendraadhi dhasa aka Moola Dhasa

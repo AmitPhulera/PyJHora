@@ -163,7 +163,6 @@ def compute_vimsottari_antara_from(jd, mahadashas):
     antara = _vimsottari_antara(i, j, bhuktis[j])
     return (i, j, antara)
 
-# @parity: ts=@/core/dhasa/graha/vimsottari::getVimsottariDashaBhukti
 def get_vimsottari_dhasa_bhukthi(jd,place,star_position_from_moon=1,use_tribhagi_variation=False,
                                  use_rasi_bhukthi_variation=False, include_antardhasa=True,
                                  divisional_chart_factor=1,chart_method=1,seed_star=3,antardhasa_option=1,

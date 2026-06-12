@@ -147,7 +147,6 @@ def varsha_vimsottari_dhasa_bhukthi(jd,place,years,include_antardhasa=True,divis
             date_str = '%04d-%02d-%02d' %(y,m,d)+' '+utils.to_dms(h,as_string=True)
             dhasa_bukthi.append((dhasa_lord,date_str,round(durn,2)))             
     return dhasa_bukthi
-# @parity: ts=@/core/dhasa/annual/mudda::getMuddaDhasa
 def mudda_dhasa_bhukthi(jd,place,years,include_antardhasa=True,divisional_chart_factor=1):
     return varsha_vimsottari_dhasa_bhukthi(jd,place,years,include_antardhasa,divisional_chart_factor=divisional_chart_factor)
 '------ main -----------'

@@ -59,6 +59,28 @@ export interface MuddaResult {
 
 const CYCLE = HUMAN_LIFE_SPAN_VARSHA_VIMSOTTARI; // 360
 
+/**
+ * Python-compatible round(x, 2): round-half-to-even on exact .005 ties.
+ * Python's varsha_vimsottari_bhukti/antara round the reported duration
+ * (but not the accumulated start date) to 2 decimals.
+ */
+function round2(x: number): number {
+  if (!Number.isFinite(x)) return x;
+  const neg = x < 0;
+  const a = Math.abs(x);
+  // Use the decimal expansion of the double itself (not a*100, which can
+  // introduce a spurious exact .5) to decide the rounding direction.
+  const [intPart, fracPart = ''] = a.toFixed(20).split('.');
+  const base = Number(intPart) * 100 + Number((fracPart + '00').slice(0, 2));
+  const rest = fracPart.slice(2).replace(/0+$/, '');
+  let r: number;
+  if (rest === '') r = base;
+  else if (rest === '5') r = base % 2 === 0 ? base : base + 1; // exact tie -> half-even
+  else if (rest.charCodeAt(0) >= 53 /* '5' */) r = base + 1;
+  else r = base;
+  return (neg ? -r : r) / 100;
+}
+
 function formatJdAsDate(jd: number): string {
   const { date, time } = julianDayToGregorian(jd);
   const pad = (n: number) => Math.abs(n).toString().padStart(2, '0');
@@ -141,7 +163,7 @@ function varshaVimsottariBhukti(
   for (let i = 0; i < 9; i++) {
     const factor = (VARSHA_VIMSOTTARI_DAYS[lord]! * VARSHA_VIMSOTTARI_DAYS[mahaLord]!) / CYCLE;
     const duration = (factor * TROPICAL_YEAR) / CYCLE;
-    result.push([lord, startDate, duration]);
+    result.push([lord, startDate, round2(duration)]);
     startDate += duration;
     lord = getNextVarshaAdhipati(lord);
   }
@@ -173,7 +195,7 @@ export function varshaVimsottariAntara(
   for (let i = 0; i < 9; i++) {
     const factor = VARSHA_VIMSOTTARI_DAYS[lord]! * (VARSHA_VIMSOTTARI_DAYS[mahaLord]! / CYCLE);
     const duration = factor * (VARSHA_VIMSOTTARI_DAYS[bhuktiLord]! / CYCLE);
-    result.push([lord, startDate, duration]);
+    result.push([lord, startDate, round2(duration)]);
     startDate += duration;
     lord = getNextVarshaAdhipati(lord);
   }

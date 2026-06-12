@@ -24,7 +24,6 @@ from jhora.horoscope.chart import charts, house
 
 year_duration = const.sidereal_year
 
-# @parity: ts=@/core/dhasa/graha/karaka::getKarakaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,chart_method=1,years=1,months=1,
                          sixty_hours=1,include_antardhasa=True):
     """

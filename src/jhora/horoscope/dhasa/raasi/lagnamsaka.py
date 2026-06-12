@@ -21,7 +21,6 @@
 from jhora import const, utils
 from jhora.horoscope.chart import charts, house
 from jhora.horoscope.dhasa.raasi import narayana
-# @parity: ts=@/core/dhasa/raasi/lagnamsaka::getLagnamsakaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     jd_at_dob = utils.julian_day_number(dob, tob)
     navamsa_planet_positions = charts.divisional_chart(jd_at_dob, place, divisional_chart_factor=9)

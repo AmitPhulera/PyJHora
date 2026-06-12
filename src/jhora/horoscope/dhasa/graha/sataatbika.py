@@ -28,7 +28,6 @@ seed_lord = 0
 dhasa_adhipathi_list = {0:5,1:5,5:10,3:10,4:20,2:20,6:30} #  Total 100 years
 #dhasa_adhipathi_dict = {0: [27, 7, 14, 21], 1: [1, 8, 15, 22], 5: [2, 9, 16, 23], 3: [3, 10, 17, 24], 4: [4, 11, 18, 25], 2: [5, 12, 19, 26], 6: [6, 13, 20]}
 count_direction = 1 # 1> base star to birth star zodiac -1> base star to birth star antizodiac
-# @parity: ts=@/core/dhasa/graha/applicability::isSataabdikaApplicable
 def applicability_check(dob,tob,place):
     """ Lagna in the same sign in rasi & navamsa """
     from jhora.horoscope.chart import charts
@@ -113,7 +112,6 @@ def _dhasa_start(jd,place,star_position_from_moon=1,divisional_chart_factor=1,ch
     period_elapsed *= sidereal_year        # days
     start_date = jd - period_elapsed      # so many days before current day
     return [lord, start_date,res]
-# @parity: ts=@/core/dhasa/graha/sataabdika::getSataabdikaDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,include_antardhasa=True,star_position_from_moon=1,use_tribhagi_variation=False,
                       divisional_chart_factor=1,chart_method=1,seed_star=27,dhasa_starting_planet=1, antardhasa_option=1):
     """

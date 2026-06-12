@@ -33,7 +33,6 @@ from jhora.horoscope.chart import charts
 _sandhya_duration = [10 for _ in range(12)]
 _panchaka_duration = [60/31,30/31,30/31,30/31,20/31,20/31,20/31,20/31,20/31,20/31,20/31,20/31]
 
-# @parity: ts=@/core/dhasa/raasi/sandhya::getSandhyaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,
                          include_antardhasa=False,use_panchaka_variation=False):
     jd_at_dob = utils.julian_day_number(dob, tob)

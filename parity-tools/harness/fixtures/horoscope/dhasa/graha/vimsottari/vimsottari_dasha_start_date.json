@@ -4,6 +4,10 @@
   "setup": {
     "ayanamsa": "LAHIRI"
   },
+  "tolerance": {
+    "float_abs": 0.05
+  },
+  "tolerance_rationale": "Dasha start JD = jd - (rem/13.333)*period*year_duration. With Rahu's 18y period this amplifies Moon-longitude differences by ~493 days/degree, so the ~0.2 arcsec ephemeris drift (Python FLG_SWIEPH/JPL vs TS FLG_MOSEPH/Moshier) yields ~0.03 day start-date offset. Lord (discrete) matches exactly. 0.05 day bound.",
   "cases": [
     {
       "id": "ref_chart_1996_chennai",

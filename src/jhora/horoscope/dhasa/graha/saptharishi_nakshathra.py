@@ -84,7 +84,6 @@ def _dhasa_progression(jd,place,divisional_chart_factor=1,chart_method=1,star_po
     nak = int(planet_long / one_star)
     _dp = [(nak-i)%27 for i in range(_dhasa_count)]
     return _dp
-# @parity: ts=@/core/dhasa/graha/saptharishi::getSaptharishiDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,include_antardhasa=True,
                       star_position_from_moon=1,use_tribhagi_variation=False,
                       dhasa_starting_planet=1,antardhasa_option=1):

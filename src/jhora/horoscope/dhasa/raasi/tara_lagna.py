@@ -22,7 +22,6 @@ from jhora import const, utils
 from jhora.panchanga import drik
 from jhora.horoscope.chart import charts, house
 
-# @parity: ts=@/core/dhasa/raasi/tara-lagna::getTaraLagnaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True):
     start_jd = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(start_jd, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, 
