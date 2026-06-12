@@ -34,6 +34,7 @@ def get_dosha_resources(language='en'):
     f = open(json_file,"r",encoding="utf-8")
     msgs = json.load(f)
     return msgs
+# @parity: ts=@/core/horoscope/dosha::kalaSarpa
 def kala_sarpa(house_to_planet_list):
     """ Returns kala Sarpa Dosha True or False 
         If True type kala sarpa dosha can be obtained from the Rahu's house number (1..12)
@@ -46,6 +47,7 @@ def kala_sarpa(house_to_planet_list):
     kpdc2 = all([any([p_to_h[ph]==(ketu_house+rkh)%12 for rkh in [*range(7)]]) for ph in [*range(7)]])
     #print('rahu_house',rahu_house,'ketu_house',ketu_house)
     return kpdc1 or kpdc2
+# @parity: ts=@/core/horoscope/dosha::manglik
 def manglik(planet_positions,manglik_reference_planet='L',include_lagna_house=False,
             include_2nd_house=True,apply_exceptions=True):
     """ Sanjay Rath (https://srath.com/jyoti%E1%B9%A3a/amateur/ma%E1%B9%85galika-do%E1%B9%A3a/)
@@ -124,6 +126,7 @@ def _manglik_exceptions(planet_positions):
     if have_exceptions:
         _me_i = [i+1 for i,m in enumerate(_me) if m]
     return [have_exceptions,_me_i]
+# @parity: ts=@/core/horoscope/dosha::pitruDosha
 def pitru_dosha(planet_positions):
     """
         returns True/False if pitru/pitra dosha
@@ -153,6 +156,7 @@ def pitru_dosha(planet_positions):
         return [pdc, [i+1 for i,m in enumerate(pd) if m]]
     else:
         return [False,[]]
+# @parity: ts=@/core/horoscope/dosha::guruChandalaDosha
 def guru_chandala_dosha(planet_positions):
     """ returns True/False if guru chandal dosha presents in the chart
         if Rahu/Keti conjoins Jupiter - this dosha exists
@@ -169,6 +173,7 @@ def guru_chandala_dosha(planet_positions):
         return True, jupiter_is_strong
     else:
         return False,False
+# @parity: ts=@/core/horoscope/dosha::kalathra
 def kalathra(planet_positions,reference_planet='L'):
     """
         The placement of malefic planets Mars, Saturn, Sun, Rahu, and Ketu in the 
@@ -183,6 +188,7 @@ def kalathra(planet_positions,reference_planet='L'):
     kc = all([any([planet_positions[p+1][1][0]==(reference_house+h-1)%12 for h in [1,2,4,7,8,12] ]) for p in const.natural_malefics ])
     #print(kc)
     return kc
+# @parity: ts=@/core/horoscope/dosha::getKalathraResults
 def _get_kalathra_results(planet_positions,dosha_msgs,key_str, reference_planet='L'):
     ks_results = {}
     """ get kalathra dosha """
@@ -196,8 +202,10 @@ def _get_kalathra_results(planet_positions,dosha_msgs,key_str, reference_planet=
         ks_results[ks_key] = "<html>"+ks_msgs[-1]+next_line
     ks_results[ks_key] += "</html>"
     return ks_results
+# @parity: ts=@/core/horoscope/dosha::gandaMoola
 def ganda_moola(moon_star):
     return moon_star in const.ganda_moola_stars
+# @parity: ts=@/core/horoscope/dosha::getGandaMoolaResults
 def _get_ganda_moola_results(jd_at_dob,place,dosha_msgs,key_str):
     m_results = {}
     next_line = "<br><br>"
@@ -212,6 +220,7 @@ def _get_ganda_moola_results(jd_at_dob,place,dosha_msgs,key_str):
         m_results[m_key] = m_msgs[-1]+next_line
         m_results[m_key] += m_msgs[const.ganda_moola_stars.index(moon_star)+1]
     return m_results 
+# @parity: ts=@/core/horoscope/dosha::getGuruChandalaResults
 def _get_guru_chandala_results(planet_positions,dosha_msgs,key_str):
     m_results = {}
     next_line = "<br><br>"
@@ -233,6 +242,7 @@ def _get_guru_chandala_results(planet_positions,dosha_msgs,key_str):
             m_results[m_key] += m_msgs[planet_positions[5][1][0]+1] + next_line
     m_results[m_key] += "</html>"
     return m_results
+# @parity: ts=@/core/horoscope/dosha::getKalaSarpaResults
 def _get_kala_sarpa_results(planet_positions,dosha_msgs,key_str):
     house_to_planet_list = utils.get_house_planet_list_from_planet_positions(planet_positions)
     ks_results = {}
@@ -250,18 +260,21 @@ def _get_kala_sarpa_results(planet_positions,dosha_msgs,key_str):
         ks_results[ks_key] += ks_msgs[rahu_house]+next_line
     ks_results[ks_key] += "</html>"
     return ks_results
+# @parity: ts=@/core/horoscope/dosha::ghata
 def ghata(planet_positions):
     """
         Mars/Saturn conjunction results in ghata dosha
         @return: True/False
     """
     return planet_positions[3][1][0]==planet_positions[7][1][0]
+# @parity: ts=@/core/horoscope/dosha::shrapit
 def shrapit(planet_positions):
     """
         Rahu/Saturn conjunction results in Shrapit dosha
         @return: True/False
     """
     return planet_positions[8][1][0]==planet_positions[7][1][0]
+# @parity: ts=@/core/horoscope/dosha::getGhataResults
 def _get_ghata_results(planet_positions,dosha_msgs,key_str):
     house_to_planet_list = utils.get_house_planet_list_from_planet_positions(planet_positions)
     ks_results = {}
@@ -278,6 +291,7 @@ def _get_ghata_results(planet_positions,dosha_msgs,key_str):
         ks_results[ks_key] += ks_msgs[mars_house]+next_line
     ks_results[ks_key] += "</html>"
     return ks_results
+# @parity: ts=@/core/horoscope/dosha::getShrapitResults
 def _get_shrapit_results(planet_positions,dosha_msgs,key_str):
     house_to_planet_list = utils.get_house_planet_list_from_planet_positions(planet_positions)
     ks_results = {}
@@ -294,6 +308,7 @@ def _get_shrapit_results(planet_positions,dosha_msgs,key_str):
         ks_results[ks_key] += ks_msgs[saturn_house]+next_line
     ks_results[ks_key] += "</html>"
     return ks_results
+# @parity: ts=@/core/horoscope/dosha::getManglikResults
 def _get_manglik_results(planet_positions, dosha_msgs,key_str):
     m_results = {}
     next_line = "<br><br>"
@@ -317,6 +332,7 @@ def _get_manglik_results(planet_positions, dosha_msgs,key_str):
         m_results[m_key] += exp
     m_results[m_key] += "</html>"
     return m_results
+# @parity: ts=@/core/horoscope/dosha::getPitruResults
 def _get_pitru_results(planet_positions,dosha_msgs,key_str):
     house_to_planet_list = utils.get_house_planet_list_from_planet_positions(planet_positions)
     ks_results = {}
@@ -332,6 +348,7 @@ def _get_pitru_results(planet_positions,dosha_msgs,key_str):
             ks_results[ks_key] += ks_msgs[m]+next_line
     ks_results[ks_key] += "</html>"
     return ks_results
+# @parity: ts=@/core/horoscope/dosha::getDoshaDetails
 def get_dosha_details(jd_at_dob,place_as_tuple,language=const._DEFAULT_LANGUAGE):
     dosha_msgs = get_dosha_resources(language)
     #print(dosha_msgs)
