@@ -59,6 +59,7 @@ export interface ArudhaPlanetPosition {
  *   - 3-9: Other planets (Mars to Ketu)
  * @returns Array of 12 rasi indices representing Bhava Arudhas for houses 1-12 from base
  */
+// @parity: py=bhava_arudhas_from_planet_positions
 export function bhavaArudhasFromPlanetPositions(
   planetPositions: ArudhaPlanetPosition[],
   arudhaBase: number = 0
@@ -112,6 +113,7 @@ export function bhavaArudhasFromPlanetPositions(
  * @param planetPositions - Array of planet positions
  * @returns Array of 12 rasi indices for Surya Arudhas S1-S12
  */
+// @parity: py=surya_arudhas_from_planet_positions
 export function suryaArudhasFromPlanetPositions(
   planetPositions: ArudhaPlanetPosition[]
 ): number[] {
@@ -123,6 +125,7 @@ export function suryaArudhasFromPlanetPositions(
  * @param planetPositions - Array of planet positions
  * @returns Array of 12 rasi indices for Chandra Arudhas M1-M12
  */
+// @parity: py=chandra_arudhas_from_planet_positions
 export function chandraArudhasFromPlanetPositions(
   planetPositions: ArudhaPlanetPosition[]
 ): number[] {
@@ -144,6 +147,7 @@ export function chandraArudhasFromPlanetPositions(
  *          Index 0: Lagna Pada
  *          Index 1-9: Sun Pada, Moon Pada, Mars Pada, etc.
  */
+// @parity: py=graha_arudhas_from_planet_positions
 export function grahaArudhasFromPlanetPositions(
   planetPositions: ArudhaPlanetPosition[]
 ): number[] {
@@ -312,6 +316,7 @@ function parsePlanetToHouseDict(chart: string[]): Record<number | string, number
  *                ['0/1','2','','','3/4/5','','','6','L/7','','8','']
  * @returns Array of 12 rasi indices representing Bhava Arudhas for houses 1-12
  */
+// @parity: py=bhava_arudhas
 export function bhavaArudhas(chart: string[]): number[] {
   const pToH = parsePlanetToHouseDict(chart);
   const ascHouse = pToH[ASCENDANT_SYMBOL];
@@ -352,6 +357,7 @@ export function bhavaArudhas(chart: string[]): number[] {
  * @returns Array of rasi indices for Graha Arudhas.
  *          Index 0: Lagna Pada, Index 1-9: Sun to Ketu Pada
  */
+// @parity: py=graha_arudhas
 export function grahaArudhas(chart: string[]): number[] {
   const pToH = parsePlanetToHouseDict(chart);
   const ascHouse = pToH[ASCENDANT_SYMBOL];

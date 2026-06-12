@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from jhora import const, utils
 from jhora.horoscope.chart import house
+# @parity: ts=@/core/horoscope/arudhas::bhavaArudhasFromPlanetPositions
 def bhava_arudhas_from_planet_positions(planet_positions,arudha_base=0):
     """
         gives Bhava Arudhas for each house from the chart (A1=Arudha Lagna,A2.. A12=Upa Lagna)
@@ -49,10 +50,13 @@ def bhava_arudhas_from_planet_positions(planet_positions,arudha_base=0):
             bhava_arudha_of_house = (bhava_arudha_of_house+10-1)%12
         bhava_arudhas_of_houses.append(bhava_arudha_of_house)
     return bhava_arudhas_of_houses
+# @parity: ts=@/core/horoscope/arudhas::suryaArudhasFromPlanetPositions
 def surya_arudhas_from_planet_positions(planet_positions):
     return bhava_arudhas_from_planet_positions(planet_positions, arudha_base=1)
+# @parity: ts=@/core/horoscope/arudhas::chandraArudhasFromPlanetPositions
 def chandra_arudhas_from_planet_positions(planet_positions):
     return bhava_arudhas_from_planet_positions(planet_positions, arudha_base=2)
+# @parity: ts=@/core/horoscope/arudhas::bhavaArudhas
 def bhava_arudhas(chart):
     """
         gives Bhava Arudhas for each house from the chart (A1=Arudha Lagna,A2.. A12=Upa Lagna)
@@ -76,6 +80,7 @@ def bhava_arudhas(chart):
             bhava_arudha_of_house = (bhava_arudha_of_house+10-1)%12
         bhava_arudhas_of_houses.append(bhava_arudha_of_house)
     return bhava_arudhas_of_houses
+# @parity: ts=@/core/horoscope/arudhas::grahaArudhasFromPlanetPositions
 def graha_arudhas_from_planet_positions(planet_positions):
     """
         gives Graha Arudhas for each planet from the planet positions
@@ -101,6 +106,7 @@ def graha_arudhas_from_planet_positions(planet_positions):
         graha_padha_of_planet = count_to_arudha
         graha_arudhas_of_planets.append(graha_padha_of_planet)
     return graha_arudhas_of_planets
+# @parity: ts=@/core/horoscope/arudhas::grahaArudhas
 def graha_arudhas(chart):
     """
         gives Graha Arudhas for each planet from the chart
