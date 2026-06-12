@@ -1,0 +1,16 @@
+{
+  "python_target": "jhora.utils.normalize_angle",
+  "typescript_target": "@/core/utils/angle::normalizeAngle",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "angle": 123.456
+      }
+    }
+  ]
+}

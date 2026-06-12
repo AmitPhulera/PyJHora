@@ -1,0 +1,29 @@
+{
+  "python_target": "jhora.horoscope.chart.yoga.dama_yoga",
+  "typescript_target": "@/core/horoscope/yoga::damaYoga",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "chart_1d": [
+          "",
+          "",
+          "",
+          "",
+          "2",
+          "7",
+          "1/5",
+          "0",
+          "3/4",
+          "L",
+          "",
+          "6/8"
+        ]
+      }
+    }
+  ]
+}

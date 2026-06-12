@@ -1,0 +1,16 @@
+{
+  "python_target": "jhora.panchanga.drik.get_ayanamsa_value",
+  "typescript_target": "@/core/panchanga/drik::getAyanamsaValue",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "jd": 2450424.9402777776
+      }
+    }
+  ]
+}

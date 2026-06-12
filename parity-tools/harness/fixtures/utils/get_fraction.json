@@ -1,0 +1,18 @@
+{
+  "python_target": "jhora.utils.get_fraction",
+  "typescript_target": "@/core/utils/chart::getFraction",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "start_time_hrs": 10.5,
+        "end_time_hrs": 20.5,
+        "birth_time_hrs": 10.566666666666666
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "python_target": "jhora.panchanga.drik.next_annual_solar_date_approximate",
+  "typescript_target": "@/core/panchanga/drik::nextAnnualSolarDateApproximate",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "dob": {
+          "__type": "Date",
+          "value": {
+            "year": 1996,
+            "month": 12,
+            "day": 7
+          }
+        },
+        "tob": [
+          10,
+          34,
+          0
+        ],
+        "years": 1
+      }
+    }
+  ]
+}

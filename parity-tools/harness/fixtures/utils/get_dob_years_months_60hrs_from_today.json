@@ -1,0 +1,28 @@
+{
+  "python_target": "jhora.utils.get_dob_years_months_60hrs_from_today",
+  "typescript_target": "@/core/utils/panchanga-date::getAgeFrom",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "dob": {
+          "__type": "Date",
+          "value": {
+            "year": 1996,
+            "month": 12,
+            "day": 7
+          }
+        },
+        "tob": [
+          10,
+          34,
+          0
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "python_target": "jhora.horoscope.dhasa.graha.ashtottari.ashtottari_bhukthi",
+  "typescript_target": "@/core/dhasa/graha/ashtottari::ashtottariBhukti",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "dhasa_lord": 0,
+        "start_date": {
+          "__type": "Date",
+          "value": {
+            "year": 1996,
+            "month": 12,
+            "day": 7
+          }
+        }
+      }
+    }
+  ]
+}

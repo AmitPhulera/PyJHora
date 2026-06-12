@@ -1,0 +1,14 @@
+{
+  "python_target": "jhora.panchanga.drik.set_tropical_planets",
+  "typescript_target": "@/core/panchanga/drik::setTropicalPlanets",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {}
+    }
+  ]
+}

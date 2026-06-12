@@ -1,0 +1,87 @@
+{
+  "python_target": "jhora.horoscope.chart.yoga.dharidhra_yoga_from_planet_positions",
+  "typescript_target": "@/core/horoscope/yoga::dharidhraYogaFromPlanetPositions",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "planet_positions": [
+          [
+            "L",
+            [
+              9,
+              22.445758844045713
+            ]
+          ],
+          [
+            0,
+            [
+              7,
+              21.565282199774686
+            ]
+          ],
+          [
+            1,
+            [
+              6,
+              6.959489439173353
+            ]
+          ],
+          [
+            2,
+            [
+              4,
+              25.5397473174246
+            ]
+          ],
+          [
+            3,
+            [
+              8,
+              9.936449033727513
+            ]
+          ],
+          [
+            4,
+            [
+              8,
+              25.82805158487281
+            ]
+          ],
+          [
+            5,
+            [
+              6,
+              23.71713310477864
+            ]
+          ],
+          [
+            6,
+            [
+              11,
+              6.8072763533850775
+            ]
+          ],
+          [
+            7,
+            [
+              5,
+              10.553787374473785
+            ]
+          ],
+          [
+            8,
+            [
+              11,
+              10.553787374473814
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

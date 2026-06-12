@@ -1,0 +1,18 @@
+{
+  "python_target": "jhora.panchanga.pancha_paksha.get_matching_pancha_pakshi_data_from_db",
+  "typescript_target": "@/core/panchanga/pancha-paksha::getMatchingPanchaPakshiData",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "bird_index": 1,
+        "weekday_index": 3,
+        "paksha_index": 0
+      }
+    }
+  ]
+}

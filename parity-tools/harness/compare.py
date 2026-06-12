@@ -163,7 +163,9 @@ def compare_fixture_results(fixture_path: Path,
             diffs.append(entry)
             continue
         tol = _resolve_tolerance(fixture, case)
-        leaf = compare_values(p["result"], t["result"], tol)
+        # TS void functions return undefined, which JSON.stringify drops —
+        # treat a missing result key as null (Python None).
+        leaf = compare_values(p.get("result"), t.get("result"), tol)
         if leaf is None:
             entry["status"] = "ok"
         else:
