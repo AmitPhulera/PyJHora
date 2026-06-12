@@ -272,6 +272,7 @@ export const planetPositionsToChart = (positions: PlanetPosition[]): HouseChart 
 /**
  * Vesi Yoga: Planet other than Moon in 2nd house from Sun
  */
+// @parity: py=vesi_yoga
 export const vesiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const sunHouse = h(pToH, SUN);
@@ -284,6 +285,7 @@ export const vesiYoga = (chart: HouseChart): boolean => {
 /**
  * Vosi Yoga: Planet other than Moon in 12th house from Sun
  */
+// @parity: py=vosi_yoga
 export const vosiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const sunHouse = h(pToH, SUN);
@@ -296,6 +298,7 @@ export const vosiYoga = (chart: HouseChart): boolean => {
 /**
  * Ubhayachara Yoga: Planets other than Moon in both 2nd and 12th from Sun
  */
+// @parity: py=ubhayachara_yoga
 export const ubhayacharaYoga = (chart: HouseChart): boolean => {
   return vesiYoga(chart) && vosiYoga(chart);
 };
@@ -303,6 +306,7 @@ export const ubhayacharaYoga = (chart: HouseChart): boolean => {
 /**
  * Nipuna/Budha-Aaditya Yoga: Sun and Mercury together
  */
+// @parity: py=nipuna_yoga
 export const nipunaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   return h(pToH, SUN) === h(pToH, MERCURY);
@@ -316,6 +320,7 @@ export const budhaAadityaYoga = nipunaYoga;
 /**
  * Sunaphaa Yoga: Planets other than Sun in 2nd house from Moon
  */
+// @parity: py=sunaphaa_yoga
 export const sunaphaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const moonHouse = h(pToH, MOON);
@@ -328,6 +333,7 @@ export const sunaphaaYoga = (chart: HouseChart): boolean => {
 /**
  * Anaphaa Yoga: Planets other than Sun in 12th house from Moon
  */
+// @parity: py=anaphaa_yoga
 export const anaphaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const moonHouse = h(pToH, MOON);
@@ -340,6 +346,7 @@ export const anaphaaYoga = (chart: HouseChart): boolean => {
 /**
  * Duradhara/Dhurdhura Yoga: Planets other than Sun in both 2nd and 12th from Moon
  */
+// @parity: py=duradhara_yoga
 export const duradharaYoga = (chart: HouseChart): boolean => {
   return sunaphaaYoga(chart) && anaphaaYoga(chart);
 };
@@ -349,6 +356,7 @@ export const dhurdhuraYoga = duradharaYoga;
  * Kemadruma Yoga: No planets other than Sun in 1st, 2nd, 12th from Moon
  * AND no planets other than Moon in quadrants from lagna
  */
+// @parity: py=kemadruma_yoga
 export const kemadrumaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const moonHouse = h(pToH, MOON);
@@ -376,6 +384,7 @@ export const kemadrumaYoga = (chart: HouseChart): boolean => {
 /**
  * Chandra-Mangala Yoga: Moon and Mars together
  */
+// @parity: py=chandra_mangala_yoga
 export const chandraMangalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   return h(pToH, MOON) === h(pToH, MARS);
@@ -384,6 +393,7 @@ export const chandraMangalaYoga = (chart: HouseChart): boolean => {
 /**
  * Adhi Yoga: Natural benefics in 6th, 7th, 8th from Moon
  */
+// @parity: py=adhi_yoga
 export const adhiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const moonHouse = h(pToH, MOON);
@@ -404,6 +414,7 @@ export const adhiYoga = (chart: HouseChart): boolean => {
 /**
  * Ruchaka Yoga: Mars in Aries, Scorpio, or Capricorn AND in quadrant from Lagna
  */
+// @parity: py=ruchaka_yoga
 export const ruchakaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const marsHouse = h(pToH, MARS);
@@ -416,6 +427,7 @@ export const ruchakaYoga = (chart: HouseChart): boolean => {
 /**
  * Bhadra Yoga: Mercury in Gemini or Virgo AND in quadrant from Lagna
  */
+// @parity: py=bhadra_yoga
 export const bhadraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const mercuryHouse = h(pToH, MERCURY);
@@ -428,6 +440,7 @@ export const bhadraYoga = (chart: HouseChart): boolean => {
 /**
  * Sasa Yoga: Saturn in Capricorn, Aquarius, or Libra AND in quadrant from Lagna
  */
+// @parity: py=sasa_yoga
 export const sasaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const saturnHouse = h(pToH, SATURN);
@@ -440,6 +453,7 @@ export const sasaYoga = (chart: HouseChart): boolean => {
 /**
  * Maalavya Yoga: Venus in Taurus, Libra, or Pisces AND in quadrant from Lagna
  */
+// @parity: py=maalavya_yoga
 export const maalavyaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const venusHouse = h(pToH, VENUS);
@@ -452,6 +466,7 @@ export const maalavyaYoga = (chart: HouseChart): boolean => {
 /**
  * Hamsa Yoga: Jupiter in Sagittarius, Pisces, or Cancer AND in quadrant from Lagna
  */
+// @parity: py=hamsa_yoga
 export const hamsaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const jupiterHouse = h(pToH, JUPITER);
@@ -468,6 +483,7 @@ export const hamsaYoga = (chart: HouseChart): boolean => {
 /**
  * Rajju Yoga: All planets exclusively in movable signs
  */
+// @parity: py=rajju_yoga
 export const rajjuYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   return SUN_TO_KETU.every((p) => MOVABLE_SIGNS.includes(pToH[p]));
@@ -476,6 +492,7 @@ export const rajjuYoga = (chart: HouseChart): boolean => {
 /**
  * Musala Yoga: All planets exclusively in fixed signs
  */
+// @parity: py=musala_yoga
 export const musalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   return SUN_TO_KETU.every((p) => FIXED_SIGNS.includes(pToH[p]));
@@ -484,6 +501,7 @@ export const musalaYoga = (chart: HouseChart): boolean => {
 /**
  * Nala Yoga: All planets exclusively in dual signs
  */
+// @parity: py=nala_yoga
 export const nalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   return SUN_TO_KETU.every((p) => DUAL_SIGNS.includes(pToH[p]));
@@ -496,6 +514,7 @@ export const nalaYoga = (chart: HouseChart): boolean => {
 /**
  * Maalaa/Srik Yoga: Three quadrants from Lagna occupied by natural benefics
  */
+// @parity: py=maalaa_yoga
 export const maalaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -511,11 +530,13 @@ export const maalaaYoga = (chart: HouseChart): boolean => {
   }
   return occupiedBeneficKendras === 3;
 };
+// @parity: py=srik_yoga
 export const srikYoga = maalaaYoga;
 
 /**
  * Sarpa Yoga: Three quadrants from Lagna occupied by natural malefics
  */
+// @parity: py=sarpa_yoga
 export const sarpaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -539,6 +560,7 @@ export const sarpaYoga = (chart: HouseChart): boolean => {
 /**
  * Gadaa Yoga: All planets in two successive quadrants from Lagna
  */
+// @parity: py=gadaa_yoga
 export const gadaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -565,6 +587,7 @@ export const gadaaYoga = (chart: HouseChart): boolean => {
 /**
  * Sakata Yoga: All planets in 1st and 7th houses from Lagna
  */
+// @parity: py=sakata_yoga
 export const sakataYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -582,6 +605,7 @@ export const sakataYoga = (chart: HouseChart): boolean => {
 /**
  * Vihanga Yoga: All planets in 4th and 10th houses from Lagna
  */
+// @parity: py=vihanga_yoga
 export const vihangaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -595,11 +619,13 @@ export const vihangaYoga = (chart: HouseChart): boolean => {
     Array.from(planetHouses).every((h) => validHouses.has(h))
   );
 };
+// @parity: py=vihaga_yoga
 export const vihagaYoga = vihangaYoga;
 
 /**
  * Sringaataka Yoga: All planets in trines (1, 5, 9) from Lagna
  */
+// @parity: py=sringaataka_yoga
 export const sringaatakaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -618,6 +644,7 @@ export const sringaatakaYoga = (chart: HouseChart): boolean => {
 /**
  * Hala Yoga: All planets in mutual trines but not trines from Lagna
  */
+// @parity: py=hala_yoga
 export const halaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -656,6 +683,7 @@ export const halaYoga = (chart: HouseChart): boolean => {
 /**
  * Vajra Yoga: Benefics in 1st and 7th, malefics in 4th and 10th from Lagna
  */
+// @parity: py=vajra_yoga
 export const vajraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -682,6 +710,7 @@ export const vajraYoga = (chart: HouseChart): boolean => {
 /**
  * Yava Yoga: Malefics in 1st and 7th, benefics in 4th and 10th from Lagna
  */
+// @parity: py=yava_yoga
 export const yavaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -708,6 +737,7 @@ export const yavaYoga = (chart: HouseChart): boolean => {
 /**
  * Kamala Yoga: All planets in quadrants (kendras) from Lagna
  */
+// @parity: py=kamala_yoga
 export const kamalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -718,6 +748,7 @@ export const kamalaYoga = (chart: HouseChart): boolean => {
 /**
  * Vaapi Yoga: All planets in Panaparas (2,5,8,11) OR Apoklimas (3,6,9,12) from Lagna
  */
+// @parity: py=vaapi_yoga
 export const vaapiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -745,6 +776,7 @@ export const vaapiYoga = (chart: HouseChart): boolean => {
 /**
  * Yoopa Yoga: All planets in 1st, 2nd, 3rd, 4th houses from Lagna
  */
+// @parity: py=yoopa_yoga
 export const yoopaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -760,6 +792,7 @@ export const yoopaYoga = (chart: HouseChart): boolean => {
 /**
  * Sara/Ishu Yoga: All planets in 4th, 5th, 6th, 7th houses from Lagna
  */
+// @parity: py=sara_yoga
 export const saraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -771,11 +804,13 @@ export const saraYoga = (chart: HouseChart): boolean => {
   ]);
   return SUN_TO_SATURN.every((p) => validHouses.has(pToH[p]));
 };
+// @parity: py=ishu_yoga
 export const ishuYoga = saraYoga;
 
 /**
  * Sakti Yoga: All planets in 7th, 8th, 9th, 10th houses from Lagna
  */
+// @parity: py=sakti_yoga
 export const saktiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -791,6 +826,7 @@ export const saktiYoga = (chart: HouseChart): boolean => {
 /**
  * Danda Yoga: All planets in 10th, 11th, 12th, 1st houses from Lagna
  */
+// @parity: py=danda_yoga
 export const dandaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -806,6 +842,7 @@ export const dandaYoga = (chart: HouseChart): boolean => {
 /**
  * Naukaa/Nav Yoga: All 7 visible planets in 7 consecutive houses from Lagna
  */
+// @parity: py=naukaa_yoga
 export const naukaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const baseHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -825,11 +862,13 @@ export const naukaaYoga = (chart: HouseChart): boolean => {
 
   return span7.every((h) => houseToVisible[h].size > 0);
 };
+// @parity: py=nav_yoga
 export const navYoga = naukaaYoga;
 
 /**
  * Koota Yoga: All planets in 7 signs from 4th house
  */
+// @parity: py=koota_yoga
 export const kootaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const baseHouse = (h(pToH, ASCENDANT_SYMBOL) + HOUSE_4) % 12;
@@ -851,6 +890,7 @@ export const kootaYoga = (chart: HouseChart): boolean => {
 /**
  * Chatra Yoga: All planets in 7 signs from 7th house
  */
+// @parity: py=chatra_yoga
 export const chatraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const baseHouse = (h(pToH, ASCENDANT_SYMBOL) + HOUSE_7) % 12;
@@ -872,6 +912,7 @@ export const chatraYoga = (chart: HouseChart): boolean => {
 /**
  * Chaapa Yoga: All planets in 7 signs from 10th house
  */
+// @parity: py=chaapa_yoga
 export const chaapaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const baseHouse = (h(pToH, ASCENDANT_SYMBOL) + HOUSE_10) % 12;
@@ -894,6 +935,7 @@ export const chaapaYoga = (chart: HouseChart): boolean => {
  * Ardha Chandra Yoga: All 7 visible planets confined to 7 consecutive houses
  * starting from a non-Kendra (Panapara or Apoklima)
  */
+// @parity: py=ardha_chandra_yoga
 export const ardhaChandraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -927,6 +969,7 @@ export const ardhaChandraYoga = (chart: HouseChart): boolean => {
 /**
  * Chakra Yoga: All planets in 1st, 3rd, 5th, 7th, 9th, 11th houses
  */
+// @parity: py=chakra_yoga
 export const chakraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -954,6 +997,7 @@ export const chakraYoga = (chart: HouseChart): boolean => {
 /**
  * Samudra Yoga: All planets in 2nd, 4th, 6th, 8th, 10th, 12th houses
  */
+// @parity: py=samudra_yoga
 export const samudraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -985,6 +1029,7 @@ export const samudraYoga = (chart: HouseChart): boolean => {
 /**
  * Veenaa Yoga: 7 planets in exactly 7 distinct signs
  */
+// @parity: py=veenaa_yoga
 export const veenaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -994,6 +1039,7 @@ export const veenaaYoga = (chart: HouseChart): boolean => {
 /**
  * Daama Yoga: 7 planets in exactly 6 distinct signs
  */
+// @parity: py=daama_yoga
 export const daamaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1003,6 +1049,7 @@ export const daamaYoga = (chart: HouseChart): boolean => {
 /**
  * Paasa Yoga: 7 planets in exactly 5 distinct signs
  */
+// @parity: py=paasa_yoga
 export const paasaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1012,6 +1059,7 @@ export const paasaYoga = (chart: HouseChart): boolean => {
 /**
  * Kedaara Yoga: 7 planets in exactly 4 distinct signs
  */
+// @parity: py=kedaara_yoga
 export const kedaaraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1021,6 +1069,7 @@ export const kedaaraYoga = (chart: HouseChart): boolean => {
 /**
  * Soola Yoga: 7 planets in exactly 3 distinct signs
  */
+// @parity: py=soola_yoga
 export const soolaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1030,6 +1079,7 @@ export const soolaYoga = (chart: HouseChart): boolean => {
 /**
  * Yuga Yoga: 7 planets in exactly 2 distinct signs
  */
+// @parity: py=yuga_yoga
 export const yugaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1039,6 +1089,7 @@ export const yugaYoga = (chart: HouseChart): boolean => {
 /**
  * Gola Yoga: All 7 planets in exactly 1 sign
  */
+// @parity: py=gola_yoga
 export const golaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const houses = new Set(SUN_TO_SATURN.map((p) => pToH[p]));
@@ -1052,6 +1103,7 @@ export const golaYoga = (chart: HouseChart): boolean => {
 /**
  * Subha Yoga: Lagna has benefics OR is surrounded by benefics (12th and 2nd)
  */
+// @parity: py=subha_yoga
 export const subhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1080,6 +1132,7 @@ export const subhaYoga = (chart: HouseChart): boolean => {
 /**
  * Asubha Yoga: Lagna has malefics OR is surrounded by malefics (12th and 2nd)
  */
+// @parity: py=asubha_yoga
 export const asubhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1111,6 +1164,7 @@ export const asubhaYoga = (chart: HouseChart): boolean => {
 /**
  * Gaja Kesari Yoga: Jupiter in quadrant from Moon
  */
+// @parity: py=gaja_kesari_yoga
 export const gajaKesariYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const moonHouse = h(pToH, MOON);
@@ -1130,6 +1184,7 @@ export const gajaKesariYoga = (chart: HouseChart): boolean => {
 /**
  * Guru-Mangala Yoga: Jupiter and Mars together OR in 7th from each other
  */
+// @parity: py=guru_mangala_yoga
 export const guruMangalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const marsHouse = h(pToH, MARS);
@@ -1148,6 +1203,7 @@ export const guruMangalaYoga = (chart: HouseChart): boolean => {
 /**
  * Amala Yoga: Only natural benefics in 10th house from Lagna or Moon
  */
+// @parity: py=amala_yoga
 export const amalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1168,6 +1224,7 @@ export const amalaYoga = (chart: HouseChart): boolean => {
 /**
  * Parvata Yoga: Quadrants occupied only by benefics AND 7th/8th vacant or with benefics only
  */
+// @parity: py=parvata_yoga
 export const parvataYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1198,6 +1255,7 @@ export const parvataYoga = (chart: HouseChart): boolean => {
 /**
  * Harsha Yoga: 6th lord occupies the 6th house
  */
+// @parity: py=harsha_yoga
 export const harshaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1209,6 +1267,7 @@ export const harshaYoga = (chart: HouseChart): boolean => {
 /**
  * Sarala Yoga: 8th lord occupies the 8th house
  */
+// @parity: py=sarala_yoga
 export const saralaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1220,6 +1279,7 @@ export const saralaYoga = (chart: HouseChart): boolean => {
 /**
  * Vimala Yoga: 12th lord occupies the 12th house
  */
+// @parity: py=vimala_yoga
 export const vimalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1235,6 +1295,7 @@ export const vimalaYoga = (chart: HouseChart): boolean => {
 /**
  * Chatussagara Yoga: All planets in all 4 quadrants (kendras)
  */
+// @parity: py=chatussagara_yoga
 export const chatussagaraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1250,6 +1311,7 @@ export const chatussagaraYoga = (chart: HouseChart): boolean => {
 /**
  * Rajalakshana Yoga: All planets in quadrants or trines
  */
+// @parity: py=rajalakshana_yoga
 export const rajalakshanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1284,50 +1346,62 @@ const malikaYogaBase = (chart: HouseChart, startingHouse: number): boolean => {
 };
 
 /** Lagna Malika: 7 consecutive from 1st house */
+// @parity: py=lagna_malika_yoga
 export const lagnaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_1);
 
 /** Dhana Malika: 7 consecutive from 2nd house */
+// @parity: py=dhana_malika_yoga
 export const dhanaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_2);
 
 /** Vikrama Malika: 7 consecutive from 3rd house */
+// @parity: py=vikrama_malika_yoga
 export const vikramaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_3);
 
 /** Sukha Malika: 7 consecutive from 4th house */
+// @parity: py=sukha_malika_yoga
 export const sukhaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_4);
 
 /** Putra Malika: 7 consecutive from 5th house */
+// @parity: py=putra_malika_yoga
 export const putraMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_5);
 
 /** Satru Malika: 7 consecutive from 6th house */
+// @parity: py=satru_malika_yoga
 export const satruMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_6);
 
 /** Kalatra Malika: 7 consecutive from 7th house */
+// @parity: py=kalatra_malika_yoga
 export const kalatraMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_7);
 
 /** Randhra Malika: 7 consecutive from 8th house */
+// @parity: py=randhra_malika_yoga
 export const randhraMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_8);
 
 /** Bhagya Malika: 7 consecutive from 9th house */
+// @parity: py=bhagya_malika_yoga
 export const bhagyaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_9);
 
 /** Karma Malika: 7 consecutive from 10th house */
+// @parity: py=karma_malika_yoga
 export const karmaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_10);
 
 /** Labha Malika: 7 consecutive from 11th house */
+// @parity: py=labha_malika_yoga
 export const labhaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_11);
 
 /** Vyaya Malika: 7 consecutive from 12th house */
+// @parity: py=vyaya_malika_yoga
 export const vyayaMalikaYoga = (chart: HouseChart): boolean =>
   malikaYogaBase(chart, HOUSE_12);
 
@@ -1338,18 +1412,22 @@ export const vyayaMalikaYoga = (chart: HouseChart): boolean =>
 // chart-based function. Mirrors Python's *_from_planet_positions functions.
 
 /** Vesi Yoga from planet positions */
+// @parity: py=vesi_yoga_from_planet_positions
 export const vesiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vesiYoga(planetPositionsToChart(positions));
 
 /** Vosi Yoga from planet positions */
+// @parity: py=vosi_yoga_from_planet_positions
 export const vosiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vosiYoga(planetPositionsToChart(positions));
 
 /** Ubhayachara Yoga from planet positions */
+// @parity: py=ubhayachara_yoga_from_planet_positions
 export const ubhayacharaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   ubhayacharaYoga(planetPositionsToChart(positions));
 
 /** Nipuna Yoga from planet positions */
+// @parity: py=nipuna_yoga_from_planet_positions
 export const nipunaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   nipunaYoga(planetPositionsToChart(positions));
 
@@ -1357,210 +1435,263 @@ export const nipunaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 export const budhaAadityaYogaFromPlanetPositions = nipunaYogaFromPlanetPositions;
 
 /** Sunaphaa Yoga from planet positions */
+// @parity: py=sunaphaa_yoga_from_planet_positions
 export const sunaphaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sunaphaaYoga(planetPositionsToChart(positions));
 
 /** Anaphaa Yoga from planet positions */
+// @parity: py=anaphaa_yoga_from_planet_positions
 export const anaphaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   anaphaaYoga(planetPositionsToChart(positions));
 
 /** Duradhara Yoga from planet positions */
+// @parity: py=duradhara_yoga_from_planet_positions
 export const duradharaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   duradharaYoga(planetPositionsToChart(positions));
 
 /** Dhurdhura Yoga from planet positions */
+// @parity: py=dhurdhura_yoga_from_planet_positions
 export const dhurdhuraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dhurdhuraYoga(planetPositionsToChart(positions));
 
 /** Kemadruma Yoga from planet positions */
+// @parity: py=kemadruma_yoga_from_planet_positions
 export const kemadrumaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kemadrumaYoga(planetPositionsToChart(positions));
 
 /** Chandra-Mangala Yoga from planet positions */
+// @parity: py=chandra_mangala_yoga_from_planet_positions
 export const chandraMangalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chandraMangalaYoga(planetPositionsToChart(positions));
 
 /** Adhi Yoga from planet positions */
+// @parity: py=adhi_yoga_from_planet_positions
 export const adhiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   adhiYoga(planetPositionsToChart(positions));
 
 /** Ruchaka Yoga from planet positions */
+// @parity: py=ruchaka_yoga_from_planet_positions
 export const ruchakaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   ruchakaYoga(planetPositionsToChart(positions));
 
 /** Bhadra Yoga from planet positions */
+// @parity: py=bhadra_yoga_from_planet_positions
 export const bhadraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bhadraYoga(planetPositionsToChart(positions));
 
 /** Sasa Yoga from planet positions */
+// @parity: py=sasa_yoga_from_planet_positions
 export const sasaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sasaYoga(planetPositionsToChart(positions));
 
 /** Maalavya Yoga from planet positions */
+// @parity: py=maalavya_yoga_from_planet_positions
 export const maalavyaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   maalavyaYoga(planetPositionsToChart(positions));
 
 /** Hamsa Yoga from planet positions */
+// @parity: py=hamsa_yoga_from_planet_positions
 export const hamsaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   hamsaYoga(planetPositionsToChart(positions));
 
 /** Rajju Yoga from planet positions */
+// @parity: py=rajju_yoga_from_planet_positions
 export const rajjuYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   rajjuYoga(planetPositionsToChart(positions));
 
 /** Musala Yoga from planet positions */
+// @parity: py=musala_yoga_from_planet_positions
 export const musalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   musalaYoga(planetPositionsToChart(positions));
 
 /** Nala Yoga from planet positions */
+// @parity: py=nala_yoga_from_planet_positions
 export const nalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   nalaYoga(planetPositionsToChart(positions));
 
 /** Maalaa/Srik Yoga from planet positions */
+// @parity: py=maalaa_yoga_from_planet_positions
 export const maalaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   maalaaYoga(planetPositionsToChart(positions));
 
 /** Srik Yoga from planet positions */
+// @parity: py=srik_yoga_from_planet_positions
 export const srikYogaFromPlanetPositions = maalaaYogaFromPlanetPositions;
 
 /** Sarpa Yoga from planet positions */
+// @parity: py=sarpa_yoga_from_planet_positions
 export const sarpaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sarpaYoga(planetPositionsToChart(positions));
 
 /** Gadaa Yoga from planet positions */
+// @parity: py=gadaa_yoga_from_planet_positions
 export const gadaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   gadaaYoga(planetPositionsToChart(positions));
 
 /** Sakata Yoga from planet positions */
+// @parity: py=sakata_yoga_from_planet_positions
 export const sakataYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sakataYoga(planetPositionsToChart(positions));
 
 /** Vihanga Yoga from planet positions */
+// @parity: py=vihanga_yoga_from_planet_positions
 export const vihangaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vihangaYoga(planetPositionsToChart(positions));
 
 /** Vihaga Yoga from planet positions */
+// @parity: py=vihaga_yoga_from_planet_positions
 export const vihagaYogaFromPlanetPositions = vihangaYogaFromPlanetPositions;
 
 /** Sringaataka Yoga from planet positions */
+// @parity: py=sringaataka_yoga_from_planet_positions
 export const sringaatakaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sringaatakaYoga(planetPositionsToChart(positions));
 
 /** Hala Yoga from planet positions */
+// @parity: py=hala_yoga_from_planet_positions
 export const halaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   halaYoga(planetPositionsToChart(positions));
 
 /** Vajra Yoga from planet positions */
+// @parity: py=vajra_yoga_from_planet_positions
 export const vajraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vajraYoga(planetPositionsToChart(positions));
 
 /** Yava Yoga from planet positions */
+// @parity: py=yava_yoga_from_planet_positions
 export const yavaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   yavaYoga(planetPositionsToChart(positions));
 
 /** Kamala Yoga from planet positions */
+// @parity: py=kamala_yoga_from_planet_positions
 export const kamalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kamalaYoga(planetPositionsToChart(positions));
 
 /** Vaapi Yoga from planet positions */
+// @parity: py=vaapi_yoga_from_planet_positions
 export const vaapiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vaapiYoga(planetPositionsToChart(positions));
 
 /** Yoopa Yoga from planet positions */
+// @parity: py=yoopa_yoga_from_planet_positions
 export const yoopaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   yoopaYoga(planetPositionsToChart(positions));
 
 /** Sara Yoga from planet positions */
+// @parity: py=sara_yoga_from_planet_positions
 export const saraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   saraYoga(planetPositionsToChart(positions));
 
 /** Ishu Yoga from planet positions */
+// @parity: py=ishu_yoga_from_planet_positions
 export const ishuYogaFromPlanetPositions = saraYogaFromPlanetPositions;
 
 /** Sakti Yoga from planet positions */
+// @parity: py=sakti_yoga_from_planet_positions
 export const saktiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   saktiYoga(planetPositionsToChart(positions));
 
 /** Danda Yoga from planet positions */
+// @parity: py=danda_yoga_from_planet_positions
 export const dandaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dandaYoga(planetPositionsToChart(positions));
 
 /** Naukaa Yoga from planet positions */
+// @parity: py=naukaa_yoga_from_planet_positions
 export const naukaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   naukaaYoga(planetPositionsToChart(positions));
 
 /** Nav Yoga from planet positions */
+// @parity: py=nav_yoga_from_planet_positions
 export const navYogaFromPlanetPositions = naukaaYogaFromPlanetPositions;
 
 /** Koota Yoga from planet positions */
+// @parity: py=koota_yoga_from_planet_positions
 export const kootaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kootaYoga(planetPositionsToChart(positions));
 
 /** Chatra Yoga from planet positions */
+// @parity: py=chatra_yoga_from_planet_positions
 export const chatraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chatraYoga(planetPositionsToChart(positions));
 
 /** Chaapa Yoga from planet positions */
+// @parity: py=chaapa_yoga_from_planet_positions
 export const chaapaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chaapaYoga(planetPositionsToChart(positions));
 
 /** Ardha Chandra Yoga from planet positions */
+// @parity: py=ardha_chandra_yoga_from_planet_positions
 export const ardhaChandraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   ardhaChandraYoga(planetPositionsToChart(positions));
 
 /** Chakra Yoga from planet positions */
+// @parity: py=chakra_yoga_from_planet_positions
 export const chakraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chakraYoga(planetPositionsToChart(positions));
 
 /** Samudra Yoga from planet positions */
+// @parity: py=samudra_yoga_from_planet_positions
 export const samudraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   samudraYoga(planetPositionsToChart(positions));
 
 /** Veenaa Yoga from planet positions */
+// @parity: py=veenaa_yoga_from_planet_positions
 export const veenaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   veenaaYoga(planetPositionsToChart(positions));
 
 /** Daama Yoga from planet positions */
+// @parity: py=daama_yoga_from_planet_positions
 export const daamaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   daamaYoga(planetPositionsToChart(positions));
 
 /** Paasa Yoga from planet positions */
+// @parity: py=paasa_yoga_from_planet_positions
 export const paasaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   paasaYoga(planetPositionsToChart(positions));
 
 /** Kedaara Yoga from planet positions */
+// @parity: py=kedaara_yoga_from_planet_positions
 export const kedaaraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kedaaraYoga(planetPositionsToChart(positions));
 
 /** Soola Yoga from planet positions */
+// @parity: py=soola_yoga_from_planet_positions
 export const soolaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   soolaYoga(planetPositionsToChart(positions));
 
 /** Yuga Yoga from planet positions */
+// @parity: py=yuga_yoga_from_planet_positions
 export const yugaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   yugaYoga(planetPositionsToChart(positions));
 
 /** Gola Yoga from planet positions */
+// @parity: py=gola_yoga_from_planet_positions
 export const golaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   golaYoga(planetPositionsToChart(positions));
 
 /** Subha Yoga from planet positions */
+// @parity: py=subha_yoga_from_planet_positions
 export const subhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   subhaYoga(planetPositionsToChart(positions));
 
 /** Asubha Yoga from planet positions */
+// @parity: py=asubha_yoga_from_planet_positions
 export const asubhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   asubhaYoga(planetPositionsToChart(positions));
 
 /** Gaja Kesari Yoga from planet positions */
+// @parity: py=gaja_kesari_yoga_from_planet_positions
 export const gajaKesariYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   gajaKesariYoga(planetPositionsToChart(positions));
 
 /** Guru-Mangala Yoga from planet positions */
+// @parity: py=guru_mangala_yoga_from_planet_positions
 export const guruMangalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   guruMangalaYoga(planetPositionsToChart(positions));
 
 /** Amala Yoga from planet positions */
+// @parity: py=amala_yoga_from_planet_positions
 export const amalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   amalaYoga(planetPositionsToChart(positions));
 
@@ -1569,30 +1700,37 @@ export const parvataYogaFromPlanetPositions = (positions: PlanetPosition[]): boo
   parvataYoga(planetPositionsToChart(positions));
 
 /** Harsha Yoga from planet positions */
+// @parity: py=harsha_yoga_from_planet_positions
 export const harshaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   harshaYoga(planetPositionsToChart(positions));
 
 /** Sarala Yoga from planet positions */
+// @parity: py=sarala_yoga_from_planet_positions
 export const saralaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   saralaYoga(planetPositionsToChart(positions));
 
 /** Vimala Yoga from planet positions */
+// @parity: py=vimala_yoga_from_planet_positions
 export const vimalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vimalaYoga(planetPositionsToChart(positions));
 
 /** Chatussagara Yoga from planet positions */
+// @parity: py=chatussagara_yoga_from_planet_positions
 export const chatussagaraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chatussagaraYoga(planetPositionsToChart(positions));
 
 /** Rajalakshana Yoga from planet positions */
+// @parity: py=rajalakshana_yoga_from_planet_positions
 export const rajalakshanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   rajalakshanaYoga(planetPositionsToChart(positions));
 
 /** Trilochana Yoga from planet positions */
+// @parity: py=trilochana_yoga_from_planet_positions
 export const trilochanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   trilochanaYoga(planetPositionsToChart(positions));
 
 /** Mahabhagya Yoga from planet positions */
+// @parity: py=mahabhagya_yoga_from_planet_positions
 export const mahabhagyaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   gender: 'male' | 'female' = 'male',
@@ -1601,54 +1739,67 @@ export const mahabhagyaYogaFromPlanetPositions = (
   mahabhagyaYoga(planetPositionsToChart(positions), gender, isDayBirth);
 
 /** Kahala Yoga from planet positions */
+// @parity: py=kahala_yoga_from_planet_positions
 export const kahalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kahalaYoga(planetPositionsToChart(positions));
 
 /** Lagna Malika Yoga from planet positions */
+// @parity: py=lagna_malika_yoga_from_planet_positions
 export const lagnaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   lagnaMalikaYoga(planetPositionsToChart(positions));
 
 /** Dhana Malika Yoga from planet positions */
+// @parity: py=dhana_malika_yoga_from_planet_positions
 export const dhanaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dhanaMalikaYoga(planetPositionsToChart(positions));
 
 /** Vikrama Malika Yoga from planet positions */
+// @parity: py=vikrama_malika_yoga_from_planet_positions
 export const vikramaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vikramaMalikaYoga(planetPositionsToChart(positions));
 
 /** Sukha Malika Yoga from planet positions */
+// @parity: py=sukha_malika_yoga_from_planet_positions
 export const sukhaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sukhaMalikaYoga(planetPositionsToChart(positions));
 
 /** Putra Malika Yoga from planet positions */
+// @parity: py=putra_malika_yoga_from_planet_positions
 export const putraMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   putraMalikaYoga(planetPositionsToChart(positions));
 
 /** Satru Malika Yoga from planet positions */
+// @parity: py=satru_malika_yoga_from_planet_positions
 export const satruMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   satruMalikaYoga(planetPositionsToChart(positions));
 
 /** Kalatra Malika Yoga from planet positions */
+// @parity: py=kalatra_malika_yoga_from_planet_positions
 export const kalatraMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kalatraMalikaYoga(planetPositionsToChart(positions));
 
 /** Randhra Malika Yoga from planet positions */
+// @parity: py=randhra_malika_yoga_from_planet_positions
 export const randhraMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   randhraMalikaYoga(planetPositionsToChart(positions));
 
 /** Bhagya Malika Yoga from planet positions */
+// @parity: py=bhagya_malika_yoga_from_planet_positions
 export const bhagyaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bhagyaMalikaYoga(planetPositionsToChart(positions));
 
 /** Karma Malika Yoga from planet positions */
+// @parity: py=karma_malika_yoga_from_planet_positions
 export const karmaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   karmaMalikaYoga(planetPositionsToChart(positions));
 
 /** Labha Malika Yoga from planet positions */
+// @parity: py=labha_malika_yoga_from_planet_positions
 export const labhaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   labhaMalikaYoga(planetPositionsToChart(positions));
 
 /** Vyaya Malika Yoga from planet positions */
+// @parity: py=vyaya_malika_yoga_from_planet_positions
 export const vyayaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vyayaMalikaYoga(planetPositionsToChart(positions));
 
@@ -1659,6 +1810,7 @@ export const vyayaMalikaYogaFromPlanetPositions = (positions: PlanetPosition[]):
 /**
  * Lakshmi Yoga: 9th lord strong and in quadrant/trine, Venus strong in own/exaltation
  */
+// @parity: py=lakshmi_yoga
 export const lakshmiYoga = (chart: HouseChart): boolean => {
   // Method 1 (PVR, default): L9 in own/exalted sign that is a kendra, L1 powerful
   const pToH = getPlanetToHouseDict(chart);
@@ -1689,6 +1841,7 @@ export const lakshmiYoga = (chart: HouseChart): boolean => {
 /**
  * Dhana Yoga: Lords of 2nd and 11th in favorable positions
  */
+// @parity: py=dhana_yoga
 export const dhanaYoga = (chart: HouseChart): boolean => {
   // BV Raman #118-122: Specific 5th/11th house combinations
   const pToH = getPlanetToHouseDict(chart);
@@ -1714,6 +1867,7 @@ export const dhanaYoga = (chart: HouseChart): boolean => {
  * Vasumathi Yoga: ALL benefics occupy upachaya houses (3, 6, 10, 11)
  * from Lagna OR Moon.
  */
+// @parity: py=vasumathi_yoga
 export const vasumathiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1736,6 +1890,7 @@ export const vasumathiYoga = (chart: HouseChart): boolean => {
 /**
  * Kahala Yoga: 4th lord and Jupiter in mutual quadrants, Lagna lord strong
  */
+// @parity: py=kahala_yoga
 export const kahalaYoga = (chart: HouseChart): boolean => {
   // Kahala Yoga: L4 and L9 in mutual kendras, and L1 is strong (in kendra/trine from lagna)
   const pToH = getPlanetToHouseDict(chart);
@@ -1764,6 +1919,7 @@ export const kahalaYoga = (chart: HouseChart): boolean => {
 /**
  * Trilochana Yoga: Sun, Moon, Mars in trines from each other
  */
+// @parity: py=trilochana_yoga
 export const trilochanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const sunHouse = h(pToH, SUN);
@@ -1781,6 +1937,7 @@ export const trilochanaYoga = (chart: HouseChart): boolean => {
  * Male: Sun, Moon, Lagna in odd signs (day birth)
  * Female: Sun, Moon, Lagna in even signs (night birth)
  */
+// @parity: py=mahabhagya_yoga
 export const mahabhagyaYoga = (
   chart: HouseChart,
   gender: 'male' | 'female' = 'male',
@@ -1816,14 +1973,17 @@ export const mahabhagyaYoga = (
 // ============================================================================
 
 /** Lakshmi Yoga from planet positions */
+// @parity: py=lakshmi_yoga_from_planet_positions
 export const lakshmiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   lakshmiYoga(planetPositionsToChart(positions));
 
 /** Dhana Yoga from planet positions */
+// @parity: py=dhana_yoga_from_planet_positions
 export const dhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dhanaYoga(planetPositionsToChart(positions));
 
 /** Vasumathi Yoga from planet positions */
+// @parity: py=vasumathi_yoga_from_planet_positions
 export const vasumathiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vasumathiYoga(planetPositionsToChart(positions));
 
@@ -1843,6 +2003,7 @@ const getRelativeHouse = (fromHouse: number, planetHouse: number): number => {
  * Marud Yoga: Jupiter in 5th or 9th from Venus, Moon in 5th from Jupiter,
  * Sun in a kendra from Moon.
  */
+// @parity: py=marud_yoga
 export const marudYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
 
@@ -1862,6 +2023,7 @@ export const marudYoga = (chart: HouseChart): boolean => {
   return cond1 && cond2 && cond3;
 };
 
+// @parity: py=marud_yoga_from_planet_positions
 export const marudYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   marudYoga(planetPositionsToChart(positions));
 
@@ -1869,6 +2031,7 @@ export const marudYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
  * Budha Yoga: Jupiter in Lagna, Moon in a kendra from Lagna,
  * Rahu in 2nd from Moon, Sun and Mars in 3rd from Rahu.
  */
+// @parity: py=budha_yoga
 export const budhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1891,6 +2054,7 @@ export const budhaYoga = (chart: HouseChart): boolean => {
   return jupiterInLagna && moonInKendra && rahu2ndFromMoon && sunMars3rdFromRahu;
 };
 
+// @parity: py=budha_yoga_from_planet_positions
 export const budhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   budhaYoga(planetPositionsToChart(positions));
 
@@ -1898,6 +2062,7 @@ export const budhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
  * Andha Yoga: Mercury and Moon in 2nd house, OR lords of Lagna and 2nd
  * join the 2nd house with the Sun.
  */
+// @parity: py=andha_yoga
 export const andhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const lagnaHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1917,6 +2082,7 @@ export const andhaYoga = (chart: HouseChart): boolean => {
   return cond1 || cond2;
 };
 
+// @parity: py=andha_yoga_from_planet_positions
 export const andhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   andhaYoga(planetPositionsToChart(positions));
 
@@ -1924,6 +2090,7 @@ export const andhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
  * Chaamara Yoga: Two benefics conjoin in Lagna, 7th, 9th, or 10th house,
  * OR lagna lord is exalted in a kendra and aspected by Jupiter.
  */
+// @parity: py=chaamara_yoga
 export const chaamaraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -1970,6 +2137,7 @@ export const chaamaraYogaFromPlanetPositions = (positions: PlanetPosition[]): bo
  * Path 1: Lagna lord strong AND 5th & 6th lords in mutual quadrants.
  * Path 2: Lagna lord & 10th lord together in a movable sign AND 9th lord strong.
  */
+// @parity: py=sankha_yoga
 export const sankhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2002,6 +2170,7 @@ export const sankhaYoga = (chart: HouseChart): boolean => {
   return (mutualKendras && lagnaLordStrong) || (ninthLordStrong && conjunct && conjSignIsMovable);
 };
 
+// @parity: py=sankha_yoga_from_planet_positions
 export const sankhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sankhaYoga(planetPositionsToChart(positions));
 
@@ -2009,6 +2178,7 @@ export const sankhaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
  * Khadga Yoga: 2nd lord in 9th house, 9th lord in 2nd house (mutual exchange),
  * and lagna lord in a quadrant or trine.
  */
+// @parity: py=khadga_yoga
 export const khadgaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2034,6 +2204,7 @@ export const khadgaYoga = (chart: HouseChart): boolean => {
   return secondLordInNinth && ninthLordInSecond && lagnaLordInQT;
 };
 
+// @parity: py=khadga_yoga_from_planet_positions
 export const khadgaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   khadgaYoga(planetPositionsToChart(positions));
 
@@ -2042,6 +2213,7 @@ export const khadgaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
  * (2) 2nd lord conjunct Jupiter, (3) Lagna lord exalted (strength >= EXALTED).
  * Note: chart-based variant uses sign-only moolatrikona check (no degree enforcement).
  */
+// @parity: py=go_yoga
 export const goYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2063,12 +2235,14 @@ export const goYoga = (chart: HouseChart): boolean => {
   return true;
 };
 
+// @parity: py=go_yoga_from_planet_positions
 export const goYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   goYoga(planetPositionsToChart(positions));
 
 /**
  * Dharidhra Yoga (Method 1): Lord of 2nd or 11th in 6th, 8th, or 12th house (dusthana).
  */
+// @parity: py=dharidhra_yoga
 export const dharidhraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2090,6 +2264,7 @@ export const dharidhraYoga = (chart: HouseChart): boolean => {
   return secondIn6_8_12 || eleventhIn6_8_12;
 };
 
+// @parity: py=dharidhra_yoga_from_planet_positions
 export const dharidhraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dharidhraYoga(planetPositionsToChart(positions));
 
@@ -2098,38 +2273,46 @@ export const dharidhraYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Vallaki Yoga: 7 planets (Sun-Saturn) in 7 signs */
+// @parity: py=vallaki_yoga
 export const vallakiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const signs = new Set(SUN_TO_SATURN.map((p) => h(pToH, p)));
   return signs.size === 7;
 };
+// @parity: py=vallaki_yoga_from_planet_positions
 export const vallakiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vallakiYoga(planetPositionsToChart(positions));
 
 /** Dama Yoga: 7 planets in 6 signs */
+// @parity: py=dama_yoga
 export const damaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const signs = new Set(SUN_TO_SATURN.map((p) => h(pToH, p)));
   return signs.size === 6;
 };
+// @parity: py=dama_yoga_from_planet_positions
 export const damaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   damaYoga(planetPositionsToChart(positions));
 
 /** Kedara Yoga: 7 planets in 4 signs */
+// @parity: py=kedara_yoga
 export const kedaraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const signs = new Set(SUN_TO_SATURN.map((p) => h(pToH, p)));
   return signs.size === 4;
 };
+// @parity: py=kedara_yoga_from_planet_positions
 export const kedaraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kedaraYoga(planetPositionsToChart(positions));
 
 /** Sula Yoga: 7 planets in 3 signs */
+// @parity: py=sula_yoga
 export const sulaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const signs = new Set(SUN_TO_SATURN.map((p) => h(pToH, p)));
   return signs.size === 3;
 };
+// @parity: py=sula_yoga_from_planet_positions
 export const sulaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sulaYoga(planetPositionsToChart(positions));
 
@@ -2138,6 +2321,7 @@ export const sulaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Dhur Yoga: Lord of 10th in 6th, 8th or 12th house */
+// @parity: py=dhur_yoga
 export const dhurYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2149,6 +2333,7 @@ export const dhurYoga = (chart: HouseChart): boolean => {
   const l10Pos = h(pToH, l10);
   return l10Pos === h6 || l10Pos === h8 || l10Pos === h12;
 };
+// @parity: py=dhur_yoga_from_planet_positions
 export const dhurYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dhurYoga(planetPositionsToChart(positions));
 
@@ -2157,6 +2342,7 @@ export const dhurYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Bheri Yoga: 9th lord strong AND (houses 1,2,7,12 occupied OR Jup/Ven/L1 mutual quadrants) */
+// @parity: py=bheri_yoga
 export const bheriYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2186,6 +2372,7 @@ export const bheriYoga = (chart: HouseChart): boolean => {
 
   return pathA || pathB;
 };
+// @parity: py=bheri_yoga_from_planet_positions
 export const bheriYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bheriYoga(planetPositionsToChart(positions));
 
@@ -2194,6 +2381,7 @@ export const bheriYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
 // ============================================================================
 
 /** Mridanga Yoga: Planets in own/exalted in quadrants AND trines, lagna lord strong */
+// @parity: py=mridanga_yoga
 export const mridangaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2214,6 +2402,7 @@ export const mridangaYoga = (chart: HouseChart): boolean => {
 
   return ownExaltedInQuad && ownExaltedInTrine && llStrong;
 };
+// @parity: py=mridanga_yoga_from_planet_positions
 export const mridangaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   mridangaYoga(planetPositionsToChart(positions));
 
@@ -2247,6 +2436,7 @@ export const sreenaatheYogaFromPlanetPositions = (positions: PlanetPosition[]): 
 // ============================================================================
 
 /** Koorma Yoga (Method 1 - BV Raman): benefics in 5,6,7 strong OR benefics in 1,3,11 strong */
+// @parity: py=koorma_yoga
 export const koormaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2275,6 +2465,7 @@ export const koormaYoga = (chart: HouseChart): boolean => {
 
   return firstCond || secondCond;
 };
+// @parity: py=koorma_yoga_from_planet_positions
 export const koormaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   koormaYoga(planetPositionsToChart(positions));
 
@@ -2283,6 +2474,7 @@ export const koormaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Kusuma Yoga: fixed lagna, Venus in quadrant, Moon in trine with benefic, Saturn in 10th */
+// @parity: py=kusuma_yoga
 export const kusumaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2297,6 +2489,7 @@ export const kusumaYoga = (chart: HouseChart): boolean => {
   );
   return moonInTrineWithBenefic;
 };
+// @parity: py=kusuma_yoga_from_planet_positions
 export const kusumaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kusumaYoga(planetPositionsToChart(positions));
 
@@ -2305,6 +2498,7 @@ export const kusumaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Kalaanidhi Yoga: Jupiter in 2nd/5th, conjoined or aspected by Mercury and Venus */
+// @parity: py=kalaanidhi_yoga
 export const kalaanidhiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2328,6 +2522,7 @@ export const kalaanidhiYoga = (chart: HouseChart): boolean => {
 
   return hasMercInfluence && hasVenInfluence;
 };
+// @parity: py=kalaanidhi_yoga_from_planet_positions
 export const kalaanidhiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kalaanidhiYoga(planetPositionsToChart(positions));
 
@@ -2364,6 +2559,7 @@ export const lagnaAdhiYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Hari Yoga: benefics in 2nd, 8th, 12th from 2nd lord */
+// @parity: py=hari_yoga
 export const hariYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2378,6 +2574,7 @@ export const hariYoga = (chart: HouseChart): boolean => {
   const benefics = getNaturalBenefics(chart);
   return benefics.every((p) => targets.includes(h(pToH, p)));
 };
+// @parity: py=hari_yoga_from_planet_positions
 export const hariYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   hariYoga(planetPositionsToChart(positions));
 
@@ -2386,6 +2583,7 @@ export const hariYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Hara Yoga: benefics in 4th, 9th, 8th from 7th lord */
+// @parity: py=hara_yoga
 export const haraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2402,6 +2600,7 @@ export const haraYoga = (chart: HouseChart): boolean => {
     .filter((p) => p !== seventhLord)
     .every((p) => targets.includes(h(pToH, p)));
 };
+// @parity: py=hara_yoga_from_planet_positions
 export const haraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   haraYoga(planetPositionsToChart(positions));
 
@@ -2416,6 +2615,7 @@ export const haraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
  * Method 2 (BV Raman): Jupiter in quadrant from 9th lord, Venus in quadrant from 11th lord,
  *                       and Mercury in quadrant from 1st or 10th lord.
  */
+// @parity: py=brahma_yoga
 export const brahmaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2448,6 +2648,7 @@ export const brahmaYoga = (chart: HouseChart, method: number = 1): boolean => {
     return jupInQuadFrom9 && venInQuadFrom11 && (merInQuadFrom1 || merInQuadFrom10);
   }
 };
+// @parity: py=brahma_yoga_from_planet_positions
 export const brahmaYogaFromPlanetPositions = (positions: PlanetPosition[], method: number = 1): boolean =>
   brahmaYoga(planetPositionsToChart(positions), method);
 
@@ -2456,6 +2657,7 @@ export const brahmaYogaFromPlanetPositions = (positions: PlanetPosition[], metho
 // ============================================================================
 
 /** Siva Yoga: 5th lord in 9th, 9th lord in 10th, 10th lord in 5th */
+// @parity: py=siva_yoga
 export const sivaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2469,6 +2671,7 @@ export const sivaYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, l5) === h9 && h(pToH, l9) === h10 && h(pToH, l10) === h5;
 };
+// @parity: py=siva_yoga_from_planet_positions
 export const sivaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sivaYoga(planetPositionsToChart(positions));
 
@@ -2477,6 +2680,7 @@ export const sivaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Devendra Yoga: fixed lagna, exchange 2nd/10th lords, exchange 1st/11th lords */
+// @parity: py=devendra_yoga
 export const devendraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2497,6 +2701,7 @@ export const devendraYoga = (chart: HouseChart): boolean => {
 
   return exchange2_10 && exchange1_11;
 };
+// @parity: py=devendra_yoga_from_planet_positions
 export const devendraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   devendraYoga(planetPositionsToChart(positions));
 
@@ -2505,6 +2710,7 @@ export const devendraYogaFromPlanetPositions = (positions: PlanetPosition[]): bo
 // ============================================================================
 
 /** Indra Yoga: exchange between 5th and 11th lords, Moon in 5th */
+// @parity: py=indra_yoga
 export const indraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2519,6 +2725,7 @@ export const indraYoga = (chart: HouseChart): boolean => {
 
   return exchange && moonIn5;
 };
+// @parity: py=indra_yoga_from_planet_positions
 export const indraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   indraYoga(planetPositionsToChart(positions));
 
@@ -2527,6 +2734,7 @@ export const indraYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
 // ============================================================================
 
 /** Ravi Yoga: Sun in 10th, 10th lord in 3rd with Saturn */
+// @parity: py=ravi_yoga
 export const raviYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2537,6 +2745,7 @@ export const raviYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, SUN) === h10 && h(pToH, l10) === h3 && h(pToH, SATURN) === h3;
 };
+// @parity: py=ravi_yoga_from_planet_positions
 export const raviYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   raviYoga(planetPositionsToChart(positions));
 
@@ -2545,6 +2754,7 @@ export const raviYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Bhaaskara Yoga: Moon 12th from Sun, Mercury 2nd from Sun, Jupiter 5/9 from Moon */
+// @parity: py=bhaaskara_yoga
 export const bhaaskaraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const sunIdx = h(pToH, SUN);
@@ -2563,6 +2773,7 @@ export const bhaaskaraYoga = (chart: HouseChart): boolean => {
     (jupiterIdx === jupTarget5 || jupiterIdx === jupTarget9)
   );
 };
+// @parity: py=bhaaskara_yoga_from_planet_positions
 export const bhaaskaraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bhaaskaraYoga(planetPositionsToChart(positions));
 
@@ -2571,6 +2782,7 @@ export const bhaaskaraYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Kulavardhana Yoga: all planets (Sun-Saturn) in 5th from lagna, moon, or sun */
+// @parity: py=kulavardhana_yoga
 export const kulavardhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascIdx = h(pToH, ASCENDANT_SYMBOL);
@@ -2585,6 +2797,7 @@ export const kulavardhanaYoga = (chart: HouseChart): boolean => {
 
   return SUN_TO_SATURN.every((p) => validHouses.has(h(pToH, p)));
 };
+// @parity: py=kulavardhana_yoga_from_planet_positions
 export const kulavardhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kulavardhanaYoga(planetPositionsToChart(positions));
 
@@ -2605,6 +2818,7 @@ export const kulavardhanaYogaFromPlanetPositions = (positions: PlanetPosition[])
  *   (3) Sun is exalted and strong.
  *   (4) Moon is in the 9th house.
  */
+// @parity: py=gandharva_yoga
 export const gandharvaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2647,6 +2861,7 @@ export const gandharvaYoga = (chart: HouseChart, method: number = 1): boolean =>
 
   return cond1 && cond2 && cond3 && cond4;
 };
+// @parity: py=gandharva_yoga_from_planet_positions
 export const gandharvaYogaFromPlanetPositions = (positions: PlanetPosition[], method: number = 1): boolean =>
   gandharvaYoga(planetPositionsToChart(positions), method);
 
@@ -2655,6 +2870,7 @@ export const gandharvaYogaFromPlanetPositions = (positions: PlanetPosition[], me
 // ============================================================================
 
 /** Vidyut Yoga: 11th lord exalted, conjoins Venus, both in quadrant from lagna lord */
+// @parity: py=vidyut_yoga
 export const vidyutYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2674,6 +2890,7 @@ export const vidyutYoga = (chart: HouseChart): boolean => {
 
   return true;
 };
+// @parity: py=vidyut_yoga_from_planet_positions
 export const vidyutYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vidyutYoga(planetPositionsToChart(positions));
 
@@ -2682,6 +2899,7 @@ export const vidyutYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Chapa Yoga: 4th/10th lords exchange, lagna lord exalted */
+// @parity: py=chapa_yoga
 export const chapaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2697,6 +2915,7 @@ export const chapaYoga = (chart: HouseChart): boolean => {
   const l1Pos = h(pToH, l1);
   return (HOUSE_STRENGTHS_OF_PLANETS[l1]?.[l1Pos] ?? 0) >= STRENGTH_EXALTED;
 };
+// @parity: py=chapa_yoga_from_planet_positions
 export const chapaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chapaYoga(planetPositionsToChart(positions));
 
@@ -2705,6 +2924,7 @@ export const chapaYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
 // ============================================================================
 
 /** Pushkala Yoga: lagna lord with Moon, Moon's dispositor in quadrant or adhimitra, aspects lagna */
+// @parity: py=pushkala_yoga
 export const pushkalaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2726,6 +2946,7 @@ export const pushkalaYoga = (chart: HouseChart): boolean => {
   const aspectedRasis = getRaasiDrishtiOfPlanet(chart, lMoon);
   return aspectedRasis.includes(ascHouse);
 };
+// @parity: py=pushkala_yoga_from_planet_positions
 export const pushkalaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   pushkalaYoga(planetPositionsToChart(positions));
 
@@ -2734,6 +2955,7 @@ export const pushkalaYogaFromPlanetPositions = (positions: PlanetPosition[]): bo
 // ============================================================================
 
 /** Makuta Yoga: Saturn in 10th, Jupiter 9th from 9th lord, benefic 9th from Jupiter */
+// @parity: py=makuta_yoga
 export const makutaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2756,6 +2978,7 @@ export const makutaYoga = (chart: HouseChart): boolean => {
   const benefics = getNaturalBenefics(chart);
   return planetsInH9FromJup.some((p) => benefics.includes(p));
 };
+// @parity: py=makuta_yoga_from_planet_positions
 export const makutaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   makutaYoga(planetPositionsToChart(positions));
 
@@ -2764,6 +2987,7 @@ export const makutaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Jaya Yoga: 10th lord exalted, 6th lord debilitated */
+// @parity: py=jaya_yoga
 export const jayaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2781,6 +3005,7 @@ export const jayaYoga = (chart: HouseChart): boolean => {
 
   return l10Exalted && l6Debilitated;
 };
+// @parity: py=jaya_yoga_from_planet_positions
 export const jayaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   jayaYoga(planetPositionsToChart(positions));
 
@@ -2807,9 +3032,11 @@ export const vanchanaChoraYogaFromPlanetPositions = (positions: PlanetPosition[]
 // ============================================================================
 
 /** Harihara Brahma Yoga: hari OR hara OR brahma yoga */
+// @parity: py=harihara_brahma_yoga
 export const hariharaBrahmaYoga = (chart: HouseChart): boolean => {
   return hariYoga(chart) || haraYoga(chart) || brahmaYoga(chart);
 };
+// @parity: py=harihara_brahma_yoga_from_planet_positions
 export const hariharaBrahmaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   hariharaBrahmaYoga(planetPositionsToChart(positions));
 
@@ -2843,6 +3070,7 @@ export const sreenataYogaFromPlanetPositions = (positions: PlanetPosition[]): bo
 // ============================================================================
 
 /** Parijatha Yoga: dispositor chain from lagna lord ends in quadrant/trine or exalted */
+// @parity: py=parijatha_yoga
 export const parijathaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2860,6 +3088,7 @@ export const parijathaYoga = (chart: HouseChart): boolean => {
 
   return isInGoodHouse || isDignified;
 };
+// @parity: py=parijatha_yoga_from_planet_positions
 export const parijathaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   parijathaYoga(planetPositionsToChart(positions));
 
@@ -2868,6 +3097,7 @@ export const parijathaYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Gaja Yoga: lord of 9th from 11th in 11th with Moon, aspected by 11th lord */
+// @parity: py=gaja_yoga
 export const gajaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2888,6 +3118,7 @@ export const gajaYoga = (chart: HouseChart): boolean => {
   const raasiAspects = getAspectedPlanetsOfRaasi(chart, h(pToH, l11));
   return grahaAspects.includes(l9From11) || raasiAspects.includes(l9From11);
 };
+// @parity: py=gaja_yoga_from_planet_positions
 export const gajaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   gajaYoga(planetPositionsToChart(positions));
 
@@ -2896,6 +3127,7 @@ export const gajaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
 // ============================================================================
 
 /** Kalanidhi Yoga: Jupiter in 2nd/5th in Mercury/Venus sign, joined/aspected by both */
+// @parity: py=kalanidhi_yoga
 export const kalanidhiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2921,6 +3153,7 @@ export const kalanidhiYoga = (chart: HouseChart): boolean => {
 
   return hasMerc && hasVen && (isInMercOrVenSign || isStrongConj);
 };
+// @parity: py=kalanidhi_yoga_from_planet_positions
 export const kalanidhiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kalanidhiYoga(planetPositionsToChart(positions));
 
@@ -2929,6 +3162,7 @@ export const kalanidhiYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Saarada Yoga: 10L in 5th, Mercury in quadrant, Sun in Leo, Merc/Jup trine from Moon, Mars in 11th */
+// @parity: py=saarada_yoga
 export const saaradaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2953,6 +3187,7 @@ export const saaradaYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, MARS) === h11;
 };
+// @parity: py=saarada_yoga_from_planet_positions
 export const saaradaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   saaradaYoga(planetPositionsToChart(positions));
 
@@ -2961,6 +3196,7 @@ export const saaradaYogaFromPlanetPositions = (positions: PlanetPosition[]): boo
 // ============================================================================
 
 /** Saraswathi Yoga: Mercury/Jupiter/Venus in quadrant/trine/2nd, Jupiter strong */
+// @parity: py=saraswathi_yoga
 export const saraswathiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2976,6 +3212,7 @@ export const saraswathiYoga = (chart: HouseChart): boolean => {
 
   return placed && jupStrong;
 };
+// @parity: py=saraswathi_yoga_from_planet_positions
 export const saraswathiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   saraswathiYoga(planetPositionsToChart(positions));
 
@@ -2984,6 +3221,7 @@ export const saraswathiYogaFromPlanetPositions = (positions: PlanetPosition[]): 
 // ============================================================================
 
 /** Amsaavatara Yoga: Jupiter, Venus, exalted Saturn in quadrants */
+// @parity: py=amsaavatara_yoga
 export const amsaavataraYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -2998,6 +3236,7 @@ export const amsaavataraYoga = (chart: HouseChart): boolean => {
 
   return inQuadrants && satExalted;
 };
+// @parity: py=amsaavatara_yoga_from_planet_positions
 export const amsaavataraYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   amsaavataraYoga(planetPositionsToChart(positions));
 
@@ -3006,6 +3245,7 @@ export const amsaavataraYogaFromPlanetPositions = (positions: PlanetPosition[]):
 // ============================================================================
 
 /** Dehapushti Yoga: lagna lord in movable sign, aspected by benefic */
+// @parity: py=dehapushti_yoga
 export const dehapushtiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3018,6 +3258,7 @@ export const dehapushtiYoga = (chart: HouseChart): boolean => {
   const aspectingPlanets = getGrahaDrishtiOnPlanet(chart, ll);
   return aspectingPlanets.some((p) => benefics.includes(p));
 };
+// @parity: py=dehapushti_yoga_from_planet_positions
 export const dehapushtiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dehapushtiYoga(planetPositionsToChart(positions));
 
@@ -3026,6 +3267,7 @@ export const dehapushtiYogaFromPlanetPositions = (positions: PlanetPosition[]): 
 // ============================================================================
 
 /** Rogagrastha Yoga: (a) LL in lagna joined by dusthana lord OR (b) weak LL in kendra/trikona */
+// @parity: py=rogagrastha_yoga
 export const rogagrasthaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3049,6 +3291,7 @@ export const rogagrasthaYoga = (chart: HouseChart): boolean => {
 
   return condA || condB;
 };
+// @parity: py=rogagrastha_yoga_from_planet_positions
 export const rogagrasthaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   rogagrasthaYoga(planetPositionsToChart(positions));
 
@@ -3057,6 +3300,7 @@ export const rogagrasthaYogaFromPlanetPositions = (positions: PlanetPosition[]):
 // ============================================================================
 
 /** Krisanga Yoga: lagna lord in dry sign or sign owned by dry planet */
+// @parity: py=krisanga_yoga
 export const krisangaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3066,6 +3310,7 @@ export const krisangaYoga = (chart: HouseChart): boolean => {
 
   return DRY_SIGNS.includes(llHouse) || DRY_PLANETS.includes(llHouseOwner);
 };
+// @parity: py=krisanga_yoga_from_planet_positions
 export const krisangaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   krisangaYoga(planetPositionsToChart(positions));
 
@@ -3074,6 +3319,7 @@ export const krisangaYogaFromPlanetPositions = (positions: PlanetPosition[]): bo
 // ============================================================================
 
 /** Dehasthoulya Yoga: Jupiter in lagna, or Jupiter aspects lagna from watery sign, or benefics in watery lagna */
+// @parity: py=dehasthoulya_yoga
 export const dehasthoulyaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3099,6 +3345,7 @@ export const dehasthoulyaYoga = (chart: HouseChart): boolean => {
 
   return false;
 };
+// @parity: py=dehasthoulya_yoga_from_planet_positions
 export const dehasthoulyaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   dehasthoulyaYoga(planetPositionsToChart(positions));
 
@@ -3107,6 +3354,7 @@ export const dehasthoulyaYogaFromPlanetPositions = (positions: PlanetPosition[])
 // ============================================================================
 
 /** Sada Sanchara Yoga: lagna lord or its dispositor in movable sign */
+// @parity: py=sada_sanchara_yoga
 export const sadaSancharaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3119,6 +3367,7 @@ export const sadaSancharaYoga = (chart: HouseChart): boolean => {
   const llDispHouse = h(pToH, llDispositor);
   return MOVABLE_SIGNS.includes(llDispHouse);
 };
+// @parity: py=sada_sanchara_yoga_from_planet_positions
 export const sadaSancharaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sadaSancharaYoga(planetPositionsToChart(positions));
 
@@ -3127,6 +3376,7 @@ export const sadaSancharaYogaFromPlanetPositions = (positions: PlanetPosition[])
 // ============================================================================
 
 /** Bahudravyarjana Yoga: L1 in 2nd, L2 in 11th, L11 in lagna */
+// @parity: py=bahudravyarjana_yoga
 export const bahudravyarjanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3139,6 +3389,7 @@ export const bahudravyarjanaYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, l1) === h2 && h(pToH, l2) === h11 && h(pToH, l11) === ascHouse;
 };
+// @parity: py=bahudravyarjana_yoga_from_planet_positions
 export const bahudravyarjanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bahudravyarjanaYoga(planetPositionsToChart(positions));
 
@@ -3147,6 +3398,7 @@ export const bahudravyarjanaYogaFromPlanetPositions = (positions: PlanetPosition
 // ============================================================================
 
 /** Madhya Vayasi Dhana Yoga: benefics in 2nd and 3rd from lagna lord position */
+// @parity: py=madhya_vayasi_dhana_yoga
 export const madhyaVayasiDhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3164,6 +3416,7 @@ export const madhyaVayasiDhanaYoga = (chart: HouseChart): boolean => {
     planetsIn2.some((p) => benefics.includes(p)) && planetsIn3.some((p) => benefics.includes(p))
   );
 };
+// @parity: py=madhya_vayasi_dhana_yoga_from_planet_positions
 export const madhyaVayasiDhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   madhyaVayasiDhanaYoga(planetPositionsToChart(positions));
 
@@ -3172,6 +3425,7 @@ export const madhyaVayasiDhanaYogaFromPlanetPositions = (positions: PlanetPositi
 // ============================================================================
 
 /** Anthya Vayasi Dhana Yoga: L2 in kendra/trine from L1 */
+// @parity: py=anthya_vayasi_dhana_yoga
 export const anthyaVayasiDhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3183,6 +3437,7 @@ export const anthyaVayasiDhanaYoga = (chart: HouseChart): boolean => {
   const validHouses = [...getQuadrants(llHouse), ...getTrines(llHouse)];
   return validHouses.includes(l2House);
 };
+// @parity: py=anthya_vayasi_dhana_yoga_from_planet_positions
 export const anthyaVayasiDhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   anthyaVayasiDhanaYoga(planetPositionsToChart(positions));
 
@@ -3191,6 +3446,7 @@ export const anthyaVayasiDhanaYogaFromPlanetPositions = (positions: PlanetPositi
 // ============================================================================
 
 /** Sareera Soukhya Yoga: L1, Jupiter, or Venus in a quadrant */
+// @parity: py=sareera_soukhya_yoga
 export const sareeraSoukhyaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3203,6 +3459,7 @@ export const sareeraSoukhyaYoga = (chart: HouseChart): boolean => {
     quads.includes(h(pToH, VENUS))
   );
 };
+// @parity: py=sareera_soukhya_yoga_from_planet_positions
 export const sareeraSoukhyaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sareeraSoukhyaYoga(planetPositionsToChart(positions));
 
@@ -3211,6 +3468,7 @@ export const sareeraSoukhyaYogaFromPlanetPositions = (positions: PlanetPosition[
 // ============================================================================
 
 /** Matrumooladdhana Yoga: L2 joined or aspected by L4 */
+// @parity: py=matrumooladdhana_yoga
 export const matrumooladdhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3221,6 +3479,7 @@ export const matrumooladdhanaYoga = (chart: HouseChart): boolean => {
   const l4AspectsL2 = getGrahaDrishtiPlanetsOfPlanet(chart, l4).includes(l2);
   return conjoined || l4AspectsL2;
 };
+// @parity: py=matrumooladdhana_yoga_from_planet_positions
 export const matrumooladdhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   matrumooladdhanaYoga(planetPositionsToChart(positions));
 
@@ -3229,6 +3488,7 @@ export const matrumooladdhanaYogaFromPlanetPositions = (positions: PlanetPositio
 // ============================================================================
 
 /** Kalatramooladdhana Yoga: strong L2 joined/aspected by L7 and Venus, L1 powerful */
+// @parity: py=kalatramooladdhana_yoga
 export const kalatramooladdhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3249,6 +3509,7 @@ export const kalatramooladdhanaYoga = (chart: HouseChart): boolean => {
 
   return l1Strong && l2Strong && (conjoined || aspected);
 };
+// @parity: py=kalatramooladdhana_yoga_from_planet_positions
 export const kalatramooladdhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kalatramooladdhanaYoga(planetPositionsToChart(positions));
 
@@ -3263,6 +3524,7 @@ export const kalatramooladdhanaYogaFromPlanetPositions = (positions: PlanetPosit
 // ============================================================================
 
 /** Vishnu Yoga (simplified): 9th and 10th lords in 2nd house */
+// @parity: py=vishnu_yoga
 export const vishnuYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3275,6 +3537,7 @@ export const vishnuYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, l9) === h2 && h(pToH, l10) === h2;
 };
+// @parity: py=vishnu_yoga_from_planet_positions
 export const vishnuYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   vishnuYoga(planetPositionsToChart(positions));
 
@@ -3283,6 +3546,7 @@ export const vishnuYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Gouri Yoga (simplified): 10th lord exalted in 10th with lagna lord */
+// @parity: py=gouri_yoga
 export const gouriYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3297,6 +3561,7 @@ export const gouriYoga = (chart: HouseChart): boolean => {
 
   return l10In10 && l10Exalted && l1In10;
 };
+// @parity: py=gouri_yoga_from_planet_positions
 export const gouriYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   gouriYoga(planetPositionsToChart(positions));
 
@@ -3305,6 +3570,7 @@ export const gouriYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
 // ============================================================================
 
 /** Chandikaa Yoga (simplified): fixed lagna aspected by 6th lord */
+// @parity: py=chandikaa_yoga
 export const chandikaaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3315,6 +3581,7 @@ export const chandikaaYoga = (chart: HouseChart): boolean => {
   const l6Aspects = getRaasiDrishtiOfPlanet(chart, l6);
   return l6Aspects.includes(ascHouse);
 };
+// @parity: py=chandikaa_yoga_from_planet_positions
 export const chandikaaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   chandikaaYoga(planetPositionsToChart(positions));
 
@@ -3323,11 +3590,13 @@ export const chandikaaYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // ============================================================================
 
 /** Garuda Yoga (simplified stub - always false without navamsa/tithi data) */
+// @parity: py=garuda_yoga
 export const garudaYoga = (_chart: HouseChart): boolean => {
   // Requires navamsa chart, shukla paksha, and daytime birth data
   // Cannot be accurately computed from single chart alone
   return false;
 };
+// @parity: py=garuda_yoga_from_planet_positions
 export const garudaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   garudaYoga(planetPositionsToChart(positions));
 
@@ -3336,6 +3605,7 @@ export const garudaYogaFromPlanetPositions = (positions: PlanetPosition[]): bool
 // ============================================================================
 
 /** Kalpadruma Yoga (simplified): dispositor chain from lagna lord in kendra/trikona or exalted */
+// @parity: py=kalpadruma_yoga
 export const kalpadrumaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3356,6 +3626,7 @@ export const kalpadrumaYoga = (chart: HouseChart): boolean => {
 
   return [lagnaLord, disp1, disp2].every(isWellPlaced);
 };
+// @parity: py=kalpadruma_yoga_from_planet_positions
 export const kalpadrumaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   kalpadrumaYoga(planetPositionsToChart(positions));
 
@@ -3364,6 +3635,7 @@ export const kalpadrumaYogaFromPlanetPositions = (positions: PlanetPosition[]): 
 // ============================================================================
 
 /** Bhaarathi Yoga (simplified): exalted planet joins 9th lord */
+// @parity: py=bhaarathi_yoga
 export const bhaarathiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3377,6 +3649,7 @@ export const bhaarathiYoga = (chart: HouseChart): boolean => {
     (p) => (HOUSE_STRENGTHS_OF_PLANETS[p]?.[l9Pos] ?? 0) >= STRENGTH_EXALTED
   );
 };
+// @parity: py=bhaarathi_yoga_from_planet_positions
 export const bhaarathiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   bhaarathiYoga(planetPositionsToChart(positions));
 
@@ -3395,6 +3668,7 @@ export const bhaarathiYogaFromPlanetPositions = (positions: PlanetPosition[]): b
  * @param chartNavamsa - D9 navamsa chart (optional, for condition b)
  * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional, for condition a)
  */
+// @parity: py=swaveeryaddhana_yoga
 export const swaveeryaddhanaYoga = (
   chart: HouseChart,
   chartNavamsa?: HouseChart,
@@ -3456,6 +3730,7 @@ export const swaveeryaddhanaYoga = (
 
   return false;
 };
+// @parity: py=swaveeryaddhana_yoga_from_planet_positions
 export const swaveeryaddhanaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   chartNavamsa?: HouseChart,
@@ -3477,6 +3752,7 @@ export const swaveeryaddhanaYogaFromPlanetPositions = (
  *   (2) 5th contains BOTH benefics AND malefics
  *   (3) 4th AND 8th contain ONLY malefics (and at least one in each)
  */
+// @parity: py=matsya_yoga
 export const matsyaYoga = (chart: HouseChart, method: number = 1): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3527,6 +3803,7 @@ export const matsyaYogaFromPlanetPositions = (positions: PlanetPosition[], metho
  * Mooka Yoga: The 2nd lord should join the 8th with Jupiter.
  * Does not apply if 8th house is Jupiter's own or exaltation sign.
  */
+// @parity: py=mooka_yoga
 export const mookaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3543,6 +3820,7 @@ export const mookaYoga = (chart: HouseChart): boolean => {
 
   return condMain && !jupExalted;
 };
+// @parity: py=mooka_yoga_from_planet_positions
 export const mookaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   mookaYoga(planetPositionsToChart(positions));
 
@@ -3550,6 +3828,7 @@ export const mookaYogaFromPlanetPositions = (positions: PlanetPosition[]): boole
  * Netranasa Yoga: Lords of 10th and 6th occupy Lagna with 2nd lord,
  * or they are in debilitation.
  */
+// @parity: py=netranasa_yoga
 export const netranasaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3574,6 +3853,7 @@ export const netranasaYoga = (chart: HouseChart): boolean => {
 
   return condA || condB;
 };
+// @parity: py=netranasa_yoga_from_planet_positions
 export const netranasaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   netranasaYoga(planetPositionsToChart(positions));
 
@@ -3581,6 +3861,7 @@ export const netranasaYogaFromPlanetPositions = (positions: PlanetPosition[]): b
  * Asatyavadi Yoga: Lord of 2nd occupies sign owned by Saturn or Mars,
  * and malefics join kendras and trikonas.
  */
+// @parity: py=asatyavadi_yoga
 export const asatyavadiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3600,6 +3881,7 @@ export const asatyavadiYoga = (chart: HouseChart): boolean => {
 
   return malefics.some(p => targetHouses.has(h(pToH, p)));
 };
+// @parity: py=asatyavadi_yoga_from_planet_positions
 export const asatyavadiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   asatyavadiYoga(planetPositionsToChart(positions));
 
@@ -3607,6 +3889,7 @@ export const asatyavadiYogaFromPlanetPositions = (positions: PlanetPosition[]): 
  * Jada Yoga: 2nd lord in 10th with malefics, OR 2nd house joined by Sun and Mandi.
  * Simplified: Without mandi data, only checks criterion A.
  */
+// @parity: py=jada_yoga
 export const jadaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3625,6 +3908,7 @@ export const jadaYoga = (chart: HouseChart): boolean => {
   // Criterion B: Sun and Mandi in 2nd -- cannot check without mandi data
   return false;
 };
+// @parity: py=jada_yoga_from_planet_positions
 export const jadaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   jadaYoga(planetPositionsToChart(positions));
 
@@ -3637,6 +3921,7 @@ export const jadaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolea
  * @param chart - D1 rasi chart
  * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional, for condition 137)
  */
+// @parity: py=bhratrumooladdhanaprapti_yoga
 export const bhratrumooladdhanapraptiYoga = (
   chart: HouseChart,
   vaiseshikamsaScores?: Record<number, number>,
@@ -3670,6 +3955,7 @@ export const bhratrumooladdhanapraptiYoga = (
 
   return l3In2 && withJupiter && (l1AspectsL3 || l1ConjL3) && l1Vaiseshikamsa;
 };
+// @parity: py=bhratrumooladdhanaprapti_yoga_from_planet_positions
 export const bhratrumooladdhanapraptiYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   vaiseshikamsaScores?: Record<number, number>,
@@ -3683,6 +3969,7 @@ export const bhratrumooladdhanapraptiYogaFromPlanetPositions = (
  * @param chart - D1 rasi chart
  * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
  */
+// @parity: py=putramooladdhana_yoga
 export const putramooladdhanaYoga = (
   chart: HouseChart,
   vaiseshikamsaScores?: Record<number, number>,
@@ -3702,6 +3989,7 @@ export const putramooladdhanaYoga = (
 
   return l2Strong && conj && l1Vaiseshikamsa;
 };
+// @parity: py=putramooladdhana_yoga_from_planet_positions
 export const putramooladdhanaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   vaiseshikamsaScores?: Record<number, number>,
@@ -3715,6 +4003,7 @@ export const putramooladdhanaYogaFromPlanetPositions = (
  * @param chart - D1 rasi chart
  * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
  */
+// @parity: py=shatrumooladdhana_yoga
 export const shatrumooladdhanaYoga = (
   chart: HouseChart,
   vaiseshikamsaScores?: Record<number, number>,
@@ -3734,6 +4023,7 @@ export const shatrumooladdhanaYoga = (
 
   return l2Strong && conj && l1Vaiseshikamsa;
 };
+// @parity: py=shatrumooladdhana_yoga_from_planet_positions
 export const shatrumooladdhanaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
   vaiseshikamsaScores?: Record<number, number>,
@@ -3743,6 +4033,7 @@ export const shatrumooladdhanaYogaFromPlanetPositions = (
  * Amaranantha Dhana Yoga (BV Raman 142):
  * Multiple planets (>=3) in 2nd house, wealth-giving planets strong.
  */
+// @parity: py=amaranantha_dhana_yoga
 export const amarananthaDhanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3757,6 +4048,7 @@ export const amarananthaDhanaYoga = (chart: HouseChart): boolean => {
 
   return [...wealthPlanets].some(p => planetsIn2.includes(p) && (HOUSE_STRENGTHS_OF_PLANETS[p]?.[h2] ?? 0) >= STRENGTH_EXALTED);
 };
+// @parity: py=amaranantha_dhana_yoga_from_planet_positions
 export const amarananthaDhanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   amarananthaDhanaYoga(planetPositionsToChart(positions));
 
@@ -3764,6 +4056,7 @@ export const amarananthaDhanaYogaFromPlanetPositions = (positions: PlanetPositio
  * Ayatnadhanalabha Yoga (BV Raman 143):
  * Lords of Lagna and 2nd exchange positions.
  */
+// @parity: py=ayatnadhanalabha_yoga
 export const ayatnadhanalabhaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3773,6 +4066,7 @@ export const ayatnadhanalabhaYoga = (chart: HouseChart): boolean => {
 
   return h(pToH, secondLord) === ascHouse && h(pToH, lagnaLord) === secondHouse;
 };
+// @parity: py=ayatnadhanalabha_yoga_from_planet_positions
 export const ayatnadhanalabhaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   ayatnadhanalabhaYoga(planetPositionsToChart(positions));
 
@@ -3781,6 +4075,7 @@ export const ayatnadhanalabhaYogaFromPlanetPositions = (positions: PlanetPositio
  * AND aspected by a debilitated planet.
  * Simplified: navamsa check omitted, only rasi debilitation used.
  */
+// @parity: py=parannabhojana_yoga
 export const parannabhojanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3799,6 +4094,7 @@ export const parannabhojanaYoga = (chart: HouseChart): boolean => {
     return pStrength === STRENGTH_DEBILITATED;
   });
 };
+// @parity: py=parannabhojana_yoga_from_planet_positions
 export const parannabhojanaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   parannabhojanaYoga(planetPositionsToChart(positions));
 
@@ -3806,6 +4102,7 @@ export const parannabhojanaYogaFromPlanetPositions = (positions: PlanetPosition[
  * Sraddhannabhuktha Yoga: Saturn owns 2nd, OR joins 2nd lord,
  * OR debilitated Saturn aspects 2nd house.
  */
+// @parity: py=sraddhannabhuktha_yoga
 export const sraddhannabhukthaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
@@ -3829,6 +4126,7 @@ export const sraddhannabhukthaYoga = (chart: HouseChart): boolean => {
 
   return cond1 || cond2 || cond3;
 };
+// @parity: py=sraddhannabhuktha_yoga_from_planet_positions
 export const sraddhannabhukthaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
   sraddhannabhukthaYoga(planetPositionsToChart(positions));
 
@@ -3836,10 +4134,12 @@ export const sraddhannabhukthaYogaFromPlanetPositions = (positions: PlanetPositi
  * Sarpaganda Yoga: Rahu should join the 2nd house with Mandi.
  * Simplified: Without mandi data, always returns false.
  */
+// @parity: py=sarpaganda_yoga
 export const sarpagandaYoga = (_chart: HouseChart): boolean => {
   // Requires mandi house data which is not available from chart alone
   return false;
 };
+// @parity: py=sarpaganda_yoga_from_planet_positions
 export const sarpagandaYogaFromPlanetPositions = (_positions: PlanetPosition[]): boolean => false;
 
 /**
@@ -4194,6 +4494,7 @@ export const dharidhraYogaBvRamanFromPlanetPositions = (positions: PlanetPositio
  * The 2nd lord should join a benefic in a kendra or thrikona,
  * or be exalted and combined with Jupiter.
  */
+// @parity: py=yukthi_samanwithavagmi_yoga
 export const yukthiSamanwithavagmiYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascH = h(pToH, ASCENDANT_SYMBOL);
@@ -4499,6 +4800,7 @@ export const annadanaYogaFromPlanetPositions = (
  * @param vaiseshikamsaScores - Record mapping planet_id to vaiseshikamsa count (optional)
  *                              e.g. from vaiseshikamsaShodhasavargaOfPlanets().count
  */
+// @parity: py=parihasaka_yoga
 export const parihasakaYoga = (
   chartD1: HouseChart,
   chartD9?: HouseChart,
@@ -4539,6 +4841,7 @@ export const parihasakaYogaFromPlanetPositions = (
  * Check if two lords are exchanged (mutual reception).
  * lord1 occupies lord2_house and lord2 occupies lord1_house.
  */
+// @parity: py=are_lords_exchanged
 export const areLordsExchanged = (
   p2h: PlanetToHouseMap,
   lord1: number, lord1House: number,
@@ -4555,6 +4858,7 @@ export const areLordsExchanged = (
  * Dhana Yogas #123-128 (BV Raman).
  * Planet in Lagna (own sign) joined or aspected by specific planets.
  */
+// @parity: py=dhana_yoga_123_128
 export const dhanaYoga123_128 = (chart: HouseChart): boolean => {
   const p2h = getPlanetToHouseDict(chart);
   const ascHouse = p2h[ASCENDANT_SYMBOL]!;
@@ -4601,14 +4905,23 @@ export const dhanaYoga123_128FromPlanetPositions = (positions: PlanetPosition[])
 
 export const areLordsExchangedFromPlanetPositions = areLordsExchanged;
 
+// @parity: py=lagnaadhi_yoga
 export const lagnaadhiYoga = lagnaAdhiYoga;
+// @parity: py=lagnaadhi_yoga_from_planet_positions
 export const lagnaadhiYogaFromPlanetPositions = lagnaAdhiYogaFromPlanetPositions;
+// @parity: py=sreenaatha_yoga
 export const sreenaathaYoga = sreenaatheYoga;
+// @parity: py=sreenaatha_yoga_from_planet_positions
 export const sreenaathaYogaFromPlanetPositions = sreenaatheYogaFromPlanetPositions;
+// @parity: py=sreenatha_yoga
 export const sreenathaYoga = sreenataYoga;
+// @parity: py=sreenatha_yoga_from_planet_positions
 export const sreenathaYogaFromPlanetPositions = sreenataYogaFromPlanetPositions;
+// @parity: py=vanchana_chora_bheethi_yoga
 export const vanchanaChoraBheethiYoga = vanchanaChoraYoga;
+// @parity: py=vanchana_chora_bheethi_yoga_from_planet_positions
 export const vanchanaChoraBheethiYogaFromPlanetPositions = vanchanaChoraYogaFromPlanetPositions;
+// @parity: py=kaahala_yoga
 export const kaahalaYoga = kahalaYoga;
 export const kaahalaYogaFromPlanetPositions = kahalaYogaFromPlanetPositions;
 
@@ -4758,6 +5071,7 @@ export interface YogaDetailsResult {
  *                       If not provided, results will contain just the chart label.
  * @returns YogaDetailsResult with found yogas, count found, and total checked
  */
+// @parity: py=get_yoga_details
 export const getYogaDetails = (
   planetPositions: PlanetPosition[],
   divisionalChartFactor: number = 1,
@@ -4809,6 +5123,7 @@ export const getYogaDetails = (
  * @param yogaMessages - Optional yoga messages dictionary (from yoga_msgs_<lang>.json)
  * @returns YogaDetailsResult with combined results across all charts
  */
+// @parity: py=get_yoga_details_for_all_charts
 export const getYogaDetailsForAllCharts = (
   getPositionsForChart: (chartFactor: number) => PlanetPosition[],
   divisionalChartFactor?: number | null,
