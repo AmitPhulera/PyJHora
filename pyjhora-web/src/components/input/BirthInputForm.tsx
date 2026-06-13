@@ -142,7 +142,7 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
               className="input input-mono"
               value={latitude}
               onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
-              step="0.001"
+              step="0.0001"
               min="-90"
               max="90"
             />
@@ -156,7 +156,7 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
               className="input input-mono"
               value={longitude}
               onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
-              step="0.001"
+              step="0.0001"
               min="-180"
               max="180"
             />
