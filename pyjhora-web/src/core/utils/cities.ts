@@ -60,7 +60,9 @@ let cityIndex: Map<string, number> | null = null;
  * @param url - URL to the city database JSON (default: '/world_cities.json')
  * @returns Number of cities loaded
  */
-export async function loadCityDatabase(url = '/world_cities.json'): Promise<number> {
+export async function loadCityDatabase(
+  url = `${import.meta.env.BASE_URL}world_cities.json`,
+): Promise<number> {
   if (cityDatabase !== null) {
     return cityDatabase.length;
   }
