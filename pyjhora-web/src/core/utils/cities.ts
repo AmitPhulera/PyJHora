@@ -237,7 +237,7 @@ export function cityToPlace(city: CityResult): Place {
  * @param cityName - City name
  * @returns Place or null
  */
-// @parity: py=get_location
+// no @parity pair: Python get_location() is IP-based/environment-dependent and returns a tuple.
 export function getLocation(cityName: string): Place | null {
   const city = lookupCity(cityName);
   if (!city) return null;

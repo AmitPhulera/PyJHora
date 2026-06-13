@@ -23,7 +23,6 @@ from jhora.horoscope.chart import charts
 from jhora.panchanga import drik
 _conditional_dhasas = ['ashtottari','chaturaaseeti_sama','dwadasottari','dwisatpathi','panchottari','satabdika',
                     'shashtisama','shattrimsa_sama','shodasottari']
-# @parity: ts=@/core/dhasa/graha/applicability::getApplicableDhasas
 def applicability_check(dob,tob,place,divisional_chart_factor=1):
     jd = utils.julian_day_number(dob, tob)
     planet_positions = charts.divisional_chart(jd, place,divisional_chart_factor=divisional_chart_factor)

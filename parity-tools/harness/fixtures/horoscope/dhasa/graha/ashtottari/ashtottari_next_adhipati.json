@@ -1,0 +1,16 @@
+{
+  "python_target": "jhora.horoscope.dhasa.graha.ashtottari.ashtottari_next_adhipati",
+  "typescript_target": "@/core/dhasa/graha/ashtottari::getNextAshtottariAdhipati",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "lord": 0
+      }
+    }
+  ]
+}

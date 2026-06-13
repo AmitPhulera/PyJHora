@@ -1533,23 +1533,18 @@ describe('Aspected Houses and Rasis of Raasi', () => {
   const chennaiChart = ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8'];
 
   describe('getAspectedRasisOfRaasi', () => {
-    it('should find planets whose sign aspects Sagittarius(8) via raasi drishti', () => {
-      // Sagittarius(8) is dual. Other dual signs aspect it: Gemini(2), Virgo(5), Pisces(11)
-      // Planets in those signs: Virgo(5)->Rahu(7), Pisces(11)->Saturn(6)/Ketu(8)
+    // Parity note: Python's aspected_raasis_of_the_raasi filters with `str(raasi) in value`,
+    // where `value` is a list of integer rasi numbers. A Python str never equals an int, so
+    // the membership test is ALWAYS False and the function ALWAYS returns []. The TS port
+    // replicates this source-of-truth behavior, so these always return an empty array.
+    it('always returns [] (replicates Python str-vs-int bug) for Sagittarius(8)', () => {
       const planets = getAspectedRasisOfRaasi(chennaiChart, SAGITTARIUS);
-      expect(planets).toContain(RAHU);
-      expect(planets).toContain(SATURN);
-      expect(planets).toContain(KETU);
+      expect(planets).toEqual([]);
     });
 
-    it('should find planets whose sign aspects Leo(4) via raasi drishti', () => {
-      // Leo(4) is fixed. Movable signs aspect it except adjacent.
-      // Movable: 0,3,6,9. Adjacent to 4: 3(Cancer) and 5(Virgo).
-      // Exclude Cancer(3). So Aries(0), Libra(6), Capricorn(9) aspect Leo.
-      // Planets in those signs: Libra(6)->Moon(1)/Venus(5), Capricorn(9)->Lagna only
+    it('always returns [] (replicates Python str-vs-int bug) for Leo(4)', () => {
       const planets = getAspectedRasisOfRaasi(chennaiChart, LEO);
-      expect(planets).toContain(MOON);
-      expect(planets).toContain(VENUS);
+      expect(planets).toEqual([]);
     });
   });
 

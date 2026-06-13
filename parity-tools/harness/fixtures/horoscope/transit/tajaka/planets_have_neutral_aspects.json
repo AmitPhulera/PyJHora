@@ -1,0 +1,31 @@
+{
+  "python_target": "jhora.horoscope.transit.tajaka.planets_have_neutral_aspects",
+  "typescript_target": "@/core/horoscope/tajaka::planetsHaveNeutralAspects",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "house_planet_dict": [
+          "",
+          "",
+          "",
+          "",
+          "2",
+          "7",
+          "1/5",
+          "0",
+          "3/4",
+          "L",
+          "",
+          "6/8"
+        ],
+        "planet1": 0,
+        "planet2": 1
+      }
+    }
+  ]
+}

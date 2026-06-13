@@ -29,11 +29,12 @@ export const SIDEREAL_YEAR = 365.256363;
  * @returns New date
  */
 // @parity: py=next_panchanga_day
-export function nextPanchangaDay(date: JhoraDate, addDays = 1): JhoraDate {
+export function nextPanchangaDay(date: JhoraDate, addDays = 1): [number, number, number] {
   const jd = gregorianToJulianDay(date, { hour: 12, minute: 0, second: 0 });
   const newJd = jd + addDays;
-  const result = julianDayToGregorian(newJd);
-  return result.date;
+  const { date: d } = julianDayToGregorian(newJd);
+  // Python returns a Date namedtuple (serializes as a [y, m, d] tuple).
+  return [d.year, d.month, d.day];
 }
 
 /**
@@ -46,7 +47,7 @@ export function nextPanchangaDay(date: JhoraDate, addDays = 1): JhoraDate {
  * @returns New date
  */
 // @parity: py=previous_panchanga_day
-export function previousPanchangaDay(date: JhoraDate, minusDays = 1): JhoraDate {
+export function previousPanchangaDay(date: JhoraDate, minusDays = 1): [number, number, number] {
   return nextPanchangaDay(date, -minusDays);
 }
 
@@ -67,7 +68,7 @@ export function previousPanchangaDay(date: JhoraDate, minusDays = 1): JhoraDate 
 export function panchangaDateDiff(
   date1: JhoraDate,
   date2: JhoraDate,
-): { years: number; months: number; days: number } {
+): [number, number, number] {
   const jd1 = gregorianToJulianDay(date1, { hour: 12, minute: 0, second: 0 });
   const jd2 = gregorianToJulianDay(date2, { hour: 12, minute: 0, second: 0 });
   const totalDays = jd2 - jd1;
@@ -77,7 +78,8 @@ export function panchangaDateDiff(
   const months = Math.floor(remainAfterYears / (SIDEREAL_YEAR / 12));
   const days = Math.round(remainAfterYears - months * (SIDEREAL_YEAR / 12));
 
-  return { years, months, days };
+  // Python returns an (years, months, days) tuple.
+  return [years, months, days];
 }
 
 /**
@@ -188,7 +190,7 @@ export function getAgeFrom(
   dob: JhoraDate,
   tob: JhoraTime,
   currentDate?: JhoraDate,
-): { years: number; months: number; sixtyHours: number } {
+): [number, number, number] {
   const now = currentDate ?? (() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
@@ -204,10 +206,11 @@ export function getAgeFrom(
     const months = Math.floor(remainDays / 30);
     const dayRemainder = remainDays % 30;
     const sixtyHours = Math.floor(dayRemainder / 2.5);
-    return { years: years + 1, months: months + 1, sixtyHours };
+    // Python returns a (years, months, sixty_hours) tuple.
+    return [years + 1, months + 1, sixtyHours];
   }
 
-  return { years: 1, months: 1, sixtyHours: 1 };
+  return [1, 1, 1];
 }
 
 // ============================================================================

@@ -1,0 +1,17 @@
+{
+  "python_target": "jhora.utils.get_place_timezone_offset",
+  "typescript_target": "@/core/utils/cities::getTimezoneOffsetFromCoords",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "latitude": 13.0878,
+        "longitude": 123.456
+      }
+    }
+  ]
+}

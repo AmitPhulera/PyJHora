@@ -1,0 +1,17 @@
+{
+  "python_target": "jhora.utils.to_dms",
+  "typescript_target": "@/core/utils/format::toDmsString",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart value; is_lat_long='plong' so both sides emit degree-style DMS (Python default None is a time format with no TS counterpart)",
+      "inputs": {
+        "deg": 123.456,
+        "is_lat_long": "plong"
+      }
+    }
+  ]
+}

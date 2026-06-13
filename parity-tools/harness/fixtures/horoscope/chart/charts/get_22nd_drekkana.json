@@ -1,0 +1,87 @@
+{
+  "python_target": "jhora.horoscope.chart.charts.get_22nd_drekkana",
+  "typescript_target": "@/core/horoscope/charts::get22ndDrekkana",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "drekkana_planet_positions": [
+          [
+            "L",
+            [
+              5,
+              7.337276532137139
+            ]
+          ],
+          [
+            0,
+            [
+              3,
+              4.695846599324057
+            ]
+          ],
+          [
+            1,
+            [
+              6,
+              20.87846831752006
+            ]
+          ],
+          [
+            2,
+            [
+              0,
+              16.619241952273796
+            ]
+          ],
+          [
+            3,
+            [
+              8,
+              29.80934710118254
+            ]
+          ],
+          [
+            4,
+            [
+              4,
+              17.48415475461843
+            ]
+          ],
+          [
+            5,
+            [
+              2,
+              11.151399314335919
+            ]
+          ],
+          [
+            6,
+            [
+              11,
+              20.421829060155233
+            ]
+          ],
+          [
+            7,
+            [
+              9,
+              1.6613621234213554
+            ]
+          ],
+          [
+            8,
+            [
+              3,
+              1.6613621234214406
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

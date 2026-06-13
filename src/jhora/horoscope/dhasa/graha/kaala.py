@@ -59,7 +59,6 @@ def _dhasa_progression_and_periods(jd,place):
     _kaala_dhasa_life_span_second_cycle = _kaala_dhasa_life_span - _kaala_dhasa_life_span_first_cycle
     _dhasas2 = [(p+1)*_kaala_dhasa_life_span_second_cycle/45.0 for p in range(9)]
     return kaala_type, kaala_frac,_dhasas1,_dhasas2
-# @parity: ts=@/core/dhasa/graha/kaala::getKaalaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,years=1,months=1,sixty_hours=1,include_antardhasa=False):
     """
         provides kaala dhasa bhukthi for a given date in julian day (includes birth time)

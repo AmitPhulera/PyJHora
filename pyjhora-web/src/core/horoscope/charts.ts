@@ -103,7 +103,7 @@ import {
 import { PRASNA_KP_249_DICT } from '../kp-data';
 
 import { JhoraDate, JhoraTime, Place } from '../types';
-import { julianDayNumber } from '../utils/julian';
+import { julianDayNumber, asJhoraTime } from '../utils/julian';
 import { countRasis } from '../utils/angle';
 import {
   horaLagnaAsync, horaLagnaMixedChart,
@@ -114,7 +114,7 @@ import {
   solarUpagrahaLongitudes as drikSolarUpagrahaLongitudes
 } from '../panchanga/drik';
 
-import { nakshatraPada, cyclicCountOfStarsWithAbhijit } from '../panchanga/drik';
+import { nakshatraPada, cyclicCountOfStarsWithAbhijit, tithiUsingPlanetSpeed } from '../panchanga/drik';
 
 import { kendras, getRelativeHouseOfPlanet, getCompoundRelationshipsOfPlanets } from './house';
 
@@ -123,6 +123,32 @@ export interface PlanetPosition {
   rasi: number;
   longitude: number; // In degrees (0-30 within sign)
 }
+
+/** Python-style planet position tuple: [planet_id_or_'L', [rasi, longitude]] */
+export type PyPlanetPositionTuple = [number | string, [number, number]];
+/** Either TS object positions or Python-style tuple positions. */
+export type PlanetPositionsLike = PlanetPosition[] | PyPlanetPositionTuple[];
+
+/** True if positions are in Python tuple format [[id, [rasi, long]], ...]. */
+const isPyPositionTuples = (positions: PlanetPositionsLike): positions is PyPlanetPositionTuple[] =>
+  Array.isArray(positions) && positions.length > 0 && Array.isArray(positions[0]);
+
+/**
+ * Normalize positions to PlanetPosition[] objects.
+ * Accepts Python-style tuples ('L' or -1 for Lagna) for parity with Python APIs.
+ */
+export function asPlanetPositions(positions: PlanetPositionsLike): PlanetPosition[] {
+  if (!isPyPositionTuples(positions)) return positions;
+  return positions.map(([id, [rasi, longitude]]) => ({
+    planet: id === 'L' ? -1 : Number(id),
+    rasi,
+    longitude,
+  }));
+}
+
+/** Convert PlanetPosition[] back to Python tuple format (-1 -> 'L'). */
+const toPyPositionTuples = (positions: PlanetPosition[]): PyPlanetPositionTuple[] =>
+  positions.map(p => [p.planet === -1 ? 'L' : p.planet, [p.rasi, p.longitude]]);
 
 /**
  * Calculate the longitude within the varga sign
@@ -287,11 +313,33 @@ const getVargaSignForMethod = (totalLongitude: number, divisionFactor: number, c
  * @param chartMethod - Chart calculation method (1=Parashara default, higher=variants)
  * @returns Array of transformed positions
  */
-// @parity: py=divisional_chart
-export const getDivisionalChart = (
+// @parity: py=divisional_positions_from_rasi_positions
+export function getDivisionalChart(
+  d1Positions: PlanetPosition[], divisionFactor: number, chartMethod?: number
+): PlanetPosition[];
+export function getDivisionalChart(
+  d1Positions: PyPlanetPositionTuple[], divisionFactor: number, chartMethod?: number
+): PyPlanetPositionTuple[];
+export function getDivisionalChart(
+  d1PositionsLike: PlanetPositionsLike,
+  divisionFactor: number,
+  chartMethod: number = 1
+): PlanetPosition[] | PyPlanetPositionTuple[] {
+  // Round-trip Python tuple shape for parity with Python APIs.
+  if (isPyPositionTuples(d1PositionsLike)) {
+    return toPyPositionTuples(
+      divisionalChartCore(asPlanetPositions(d1PositionsLike), divisionFactor, chartMethod)
+    );
+  }
+  return divisionalChartCore(d1PositionsLike, divisionFactor, chartMethod);
+}
+
+// Default chartMethod=1 matches Python divisional_chart(chart_method=1);
+// for D2 this is Parivritti Even Reverse, NOT traditional Parasara.
+const divisionalChartCore = (
   d1Positions: PlanetPosition[],
   divisionFactor: number,
-  chartMethod: number = 0
+  chartMethod: number
 ): PlanetPosition[] => {
   // Composite charts (apply two vargas sequentially)
   if (divisionFactor === 81 && chartMethod === 4) {
@@ -332,17 +380,28 @@ export const getDivisionalChart = (
  * Get composite (mixed) divisional chart by applying two varga transformations sequentially.
  * Used for D-108 (D9 then D12) and D-144 (D12 then D12).
  */
-// @parity: py=mixed_chart
-export const getMixedDivisionalChart = (
+// @parity: py=mixed_chart_from_rasi_positions
+export function getMixedDivisionalChart(
   d1Positions: PlanetPosition[],
+  vargaFactor1: number, chartMethod1?: number,
+  vargaFactor2?: number, chartMethod2?: number
+): PlanetPosition[];
+export function getMixedDivisionalChart(
+  d1Positions: PyPlanetPositionTuple[],
+  vargaFactor1: number, chartMethod1?: number,
+  vargaFactor2?: number, chartMethod2?: number
+): PyPlanetPositionTuple[];
+export function getMixedDivisionalChart(
+  d1Positions: PlanetPositionsLike,
   vargaFactor1: number,
-  chartMethod1: number,
-  vargaFactor2: number,
-  chartMethod2: number
-): PlanetPosition[] => {
-  const pp1 = getDivisionalChart(d1Positions, vargaFactor1, chartMethod1);
+  chartMethod1: number = 1,
+  vargaFactor2: number = 1,
+  chartMethod2: number = 1
+): PlanetPosition[] | PyPlanetPositionTuple[] {
+  // getDivisionalChart round-trips Python tuple shape, so this composes either shape.
+  const pp1 = getDivisionalChart(d1Positions as PlanetPosition[], vargaFactor1, chartMethod1);
   return getDivisionalChart(pp1, vargaFactor2, chartMethod2);
-};
+}
 
 /**
  * Get positions for Ascendant and Planets for a specific chart
@@ -514,9 +573,10 @@ const _planetsInRetrogradeNew = (positions: PlanetPosition[]): number[] => {
  */
 // @parity: py=planets_in_retrograde
 export const planetsInRetrograde = (
-  positions: PlanetPosition[],
+  positionsLike: PlanetPositionsLike,
   method: number = PLANET_RETROGRESSION_CALCULATION_METHOD
 ): number[] => {
+  const positions = asPlanetPositions(positionsLike);
   if (method === 1) {
     return _planetsInRetrogradeOld(positions);
   }
@@ -540,9 +600,10 @@ export const planetsInRetrograde = (
  */
 // @parity: py=planets_in_combustion
 export const planetsInCombustion = (
-  positions: PlanetPosition[],
+  positionsLike: PlanetPositionsLike,
   useAbsoluteLongitude: boolean = true
 ): number[] => {
+  const positions = asPlanetPositions(positionsLike);
   const retrogradePlanets = planetsInRetrograde(positions);
   const sunPos = positions.find(p => p.planet === SUN);
   if (!sunPos) return [];
@@ -643,7 +704,6 @@ export const planetsInCombustion = (
  * @param excludeRahuKetu - If true, exclude Rahu/Ketu from malefics list
  * @returns Tuple [benefics, malefics] where each is a sorted array of planet indices
  */
-// @parity: py=benefics_and_malefics
 export const beneficsAndMalefics = (
   positions: PlanetPosition[],
   tithi: number,
@@ -729,7 +789,6 @@ export const beneficsAndMalefics = (
  * @param excludeRahuKetu - Whether to exclude Rahu/Ketu
  * @returns Sorted array of benefic planet indices
  */
-// @parity: py=benefics
 export const getBenefics = (
   positions: PlanetPosition[],
   tithi: number,
@@ -749,7 +808,6 @@ export const getBenefics = (
  * @param excludeRahuKetu - Whether to exclude Rahu/Ketu
  * @returns Sorted array of malefic planet indices
  */
-// @parity: py=malefics
 export const getMalefics = (
   positions: PlanetPosition[],
   tithi: number,
@@ -757,6 +815,55 @@ export const getMalefics = (
   excludeRahuKetu: boolean = false
 ): number[] => {
   return beneficsAndMalefics(positions, tithi, method, excludeRahuKetu)[1];
+};
+
+/**
+ * Benefics and malefics computed from JD/place (Python-style API).
+ * Computes the tithi and the divisional chart internally.
+ *
+ * Python: benefics_and_malefics(jd, place, ayanamsa_mode, divisional_chart_factor, method, exclude_rahu_ketu)
+ */
+// @parity: py=benefics_and_malefics
+export const beneficsAndMaleficsFromJd = (
+  jd: number, place: Place,
+  _ayanamsaMode?: string,
+  divisionalChartFactor: number = 1,
+  method: number = 2,
+  excludeRahuKetu: boolean = false
+): [number[], number[]] => {
+  const tithi = tithiUsingPlanetSpeed(jd, place)[0]!;
+  const positions = getDivisionalChart(buildD1PositionsFromJd(jd, place), divisionalChartFactor);
+  return beneficsAndMalefics(positions, tithi, method, excludeRahuKetu);
+};
+
+/**
+ * Benefics computed from JD/place (Python-style API).
+ * Python: benefics(jd, place, divisional_chart_factor, method, ayanamsa_mode, exclude_rahu_ketu)
+ */
+// @parity: py=benefics
+export const getBeneficsFromJd = (
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1,
+  method: number = 2,
+  _ayanamsaMode?: string,
+  excludeRahuKetu: boolean = false
+): number[] => {
+  return beneficsAndMaleficsFromJd(jd, place, _ayanamsaMode, divisionalChartFactor, method, excludeRahuKetu)[0];
+};
+
+/**
+ * Malefics computed from JD/place (Python-style API).
+ * Python: malefics(jd, place, divisional_chart_factor, method, ayanamsa_mode, exclude_rahu_ketu)
+ */
+// @parity: py=malefics
+export const getMaleficsFromJd = (
+  jd: number, place: Place,
+  divisionalChartFactor: number = 1,
+  method: number = 2,
+  _ayanamsaMode?: string,
+  excludeRahuKetu: boolean = false
+): number[] => {
+  return beneficsAndMaleficsFromJd(jd, place, _ayanamsaMode, divisionalChartFactor, method, excludeRahuKetu)[1];
 };
 
 // ============================================================================
@@ -777,9 +884,10 @@ export const getMalefics = (
  */
 // @parity: py=get_planets_in_marana_karaka_sthana
 export const getPlanetsInMaranaKarakaSthana = (
-  positions: PlanetPosition[],
+  positionsLike: PlanetPositionsLike,
   considerKetu4thHouse: boolean = true
 ): [number, number][] => {
+  const positions = asPlanetPositions(positionsLike);
   const mksResults: [number, number][] = [];
   const lagnaPos = positions.find(p => p.planet === -1);
   if (!lagnaPos) return mksResults;
@@ -815,8 +923,9 @@ export const getPlanetsInMaranaKarakaSthana = (
  */
 // @parity: py=planets_in_pushkara_navamsa_bhaga
 export const planetsInPushkaraNavamsaBhaga = (
-  positions: PlanetPosition[]
+  positionsLike: PlanetPositionsLike
 ): [number[], number[]] => {
+  const positions = asPlanetPositions(positionsLike);
   const pna: number[] = [];
   const pb: number[] = [];
 
@@ -862,15 +971,17 @@ export const planetsInPushkaraNavamsaBhaga = (
  */
 // @parity: py=get_64th_navamsa
 export const get64thNavamsa = (
-  navamsaPositions: PlanetPosition[]
+  navamsaPositionsLike: PlanetPositionsLike
 ): Record<number, [number, number]> => {
-  const result: Record<number, [number, number]> = {};
+  const navamsaPositions = asPlanetPositions(navamsaPositionsLike);
+  // Lagna is keyed 'L' to match Python's dict keys.
+  const result: Record<number | string, [number, number]> = {};
   for (const pos of navamsaPositions) {
     const navamsa64 = (pos.rasi + 3) % 12;
     const lord = HOUSE_OWNERS[navamsa64];
-    result[pos.planet] = [navamsa64, lord];
+    result[pos.planet === -1 ? 'L' : pos.planet] = [navamsa64, lord];
   }
-  return result;
+  return result as Record<number, [number, number]>;
 };
 
 /**
@@ -885,15 +996,17 @@ export const get64thNavamsa = (
  */
 // @parity: py=get_22nd_drekkana
 export const get22ndDrekkana = (
-  drekkanaPositions: PlanetPosition[]
+  drekkanaPositionsLike: PlanetPositionsLike
 ): Record<number, [number, number]> => {
-  const result: Record<number, [number, number]> = {};
+  const drekkanaPositions = asPlanetPositions(drekkanaPositionsLike);
+  // Lagna is keyed 'L' to match Python's dict keys.
+  const result: Record<number | string, [number, number]> = {};
   for (const pos of drekkanaPositions) {
     const drekkana22 = (pos.rasi + 7) % 12;
     const lord = HOUSE_OWNERS[drekkana22];
-    result[pos.planet] = [drekkana22, lord];
+    result[pos.planet === -1 ? 'L' : pos.planet] = [drekkana22, lord];
   }
-  return result;
+  return result as Record<number, [number, number]>;
 };
 
 // ============================================================================
@@ -913,10 +1026,11 @@ export const get22ndDrekkana = (
  */
 // @parity: py=order_planets_from_kendras_of_raasi
 export const orderPlanetsFromKendrasOfRaasi = (
-  positions: PlanetPosition[],
+  positionsLike: PlanetPositionsLike,
   raasi?: number,
   includeLagna: boolean = false
 ): number[] => {
+  const positions = asPlanetPositions(positionsLike);
   const baseHouse = raasi ?? (positions.find(p => p.planet === -1)?.rasi ?? 0);
 
   // Get kendra offsets (1st, 4th, 7th, 10th) plus 2nd, 5th, 8th, 11th, 3rd, 6th, 9th, 12th
@@ -1080,14 +1194,19 @@ const getKPLordsFromPlanetLongitude = (
  */
 // @parity: py=get_KP_lords_from_planet_positions
 export const getKPLordsFromPlanetPositions = (
-  positions: PlanetPosition[]
+  positionsLike: PlanetPositionsLike
 ): Record<number, number[]> => {
-  let kpInfo: Record<number, number[]> = {};
+  const positions = asPlanetPositions(positionsLike);
+  // Lagna is keyed 'L' to match Python's dict keys.
+  const kpInfo: Record<number | string, number[]> = {};
   for (const pos of positions) {
     const planetKP = getKPLordsFromPlanetLongitude(pos.planet, pos.rasi, pos.longitude);
-    kpInfo = { ...kpInfo, ...planetKP };
+    const lords = planetKP[pos.planet];
+    if (lords !== undefined) {
+      kpInfo[pos.planet === -1 ? 'L' : pos.planet] = lords;
+    }
   }
-  return kpInfo;
+  return kpInfo as Record<number, number[]>;
 };
 
 // ============================================================================
@@ -1103,8 +1222,9 @@ export const getKPLordsFromPlanetPositions = (
  */
 // @parity: py=get_pachakadi_sambhandha
 export const getPachakadiSambhandha = (
-  positions: PlanetPosition[]
+  positionsLike: PlanetPositionsLike
 ): Record<number, [number, [number, number, string]]> => {
+  const positions = asPlanetPositions(positionsLike);
   const posMap = new Map<number, number>();
   for (const pos of positions) {
     posMap.set(pos.planet, pos.rasi);
@@ -1145,9 +1265,10 @@ export const getPachakadiSambhandha = (
  */
 // @parity: py=lattha_stars_planets
 export const latthaStarsPlanets = (
-  positions: PlanetPosition[],
+  positionsLike: PlanetPositionsLike,
   includeAbhijit: boolean = true
 ): [number, number][] => {
+  const positions = asPlanetPositions(positionsLike);
   const starCount = includeAbhijit ? 28 : 27;
   const result: [number, number][] = [];
 
@@ -1275,7 +1396,8 @@ export async function specialPlanetLongitudesAsync(
   countFromEndOfSign?: boolean
 ): Promise<SpecialPlanetPosition[]> {
   const jd = julianDayNumber(dob, tob);
-  const tobHours = tob.hour + tob.minute / 60 + tob.second / 3600;
+  const tobTime = asJhoraTime(tob);
+  const tobHours = tobTime.hour + tobTime.minute / 60 + tobTime.second / 3600;
 
   // sub_planet_list_1: time-based upagrahas (from drik async functions)
   const [kl, mr, ap, yg, gk, md] = await Promise.all([
@@ -1449,7 +1571,8 @@ export function specialLagnaLongitudes(
  * @param vargaFactor2 - Second divisional factor (e.g. 12 for Dwadasamsa)
  * @returns Planet positions in the mixed chart
  */
-// @parity: py=mixed_chart_from_rasi_positions
+// no @parity pair: mixed_chart_from_rasi_positions pairs with getMixedDivisionalChart
+// (which also accepts chart methods); this is a convenience variant without methods.
 export const mixedChartFromRasiPositions = (
   d1Positions: PlanetPosition[],
   vargaFactor1: number,
@@ -1805,7 +1928,7 @@ export interface VargaBalaResult {
  * @param amsaVaiseshikamsa - Dict of {dcf: weight} for each varga to check
  * @returns Record mapping planet index (0-8) to VargaBalaResult
  */
-// @parity: py=_vaiseshikamsa_bala_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vaiseshikamsaBalaOfPlanets = (
   jd: number,
   place: Place,
@@ -1855,7 +1978,7 @@ export const vaiseshikamsaBalaOfPlanets = (
  *
  * Python: vaiseshikamsa_dhasavarga_of_planets
  */
-// @parity: py=vaiseshikamsa_dhasavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vaiseshikamsaDhasavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -1869,7 +1992,7 @@ export const vaiseshikamsaDhasavargaOfPlanets = (
  *
  * Python: vaiseshikamsa_shadvarga_of_planets
  */
-// @parity: py=vaiseshikamsa_shadvarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vaiseshikamsaShadvargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -1884,7 +2007,7 @@ export const vaiseshikamsaShadvargaOfPlanets = (
  *
  * Python: vaiseshikamsa_sapthavarga_of_planets
  */
-// @parity: py=vaiseshikamsa_sapthavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vaiseshikamsaSapthavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -1901,7 +2024,7 @@ export const vaiseshikamsaSapthavargaOfPlanets = (
  *
  * Python: vaiseshikamsa_shodhasavarga_of_planets
  */
-// @parity: py=vaiseshikamsa_shodhasavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vaiseshikamsaShodhasavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -1929,7 +2052,7 @@ export const vaiseshikamsaShodhasavargaOfPlanets = (
  * @param amsaVimsopaka - Dict of {dcf: weight} for each varga
  * @returns Record mapping planet index (0-8) to VargaBalaResult
  */
-// @parity: py=_vimsopaka_bala_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vimsopakaBalaOfPlanets = (
   jd: number,
   place: Place,
@@ -1990,7 +2113,7 @@ export const vimsopakaBalaOfPlanets = (
  * Vimsopaka Dhasavarga — 10 vargas with weights
  * Python: vimsopaka_dhasavarga_of_planets
  */
-// @parity: py=vimsopaka_dhasavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vimsopakaDhasavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -2001,7 +2124,7 @@ export const vimsopakaDhasavargaOfPlanets = (
  * Vimsopaka Shadvarga — 6 vargas with weights
  * Python: vimsopaka_shadvarga_of_planets
  */
-// @parity: py=vimsopaka_shadvarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vimsopakaShadvargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -2012,7 +2135,7 @@ export const vimsopakaShadvargaOfPlanets = (
  * Vimsopaka Sapthavarga — 7 vargas with weights
  * Python: vimsopaka_sapthavarga_of_planets
  */
-// @parity: py=vimsopaka_sapthavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vimsopakaSapthavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -2023,7 +2146,7 @@ export const vimsopakaSapthavargaOfPlanets = (
  * Vimsopaka Shodhasavarga — 16 vargas with weights
  * Python: vimsopaka_shodhasavarga_of_planets
  */
-// @parity: py=vimsopaka_shodhasavarga_of_planets
+// no @parity pair: returns {count, charts, score} objects; Python returns tuples (shape-only divergence)
 export const vimsopakaShodhasavargaOfPlanets = (
   jd: number, place: Place
 ): Record<number, VargaBalaResult> => {
@@ -2191,13 +2314,28 @@ const generateVargaNonCyclic = (
  * @returns Array of PlanetPosition for the custom divisional chart
  */
 // @parity: py=custom_divisional_chart
-export const customDivisionalChart = (
-  d1Positions: PlanetPosition[],
+export function customDivisionalChart(
+  d1Positions: PlanetPosition[], divisionalChartFactor: number,
+  chartMethod?: number, baseRasi?: number, countFromEndOfSign?: boolean
+): PlanetPosition[];
+export function customDivisionalChart(
+  d1Positions: PyPlanetPositionTuple[], divisionalChartFactor: number,
+  chartMethod?: number, baseRasi?: number, countFromEndOfSign?: boolean
+): PyPlanetPositionTuple[];
+export function customDivisionalChart(
+  d1PositionsLike: PlanetPositionsLike,
   divisionalChartFactor: number,
   chartMethod: number = 0,
   baseRasi?: number,
   countFromEndOfSign: boolean = false
-): PlanetPosition[] => {
+): PlanetPosition[] | PyPlanetPositionTuple[] {
+  // Round-trip Python tuple shape for parity with Python APIs.
+  if (isPyPositionTuples(d1PositionsLike)) {
+    return toPyPositionTuples(customDivisionalChart(
+      asPlanetPositions(d1PositionsLike), divisionalChartFactor, chartMethod, baseRasi, countFromEndOfSign
+    ));
+  }
+  const d1Positions = d1PositionsLike;
   const dvf = divisionalChartFactor;
   const f1 = 30.0 / dvf;
 
@@ -2220,7 +2358,7 @@ export const customDivisionalChart = (
     const horaSign = horaList[pos.rasi][hora];
     return { planet: pos.planet, rasi: horaSign, longitude: dLong };
   });
-};
+}
 
 /**
  * Build D1 (Rasi) positions from JD and place (sync helper).
@@ -2232,7 +2370,7 @@ function buildD1PositionsFromJd(jd: number, place: Place): PlanetPosition[] {
   const positions: PlanetPosition[] = [
     { planet: -1, rasi: asc[0], longitude: asc[1] }, // Ascendant as planet -1
   ];
-  for (const [pid, [rasi, long]] of pp) {
+  for (const [pid, long, rasi] of pp) {
     positions.push({ planet: pid, rasi, longitude: long });
   }
   return positions;

@@ -132,7 +132,7 @@ def _ashtaka_manvaadhi_dates(panchanga_place,panchanga_start_date,panchanga_end_
     results = utils.flatten_list(results)
     if _debug_print: print('_ashtaka_manvaadhi_dates after sorting and flattening',results)
     return results
-# @parity: ts=@/core/panchanga/vratha::specialVrathaDates
+# no-parity: TS specialVrathaDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def special_vratha_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,vratha_type=None,vratha_index_list=None):
     """
         Find vratha dates between dates
@@ -152,7 +152,7 @@ def special_vratha_dates(panchanga_place,panchanga_start_date,panchanga_end_date
         return utils.flatten_list(eval(vratha_function)(panchanga_place,panchanga_start_date,panchanga_end_date,vratha_index_list))
     else:
         return eval(vratha_function)(panchanga_place,panchanga_start_date,panchanga_end_date)
-# @parity: ts=@/core/panchanga/vratha::pradoshamDates
+# no-parity: TS pradoshamDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def pradosham_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     _tz = panchanga_place.timezone
     res = utils.resource_strings
@@ -170,7 +170,7 @@ def pradosham_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None
         if panchanga_end_date is None :
             return special_vratha_dates
     return special_vratha_dates
-# @parity: ts=@/core/panchanga/vratha::tithiDates
+# no-parity: TS tithiDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tithi_index_list=None,tag_t=''):
     """ TODO For Amavasya select Date that has amavasya spreads in the afternoon """ 
     jd = utils.julian_day_number(panchanga_start_date, (6.5,0,0))
@@ -216,7 +216,7 @@ def tithi_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,tit
             cur_jd += skip_days
         cur_jd += 1 
     return special_vratha_dates
-# @parity: ts=@/core/panchanga/vratha::nakshatraDates
+# no-parity: TS nakshatraDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def nakshathra_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,nakshathra_index_list=None):
     res = utils.resource_strings
     _start_date = panchanga.Date(panchanga_start_date.year,panchanga_start_date.month,panchanga_start_date.day)
@@ -249,7 +249,7 @@ def nakshathra_dates(panchanga_place,panchanga_start_date,panchanga_end_date=Non
             cur_jd += skip_days
         cur_jd += 1 
     return special_vratha_dates
-# @parity: ts=@/core/panchanga/vratha::yogaDates
+# no-parity: TS yogaDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def yoga_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None,yoga_index_list=None,tag_y=''):
     res = utils.resource_strings
     if tag_y != '': tag_y = ' / '+ res[tag_y+'_str']
@@ -498,15 +498,15 @@ def sankranti_dates(place,start_date,end_date=None):
             return results
         jd_inc +=  day_inc
     return results
-# @parity: ts=@/core/panchanga/vratha::sathyanarayanaPujaDates
+# no-parity: TS sathyanarayanaPujaDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def sathyanarayana_puja_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     return search(panchanga_place, panchanga_start_date, panchanga_end_date, tithi_index=_pournami_tithi[0],
                   description=utils.resource_strings['sathyanarayana_puja_str'])
-# @parity: ts=@/core/panchanga/vratha::durgashtamiDates
+# no-parity: TS durgashtamiDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def durgashtami_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     return search(panchanga_place, panchanga_start_date, panchanga_end_date, tithi_index=_sukla_ashtami,
                   description=utils.resource_strings['durgashtami_str'])
-# @parity: ts=@/core/panchanga/vratha::kaalashtamiDates
+# no-parity: TS kaalashtamiDates returns English-tagged objects; Python returns localized tuples (needs set_language)
 def kaalashtami_dates(panchanga_place,panchanga_start_date,panchanga_end_date=None):
     return search(panchanga_place, panchanga_start_date, panchanga_end_date, tithi_index=_krishna_ashtami,
                   description=utils.resource_strings['kaalashtami_str'])

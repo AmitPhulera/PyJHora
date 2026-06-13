@@ -64,7 +64,6 @@ def _dhasa_seed(jd,place,lagna_house,lagna_lord_house):
         kaala_period = 'ToNight'
         _dhasa_seed = lagna_house    
     return _dhasa_seed
-# @parity: ts=@/core/dhasa/raasi/chakra::getChakraDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=False):
     jd_at_dob = utils.julian_day_number(dob, tob)
     jd_years = drik.next_solar_date(jd_at_dob, place, years=years, months=months,sixty_hours=months)

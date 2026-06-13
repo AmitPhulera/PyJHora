@@ -252,9 +252,30 @@ export const getHouseOwner = (chart: HouseChart, houseSign: number): number => {
  * @param positions - Array of PlanetPosition objects
  * @returns HouseChart array of 12 strings
  */
+/**
+ * Normalize planet positions to object form.
+ * Accepts both TS-native objects ({planet, rasi, longitude}) and
+ * Python-native tuples ([planet|'L', [rasi, longitude]]) as used by
+ * jhora planet_positions structures (and parity fixtures).
+ */
+export const normalizePlanetPositions = (
+  positions: ReadonlyArray<PlanetPosition | [number | string, [number, number]]>,
+): PlanetPosition[] =>
+  positions.map((pos) => {
+    if (Array.isArray(pos)) {
+      const [p, [rasi, longitude]] = pos;
+      return {
+        planet: p === 'L' ? -1 : Number(p),
+        rasi,
+        longitude,
+      } as PlanetPosition;
+    }
+    return pos;
+  });
+
 export const planetPositionsToChart = (positions: PlanetPosition[]): HouseChart => {
   const chart: string[] = Array(12).fill('');
-  for (const pos of positions) {
+  for (const pos of normalizePlanetPositions(positions)) {
     const key = pos.planet === -1 ? ASCENDANT_SYMBOL : String(pos.planet);
     if (chart[pos.rasi] === '') {
       chart[pos.rasi] = key;
@@ -2253,8 +2274,8 @@ export const dharidhraYoga = (chart: HouseChart): boolean => {
   const eleventhHouse = (ascHouse + HOUSE_11) % 12;
   const twelfthHouse = (ascHouse + HOUSE_12) % 12;
 
-  const lordOfSecond = getLordOfSign(secondHouse);
-  const lordOfEleventh = getLordOfSign(eleventhHouse);
+  const lordOfSecond = getHouseOwnerFromChart(chart, secondHouse);
+  const lordOfEleventh = getHouseOwnerFromChart(chart, eleventhHouse);
 
   const dusthanas = [sixthHouse, eighthHouse, twelfthHouse];
 
@@ -3589,16 +3610,50 @@ export const chandikaaYogaFromPlanetPositions = (positions: PlanetPosition[]): b
 // GARUDA YOGA (requires navamsa + tithi - simplified single-chart stub)
 // ============================================================================
 
-/** Garuda Yoga (simplified stub - always false without navamsa/tithi data) */
+/**
+ * Garuda Yoga (B.V. Raman #58):
+ * The lord of the Navamsa occupied by the Moon should be exalted in Rasi.
+ * Birth should occur during daytime when the Moon is waxing.
+ */
 // @parity: py=garuda_yoga
-export const garudaYoga = (_chart: HouseChart): boolean => {
-  // Requires navamsa chart, shukla paksha, and daytime birth data
-  // Cannot be accurately computed from single chart alone
-  return false;
+export const garudaYoga = (
+  chartRasi: HouseChart,
+  chartNavamsa?: HouseChart,
+  isShuklaPaksha?: boolean,
+  isDaytimeBirth?: boolean,
+): boolean => {
+  if (!chartNavamsa) return false; // cannot evaluate without navamsa chart
+  if (!(isShuklaPaksha && isDaytimeBirth)) return false;
+
+  const pToHNav = getPlanetToHouseDict(chartNavamsa);
+  const pToHRasi = getPlanetToHouseDict(chartRasi);
+
+  // 1. Find Moon's sign in Navamsa
+  const moonNavHouse = pToHNav[MOON];
+  if (moonNavHouse === undefined) return false;
+
+  // 2. Lord of that navamsa sign (house_owner on the navamsa chart)
+  const navLordOfMoon = getHouseOwnerFromChart(chartNavamsa, moonNavHouse);
+
+  // 3. That planet must be exalted in the Rasi chart
+  const rasiHouseOfLord = pToHRasi[navLordOfMoon];
+  if (rasiHouseOfLord === undefined) return false;
+
+  return (HOUSE_STRENGTHS_OF_PLANETS[navLordOfMoon]?.[rasiHouseOfLord] ?? 0) >= STRENGTH_EXALTED;
 };
 // @parity: py=garuda_yoga_from_planet_positions
-export const garudaYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  garudaYoga(planetPositionsToChart(positions));
+export const garudaYogaFromPlanetPositions = (
+  ppRasi: PlanetPosition[],
+  ppNavamsa?: PlanetPosition[],
+  isShuklaPaksha?: boolean,
+  isDaytimeBirth?: boolean,
+): boolean =>
+  garudaYoga(
+    planetPositionsToChart(ppRasi),
+    ppNavamsa ? planetPositionsToChart(ppNavamsa) : undefined,
+    isShuklaPaksha,
+    isDaytimeBirth,
+  );
 
 // ============================================================================
 // KALPADRUMA YOGA (requires navamsa - simplified single-chart stub)
@@ -3634,24 +3689,39 @@ export const kalpadrumaYogaFromPlanetPositions = (positions: PlanetPosition[]): 
 // BHAARATHI YOGA (requires navamsa - simplified single-chart stub)
 // ============================================================================
 
-/** Bhaarathi Yoga (simplified): exalted planet joins 9th lord */
+/**
+ * Bhaarathi Yoga: the lord of the navamsa sign occupied by the 2nd, 5th or 11th lord
+ * is exalted and joins the 9th lord.
+ */
 // @parity: py=bhaarathi_yoga
-export const bhaarathiYoga = (chart: HouseChart): boolean => {
-  const pToH = getPlanetToHouseDict(chart);
+export const bhaarathiYoga = (chartRasi: HouseChart, chartNavamsa?: HouseChart): boolean => {
+  if (!chartNavamsa) return false; // cannot evaluate without navamsa chart
+  const pToH = getPlanetToHouseDict(chartRasi);
+  const pToHNav = getPlanetToHouseDict(chartNavamsa);
   const ascHouse = h(pToH, ASCENDANT_SYMBOL);
-  const h9 = (ascHouse + HOUSE_9) % 12;
-  const l9 = getLordOfSign(h9);
-  const l9Pos = h(pToH, l9);
 
-  // Check if any planet joined with l9 is exalted
-  const planetsWithL9 = getPlanetsInHouse(chart, l9Pos).filter((p) => p !== l9);
-  return planetsWithL9.some(
-    (p) => (HOUSE_STRENGTHS_OF_PLANETS[p]?.[l9Pos] ?? 0) >= STRENGTH_EXALTED
+  const hOffsets = [HOUSE_2, HOUSE_5, HOUSE_11];
+  const lordsX = hOffsets.map((off) => getHouseOwnerFromChart(chartRasi, (ascHouse + off) % 12));
+  const ninthLord = getHouseOwnerFromChart(chartRasi, (ascHouse + HOUSE_9) % 12);
+  const navamsaLords = lordsX.map((l) => getHouseOwnerFromChart(chartNavamsa, h(pToHNav, l)));
+
+  const l9Pos = h(pToH, ninthLord);
+  // Dispositor joins L9 AND is exalted
+  return navamsaLords.some(
+    (nl) =>
+      h(pToH, nl) === l9Pos &&
+      (HOUSE_STRENGTHS_OF_PLANETS[nl]?.[h(pToH, nl)] ?? 0) >= STRENGTH_EXALTED,
   );
 };
 // @parity: py=bhaarathi_yoga_from_planet_positions
-export const bhaarathiYogaFromPlanetPositions = (positions: PlanetPosition[]): boolean =>
-  bhaarathiYoga(planetPositionsToChart(positions));
+export const bhaarathiYogaFromPlanetPositions = (
+  positionsRasi: PlanetPosition[],
+  positionsNavamsa?: PlanetPosition[],
+): boolean =>
+  bhaarathiYoga(
+    planetPositionsToChart(positionsRasi),
+    positionsNavamsa ? planetPositionsToChart(positionsNavamsa) : undefined,
+  );
 
 // ============================================================================
 // SWAVEERYADDHANA YOGA (simplified - rasi-only)
@@ -3673,11 +3743,12 @@ export const swaveeryaddhanaYoga = (
   chart: HouseChart,
   chartNavamsa?: HouseChart,
   vaiseshikamsaScores?: Record<number, number>,
+  naturalBenefics?: number[],
 ): boolean => {
   const pToH = getPlanetToHouseDict(chart);
-  const ascHouse = h(pToH, ASCENDANT_SYMBOL);
-  const l1 = getLordOfSign(ascHouse);
-  const l2 = getLordOfSign((ascHouse + HOUSE_2) % 12);
+  // Python uses absolute houses 0 (Aries) and 1 (Taurus): house_owner(chart, 0/1)
+  const l1 = getHouseOwnerFromChart(chart, 0);
+  const l2 = getHouseOwnerFromChart(chart, 1);
   const l1H = h(pToH, l1);
   const l2H = h(pToH, l2);
 
@@ -3695,12 +3766,12 @@ export const swaveeryaddhanaYoga = (
     const pToHNav = getPlanetToHouseDict(chartNavamsa);
     // 1. Sign occupied by LL in Navamsa
     const navSignOfLL = h(pToHNav, l1);
-    // 2. Lord of that sign (the Navamsa Lord)
-    const navLord = getLordOfSign(navSignOfLL);
+    // 2. Lord of that sign (Python: house_owner(chart_rasi, nav_sign))
+    const navLord = getHouseOwnerFromChart(chart, navSignOfLL);
     // 3. Sign occupied by NavLord in Rasi
     const rasiSignOfNavLord = h(pToH, navLord);
     // 4. Ruler of that sign (the Final Dispositor)
-    const dispositorOfNavLord = getLordOfSign(rasiSignOfNavLord);
+    const dispositorOfNavLord = getHouseOwnerFromChart(chart, rasiSignOfNavLord);
 
     const dispositorHouse = h(pToH, dispositorOfNavLord);
     const dispositorStrength = HOUSE_STRENGTHS_OF_PLANETS[dispositorOfNavLord]?.[dispositorHouse] ?? 0;
@@ -3720,7 +3791,8 @@ export const swaveeryaddhanaYoga = (
   if (kendraTrine.includes(relPos)) return true;
 
   // (d/e) L2 is benefic AND (exalted OR with exalted planet)
-  const benefics = getNaturalBenefics(chart);
+  // Python default benefics: Jupiter and Venus only
+  const benefics = naturalBenefics ?? [JUPITER, VENUS];
   const l2Strength = HOUSE_STRENGTHS_OF_PLANETS[l2]?.[l2H] ?? 0;
   const isWithExalted = getPlanetsInHouse(chart, l2H)
     .filter(p => p !== l2)
@@ -3733,9 +3805,16 @@ export const swaveeryaddhanaYoga = (
 // @parity: py=swaveeryaddhana_yoga_from_planet_positions
 export const swaveeryaddhanaYogaFromPlanetPositions = (
   positions: PlanetPosition[],
-  chartNavamsa?: HouseChart,
+  positionsNavamsa?: PlanetPosition[],
   vaiseshikamsaScores?: Record<number, number>,
-): boolean => swaveeryaddhanaYoga(planetPositionsToChart(positions), chartNavamsa, vaiseshikamsaScores);
+  naturalBenefics?: number[],
+): boolean =>
+  swaveeryaddhanaYoga(
+    planetPositionsToChart(positions),
+    positionsNavamsa ? planetPositionsToChart(positionsNavamsa) : undefined,
+    vaiseshikamsaScores,
+    naturalBenefics,
+  );
 
 // ============================================================================
 // REMAINING YOGA FUNCTIONS (Batch 3)
@@ -4763,14 +4842,15 @@ export const annadanaYoga = (chart: HouseChart): boolean => {
   const pToH = getPlanetToHouseDict(chart);
   const ascH = h(pToH, ASCENDANT_SYMBOL);
   const h2 = (ascH + 1) % 12;
-  const lordOf2 = getLordOfSign(h2);
+  const lordOf2 = getHouseOwnerFromChart(chart, h2);
   const lordHouse = h(pToH, lordOf2);
 
   // Strong lord
   const isStrong = isPlanetStrong(lordOf2, lordHouse, true);
 
-  // Conjunction with or aspected by Jupiter
-  const aspectedBy = getGrahaDrishtiOnPlanet(chart, lordOf2);
+  // Conjunction with or aspect link to Jupiter/Mercury
+  // (Python: house.aspected_planets_of_the_planet — planets aspected BY the lord)
+  const aspectedBy = getGrahaDrishtiPlanetsOfPlanet(chart, lordOf2);
   const planetsInHouse = getPlanetsInHouse(chart, lordHouse);
   const hasJupLink =
     planetsInHouse.includes(JUPITER) || aspectedBy.includes(JUPITER);

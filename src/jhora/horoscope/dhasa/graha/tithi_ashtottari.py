@@ -102,7 +102,6 @@ def ashtottari_anthara(dhasa_lord, bhukthi_lord,bhukthi_lord_start_date):
         bhukthi_lord_start_date += factor * year_duration
         lord = ashtottari_next_adhipati(lord)
     return retval
-# @parity: ts=@/core/dhasa/graha/tithi-ashtottari::getTithiAshtottariDashaBhukti
 def get_ashtottari_dhasa_bhukthi(jd, place,use_tribhagi_variation=False,include_antardhasa=True,
                                  tithi_index=1,antardhasa_option=3): #antardhasa starts from next lord
     """

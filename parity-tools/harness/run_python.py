@@ -21,6 +21,12 @@ sys.path.insert(0, str(_HARNESS_DIR.parent.parent / "src"))
 
 from coercion import coerce  # noqa: E402
 
+# Populate language-dependent module globals (e.g. NAKSHATRA_LIST) the same
+# way pvr_tests does. Without this, targets that read those globals raise
+# NameError. TS parity side runs with English resources, so use 'en'.
+from jhora import utils as _utils  # noqa: E402
+_utils.set_language("en")
+
 
 def _resolve_target(python_target: str):
     """'math.sqrt' -> math.sqrt (callable)."""
@@ -34,6 +40,23 @@ def _apply_ayanamsa(ayanamsa: str):
     set_ayanamsa_mode(ayanamsa)
 
 
+# Snapshot the default (9-planet) planet_list at import. set_sideral_planets()/
+# set_tropical_planets() mutate this module global; since the harness batch-runs
+# many fixtures in one process, that state would leak into later fixtures
+# (e.g. planetary_positions returning 12 planets). Restore it per case.
+try:
+    from jhora.panchanga import drik as _drik
+    _DEFAULT_PLANET_LIST = list(_drik.planet_list)
+except Exception:
+    _drik = None
+    _DEFAULT_PLANET_LIST = None
+
+
+def _reset_planet_list():
+    if _drik is not None and _DEFAULT_PLANET_LIST is not None:
+        _drik.planet_list = list(_DEFAULT_PLANET_LIST)
+
+
 def run_fixture(fixture_path: Path, output_root: Path = None):
     fixture_path = Path(fixture_path)
     fixture = json.loads(fixture_path.read_text())
@@ -44,7 +67,8 @@ def run_fixture(fixture_path: Path, output_root: Path = None):
 
     cases_out = []
     for case in fixture["cases"]:
-        # Reset ayanamsa per case to isolate state.
+        # Reset mutable drik module state per case to isolate fixtures.
+        _reset_planet_list()
         try:
             _apply_ayanamsa(ayanamsa)
         except Exception:
@@ -116,6 +140,9 @@ def _make_json_safe(value):
         return {k: _make_json_safe(v) for k, v in value.items()}
     if isinstance(value, (int, float, str, bool)) or value is None:
         return value
+    # numpy scalars (np.int64 etc. are not int subclasses in py3)
+    if hasattr(value, "item") and callable(value.item):
+        return _make_json_safe(value.item())
     return repr(value)
 
 

@@ -36,7 +36,6 @@ import {
  * @returns Object containing argala and virodhargala lists for each house (0-11)
  *          argala[h] = list of planets causing Argala on House h+1
  */
-// @parity: py=get_argala
 export const getArgala = (
     planetToHouse: Record<number | string, number>,
     ascendantRasi: number
@@ -224,26 +223,18 @@ export const getRaasiDrishtiMap = (): Record<number, number[]> => {
  * @param planetToHouse - Map of planet ID to rasi index (0-11)
  * @returns Objects containing aspect data
  */
-// @parity: py=raasi_drishti_from_chart
 export const getRaasiDrishtiFromChart = (
-  planetToHouse: Record<number, number>
+  planetToHouse: Record<number, number>,
+  ascendantRasi?: number
 ): {
   arp: Record<number, number[]>; // Aspects on Rasis
   ahp: Record<number, number[]>; // Aspects on Houses (relative to Asc)
   app: Record<number, number[]>; // Aspects on Planets
 } => {
-  const ascRaasi = planetToHouse[ASCENDANT_SYMBOL as unknown as number] || 0; // Assuming ASCENDANT_SYMBOL handled carefully or separate
-  // Note: planetToHouse usually uses numbers for planets. We need to handle Ascendant separately or agree on ID.
-  // In our types, we might use a special ID or just pass ascendant rasi separately.
-  // For this function, let's assume we can pass the Ascendant Rasi directly or look it up if included.
-  
-  // Actually, let's refine the input. Usually we receive planet positions.
-  // planetToHouse: Record<number, number> (Planet ID -> Rasi Index)
-  // We need to know where Ascendant is too.
-  
-  // Let's refactor to take planetPositions array to be safe, or just planetToHouse and ascendantRasi.
-  // I'll stick to planetToHouse and explicit Ascendant Rasi for clarity.
-  
+  // Python derives asc_house from p_to_h['L']. Callers that need the ahp
+  // (houses relative to ascendant) must pass ascendantRasi explicitly, since the
+  // planetToHouse map only contains numeric planet ids.
+  const ascRaasi = ascendantRasi ?? 0;
   const raasiDrishtiMap = getRaasiDrishtiMap();
   const arp: Record<number, number[]> = {};
   const ahp: Record<number, number[]> = {};
@@ -272,10 +263,11 @@ export const getRaasiDrishtiFromChart = (
     // Rasis aspected by the planet's rasi
     const aspectedRasis = raasiDrishtiMap[pRaasi] || [];
     arp[p] = aspectedRasis;
-    
-    // Houses aspected (relative to Ascendant which needs to be passed, but let's calc relative later if needed)
-    // house.py uses Ascendant to calc ahp. Let's return raw rasi lists and let caller derive houses.
-    
+
+    // Houses aspected, relative to the ascendant rasi.
+    // Python: ahp[p] = [(h - asc_house) % 12 + 1 for h in arp[p]]
+    ahp[p] = aspectedRasis.map(h => ((h - ascRaasi + 12) % 12) + 1);
+
     // Planets aspected
     app[p] = [];
     aspectedRasis.forEach(r => {
@@ -301,8 +293,9 @@ export const getRaasiDrishtiFromChart = (
  */
 // @parity: py=chara_karakas
 export const getCharaKarakas = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   // Filter for 7 planets (Sun to Saturn) + maybe Rahu
   // Standard Jaimini uses 7 or 8.
   // If 8: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu
@@ -421,29 +414,270 @@ export const getHouseToPlanetList = (
 }
 
 /**
+ * Normalize planet positions to object form.
+ * Accepts either the object form [{planet, rasi, longitude}, ...] or the
+ * Python tuple form [['L', [rasi, longitude]], [0, [rasi, longitude]], ...]
+ * (as used by jhora planet_positions and the parity harness fixtures).
+ */
+export const normalizePlanetPositions = (
+    planetPositions: Array<unknown>
+): Array<{ planet: number; rasi: number; longitude: number }> => {
+    return (planetPositions as Array<any>).map((item: any) =>
+        Array.isArray(item)
+            ? {
+                planet: item[0] === 'L' ? -1 : Number(item[0]),
+                rasi: item[1][0],
+                longitude: item[1][1],
+            }
+            : item
+    );
+};
+
+/**
+ * Replicate CPython's `list(set(values))` iteration order for small non-negative
+ * integers (the planet-index domain, 0-11). Several Python functions return
+ * `list(set(...))`, whose element order is an implementation artifact of CPython's
+ * open-addressed hash table rather than insertion or sorted order. To achieve
+ * byte-for-byte parity with the Python source of truth, we emulate that table:
+ * size starts at 8 and grows (fill*5 >= mask*3 -> resize) using the same probe
+ * sequence (i = (i*5 + 1 + perturb) & mask; perturb >>= 5). hash(int) == int for
+ * small ints. Iteration yields occupied slots in ascending index order.
+ */
+const pythonIntSetOrder = (values: number[]): number[] => {
+  const seen = new Set<number>();
+  const items: number[] = [];
+  for (const v of values) {
+    if (!seen.has(v)) {
+      seen.add(v);
+      items.push(v);
+    }
+  }
+  let size = 8;
+  let table: (number | null)[] = new Array(size).fill(null);
+  let fill = 0;
+  let used = 0;
+  const insert = (val: number): void => {
+    const mask = size - 1;
+    let perturb = val >>> 0;
+    let i = (val & mask) >>> 0;
+    while (table[i] !== null) {
+      if (table[i] === val) return;
+      perturb = Math.floor(perturb / 32); // perturb >>= 5
+      i = ((i * 5 + 1 + perturb) & mask) >>> 0;
+    }
+    table[i] = val;
+    fill++;
+    used++;
+  };
+  const maybeResize = (): void => {
+    if (fill * 5 >= (size - 1) * 3) {
+      const target = used > 50000 ? used * 2 : used * 4;
+      let s = 8;
+      while (s <= target) s <<= 1;
+      size = s;
+      const old = table.filter((x): x is number => x !== null);
+      table = new Array(size).fill(null);
+      fill = 0;
+      used = 0;
+      for (const v of old) insert(v);
+    }
+  };
+  for (const v of items) {
+    insert(v);
+    maybeResize();
+  }
+  return table.filter((x): x is number => x !== null);
+};
+
+/**
+ * Faithful port of Python aspected_planets_of_the_raasi:
+ * planets (0-8) whose occupied sign has raasi drishti on the given raasi.
+ */
+const pyAspectedPlanetsOfRaasi = (chart: string[], raasi: number): number[] => {
+    const pToH = parseChartToPlanetHouseDict(chart);
+    const rd = getRaasiDrishtiMap();
+    const result: number[] = [];
+    for (let p = 0; p < 9; p++) {
+        const h = pToH[p];
+        if (h === undefined) continue;
+        if ((rd[h] ?? []).includes(raasi)) result.push(p);
+    }
+    return result;
+};
+
+/** Occupant count of a house in chart form (includes the Lagna marker, as Python's p_to_h does). */
+const chartOccupantCount = (chart: string[], house: number): number => {
+    const entry = chart[house];
+    if (!entry || entry === '') return 0;
+    return entry.split('/').filter(s => s.trim() !== '').length;
+};
+
+/**
+ * Faithful port of Python _stronger_planet_new (useBasicRule=true) and the
+ * chart-based stronger_planet (useBasicRule=false; in Python its Basic Rule
+ * compares a house number against a dict and so never fires — a known Python
+ * bug that the chart-based path intentionally omits here).
+ * Returns null when rules 1-4 cannot decide (Python returns None).
+ */
+const pyStrongerPlanetChart = (
+    chart: string[],
+    p1: number,
+    p2: number,
+    useBasicRule: boolean
+): number | null => {
+    if (p1 === p2) return p1;
+    const pToH = parseChartToPlanetHouseDict(chart);
+    const h1 = pToH[p1];
+    const h2 = pToH[p2];
+    if (h1 === undefined || h2 === undefined) return null;
+
+    // Basic Rule: node (Rahu/Ketu) vs traditional ruler — planet NOT in the
+    // co-ruled sign is stronger when the other is in it.
+    if (useBasicRule && (p1 === RAHU || p1 === KETU || p2 === RAHU || p2 === KETU)) {
+        const node = (p1 === RAHU || p1 === KETU) ? p1 : p2;
+        const lordHouse = HOUSES_OF_RAHU_KETU[node];
+        if (lordHouse !== undefined) {
+            if (h1 === lordHouse && h2 !== lordHouse) return p2;
+            if (h2 === lordHouse && h1 !== lordHouse) return p1;
+        }
+    }
+
+    // Rule 1: planet joined by more planets is stronger (Lagna counts, as in Python)
+    const c1 = chartOccupantCount(chart, h1) - 1;
+    const c2 = chartOccupantCount(chart, h2) - 1;
+    if (c1 > c2) return p1;
+    if (c2 > c1) return p2;
+
+    // Rule 2: count of Jupiter/Mercury/dispositor conjoining or (raasi-)aspecting.
+    // NOTE: Python compares the dispositor PLANET ID against the house number in
+    // the conjoin part ([p_to_h[3], p_to_h[4], dispositor].count(house)) — replicated as-is.
+    const rule2Score = (house: number): number => {
+        const dispositor = HOUSE_OWNERS[house];
+        let score = [pToH[3], pToH[4], dispositor].filter(x => x === house).length;
+        const aspects = pyAspectedPlanetsOfRaasi(chart, house);
+        score += [3, 4, dispositor].filter(x => aspects.includes(x)).length;
+        return score;
+    };
+    const s1 = rule2Score(h1);
+    const s2 = rule2Score(h2);
+    if (s1 > s2) return p1;
+    if (s2 > s1) return p2;
+
+    // Rule 3: exalted planet is stronger.
+    // (Python's planet2 branch compares planet2's strength with itself and is dead code — replicated.)
+    const hs1 = HOUSE_STRENGTHS_OF_PLANETS[p1]?.[h1] ?? 0;
+    const hs2 = HOUSE_STRENGTHS_OF_PLANETS[p2]?.[h2] ?? 0;
+    if (hs1 === STRENGTH_EXALTED && hs1 > hs2) return p1;
+
+    // Rule 4: natural strength of occupied rasi (dual > fixed > movable),
+    // replicating Python's exact branch structure (dual/dual returns planet2).
+    if (DUAL_SIGNS.includes(h1) && !DUAL_SIGNS.includes(h2)) {
+        return p1;
+    } else if (FIXED_SIGNS.includes(h1)) {
+        if (DUAL_SIGNS.includes(h2)) return p2;
+        if (MOVABLE_SIGNS.includes(h2)) return p1;
+    } else {
+        if (!MOVABLE_SIGNS.includes(h2)) return p2;
+    }
+    return null;
+};
+
+/**
+ * Faithful port of Python stronger_rasi (chart-based).
+ * Returns null when rules 1-5 cannot decide (Python returns None).
+ */
+export const getStrongerRasiFromChart = (
+    chart: string[],
+    rasi1: number,
+    rasi2: number
+): number | null => {
+    const pToH = parseChartToPlanetHouseDict(chart);
+
+    // Rule 1: rasi containing more planets (Lagna excluded)
+    const countPlanets = (r: number): number => {
+        let c = 0;
+        for (let p = 0; p < 9; p++) if (pToH[p] === r) c++;
+        return c;
+    };
+    const c1 = countPlanets(rasi1);
+    const c2 = countPlanets(rasi2);
+    if (c1 > c2) return rasi1;
+    if (c2 > c1) return rasi2;
+
+    // Rule 2: Jupiter/Mercury/lord in or (raasi-)aspecting the rasi.
+    // Same Python quirk: lord PLANET ID compared against the rasi number in the conjoin part.
+    const rule2Score = (r: number): number => {
+        const lord = HOUSE_OWNERS[r];
+        let score = [pToH[3], pToH[4], lord].filter(x => x === r).length;
+        const aspects = pyAspectedPlanetsOfRaasi(chart, r);
+        score += [3, 4, lord].filter(x => aspects.includes(x)).length;
+        return score;
+    };
+    const s1 = rule2Score(rasi1);
+    const s2 = rule2Score(rasi2);
+    if (s1 > s2) return rasi1;
+    if (s2 > s1) return rasi2;
+
+    // Rule 3: rasi containing an exalted planet
+    const exaltedCount = (r: number): number => {
+        let c = 0;
+        for (let p = 0; p < 9; p++) {
+            if (pToH[p] === r && HOUSE_STRENGTHS_OF_PLANETS[p]?.[r] === STRENGTH_EXALTED) c++;
+        }
+        return c;
+    };
+    const e1 = exaltedCount(rasi1);
+    const e2 = exaltedCount(rasi2);
+    if (e1 > 0 && e2 === 0) return rasi1;
+    if (e2 > 0 && e1 === 0) return rasi2;
+
+    // Rule 4: lord placed in a sign of different oddity
+    const hasOddity = (r: number): boolean => {
+        const lordHouse = pToH[HOUSE_OWNERS[r]];
+        if (lordHouse === undefined) return false;
+        return (ODD_SIGNS.includes(r) && EVEN_SIGNS.includes(lordHouse)) ||
+            (EVEN_SIGNS.includes(r) && ODD_SIGNS.includes(lordHouse));
+    };
+    const o1 = hasOddity(rasi1);
+    const o2 = hasOddity(rasi2);
+    if (o1 && !o2) return rasi1;
+    if (o2 && !o1) return rasi2;
+
+    // Rule 5: natural strength (dual > fixed > movable), Python's exact branch structure
+    if (DUAL_SIGNS.includes(rasi1) && !DUAL_SIGNS.includes(rasi2)) {
+        return rasi1;
+    } else if (FIXED_SIGNS.includes(rasi1)) {
+        if (DUAL_SIGNS.includes(rasi2)) return rasi2;
+        if (MOVABLE_SIGNS.includes(rasi2)) return rasi1;
+    } else {
+        if (!MOVABLE_SIGNS.includes(rasi2)) return rasi2;
+    }
+    return null;
+};
+
+/**
  * Get the owner (lord) of a house, considering exceptions for Scorpio and Aquarius.
- * @param planetPositions 
- * @param sign 
- * @param checkDuringDhasa 
+ * @param planetPositions
+ * @param sign
+ * @param checkDuringDhasa
  */
 // @parity: py=house_owner_from_planet_positions
 export const getHouseOwnerFromPlanetPositions = (
-    planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
+    planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>,
     sign: number,
     checkDuringDhasa: boolean = false
 ): number => {
-    let lord = SIGN_LORDS[sign % 12] ?? 0;
+    const planetPositions = normalizePlanetPositions(planetPositionsIn);
 
     // Exception for Scorpio (Mars vs Ketu)
-    if ((sign % 12) === SCORPIO) {
-        lord = getStrongerPlanetFromPositions(planetPositions, MARS, KETU, checkDuringDhasa);
+    if (sign === SCORPIO) {
+        return getStrongerPlanetFromPositions(planetPositions, MARS, KETU, checkDuringDhasa);
     }
     // Exception for Aquarius (Saturn vs Rahu)
-    else if ((sign % 12) === AQUARIUS) {
-        lord = getStrongerPlanetFromPositions(planetPositions, SATURN, RAHU, checkDuringDhasa);
+    if (sign === AQUARIUS) {
+        return getStrongerPlanetFromPositions(planetPositions, SATURN, RAHU, checkDuringDhasa);
     }
-
-    return lord;
+    return HOUSE_OWNERS[sign % 12] ?? 0;
 };
 
 /**
@@ -455,109 +689,26 @@ export const getHouseOwnerFromPlanetPositions = (
  */
 // @parity: py=stronger_planet_from_planet_positions
 export const getStrongerPlanetFromPositions = (
-    planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
-    p1: number,
-    p2: number,
-    checkDuringDhasa: boolean = false // Keeping parameter for future matching with python signature
+    planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>,
+    p1: number = SATURN,
+    p2: number = RAHU,
+    checkDuringDhasa: boolean = false
 ): number => {
+    const planetPositions = normalizePlanetPositions(planetPositionsIn);
     if (p1 === p2) return p1;
 
-    // TODO: Handle Ascendant comparisons if needed (usually handled before calling this)
+    const chart = buildHouseChart(planetPositions);
+    const stronger = pyStrongerPlanetChart(chart, p1, p2, true);
+    if (stronger !== null) return stronger;
 
-    const pToH = getPlanetToHouseDict(planetPositions);
-    const h1 = pToH[p1];
-    const h2 = pToH[p2];
+    // Rule 5(a) (Python: narayana dhasa duration when check_during_dhasa) is not
+    // implemented here — pre-existing deviation; falls through to Rule 5(b).
+    void checkDuringDhasa;
 
-    if (h1 === undefined || h2 === undefined) return p1;
-
-    // Basic Rule (Python _stronger_planet_new): For Rahu/Ketu co-lordship,
-    // if one planet is in the co-ruled sign and the other is not,
-    // the one NOT in the co-ruled sign is stronger.
-    if (p1 === RAHU || p1 === KETU || p2 === RAHU || p2 === KETU) {
-        const nodeP = [p1, p2].find(p => p === RAHU || p === KETU)!;
-        const lordHouse = HOUSES_OF_RAHU_KETU[nodeP];
-        if (lordHouse !== undefined) {
-            if (h1 === lordHouse && h2 !== lordHouse) return p2;
-            if (h2 === lordHouse && h1 !== lordHouse) return p1;
-        }
-    }
-
-    // Rule 1: Planet joined by more planets is stronger
-    // Count planets in same house (excluding self)
-    const count1 = planetPositions.filter(p => p.rasi === h1 && p.planet !== p1).length;
-    const count2 = planetPositions.filter(p => p.rasi === h2 && p.planet !== p2).length;
-
-    if (count1 > count2) return p1;
-    if (count2 > count1) return p2;
-
-    // Rule 2: Conjoin/Aspect by Jupiter, Mercury, or Dispositor
-    const { arp } = getRaasiDrishtiFromChart(pToH);
-
-    // Helper to get count of specific associations for a planet/house
-    const getAssociationScore = (planet: number, house: number): number => {
-        let score = 0;
-        const dispositor = SIGN_LORDS[house] ?? 0;
-        const benefics = [JUPITER, MERCURY, dispositor];
-
-        // 1. Conjoined (in same house)
-        const planetsInHouse = planetPositions.filter(p => p.rasi === house).map(p => p.planet);
-        benefics.forEach(b => {
-            if (planetsInHouse.includes(b) && b !== planet) score++;
-        });
-
-        // 2. Aspecting the Rasi (Raasi Drishti)
-        // Find which planets refer to Rasis that aspect 'house'
-        const aspectingPlanets: number[] = [];
-        Object.entries(arp).forEach(([pStr, aspectedRasis]) => {
-            if (aspectedRasis && aspectedRasis.includes(house)) {
-                aspectingPlanets.push(parseInt(pStr));
-            }
-        });
-
-        benefics.forEach(b => {
-            if (aspectingPlanets.includes(b)) score++;
-        });
-
-        return score;
-    };
-
-    const score1 = getAssociationScore(p1, h1);
-    const score2 = getAssociationScore(p2, h2);
-
-    if (score1 > score2) return p1;
-    if (score2 > score1) return p2;
-
-    // Rule 3: Exalted planet is stronger
-    const strength1 = HOUSE_STRENGTHS_OF_PLANETS[p1]?.[h1] ?? 0;
-    const strength2 = HOUSE_STRENGTHS_OF_PLANETS[p2]?.[h2] ?? 0;
-
-    if (strength1 === STRENGTH_EXALTED && strength1 > strength2) return p1;
-    if (strength2 === STRENGTH_EXALTED && strength2 > strength1) return p2;
-
-    // Rule 4: Natural strength of Rasi
-    // Dual > Fixed > Movable
-    const getRasiTypeStrength = (r: number): number => {
-        if (DUAL_SIGNS.includes(r)) return 3;
-        if (FIXED_SIGNS.includes(r)) return 2;
-        if (MOVABLE_SIGNS.includes(r)) return 1;
-        return 0;
-    };
-
-    const rType1 = getRasiTypeStrength(h1);
-    const rType2 = getRasiTypeStrength(h2);
-
-    if (rType1 > rType2) return p1;
-    if (rType2 > rType1) return p2;
-
-    // Rule 5: Longitude advancement
-    const long1 = planetPositions.find(p => p.planet === p1)?.longitude || 0;
-    const long2 = planetPositions.find(p => p.planet === p2)?.longitude || 0;
-
-    const deg1 = long1 % 30;
-    const deg2 = long2 % 30;
-
-    if (deg1 >= deg2) return p1;
-    return p2;
+    // Rule 5(b): planet more advanced in its rasi (Python: positions[p+1][1][1]; tie -> p2)
+    const long1 = planetPositions[p1 + 1]?.longitude ?? 0;
+    const long2 = planetPositions[p2 + 1]?.longitude ?? 0;
+    return long1 > long2 ? p1 : p2;
 };
 
 /**
@@ -568,112 +719,26 @@ export const getStrongerPlanetFromPositions = (
  */
 // @parity: py=stronger_rasi_from_planet_positions
 export const getStrongerRasi = (
-    planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
+    planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>,
     r1: number,
     r2: number
 ): number => {
-    // Logic similar to Stronger Planet but for Rasis directly
-    const pToH = getPlanetToHouseDict(planetPositions);
+    // Chart (string[12]) input: behave like Python's chart-based stronger_rasi.
+    if (typeof (planetPositionsIn as unknown as Array<unknown>)[0] === 'string') {
+        const chartIn = planetPositionsIn as unknown as string[];
+        return getStrongerRasiFromChart(chartIn, r1, r2) ?? r1;
+    }
+    const pp = normalizePlanetPositions(planetPositionsIn);
+    const chart = buildHouseChart(pp);
+    const chartResult = getStrongerRasiFromChart(chart, r1, r2);
+    if (chartResult !== null) return chartResult;
 
-    // Rule 1: Planet count
-    const count1All = planetPositions.filter(p => p.rasi === r1).length;
-    const count2All = planetPositions.filter(p => p.rasi === r2).length;
-
-    if (count1All > count2All) return r1;
-    if (count2All > count1All) return r2;
-
-    // Rule 2: How many of Jupiter, Mercury, and dispositor (lord) are in/aspecting the rasi
-    const lord1 = SIGN_LORDS[r1] ?? 0;
-    const lord2 = SIGN_LORDS[r2] ?? 0;
-    const lord1Pos = pToH[lord1];
-    const lord2Pos = pToH[lord2];
-
-    // Count: how many of [Mercury, Jupiter, lord] are in rasi or aspecting it
-    // (Raasi drishti: movable aspects fixed except adjacent, fixed aspects movable except adjacent,
-    //  dual aspects other dual signs)
-    const getRaasiAspects = (rasi: number): number[] => {
-        const aspected: number[] = [];
-        const isMovable = MOVABLE_SIGNS.includes(rasi);
-        const isFixed = FIXED_SIGNS.includes(rasi);
-        const isDual = DUAL_SIGNS.includes(rasi);
-        if (isMovable) {
-            for (const fs of FIXED_SIGNS) if (Math.abs(fs - rasi) !== 1 && (fs - rasi + 12) % 12 !== 1 && (rasi - fs + 12) % 12 !== 1) aspected.push(fs);
-        } else if (isFixed) {
-            for (const ms of MOVABLE_SIGNS) if (Math.abs(ms - rasi) !== 1 && (ms - rasi + 12) % 12 !== 1 && (rasi - ms + 12) % 12 !== 1) aspected.push(ms);
-        } else if (isDual) {
-            for (const ds of DUAL_SIGNS) if (ds !== rasi) aspected.push(ds);
-        }
-        return aspected;
-    };
-
-    const getCoplanetScore = (rasi: number, lordOfRasi: number): number => {
-        let score = 0;
-        const checkPlanets = [MERCURY, JUPITER, lordOfRasi];
-        // Count planets in the rasi
-        score += checkPlanets.filter(p => pToH[p] === rasi).length;
-        // Count planets aspecting the rasi via raasi drishti
-        const aspectingSigns = getRaasiAspects(rasi);
-        for (const cp of checkPlanets) {
-            if (pToH[cp] !== undefined && aspectingSigns.includes(pToH[cp])) score++;
-        }
-        return score;
-    };
-
-    const coScore1 = getCoplanetScore(r1, lord1);
-    const coScore2 = getCoplanetScore(r2, lord2);
-
-    if (coScore1 > coScore2) return r1;
-    if (coScore2 > coScore1) return r2;
-
-    // Rule 3: If one rasi contains an exalted planet and the other does not
-    const getExaltedCount = (rasi: number): number => {
-        return planetPositions.filter(p =>
-            p.planet !== -1 && // skip Lagna
-            p.rasi === rasi &&
-            HOUSE_STRENGTHS_OF_PLANETS[p.planet]?.[rasi] === STRENGTH_EXALTED
-        ).length;
-    };
-
-    const exalted1 = getExaltedCount(r1);
-    const exalted2 = getExaltedCount(r2);
-
-    if (exalted1 > 0 && exalted2 === 0) return r1;
-    if (exalted2 > 0 && exalted1 === 0) return r2;
-
-    // Rule 4: Oddity difference
-    if (lord1Pos === undefined || lord2Pos === undefined) return r1; // Fallback
-
-    const isDifferentOddity = (rasi: number, lordLoc: number) => {
-        return (ODD_SIGNS.includes(rasi) && EVEN_SIGNS.includes(lordLoc)) ||
-            (EVEN_SIGNS.includes(rasi) && ODD_SIGNS.includes(lordLoc));
-    };
-
-    const diff1 = isDifferentOddity(r1, lord1Pos);
-    const diff2 = isDifferentOddity(r2, lord2Pos);
-
-    if (diff1 && !diff2) return r1;
-    if (diff2 && !diff1) return r2;
-
-    // Rule 5: Natural Strength (Dual > Fixed > Movable)
-    const getRasiTypeStrength = (r: number): number => {
-        if (DUAL_SIGNS.includes(r)) return 3;
-        if (FIXED_SIGNS.includes(r)) return 2;
-        if (MOVABLE_SIGNS.includes(r)) return 1;
-        return 0;
-    };
-
-    const rt1 = getRasiTypeStrength(r1);
-    const rt2 = getRasiTypeStrength(r2);
-
-    if (rt1 > rt2) return r1;
-    if (rt2 > rt1) return r2;
-
-    // Fallback: Longitude of Lord
-    const lord1Long = planetPositions.find(p => p.planet === lord1)?.longitude || 0;
-    const lord2Long = planetPositions.find(p => p.planet === lord2)?.longitude || 0;
-
-    if ((lord1Long % 30) >= (lord2Long % 30)) return r1;
-    return r2;
+    // Rule 6 (Python): rasi whose lord has higher longitude advancement (tie -> r2)
+    const lord1 = getHouseOwnerFromPlanetPositions(pp, r1);
+    const lord2 = getHouseOwnerFromPlanetPositions(pp, r2);
+    const l1 = pp[lord1 + 1]?.longitude ?? 0;
+    const l2 = pp[lord2 + 1]?.longitude ?? 0;
+    return l1 > l2 ? r1 : r2;
 };
 
 // ============================================================================
@@ -691,8 +756,9 @@ export const getStrongerRasi = (
  */
 // @parity: py=brahma
 export const getBrahma = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>
 ): number => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   const pToH = getPlanetToHouseDict(planetPositions);
 
   // Get Lagna house (from first position - assumed to be Ascendant/Lagna)
@@ -798,7 +864,6 @@ const getFullGrahaDrishti = (planet: number): number[] => {
  *   ahp[p] = houses aspected (relative to ascendant)
  *   app[p] = planets aspected by planet p via graha drishti
  */
-// @parity: py=graha_drishti_from_chart
 export const getGrahaDrishtiFromChart = (
   chart: string[]
 ): {
@@ -957,9 +1022,10 @@ const getCombinedDrishtiOfPlanet = (
  */
 // @parity: py=associations_of_the_planet
 export const getAssociationsOfThePlanet = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>,
   planet: number
 ): number[] => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   // Build house-to-planet chart string (like Python's h_to_p)
   const chart = buildHouseChart(planetPositions);
 
@@ -1141,8 +1207,9 @@ export const getBadhakasOfRaasi = (raasi: number): [number, number[]] => {
  */
 // @parity: py=marakas_from_planet_positions
 export const getMarakasFromPlanetPositions = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   // Build planet-to-house dict
   const pToH: Record<number | string, number> = {};
   for (const p of planetPositions) {
@@ -1182,8 +1249,8 @@ export const getMarakasFromPlanetPositions = (
     marakaPlanets.push(...mpls);
   }
 
-  // Deduplicate
-  return [...new Set(marakaPlanets)];
+  // Deduplicate. Python returns list(set(...)); match CPython set iteration order.
+  return pythonIntSetOrder(marakaPlanets);
 };
 
 // ============================================================================
@@ -1203,13 +1270,28 @@ export const getMarakasFromPlanetPositions = (
 export const getOrderOfPlanetsByStrength = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
+  const pp = normalizePlanetPositions(planetPositions);
   const planets = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-  // Sort using comparison: if stronger returns planet1, planet1 goes first
-  planets.sort((p1, p2) => {
-    const stronger = getStrongerPlanetFromPositions(planetPositions, p1, p2);
+  // The stronger-planet comparator is not necessarily transitive, so the sort
+  // algorithm matters. Python's sorted() uses binary insertion for short lists;
+  // replicate it exactly for parity (compare(pivot, a[mid]) < 0 -> go left).
+  const compare = (p1: number, p2: number): number => {
+    const stronger = getStrongerPlanetFromPositions(pp, p1, p2);
     return stronger === p1 ? -1 : 1;
-  });
+  };
+  for (let i = 1; i < planets.length; i++) {
+    const pivot = planets[i];
+    let lo = 0;
+    let hi = i;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (compare(pivot, planets[mid]) < 0) hi = mid;
+      else lo = mid + 1;
+    }
+    planets.splice(i, 1);
+    planets.splice(lo, 0, pivot);
+  }
 
   return planets;
 };
@@ -1870,8 +1952,9 @@ export const getAspectedPlanetsOfRaasi = (chart: string[], raasi: number): numbe
  */
 // @parity: py=rudra
 export const getRudra = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>
 ): [number, number, number[]] => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   const pToH: Record<number | string, number> = {};
   for (const p of planetPositions) {
     if (p.planet === -1) {
@@ -1911,7 +1994,7 @@ export const getRudra = (
 export const getTrishoolaRasis = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
 ): number[] => {
-  return getTrinesOfRaasi(getRudra(planetPositions)[1]);
+  return getTrinesOfRaasi(getRudra(normalizePlanetPositions(planetPositions))[1]);
 };
 
 /**
@@ -1920,67 +2003,21 @@ export const getTrishoolaRasis = (
  */
 // @parity: py=house_owner
 export const getHouseOwnerFromChart = (chart: string[], sign: number): number => {
-  let lord = SIGN_LORDS[sign % 12] ?? 0;
+  const lord = HOUSE_OWNERS[sign % 12] ?? 0;
 
+  // Python uses the chart-based stronger_planet for the co-lord exceptions.
+  // (Its Basic Rule never fires due to a known Python bug, so the chart-based
+  //  path intentionally omits it — pyStrongerPlanetChart with useBasicRule=false.)
+  let stronger: number | null = null;
   if ((sign % 12) === SCORPIO) {
-    // Mars vs Ketu for Scorpio
-    lord = getStrongerPlanetFromChart(chart, MARS, KETU);
+    stronger = pyStrongerPlanetChart(chart, MARS, KETU, false);
   } else if ((sign % 12) === AQUARIUS) {
-    // Saturn vs Rahu for Aquarius
-    lord = getStrongerPlanetFromChart(chart, SATURN, RAHU);
+    stronger = pyStrongerPlanetChart(chart, SATURN, RAHU, false);
+  } else {
+    return lord;
   }
-
-  return lord;
-};
-
-/**
- * Helper: find stronger planet from a chart (string[12]).
- * Simplified version using planet count in same house as tiebreaker.
- */
-const getStrongerPlanetFromChart = (chart: string[], p1: number, p2: number): number => {
-  if (p1 === p2) return p1;
-
-  const pToH = parseChartToPlanetHouseDict(chart);
-  const h1 = pToH[p1];
-  const h2 = pToH[p2];
-  if (h1 === undefined || h2 === undefined) return p1;
-
-  // Count planets in same house (excluding self)
-  const countInHouse = (h: number, exclude: number): number => {
-    if (!chart[h] || chart[h] === '') return 0;
-    const parts = chart[h].split('/').filter(part => {
-      const t = part.trim();
-      if (t === '' || t === 'L') return false;
-      const pid = parseInt(t, 10);
-      return !isNaN(pid) && pid !== exclude;
-    });
-    return parts.length;
-  };
-
-  const count1 = countInHouse(h1, p1);
-  const count2 = countInHouse(h2, p2);
-  if (count1 > count2) return p1;
-  if (count2 > count1) return p2;
-
-  // Use house strength as tiebreaker
-  const strength1 = HOUSE_STRENGTHS_OF_PLANETS[p1]?.[h1] ?? 0;
-  const strength2 = HOUSE_STRENGTHS_OF_PLANETS[p2]?.[h2] ?? 0;
-  if (strength1 > strength2) return p1;
-  if (strength2 > strength1) return p2;
-
-  // Dual > Fixed > Movable
-  const getRasiTypeStrength = (r: number): number => {
-    if (DUAL_SIGNS.includes(r)) return 3;
-    if (FIXED_SIGNS.includes(r)) return 2;
-    if (MOVABLE_SIGNS.includes(r)) return 1;
-    return 0;
-  };
-  const rt1 = getRasiTypeStrength(h1);
-  const rt2 = getRasiTypeStrength(h2);
-  if (rt1 > rt2) return p1;
-  if (rt2 > rt1) return p2;
-
-  return p1;
+  // Python falls back to the default lord when rules 1-4 cannot decide.
+  return stronger === null ? lord : stronger;
 };
 
 // ============================================================================
@@ -1999,8 +2036,9 @@ const getStrongerPlanetFromChart = (chart: string[], p1: number, p2: number): nu
  */
 // @parity: py=maheshwara_from_planet_positions
 export const getMaheshwara = (
-  planetPositions: Array<{ planet: number; rasi: number; longitude: number }>
+  planetPositionsIn: Array<{ planet: number; rasi: number; longitude: number }>
 ): number => {
+  const planetPositions = normalizePlanetPositions(planetPositionsIn);
   const charaKarakas = getCharaKarakas(planetPositions);
   const atmaKaraka = charaKarakas[0];
 
@@ -2183,7 +2221,6 @@ export const longevityPairCheck = (
  * @param horaLagnaRasi - Rasi of the Hora Lagna (0-11)
  * @returns Longevity in years
  */
-// @parity: py=longevity
 export const getLongevity = (
   planetPositions: Array<{ planet: number; rasi: number; longitude: number }>,
   horaLagnaRasi: number
@@ -2255,8 +2292,14 @@ export const getAspectedHousesOfRaasi = (chart: string[], raasi: number): number
     if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
   }
   const { ahp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  // Parity note: Python's aspected_houses_of_the_raasi filters with `str(raasi) in value`,
+  // but `value` (ahp[p]) is a list of integer house numbers. In Python a str is never equal
+  // to an int, so the membership test is ALWAYS False and the function ALWAYS returns [].
+  // We replicate that source-of-truth behavior (string vs int never matches).
   return Object.entries(ahp)
-    .filter(([, aspectedHouses]) => aspectedHouses.includes(raasi))
+    .filter(([, aspectedHouses]) =>
+      aspectedHouses.some((h) => (h as unknown as string) === String(raasi))
+    )
     .map(([key]) => parseInt(key, 10));
 };
 
@@ -2277,8 +2320,15 @@ export const getAspectedRasisOfRaasi = (chart: string[], raasi: number): number[
     if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
   }
   const { arp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  // Parity note: Python's aspected_raasis_of_the_raasi filters with `str(raasi) in value`,
+  // but `value` (arp[p]) is a list of integer rasi numbers. In Python a str is never equal
+  // to an int, so the membership test is ALWAYS False and the function ALWAYS returns [].
+  // We replicate that source-of-truth behavior (string vs int never matches) rather than
+  // the "intended" integer comparison.
   return Object.entries(arp)
-    .filter(([, aspectedRasis]) => aspectedRasis.includes(raasi))
+    .filter(([, aspectedRasis]) =>
+      aspectedRasis.some((r) => (r as unknown as string) === String(raasi))
+    )
     .map(([key]) => parseInt(key, 10));
 };
 
@@ -2324,7 +2374,8 @@ export const getMarakas = (chart: string[]): number[] => {
     marakaPlanets.push(...mpls);
   }
 
-  return [...new Set(marakaPlanets)];
+  // Python returns list(set(...)); match CPython set iteration order.
+  return pythonIntSetOrder(marakaPlanets);
 };
 
 // ============================================================================

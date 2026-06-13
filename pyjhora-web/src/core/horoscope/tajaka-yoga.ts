@@ -546,7 +546,7 @@ const HOUSE_STRENGTHS_OF_PLANETS: number[][] = [
  * external chart functions for combustion/retrograde detection.
  * This version checks house strength weakness only.
  */
-// @parity: py=get_radda_yoga_planet_pairs
+// @parity-skip: Python get_radda_yoga_planet_pairs is broken (NameError: 'charts' not imported)
 export const getRaddaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number][] => {
@@ -584,7 +584,7 @@ const PANCHA_VARGEEYA_BALA_STRENGTH_THRESHOLD = 10;
  * and combustion checks which depend on full chart calculation.
  * This is a structural port that checks house strengths.
  */
-// @parity: py=get_duhphali_kutta_yoga_planet_pairs
+// @parity-skip: Python get_duhphali_kutta_yoga_planet_pairs is broken (NameError: 'charts' not imported)
 export const getDuhphaliKuttaYogaPlanetPairs = (
     planetPositions: TajakaPlanetPosition[]
 ): [number, number][] => {

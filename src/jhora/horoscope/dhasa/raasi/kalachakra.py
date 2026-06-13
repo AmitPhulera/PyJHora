@@ -112,7 +112,6 @@ def kalachakra_dhasa(planet_longitude,jd,include_antardhasa=True):
         dhasa_start_jd += dhasa_duration_in_days
     dhasa_periods = dp_new[:]
     return dhasa_periods
-# @parity: ts=@/core/dhasa/raasi/kalachakra::getKalachakraDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,dhasa_starting_planet=1,
                       include_antardhasa=True,star_position_from_moon=1):
     """

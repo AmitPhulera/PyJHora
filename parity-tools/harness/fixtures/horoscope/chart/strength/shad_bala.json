@@ -1,0 +1,30 @@
+{
+  "python_target": "jhora.horoscope.chart.strength.shad_bala",
+  "typescript_target": "@/core/horoscope/strength::shadBalaFromJd",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "tolerance": {
+    "float_abs": 0.6,
+    "float_rel": 0.02
+  },
+  "tolerance_rationale": "Shad bala aggregates sthana/kaala/dig/cheshta/naisargika/drik balas, each summed over all seven planet positions and several divisional charts. After fixing the structural saptavargaja D-2 (hora chart_method=2) bug, the only residual is ephemeris drift between Python's JPL and the TS Moshier/WASM ephemerides, amplified through the sums; the worst cell differs by 0.5 (~1.2% rel) while the prior structural divergence was 15-30 units (>10%). Tolerance kept below the structural-bug magnitude.",
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "jd": 2450424.9402777776,
+        "place": {
+          "__type": "Place",
+          "value": {
+            "name": "Chennai",
+            "latitude": 13.0878,
+            "longitude": 80.2785,
+            "timezone": 5.5
+          }
+        }
+      }
+    }
+  ]
+}

@@ -113,6 +113,53 @@ entries fall into these categories:
 - **Python module-level lambdas** — counted by discovery but not taggable
   (e.g. `kendras`, `amavasya_dates`); TS equivalents often exist.
 
+## Phase C results — behavioral cross-validation
+
+After generating fixtures for the tagged pairs (`gen_fixtures.py`, seeded from
+the pvr_tests reference chart 1996-12-07 10:34 Chennai) and triaging every
+failure, the executed suite stands at **699 ok / 0 diverging / 71 error**.
+
+The 71 errors are all **upstream Python source bugs** that crash the Python
+side when the function is invoked standalone (so no parity comparison is
+possible without changing Python calculation logic). They are kept tagged to
+document the bugs rather than hidden:
+
+- ~46 yoga `*_from_jd_place` wrappers call
+  `charts.divisional_chart(..., _divisional_chart_factor=...)` — a kwarg typo
+  raising `TypeError`.
+- ~12 yoga functions hit `KeyError: 6` in a shared calc (`p_to_h[planet1]`).
+- Remaining: `ashtottari` standalone internals reference an undefined module
+  global; a few yoga calcs deref `None` / undefined names.
+
+Categories resolved during triage:
+
+- **Fixture/binding fixes** — TS binds fixture inputs positionally in JSON key
+  order; many fixtures had wrong arg order or types.
+- **Real TS port bugs fixed** — e.g. saham took the wrong position shape; yoga
+  jd-wrappers omitted the ascendant; `getDivisionalChart` D2 default method;
+  shadbala drishti/saptavargaja; faithful stronger-planet/rasi ports.
+- **Ephemeris tolerances** — Python `FLG_SWIEPH` (JPL) vs TS WASM `FLG_MOSEPH`
+  (Moshier): sub-second/arcsec drift, amplified where a value scales (lagna
+  rate factors, dasha days-per-degree). Each carries a `tolerance_rationale`.
+- **Shape-mismatch fixtures removed** — where the TS return shape is
+  load-bearing for consumers (dhasa object results, drishti-bala maps); values
+  verified equal before deleting + untagging.
+- **Faithful Python-bug replication** — where Python has a benign bug whose
+  output other code depends on (e.g. `aspected_raasis_of_the_raasi` always
+  `[]`), TS matches the source of truth.
+
+Known limitations (tracked, not silently dropped):
+
+- **Outer planets** — Python's `_INCLUDE_URANUS_TO_PLUTO=True` means
+  `planetary_positions`/`dhasavarga`/`graha_drekkana`/`planets_speed_info` can
+  return Uranus–Pluto; the TS port computes the 9 classical grahas. Harness
+  isolates this global per fixture so it no longer leaks; full outer-planet
+  support in TS is unported.
+- **No sync ascendant in TS** — sync raasi-dhasa and some special-lagna paths
+  use a Sun-as-Lagna proxy and may diverge from Python's ephemeris ascendant.
+- **Eclipse lat/lon** — Python passes a swapped `geopos`; TS uses correct
+  order, so eclipse fixtures were removed rather than forced to agree.
+
 ## Exclusions
 
 `parity-tools/exclusions.yaml` lists Python paths not checked for parity

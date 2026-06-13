@@ -1,0 +1,41 @@
+{
+  "python_target": "jhora.horoscope.chart.sphuta.yoga_sphuta",
+  "typescript_target": "@/core/horoscope/sphuta::yogaSphutaFromDob",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "dob": {
+          "__type": "Date",
+          "value": {
+            "year": 1996,
+            "month": 12,
+            "day": 7
+          }
+        },
+        "tob": [
+          10,
+          34,
+          0
+        ],
+        "place": {
+          "__type": "Place",
+          "value": {
+            "name": "Chennai",
+            "latitude": 13.0878,
+            "longitude": 80.2785,
+            "timezone": 5.5
+          }
+        }
+      }
+    }
+  ],
+  "tolerance": {
+    "float_abs": 0.002
+  },
+  "tolerance_rationale": "Sphuta longitudes are linear combinations of planet/ascendant/gulika longitudes (coefficients up to x8). Python uses JPL ephemeris files, TS uses Moshier via swisseph-wasm; per-body drift is ~0.1-0.3 arcsec, amplified by formula coefficients and the sunrise-derived gulika time to <=2e-3 deg. Rasi (sign) values must still match exactly."
+}

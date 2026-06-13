@@ -608,6 +608,21 @@ async function getHouseCusps(jdUtc: number, latitude: number, longitude: number)
 const RISE_FLAGS = SWE_FLAGS.BIT_HINDU_RISING | SWE_FLAGS.FLG_TRUEPOS | SWE_FLAGS.FLG_SPEED;
 
 /**
+ * Convert float hours to {hour, minute, second} matching Python
+ * utils.to_dms(x, as_string=False): truncate hour/minute, ROUND seconds,
+ * with 60-second/60-minute carry. Python rounds seconds (round), not floor.
+ */
+function localTimeToHms(localTime: number): { hour: number; minute: number; second: number } {
+  let h = Math.trunc(localTime);
+  const mins = (localTime - h) * 60;
+  let m = Math.trunc(mins);
+  let s = Math.round((mins - m) * 60);
+  if (s === 60) { m += 1; s = 0; }
+  if (m === 60) { h += 1; m = 0; }
+  return { hour: h, minute: m, second: s };
+}
+
+/**
  * Internal helper: call swe_rise_trans via direct WASM ccall.
  * The swisseph-wasm JS wrapper for rise_trans has incorrect parameter mapping,
  * so we call the C function directly with the correct 10-parameter signature:
@@ -678,11 +693,7 @@ async function riseTransHelper(
     const localTime = (eventJdUt - jdMidnight) * 24 + place.timezone;
 
     // Recalculate JD from local time (matching Python's behavior for sunrise)
-    const h = Math.floor(localTime);
-    const remMin = (localTime - h) * 60;
-    const m = Math.floor(remMin);
-    const s = Math.floor((remMin - m) * 60);
-    const eventJdLocal = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+    const eventJdLocal = gregorianToJulianDay(date, localTimeToHms(localTime));
 
     return {
       localTime,
@@ -729,11 +740,7 @@ export async function sunsetAsync(jd: number, place: Place, gauriChoghadiyaSetti
 
   if (gauriChoghadiyaSetting) {
     const { date } = julianDayToGregorian(jd);
-    const h = Math.floor(result.localTime);
-    const remMin = (result.localTime - h) * 60;
-    const m = Math.floor(remMin);
-    const s = Math.floor((remMin - m) * 60);
-    const recalcJd = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+    const recalcJd = gregorianToJulianDay(date, localTimeToHms(result.localTime));
     return { ...result, jd: recalcJd };
   }
 
@@ -748,7 +755,7 @@ function riseTransHelperSync(
   place: Place,
   planet: number,
   riseOrSet: number
-): { localTime: number; timeString: string; jd: number } {
+): { localTime: number; timeString: string; jd: number; jdUt: number } {
   const SweModule = getSweModuleSync();
   if (SweModule) {
     // Accurate WASM calculation
@@ -780,16 +787,13 @@ function riseTransHelperSync(
         const eventJdUt = tret[0];
         const localTime = (eventJdUt - jdMidnight) * 24 + place.timezone;
 
-        const h = Math.floor(localTime);
-        const remMin = (localTime - h) * 60;
-        const m = Math.floor(remMin);
-        const s = Math.floor((remMin - m) * 60);
-        const eventJdLocal = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+        const eventJdLocal = gregorianToJulianDay(date, localTimeToHms(localTime));
 
         return {
           localTime,
           timeString: formatHoursToTime(localTime),
           jd: eventJdLocal,
+          jdUt: eventJdUt,
         };
       }
     } finally {
@@ -810,7 +814,8 @@ function riseTransHelperSync(
   return {
     localTime,
     timeString: formatHoursToTime(localTime),
-    jd: jdMidnight + (localTime - 12) / 24
+    jd: jdMidnight + (localTime - 12) / 24,
+    jdUt: jdMidnight + (localTime - 12) / 24 - place.timezone / 24
   };
 }
 
@@ -821,7 +826,8 @@ function riseTransHelperSync(
 export function sunrise(jd: number, place: Place): {
   localTime: number;
   timeString: string;
-  jd: number
+  jd: number;
+  jdUt: number
 } {
   return riseTransHelperSync(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_RISE);
 }
@@ -834,18 +840,15 @@ export function sunrise(jd: number, place: Place): {
 export function sunset(jd: number, place: Place, gauriChoghadiyaSetting: boolean = false): {
   localTime: number;
   timeString: string;
-  jd: number
+  jd: number;
+  jdUt: number
 } {
   const result = riseTransHelperSync(jd, place, SWE_PLANETS.SUN, SWE_FLAGS.CALC_SET);
 
   if (gauriChoghadiyaSetting) {
     // Matching Python: recalculate set_jd via julian_day_number(dob, tob)
     const { date } = julianDayToGregorian(jd);
-    const h = Math.floor(result.localTime);
-    const remMin = (result.localTime - h) * 60;
-    const m = Math.floor(remMin);
-    const s = Math.floor((remMin - m) * 60);
-    const recalcJd = gregorianToJulianDay(date, { hour: h, minute: m, second: s });
+    const recalcJd = gregorianToJulianDay(date, localTimeToHms(result.localTime));
     return { ...result, jd: recalcJd };
   }
 
@@ -889,7 +892,8 @@ export async function moonsetAsync(jd: number, place: Place): Promise<{
 export function moonrise(jd: number, place: Place): {
   localTime: number;
   timeString: string;
-  jd: number
+  jd: number;
+  jdUt: number
 } {
   return riseTransHelperSync(jd, place, SWE_PLANETS.MOON, SWE_FLAGS.CALC_RISE);
 }
@@ -901,7 +905,8 @@ export function moonrise(jd: number, place: Place): {
 export function moonset(jd: number, place: Place): {
   localTime: number;
   timeString: string;
-  jd: number
+  jd: number;
+  jdUt: number
 } {
   return riseTransHelperSync(jd, place, SWE_PLANETS.MOON, SWE_FLAGS.CALC_SET);
 }
@@ -1340,6 +1345,53 @@ export async function ascendantFullAsync(
     const coordinates = nirayanAsc - constellation * 30;
 
     // Calculate nakshatra and pada
+    const oneStar = 360 / 27;
+    const onePada = 360 / 108;
+    const quotient = Math.floor(nirayanAsc / oneStar);
+    const remainder = nirayanAsc % oneStar;
+    const nakNo = 1 + quotient;
+    const padaNo = 1 + Math.floor(remainder / onePada);
+
+    return [constellation, coordinates, nakNo, padaNo];
+  } finally {
+    SweModule._free(cuspsPtr);
+    SweModule._free(ascmcPtr);
+  }
+}
+
+/**
+ * Sync version of ascendantFullAsync — uses cached WASM module when available.
+ * Returns null before WASM initialization (callers should fall back).
+ */
+export function ascendantFull(
+  jd: number,
+  place: Place
+): [number, number, number, number] | null {
+  const SweModule = getSweModuleSync();
+  if (!SweModule) return null;
+
+  const jdUtc = jd - place.timezone / 24;
+  const modeId = AYANAMSA_MODES[_ayanamsaMode as keyof typeof AYANAMSA_MODES] ?? 1;
+  _sweInstance!.set_sid_mode(modeId, 0, 0);
+
+  const flags = SWE_FLAGS.FLG_SIDEREAL;
+  const cuspsPtr = SweModule._malloc(13 * Float64Array.BYTES_PER_ELEMENT);
+  const ascmcPtr = SweModule._malloc(10 * Float64Array.BYTES_PER_ELEMENT);
+
+  try {
+    SweModule.ccall(
+      'swe_houses_ex',
+      'number',
+      ['number', 'number', 'number', 'number', 'number', 'pointer', 'pointer'],
+      [jdUtc, flags, place.latitude, place.longitude, 'P'.charCodeAt(0), cuspsPtr, ascmcPtr]
+    );
+
+    const ascmcView = new Float64Array(SweModule.HEAPF64.buffer, ascmcPtr, 10);
+    const nirayanAsc = normalizeDegrees(ascmcView[0]!);
+
+    const constellation = Math.floor(nirayanAsc / 30);
+    const coordinates = nirayanAsc - constellation * 30;
+
     const oneStar = 360 / 27;
     const onePada = 360 / 108;
     const quotient = Math.floor(nirayanAsc / oneStar);

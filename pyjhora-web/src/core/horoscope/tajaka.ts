@@ -374,20 +374,10 @@ export const conjunctionAspectsOfThePlanet = (
     const pToH = getPlanetToHouseDictFromChart(housePlanetDict);
     const planetHouse = pToH[String(planet)];
     if (planetHouse == null) return [[], []];
-    // Same logic but exclude this specific planet
-    const aspectedHouses = [planetHouse];
-    const aspectedPlanets: string[] = [];
-    if (housePlanetDict[planetHouse] !== '') {
-        const parts = housePlanetDict[planetHouse]
-            .replace(String(planet), '')
-            .split('/');
-        for (const p of parts) {
-            if (p.trim() !== '') {
-                aspectedPlanets.push(p.trim());
-            }
-        }
-    }
-    return [aspectedHouses, aspectedPlanets];
+    // Python delegates to conjunction_aspects_of_the_raasi, which excludes the
+    // FIRST planet found in the house (not necessarily the queried planet).
+    // We replicate that quirk for parity.
+    return conjunctionAspectsOfTheRaasi(housePlanetDict, planetHouse);
 };
 
 // ============================================================================

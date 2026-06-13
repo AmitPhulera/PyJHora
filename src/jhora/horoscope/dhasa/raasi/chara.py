@@ -228,7 +228,6 @@ def _dhasa_progression_raghava_bhatta_method(planet_positions,gender=1):
     elif dhasa_seed in const.dual_signs:
         _dhasa_progression = [(dhasa_seed+h+4)%12 for h in range(12)]
     return _dhasa_progression
-# @parity: ts=@/core/dhasa/raasi/chara::getCharaDashaBhukti
 def get_dhasa_antardhasa(dob,tob,place,divisional_chart_factor=1,years=1,months=1,sixty_hours=1,include_antardhasa=True,
                          chara_method=1,gender=0):
     """

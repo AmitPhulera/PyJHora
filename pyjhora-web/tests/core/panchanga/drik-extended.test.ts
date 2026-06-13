@@ -277,28 +277,28 @@ describe('Extended drik.ts Tests', () => {
   // ==========================================================================
 
   describe('planetaryPositions', () => {
-    it('should return 9 planet positions', () => {
+    it('should return 9 planet positions (Python [p, long_in_sign, rasi] shape)', () => {
       const pp = planetaryPositions(jd1, bangalore);
       expect(pp.length).toBe(9);
-      // Each entry: [planetId, [rasi, longitude]]
+      // Each entry: [planetId, longitudeInSign, rasi]
       for (let i = 0; i < 9; i++) {
         expect(pp[i]![0]).toBe(i);
-        expect(pp[i]![1][0]).toBeGreaterThanOrEqual(0);
-        expect(pp[i]![1][0]).toBeLessThan(12);
-        expect(pp[i]![1][1]).toBeGreaterThanOrEqual(0);
-        expect(pp[i]![1][1]).toBeLessThan(30);
+        expect(pp[i]![1]).toBeGreaterThanOrEqual(0);
+        expect(pp[i]![1]).toBeLessThan(30);
+        expect(pp[i]![2]).toBeGreaterThanOrEqual(0);
+        expect(pp[i]![2]).toBeLessThan(12);
       }
-      // Sun in December should be in Sagittarius (7) or Scorpio (7±1)
-      expect(pp[0]![1][0]).toBeGreaterThanOrEqual(6);
-      expect(pp[0]![1][0]).toBeLessThanOrEqual(8);
+      // Sun in December should be in Sagittarius (8) or Scorpio (7)
+      expect(pp[0]![2]).toBeGreaterThanOrEqual(6);
+      expect(pp[0]![2]).toBeLessThanOrEqual(8);
     });
 
     it('should return 9 positions for second date', () => {
       const pp = planetaryPositions(jd2, bangalore);
       expect(pp.length).toBe(9);
       // Ketu should be 180° from Rahu
-      const rahuLong = pp[7]![1][0] * 30 + pp[7]![1][1];
-      const ketuLong = pp[8]![1][0] * 30 + pp[8]![1][1];
+      const rahuLong = pp[7]![2] * 30 + pp[7]![1];
+      const ketuLong = pp[8]![2] * 30 + pp[8]![1];
       const diff = Math.abs(rahuLong - ketuLong);
       expect(Math.abs(diff - 180)).toBeLessThan(1);
     });
@@ -308,15 +308,22 @@ describe('Extended drik.ts Tests', () => {
   // Gauri Choghadiya
   // ==========================================================================
 
+  // "HH:MM:SS" (with optional " (+1)" suffix) -> float hours
+  const hmsToHours = (s: string): number => {
+    const m = /^(\d+):(\d+):(\d+)(?: \(\+(\d+)\))?/.exec(s)!;
+    return Number(m[1]) + Number(m[2]) / 60 + Number(m[3]) / 3600 + (m[4] ? Number(m[4]) * 24 : 0);
+  };
+
   describe('gauriChoghadiya', () => {
     it('should return 16 periods (8 day + 8 night)', () => {
       const gc = gauriChoghadiya(jd1, bangalore);
       expect(gc.length).toBe(16);
-      // Each entry: [type, startTime, endTime]
+      // Each entry: [type, startTimeString, endTimeString] (Python parity)
       for (const [type, start, end] of gc) {
         expect(type).toBeGreaterThanOrEqual(0);
         expect(type).toBeLessThanOrEqual(6);
-        expect(end).toBeGreaterThan(start);
+        expect(start).toMatch(/^\d{2}:\d{2}:\d{2}/);
+        expect(end).toMatch(/^\d{2}:\d{2}:\d{2}/);
       }
     });
   });
@@ -330,7 +337,8 @@ describe('Extended drik.ts Tests', () => {
       const ak = amritKaalam(jd1, bangalore);
       expect(ak.length).toBeGreaterThanOrEqual(0);
       for (const [start, end] of ak) {
-        expect(end).toBeGreaterThan(start);
+        expect(start).toMatch(/^\d{2}:\d{2}:\d{2}/);
+        expect(end).toMatch(/^\d{2}:\d{2}:\d{2}/);
       }
     });
   });
@@ -356,8 +364,8 @@ describe('Extended drik.ts Tests', () => {
   // ==========================================================================
 
   describe('amritaGadiya', () => {
-    it('should return [start, end] with end > start', () => {
-      const ag = amritaGadiya(jd1, bangalore);
+    it('should return [start, end] with end > start', async () => {
+      const ag = await amritaGadiya(jd1, bangalore);
       expect(ag.length).toBe(2);
       expect(ag[1]).toBeGreaterThan(ag[0]);
     });
@@ -368,8 +376,8 @@ describe('Extended drik.ts Tests', () => {
   // ==========================================================================
 
   describe('varjyam', () => {
-    it('should return at least 2 values', () => {
-      const vj = varjyam(jd1, bangalore);
+    it('should return at least 2 values', async () => {
+      const vj = await varjyam(jd1, bangalore);
       expect(vj.length).toBeGreaterThanOrEqual(2);
       // First value should be start, second should be end
       expect(vj[1]).toBeGreaterThan(vj[0]);
@@ -396,7 +404,8 @@ describe('Extended drik.ts Tests', () => {
   describe('triguna', () => {
     it('should return 0, 1, or 2', () => {
       const tg = triguna(jd1, bangalore);
-      expect([0, 1, 2]).toContain(tg);
+      // Python returns [guna, period_start_key, period_next_key]
+      expect([0, 1, 2]).toContain(tg[0]);
     });
   });
 
@@ -854,7 +863,8 @@ describe('Extended drik.ts Tests', () => {
   describe('karakaYogam', () => {
     it('should return valid yogam result', () => {
       const result = karakaYogam(jd1, bangalore);
-      expect(result.length).toBe(3);
+      // Planet-speed yogam (Python parity) returns [no, start, end, frac, ...next quad]
+      expect(result.length).toBeGreaterThanOrEqual(3);
       expect(result[0]).toBeGreaterThanOrEqual(1);
       expect(result[0]).toBeLessThanOrEqual(27);
     });
@@ -1956,11 +1966,15 @@ describe('Extended drik.ts Tests', () => {
   // SYNC PANCHANGA WRAPPERS
   // ========================================================================
   describe('Sync panchanga wrappers', () => {
-    it('midday returns time near noon', () => {
+    it('midday returns [mdhl, jd] matching Python convention', () => {
       const jd = jdForDateTime(1996, 12, 7, 10, 34);
       const result = midday(jd, bangalore);
-      expect(result.localTime).toBeGreaterThan(11.5);
-      expect(result.localTime).toBeLessThan(13.0);
+      // Python midday mixes local sunrise hours with UT sunset hours
+      expect(result.length).toBe(2);
+      expect(result[0]).toBeGreaterThan(6);
+      expect(result[0]).toBeLessThan(13.0);
+      expect(result[1]).toBeGreaterThan(jd - 1);
+      expect(result[1]).toBeLessThan(jd + 1);
     });
 
     it('midnight returns time near 0', () => {
@@ -1972,11 +1986,14 @@ describe('Extended drik.ts Tests', () => {
 
     it('trikalam returns valid raahu kaalam period', () => {
       const jd = jdForDateTime(1996, 12, 7, 10, 34);
+      // trikalam now returns "HH:MM:SS" strings (Python parity)
       const [start, end] = trikalam(jd, bangalore, 'raahu kaalam');
-      expect(start).toBeGreaterThan(5);
-      expect(start).toBeLessThan(20);
-      expect(end).toBeGreaterThan(start);
-      expect(end - start).toBeCloseTo((sunset(jd, bangalore).localTime - sunrise(jd, bangalore).localTime) / 8, 1);
+      const startH = hmsToHours(start);
+      const endH = hmsToHours(end);
+      expect(startH).toBeGreaterThan(5);
+      expect(startH).toBeLessThan(20);
+      expect(endH).toBeGreaterThan(startH);
+      expect(endH - startH).toBeCloseTo((sunset(jd, bangalore).localTime - sunrise(jd, bangalore).localTime) / 8, 1);
     });
 
     it('trikalam matches async version', async () => {
@@ -1984,25 +2001,27 @@ describe('Extended drik.ts Tests', () => {
       const syncResult = trikalam(jd, bangalore, 'yamagandam');
       const { trikalamAsync: trikalamA } = await import('@core/panchanga/drik');
       const asyncResult = await trikalamA(jd, bangalore, 'yamagandam');
-      expect(syncResult[0]).toBeCloseTo(asyncResult[0], 1);
-      expect(syncResult[1]).toBeCloseTo(asyncResult[1], 1);
+      expect(hmsToHours(syncResult[0])).toBeCloseTo(asyncResult[0], 1);
+      expect(hmsToHours(syncResult[1])).toBeCloseTo(asyncResult[1], 1);
     });
 
     it('abhijitMuhurta returns period around midday', () => {
       const jd = jdForDateTime(1996, 12, 7, 10, 34);
       const [start, end] = abhijitMuhurta(jd, bangalore);
-      expect(start).toBeGreaterThan(11);
-      expect(start).toBeLessThan(13);
-      expect(end).toBeGreaterThan(start);
+      const startH = hmsToHours(start);
+      const endH = hmsToHours(end);
+      expect(startH).toBeGreaterThan(11);
+      expect(startH).toBeLessThan(13);
+      expect(endH).toBeGreaterThan(startH);
     });
 
-    it('durmuhurtam returns 1 or 2 periods', () => {
+    it('durmuhurtam returns 1 or 2 periods (flat string list)', () => {
       const jd = jdForDateTime(1996, 12, 7, 10, 34);
       const result = durmuhurtam(jd, bangalore);
-      expect(result.length).toBeGreaterThanOrEqual(1);
-      expect(result.length).toBeLessThanOrEqual(2);
-      for (const [start, end] of result) {
-        expect(end).toBeGreaterThan(start);
+      // Python returns a flat list: [start1, end1, (start2, end2)]
+      expect(result.length === 2 || result.length === 4).toBe(true);
+      for (let i = 0; i < result.length; i += 2) {
+        expect(hmsToHours(result[i + 1]!)).toBeGreaterThan(hmsToHours(result[i]!));
       }
     });
   });

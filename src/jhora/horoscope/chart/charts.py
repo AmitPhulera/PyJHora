@@ -1066,7 +1066,7 @@ def custom_divisional_chart(planet_positions_in_rasi,divisional_chart_factor,cha
         hora_sign = _hora_list[rasi_sign][hora]
         dp.append([planet,[hora_sign,d_long]])
     return dp
-# @parity: ts=@/core/horoscope/charts::getMixedDivisionalChart
+# no @parity pair: mixed_chart is jd-based; TS has no accurate sync ascendant for a jd-based chart
 def mixed_chart(jd,place,varga_factor_1=None,chart_method_1=1,varga_factor_2=None,chart_method_2=1):
     planet_positions_in_rasi = rasi_chart(jd,place)
     if varga_factor_1==1 and varga_factor_2==1: return planet_positions_in_rasi
@@ -1074,11 +1074,12 @@ def mixed_chart(jd,place,varga_factor_1=None,chart_method_1=1,varga_factor_2=Non
             eval(divisional_chart_functions[varga_factor_1]+'(planet_positions_in_rasi,chart_method=chart_method_1)')
     pp2 = pp1 if varga_factor_2==2 else eval(divisional_chart_functions[varga_factor_2]+'(pp1,chart_method=chart_method_2)')
     return pp2
-# @parity: ts=@/core/horoscope/charts::mixedChartFromRasiPositions
+# @parity: ts=@/core/horoscope/charts::getMixedDivisionalChart
 def mixed_chart_from_rasi_positions(planet_positions_in_rasi,varga_factor_1=None,chart_method_1=1,varga_factor_2=None,chart_method_2=1):
     pp1 = eval(divisional_chart_functions[varga_factor_1]+'(planet_positions_in_rasi,chart_method=chart_method_1)')
     pp2 = eval(divisional_chart_functions[varga_factor_2]+'(pp1,chart_method=chart_method_2)')
     return pp2
+# @parity: ts=@/core/horoscope/charts::getDivisionalChart
 def divisional_positions_from_rasi_positions(planet_positions_in_rasi,divisional_chart_factor=1,
                      chart_method=1,base_rasi=None,count_from_end_of_sign=None):
     if divisional_chart_factor==1:
@@ -1094,7 +1095,7 @@ def divisional_positions_from_rasi_positions(planet_positions_in_rasi,divisional
             print('Chart division factor',divisional_chart_factor,'not supported')
             return None
     
-# @parity: ts=@/core/horoscope/charts::getDivisionalChart
+# no @parity pair: divisional_chart is jd-based; TS has no accurate sync ascendant for a jd-based chart
 def divisional_chart(jd_at_dob,place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,
                      chart_method=1,years=1,months=1,sixty_hours=1,calculation_type='drik',pravesha_type=0,
                      base_rasi=None,count_from_end_of_sign=None):
@@ -1215,7 +1216,8 @@ def planets_in_combustion(planet_positions,use_absolute_longitude=True):
         if p_long >= sun_long-combustion_range[p-2] and p_long <= sun_long+combustion_range[p-2]:
             combustion_planets.append(p)
     return combustion_planets
-# @parity: ts=@/core/horoscope/charts::vaiseshikamsaDhasavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vaiseshikamsa_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many dhasa varga charts the planets are in their own raasi or exalted
@@ -1231,7 +1233,8 @@ def vaiseshikamsa_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode
             Sreedhaamaamsa – 10.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.dhasavarga_amsa_vaiseshikamsa)
-# @parity: ts=@/core/horoscope/charts::vaiseshikamsaShadvargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vaiseshikamsa_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shad varga charts the planets are in their own raasi or exalted
@@ -1245,7 +1248,8 @@ def vaiseshikamsa_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5,  Kundalaamsa – 6.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shadvarga_amsa_vaiseshikamsa)
-# @parity: ts=@/core/horoscope/charts::vaiseshikamsaSapthavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vaiseshikamsa_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many saptha varga charts the planets are in their own raasi or exalted
@@ -1259,7 +1263,8 @@ def vaiseshikamsa_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mod
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5, Kundalaamsa – 6, Mukutaamsa – 7.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.sapthavarga_amsa_vaiseshikamsa)
-# @parity: ts=@/core/horoscope/charts::vaiseshikamsaShodhasavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vaiseshikamsa_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shodhasa varga charts the planets are in their own raasi or exalted
@@ -1276,7 +1281,8 @@ def vaiseshikamsa_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_m
             Vidrumaamsa – 13, Indraasanaamsa – 14, Golokaamsa – 15, Sree Vallabhaamsa – 16.
     """
     return _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shodhasa_varga_amsa_vaiseshikamsa)
-# @parity: ts=@/core/horoscope/charts::vaiseshikamsaBalaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,
                                    amsa_vaiseshikamsa=None):
     p_d = [0 for _ in range(9)]
@@ -1297,7 +1303,8 @@ def _vaiseshikamsa_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const
         p_d_c[p] = p_d_c[p][:-1]
         pdc[p] = [p_d[p],p_d_c[p],p_d_s[p]]
     return pdc
-# @parity: ts=@/core/horoscope/charts::vimsopakaBalaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,amsa_vimsopaka=None):
     p_d = [0 for _ in range(9)]
     p_d_s = [0 for _ in range(9)]
@@ -1327,7 +1334,8 @@ def _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode=const._DE
         #print(house.planet_list[p],pdc[p])
     return pdc
     
-# @parity: ts=@/core/horoscope/charts::vimsopakaDhasavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vimsopaka_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many dhasa varga charts the planets are in their own raasi or exalted
@@ -1343,7 +1351,8 @@ def vimsopaka_dhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=con
             Sreedhaamaamsa – 10.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.dhasavarga_amsa_vimsopaka)
-# @parity: ts=@/core/horoscope/charts::vimsopakaShadvargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vimsopaka_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shad varga charts the planets are in their own raasi or exalted
@@ -1357,7 +1366,8 @@ def vimsopaka_shadvarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=cons
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5,  Kundalaamsa – 6.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.shadvarga_amsa_vimsopaka)
-# @parity: ts=@/core/horoscope/charts::vimsopakaSapthavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vimsopaka_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many saptha varga charts the planets are in their own raasi or exalted
@@ -1371,7 +1381,8 @@ def vimsopaka_sapthavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=co
             Kimsukaamsa – 2, Vyanjanaamsa – 3, Chaamaraamsa – 4, Chatraamsa – 5, Kundalaamsa – 6, Mukutaamsa – 7.
     """
     return _vimsopaka_bala_of_planets(jd_at_dob, place_as_tuple,ayanamsa_mode,const.sapthavarga_amsa_vimsopaka)
-# @parity: ts=@/core/horoscope/charts::vimsopakaShodhasavargaOfPlanets
+# no @parity pair: TS returns {count, charts, score} objects (consumed by main.ts/yoga.ts);
+# Python returns [count, charts, score] tuples — shape-only divergence, values verified manually.
 def vimsopaka_shodhasavarga_of_planets(jd_at_dob, place_as_tuple, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     """
         Get the count - in how many shodhasa varga charts the planets are in their own raasi or exalted
@@ -1712,7 +1723,7 @@ def _varnada_lagna_sharma(dob,tob,place,house_index=1,ayanamsa_mode=const._DEFAU
     #print(count1,count2,count,count_is_odd,_varnada_lagna)
     _varnada_lagna -= 1 ## Keep in 0..11 range instead of 1..12
     return _varnada_lagna, asc_long #hl
-# @parity: ts=@/core/horoscope/charts::beneficsAndMalefics
+# @parity: ts=@/core/horoscope/charts::beneficsAndMaleficsFromJd
 def benefics_and_malefics(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,divisional_chart_factor=1,method=2,
                           exclude_rahu_ketu=False):
     """
@@ -1770,7 +1781,7 @@ def benefics_and_malefics(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,di
             malefics += [3] 
     benefics = sorted(set(benefics)) ; malefics = sorted(set(malefics))
     return benefics, malefics
-# @parity: ts=@/core/horoscope/charts::getBenefics
+# @parity: ts=@/core/horoscope/charts::getBeneficsFromJd
 def benefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,exclude_rahu_ketu=False):
     """
         From BV Raman - Hindu Predictive Astrology - METHOD=1
@@ -1792,7 +1803,7 @@ def benefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DE
     """
     return benefics_and_malefics(jd, place, method=method,ayanamsa_mode=ayanamsa_mode,divisional_chart_factor=divisional_chart_factor,
                                  exclude_rahu_ketu=exclude_rahu_ketu)[0]
-# @parity: ts=@/core/horoscope/charts::getMalefics
+# @parity: ts=@/core/horoscope/charts::getMaleficsFromJd
 def malefics(jd,place,divisional_chart_factor=1,method=2,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,exclude_rahu_ketu=False):
     """
         From BV Raman - Hindu Predictive Astrology - METHOD=1

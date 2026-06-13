@@ -421,7 +421,6 @@ def _get_global_constants(jd,place):
     bhava_starts = [(bhava_madhya[i]-0.5*bhava_lengths[i])%30 for i in range(12) ]
     """
     return
-# @parity: ts=@/core/dhasa/graha/aayu::getDhasaAnterdhasa
 def get_dhasa_antardhasa(jd,place,aayur_type=None,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                          divisional_chart_factor=9,chart_method=1):
     """
@@ -492,25 +491,21 @@ def get_dhasa_antardhasa(jd,place,aayur_type=None,include_antardhasa=True,apply_
             dhasas.append((lord,dhasa_start,round(dd,2)))
             start_jd += dd * one_year_days
     return _dhasa_type, dhasas
-# @parity: ts=@/core/dhasa/graha/aayu::pindayuDhasaBhukthi
 def pindayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=0, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
-# @parity: ts=@/core/dhasa/graha/aayu::nisargayuDhasaBhukthi
 def nisargayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=1, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
-# @parity: ts=@/core/dhasa/graha/aayu::amsayuDhasaBhukthi
 def amsayu_dhasa_bhukthi(jd,place,include_antardhasa=True,apply_haranas=True,dhasa_method=2,
                           divisional_chart_factor=9,chart_method=1):
     return get_dhasa_antardhasa(jd, place, aayur_type=2, include_antardhasa=include_antardhasa, 
                                 apply_haranas=apply_haranas, dhasa_method=dhasa_method,
                                 divisional_chart_factor=divisional_chart_factor,chart_method=chart_method)[1]
-# @parity: ts=@/core/dhasa/graha/aayu::longevity
 def longevity(jd,place,aayu_type=None,dhasa_method=2):
     _at,_adb = get_dhasa_antardhasa(jd, place, aayur_type=aayu_type, include_antardhasa=False, apply_haranas=True, dhasa_method=dhasa_method)
     _longevity = sum(d for _,_,d in _adb)

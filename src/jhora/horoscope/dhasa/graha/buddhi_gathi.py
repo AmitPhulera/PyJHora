@@ -21,7 +21,6 @@
 from jhora import utils, const
 from jhora.horoscope.chart import charts
 from jhora.panchanga import drik
-# @parity: ts=@/core/dhasa/graha/buddhi-gathi::getBuddhiGathiDashaBhukti
 def get_dhasa_bhukthi(dob,tob,place,divisional_chart_factor=1,chart_method=1,years=1,months=1,sixty_hours=1,
                       include_antardhasa=True):
     """

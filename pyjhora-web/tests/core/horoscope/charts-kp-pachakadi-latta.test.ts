@@ -97,10 +97,11 @@ describe('getKPLordsFromPlanetPositions', () => {
   it('should compute KP lords for all planets (Python parity)', () => {
     const kp = getKPLordsFromPlanetPositions(TEST_POSITIONS);
 
-    // Python: planet=-1: [115, 1, 4, 7, 3, 7, 6]
-    expect(kp[-1][0]).toBe(115); // KP number
-    expect(kp[-1][1]).toBe(1);   // star lord (Moon)
-    expect(kp[-1][2]).toBe(4);   // sub lord (Jupiter)
+    // Python: planet 'L' (Lagna): [115, 1, 4, 7, 3, 7, 6]
+    const kpL = (kp as unknown as Record<string, number[]>)['L'];
+    expect(kpL[0]).toBe(115); // KP number
+    expect(kpL[1]).toBe(1);   // star lord (Moon)
+    expect(kpL[2]).toBe(4);   // sub lord (Jupiter)
 
     // Python: planet=0(Sun): [243, 3, 5, 7, 5, 2, 2]
     expect(kp[SUN][0]).toBe(243);

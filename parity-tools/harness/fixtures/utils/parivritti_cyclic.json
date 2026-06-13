@@ -1,0 +1,16 @@
+{
+  "python_target": "jhora.utils.parivritti_cyclic",
+  "typescript_target": "@/core/utils/chart::parivrittiCyclic",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "dcf": 1
+      }
+    }
+  ]
+}

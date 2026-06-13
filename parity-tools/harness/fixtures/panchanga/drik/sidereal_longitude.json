@@ -1,0 +1,21 @@
+{
+  "python_target": "jhora.panchanga.drik.sidereal_longitude",
+  "typescript_target": "@/core/panchanga/drik::siderealLongitude",
+  "setup": {
+    "ayanamsa": "LAHIRI"
+  },
+  "cases": [
+    {
+      "id": "ref_chart_1996_chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "inputs": {
+        "jd_utc": 2450424.9402777776,
+        "planet": 0
+      }
+    }
+  ],
+  "tolerance": {
+    "float_abs": 0.0001
+  },
+  "tolerance_rationale": "Planet sidereal longitude. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
+}

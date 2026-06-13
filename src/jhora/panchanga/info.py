@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from jhora.panchanga import drik, vratha, pancha_paksha
 from jhora import utils, const
 
-# @parity: ts=@/core/panchanga/info::getPanchangamBasic
+# no-parity: TS getPanchangamBasic returns differently keyed/formatted display dict; Python output is localized (needs set_language)
 def get_panchangam_resources_basic(jd,place):
     results_dict = {}
     year, month, day,birth_time_hrs = utils.jd_to_gregorian(jd)
@@ -389,7 +389,7 @@ def get_panchangam_resources_misc(jd,place):
         value_str=str(value)
         results_dict[key] = value
     return results_dict
-# @parity: ts=@/core/panchanga/info::getPanchangamResources
+# no-parity: TS getPanchangamResources returns differently keyed/formatted display dict; Python output is localized (needs set_language)
 def get_panchangam_resources(jd,place,resource_type=None):
     try:
         if not isinstance(resource_type, list): resource_type = [resource_type]

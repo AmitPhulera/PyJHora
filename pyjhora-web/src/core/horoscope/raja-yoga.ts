@@ -241,6 +241,24 @@ export const getRajaYogaPairs = (chart: HouseChart): [number, number][] => {
   return rajaYogaPairs;
 };
 
+
+/**
+ * Accept either object-style positions or Python tuple-style positions
+ * ([planet|'L', [rasi, longitude]]) and return object-style.
+ */
+const normalizePlanetPositions = (positions: any[]): PlanetPosition[] => {
+  if (positions.length > 0 && Array.isArray(positions[0])) {
+    return (positions as Array<[number | string, [number, number]]>).map(
+      ([p, [rasi, longitude]]) => ({
+        planet: p === 'L' ? -1 : Number(p),
+        rasi,
+        longitude,
+      }) as PlanetPosition
+    );
+  }
+  return positions as PlanetPosition[];
+};
+
 // ============================================================================
 // PUBLIC: getRajaYogaPairsFromPositions
 // ============================================================================
@@ -257,6 +275,7 @@ export const getRajaYogaPairs = (chart: HouseChart): [number, number][] => {
 export const getRajaYogaPairsFromPositions = (
   positions: PlanetPosition[]
 ): [number, number][] => {
+  positions = normalizePlanetPositions(positions);
   // Build chart from positions
   const chart: string[] = Array(12).fill('');
   for (const pos of positions) {
@@ -395,6 +414,7 @@ export const vipareethaRajaYogaFromPlanetPositions = (
   planet1: number,
   planet2: number
 ): false | [true, string] => {
+  positions = normalizePlanetPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
   const lagnaHouse =
     pToH[ASCENDANT_SYMBOL] ?? pToH[-1];
@@ -450,6 +470,7 @@ export const dharmaKarmadhipatiRajaYogaFromPlanetPositions = (
   planet1: number,
   planet2: number
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
   const lagnaHouse =
     pToH[ASCENDANT_SYMBOL] ?? pToH[-1];
@@ -580,6 +601,7 @@ export const neechaBhangaRajaYogaFromPlanetPositions = (
   planet1: number,
   planet2: number
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   const chart = buildChartFromPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
 
@@ -720,10 +742,10 @@ const getAspectedPlanetsOfRaasi = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
-// @parity: py=check_other_raja_yoga_1
 export const checkOtherRajaYoga1 = (
   positions: PlanetPosition[]
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
   const ascHouse = pToH[ASCENDANT_SYMBOL];
   if (ascHouse === undefined) return false;
@@ -777,10 +799,10 @@ export const checkOtherRajaYoga1 = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
-// @parity: py=check_other_raja_yoga_2
 export const checkOtherRajaYoga2 = (
   positions: PlanetPosition[]
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
   const ascHouse = pToH[ASCENDANT_SYMBOL];
   if (ascHouse === undefined) return false;
@@ -867,10 +889,10 @@ export const checkOtherRajaYoga2 = (
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns true if this raja yoga pattern is present
  */
-// @parity: py=check_other_raja_yoga_3
 export const checkOtherRajaYoga3 = (
   positions: PlanetPosition[]
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   const pToH = buildPlanetToHouseFromPositions(positions);
   const ascHouse = pToH[ASCENDANT_SYMBOL];
   if (ascHouse === undefined) return false;
@@ -950,7 +972,6 @@ export interface RajaYogaResult {
  * @param positions - Array of PlanetPosition objects (must include ascendant with planet === -1)
  * @returns RajaYogaResult with all yoga findings
  */
-// @parity: py=get_raja_yoga_details
 export const getRajaYogaDetails = (
   chart: HouseChart,
   positions: PlanetPosition[]
@@ -1030,7 +1051,6 @@ export interface RajaYogaAllChartsResult {
  * @param chartMethod - Method for divisional chart calculation (default 0)
  * @returns RajaYogaAllChartsResult with combined results across charts
  */
-// @parity: py=get_raja_yoga_details_for_all_charts
 export const getRajaYogaDetailsForAllCharts = (
   d1Positions: PlanetPosition[],
   divisionalChartFactor?: number | null,
@@ -1065,3 +1085,42 @@ export const getRajaYogaDetailsForAllCharts = (
 
   return { results, count, total };
 };
+
+// ============================================================================
+// JD/PLACE ASYNC WRAPPERS (Python-signature parity)
+// Python check_other_raja_yoga_{1,2,3}(jd, place, divisional_chart_factor=1)
+// compute the divisional chart internally. These wrappers mirror that.
+// ============================================================================
+
+import type { Place } from '../types';
+import { divisionalPositionsAsync } from './sphuta';
+
+// @parity: py=check_other_raja_yoga_1
+export async function checkOtherRajaYoga1FromJd(
+  jd: number, place: Place, divisionalChartFactor = 1
+): Promise<boolean> {
+  const pp = await divisionalPositionsAsync(jd, place, divisionalChartFactor);
+  return checkOtherRajaYoga1(pp);
+}
+
+// NOTE: no @parity tag — Python's check_other_raja_yoga_2(jd, place) always
+// raises TypeError (charts.benefics(jd, place)[0] is an int, used with `in`),
+// so there is no working Python counterpart to compare against.
+export async function checkOtherRajaYoga2FromJd(
+  jd: number, place: Place, divisionalChartFactor = 1
+): Promise<boolean> {
+  const pp = await divisionalPositionsAsync(jd, place, divisionalChartFactor);
+  return checkOtherRajaYoga2(pp);
+}
+
+// @parity: py=check_other_raja_yoga_3
+export async function checkOtherRajaYoga3FromJd(
+  jd: number, place: Place, divisionalChartFactor = 1
+): Promise<null> {
+  // Python's check_other_raja_yoga_3 computes its condition but has no
+  // return statement (returns None). Mirror that here for parity; the
+  // boolean logic remains available via checkOtherRajaYoga3(positions).
+  const pp = await divisionalPositionsAsync(jd, place, divisionalChartFactor);
+  void checkOtherRajaYoga3(pp);
+  return null;
+}

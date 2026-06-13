@@ -150,7 +150,6 @@ def chara_karakas(planet_positions):
     #print('sorted by long',pp1)
     pp2 = [pi[0] for _,pi in enumerate(pp1)]
     return pp2
-# @parity: ts=@/core/horoscope/house::getGrahaDrishtiFromChart
 def graha_drishti_from_chart(house_to_planet_dict,separator='/'):
     """
         get graha drishti from the chart positions of the planet
@@ -245,7 +244,6 @@ def _get_raasi_drishti():
     return _raasi_drishti
 #raasi_drishti = _get_raasi_drishti()    
 #print('raasi_drishti_map',raasi_drishti)
-# @parity: ts=@/core/horoscope/house::getRaasiDrishtiFromChart
 def raasi_drishti_from_chart(house_to_planet_dict,separator='/'):
     """
         get raasi drishti from the chart positions of the planet
@@ -334,7 +332,6 @@ def aspected_raasis_of_the_raasi(house_to_planet_dict,raasi,separator='/'):
     arr,_,_ = raasi_drishti_from_chart(house_to_planet_dict,separator=separator)
     aspected_raasis = [key for key,value in arr.items() if str(raasi) in value]
     return aspected_raasis
-# @parity: ts=@/core/horoscope/house::getArgala
 def get_argala(house_to_planet_dict,separator='\n'):
     """
         Get argala and Virodhargala from the chart
@@ -1053,7 +1050,6 @@ def maheshwara(dob,tob,place,divisional_chart_factor=1):
     pp = charts.divisional_chart(jd, place, divisional_chart_factor=divisional_chart_factor)
     return maheshwara_from_planet_positions(pp)
 longevity_of_pair = lambda rasi1,rasi2: [key for key,value in const.longevity.items() if (rasi1,rasi2) in value][0]
-# @parity: ts=@/core/horoscope/house::getLongevity
 def longevity(dob,tob,place,divisional_chart_factor=1):
     jd = utils.julian_day_number(dob, tob)
     planet_positions = drik.dhasavarga(jd, place, divisional_chart_factor=divisional_chart_factor)
