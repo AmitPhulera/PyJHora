@@ -35,20 +35,23 @@ function formatTimezoneUTC(tz: number): string {
 
 export function BirthInputForm({ onSubmit, initialData, isCalculating = false }: BirthInputFormProps) {
   const [name, setName] = useState(initialData?.name ?? '');
-  const [date, setDate] = useState(initialData?.date ?? '2025-05-26');
-  const [time, setTime] = useState(initialData?.time ?? '04:15');
-  const [placeName, setPlaceName] = useState(initialData?.placeName ?? 'Bangalore, India');
-  const [latitude, setLatitude] = useState(initialData?.latitude ?? 12.972);
-  const [longitude, setLongitude] = useState(initialData?.longitude ?? 77.594);
-  const [timezone, setTimezone] = useState(initialData?.timezone ?? 5.5);
+  const [date, setDate] = useState(initialData?.date ?? '');
+  const [time, setTime] = useState(initialData?.time ?? '');
+  const [placeName, setPlaceName] = useState(initialData?.placeName ?? '');
+  // Coordinates/timezone are kept as strings so the user can type arbitrary
+  // decimal precision; a controlled number input would truncate a trailing
+  // "." mid-entry. They're parsed to numbers on submit.
+  const [latitude, setLatitude] = useState(initialData?.latitude?.toString() ?? '');
+  const [longitude, setLongitude] = useState(initialData?.longitude?.toString() ?? '');
+  const [timezone, setTimezone] = useState(initialData?.timezone?.toString() ?? '');
 
   const handlePlaceSelect = (result: GeocodeResult) => {
     setPlaceName(result.displayName);
-    setLatitude(result.latitude);
-    setLongitude(result.longitude);
+    setLatitude(result.latitude.toString());
+    setLongitude(result.longitude.toString());
     // Derive the date-specific UTC offset (handles DST historically).
     const tz = offsetHoursForCoordsAtDate(result.latitude, result.longitude, date, time);
-    setTimezone(tz);
+    setTimezone(tz.toString());
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -58,9 +61,9 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
       date,
       time,
       placeName,
-      latitude,
-      longitude,
-      timezone
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      timezone: Number(timezone)
     });
   };
 
@@ -129,10 +132,11 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
               type="number"
               className="input input-mono"
               value={latitude}
-              onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
-              step="0.001"
+              onChange={(e) => setLatitude(e.target.value)}
+              step="any"
               min="-90"
               max="90"
+              required
             />
           </div>
 
@@ -143,27 +147,31 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
               type="number"
               className="input input-mono"
               value={longitude}
-              onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
-              step="0.001"
+              onChange={(e) => setLongitude(e.target.value)}
+              step="any"
               min="-180"
               max="180"
+              required
             />
           </div>
 
           <div className="form-group">
             <label className="label" htmlFor="timezone">
               Timezone
-              <span className="form-tz-badge">{formatTimezoneUTC(timezone)}</span>
+              {timezone !== '' && (
+                <span className="form-tz-badge">{formatTimezoneUTC(Number(timezone))}</span>
+              )}
             </label>
             <input
               id="timezone"
               type="number"
               className="input input-mono"
               value={timezone}
-              onChange={(e) => setTimezone(parseFloat(e.target.value) || 0)}
-              step="0.5"
+              onChange={(e) => setTimezone(e.target.value)}
+              step="any"
               min="-12"
               max="14"
+              required
             />
           </div>
         </div>
