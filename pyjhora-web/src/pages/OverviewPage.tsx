@@ -12,6 +12,7 @@ import {
   LagnaDisplay,
   PanchangaDisplay,
   PlanetPositionTable,
+  SavedProfilesPanel,
 } from '../components';
 
 import {
@@ -24,6 +25,9 @@ export function OverviewPage() {
   const {
     birthData,
     setBirthData,
+    profiles,
+    loadProfile,
+    deleteProfile,
     horoscope,
     isCalculating,
     error,
@@ -58,7 +62,14 @@ export function OverviewPage() {
               {error}
             </div>
           )}
-          <BirthInputForm onSubmit={setBirthData} isCalculating={isCalculating} />
+          <div className="intro-input-row">
+            <BirthInputForm onSubmit={setBirthData} isCalculating={isCalculating} />
+            <SavedProfilesPanel
+              profiles={profiles}
+              onSelect={loadProfile}
+              onDelete={deleteProfile}
+            />
+          </div>
         </div>
       </div>
     );

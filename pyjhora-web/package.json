@@ -22,6 +22,7 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
     "swisseph-wasm": "^0.0.2",
+    "tz-lookup": "^6.1.25",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {
