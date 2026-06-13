@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.05
+  },
+  "tolerance_rationale": "Mahadasa start JDs derive from Moon longitude scaled by the Vimsottari cycle (~493 days/degree for the 18y Rahu period), amplifying the ~0.2-arcsec JPL-vs-Moshier ephemeris difference to ~39 min. Lord sequence matches exactly. 0.05 day = 72 min bound. Same root cause as vimsottari_dasha_start_date."
 }
