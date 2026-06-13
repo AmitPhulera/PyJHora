@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 
 import App from './App.tsx';
 import { HoroscopeProvider } from './contexts/HoroscopeContext';
@@ -13,9 +13,9 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <SettingsProvider>
         <HoroscopeProvider>
-          <BrowserRouter>
+          <HashRouter>
             <App />
-          </BrowserRouter>
+          </HashRouter>
         </HoroscopeProvider>
       </SettingsProvider>
     </ThemeProvider>

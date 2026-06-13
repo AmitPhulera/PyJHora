@@ -30,7 +30,8 @@ describe('profileId', () => {
   });
 
   it('handles missing name', () => {
-    const anon = { ...base, name: undefined };
+    const anon: BirthData = { ...base };
+    delete anon.name;
     expect(profileId(anon)).toBe(profileId({ ...anon }));
   });
 });
@@ -50,6 +51,8 @@ describe('profileLabel', () => {
 
   it('falls back to place + date when name is blank', () => {
     expect(profileLabel(profile({ name: '   ' }))).toBe('Pithoragarh, India — 1995-06-08');
-    expect(profileLabel(profile({ name: undefined }))).toBe('Pithoragarh, India — 1995-06-08');
+    const noName = profile({});
+    delete noName.name;
+    expect(profileLabel(noName)).toBe('Pithoragarh, India — 1995-06-08');
   });
 });
