@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.05
+  },
+  "tolerance_rationale": "Tithi end-time using planet speeds; arcsec drift amplified through (p1-p2) speed scaling. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
 }

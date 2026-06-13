@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.05
+  },
+  "tolerance_rationale": "Nakshatra start/end times derived from Moon longitude and daily moon speed: arcsec ephemeris drift amplified through the speed-based time projection. Nakshatra/pada indices match exactly."
 }

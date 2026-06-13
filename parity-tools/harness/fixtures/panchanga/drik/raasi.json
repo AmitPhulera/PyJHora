@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Raasi end-longitude derived from Moon position. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
 }

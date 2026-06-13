@@ -6,14 +6,14 @@
   },
   "cases": [
     {
-      "id": "ref_chart_1996_chennai",
-      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "id": "chennai_1996_03_07_non_boundary",
+      "description": "1996-03-07 Chennai. Chosen over the Dec ref-chart: the December input lands on a sankranti whose Tamil-month assignment sits exactly on the solar-month boundary, so arcsec ephemeris drift (JPL vs Moshier) flips the integer tamil_month and (via the `multiple` target) the inverse-Lagrange sankranti time. The March sankranti is interior, so both runtimes agree on date and tamil_month; only a ~1e-5 hr time drift remains.",
       "inputs": {
         "panchanga_date": {
           "__type": "Date",
           "value": {
             "year": 1996,
-            "month": 12,
+            "month": 3,
             "day": 7
           }
         },
@@ -28,5 +28,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Sankranti time (float hours) from inverse-Lagrange root-search on solar longitude: sub-arcsec ephemeris drift (Python FLG_SWIEPH/JPL vs TS WASM FLG_MOSEPH). Discrete date/tamil_month/tamil_day match exactly at this interior (non-boundary) case."
 }

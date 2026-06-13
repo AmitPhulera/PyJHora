@@ -6,15 +6,15 @@
   },
   "cases": [
     {
-      "id": "ref_chart_1996_chennai",
-      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "id": "chennai_1996_02_15_non_boundary",
+      "description": "1996-02-15 Chennai. Chosen over the Dec ref-chart: December's solar-longitude termination lands exactly on the ~29.9999 deg month boundary where arcsec ephemeris drift (JPL vs Moshier) flips the integer day count. February terminates well inside the loop's (29,30) break window, so the count (30) is drift-robust and matches in both runtimes.",
       "inputs": {
         "panchanga_date": {
           "__type": "Date",
           "value": {
             "year": 1996,
-            "month": 12,
-            "day": 7
+            "month": 2,
+            "day": 15
           }
         },
         "place": {

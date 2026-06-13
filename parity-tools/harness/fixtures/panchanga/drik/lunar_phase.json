@@ -12,5 +12,9 @@
         "jd": 2450424.9402777776
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Tropical lunar phase angle. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
 }

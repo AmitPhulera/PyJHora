@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.005
+  },
+  "tolerance_rationale": "Yoga end-time derived from Sun+Moon longitudes. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
 }

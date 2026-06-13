@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Divisional-chart planet longitudes: sub-arcsecond ephemeris drift (Python FLG_SWIEPH/JPL vs TS WASM FLG_MOSEPH). Rasi indices match exactly."
 }

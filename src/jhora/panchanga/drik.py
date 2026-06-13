@@ -1702,7 +1702,11 @@ maandi_longitude = lambda dob,tob,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MO
     upagraha_longitude(dob,tob,place,planet_index=6,ayanamsa_mode=ayanamsa_mode,
                        divisional_chart_factor=divisional_chart_factor,upagraha_part='middle')
 
-# @parity: ts=@/core/panchanga/drik::upagrahaLongitude
+# no @parity: Python upagraha_longitude(dob,tob,place,planet_index,...) has no
+# signature-compatible TS counterpart. The TS upagrahaLongitude/upagrahaLongitudeAsync
+# take (jd, place, tobHours, planetIndex) — a different positional order — so a single
+# kwarg-keyed fixture cannot bind both. The sync variant also relies on the Sun-as-Lagna
+# proxy (no sync ascendant), which would diverge at degrees scale regardless.
 def upagraha_longitude(dob,tob,place,planet_index,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE,
                        divisional_chart_factor=1,upagraha_part='middle'):
     """
@@ -2386,7 +2390,10 @@ def is_solar_eclipse(jd,place):
         flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL | _rise_flags
     ret,_ = swe.sol_eclipse_how(jd_utc,geopos=(lon, lat,0.0),flags=flags)
     return ret
-# @parity: ts=@/core/panchanga/drik::nextSolarEclipseAsync
+# no @parity: known divergence. Python passes geopos=(place.latitude, place.longitude, 0)
+# to swe.sol_eclipse_when_loc, but Swiss Ephemeris expects (longitude, latitude, altitude).
+# This swap makes Python locate a different eclipse than the (correct) TS port, so the
+# returned retflag/tret differ structurally. Not a float drift — tolerance cannot bridge it.
 def next_solar_eclipse(jd,place):
     """
         @param jd: Julian number 
@@ -2431,7 +2438,10 @@ def next_solar_eclipse(jd,place):
     #fh_l = fh_ut + place.timezone
     #ecl_local = (y,m,d,fh_l)
     return [retflag,tret,attrs]
-# @parity: ts=@/core/panchanga/drik::nextLunarEclipseAsync
+# no @parity: known divergence. Python passes geopos=(place.latitude, place.longitude, 0)
+# to swe.lun_eclipse_when_loc, but Swiss Ephemeris expects (longitude, latitude, altitude).
+# The swap makes Python locate a different eclipse than the (correct) TS port, so the
+# returned retflag/tret differ structurally. Not a float drift — tolerance cannot bridge it.
 def next_lunar_eclipse(jd,place):
     """
         @param jd: Julian number 

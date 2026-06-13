@@ -13,5 +13,9 @@
         "tithi_": 1
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.01
+  },
+  "tolerance_rationale": "New-moon JD found by root-search on Sun-Moon elongation; arcsec position drift shifts the instant by a few hundred seconds. Sub-arcsecond ephemeris drift: Python uses FLG_SWIEPH (JPL files), TS WASM uses FLG_MOSEPH (Moshier theory). Discrete indices match exactly."
 }

@@ -91,7 +91,7 @@ import {
     SWE_PLANETS
 } from '../ephemeris/swe-adapter';
 import type { Place } from '../types';
-import { normalizeDegrees } from '../utils/angle';
+import { countRasis, normalizeDegrees } from '../utils/angle';
 import { extendAngleRange, inverseLagrange, unwrapAngles } from '../utils/interpolation';
 import { gregorianToJulianDay, julianDayToGregorian, toUtc } from '../utils/julian';
 import { getFraction } from '../utils/chart';
@@ -1936,10 +1936,12 @@ export async function durmuhurtamAsync(
 export async function isSolarEclipseAsync(
   jd: number,
   place: Place
-): Promise<{ retflag: number; attr: number[] } | null> {
+): Promise<number> {
+  // Python returns just the retflag integer from swe.sol_eclipse_how(...).
   const { date } = julianDayToGregorian(jd);
   const jdUtc = gregorianToJulianDay(date, { hour: 0, minute: 0, second: 0 });
-  return solarEclipseHowAsync(jdUtc, place);
+  const res = await solarEclipseHowAsync(jdUtc, place);
+  return res ? res.retflag : 0;
 }
 
 /**
@@ -2031,6 +2033,8 @@ export async function dhasavargaAsync(
   const jdUtc = jd - place.timezone / 24;
   const positions: Array<[number, [number, number]]> = [];
 
+  // Python default drik.planet_list = Sun..Ketu (9 entries); outers only after
+  // set_sideral_planets(), which the default/harness path does not call.
   for (let p = 0; p <= 8; p++) {
     let nirayanLong: number;
     if (p === 8) {
@@ -3028,6 +3032,7 @@ const _PY_DREKKANA_TABLE_BVRAMAN = [
 ];
 
 export function grahaDrekkana(jd: number, place: Place, useBvRamanTable: boolean = false): number[] {
+  // Python iterates dhasavarga(jd,place); default planet_list has 9 entries (Sun..Ketu).
   const pp = getAllPlanetPositionsSync(jd, place);
   const table = useBvRamanTable ? _PY_DREKKANA_TABLE_BVRAMAN : _PY_DREKKANA_TABLE;
   return pp.map(([h, long]) => table[h]![Math.floor(long / 10)]!);
@@ -3595,22 +3600,22 @@ export function anandhaadhiYoga(jd: number, place: Place): [number, number] {
 
 /**
  * Triguna of the day/time.
- * Python: triguna(jd, place)
- * @returns triguna index: 0=Sathva, 1=Rajas, 2=Thamas
+ * Python: triguna(jd, place) -> (guna_index, period_start_key, period_next_key)
+ * @returns [guna index (0=Sathva,1=Rajas,2=Thamas), period_start_key, period_next_key]
  */
 // @parity: py=triguna
-export function triguna(jd: number, place: Place): number {
-  // NOTE: Python triguna() returns (guna, period_start_key, period_end_key);
-  // this port returns only the guna index (callers/tests rely on scalar shape).
+export function triguna(jd: number, place: Place): [number, number, number] {
   const { time } = julianDayToGregorian(jd);
   const fh = time.hour + time.minute / 60 + time.second / 3600;
   const day = vaara(jd);
-  // Python utils.triguna_of_the_day_time: largest boundary <= time_of_day
-  const boundaries = Object.keys(TRIGUNA_DAYS_DICT).map(Number).sort((a, b) => a - b);
-  let minKey = boundaries[boundaries.length - 1]!;
-  const below = boundaries.filter((k) => k <= fh);
-  if (below.length > 0) minKey = below[below.length - 1]!;
-  return TRIGUNA_DAYS_DICT[minKey]![day]!;
+  // Python utils.triguna_of_the_day_time:
+  //   min_key = max(k for k <= time_of_day, default=last); next_key = min(k for k > min_key, default=first)
+  const keys = Object.keys(TRIGUNA_DAYS_DICT).map(Number).sort((a, b) => a - b);
+  const below = keys.filter((k) => k <= fh);
+  const minKey = below.length > 0 ? below[below.length - 1]! : keys[keys.length - 1]!;
+  const above = keys.filter((k) => k > minKey);
+  const nextKey = above.length > 0 ? above[0]! : keys[0]!;
+  return [TRIGUNA_DAYS_DICT[minKey]![day]!, minKey, nextKey];
 }
 
 // ============================================================================
@@ -4274,16 +4279,24 @@ export async function udhayaLagnaMuhurthaAsync(
 // @parity: py=chandrabalam
 export async function chandrabalamAsync(jd: number, place: Place): Promise<number[]> {
   const ulm = await udhayaLagnaMuhurthaAsync(jd, place);
-  const jdUtc = jd - place.timezone / 24;
-  const moon = Math.floor(lunarLongitude(jdUtc) / 30) + 1;
-  const nextSr = sunrise(jd + 1, place).localTime;
+  // Python uses lunar_longitude(jd) with the local-encoded jd (not jd_utc).
+  const moon = Math.floor(lunarLongitude(jd) / 30) + 1;
+  // Python: next_sunrise = sunrise(jd+1, place)[-1] — index -1 is the JD, not the
+  // float-hour. Since the ascendant window times `at` are float hours (0-24), the
+  // `at < next_sunrise` comparison against a ~2.45e6 JD is effectively always true.
+  // We mirror that by comparing against the JD.
+  const nextSr = sunrise(jd + 1, place).jd;
   const cbGood = [1, 3, 6, 7, 10];
 
-  let cb: number[] = [];
-  for (const [asc, , at] of ulm) {
-    const count = ((moon - asc) % 12 + 12) % 12 + 1;
-    if (cbGood.includes(count) && at < nextSr) {
-      cb.push(asc);
+  const cb: number[] = [];
+  for (const [ah, , at] of ulm) {
+    if (cbGood.includes(countRasis(ah, moon)) && at < nextSr) cb.push(ah);
+  }
+  // Python: if moon enters next rasi before next sunrise, also check (moon+1)%12.
+  const [nextMoon] = await nextPlanetEntryDateAsync(MOON, jd, place, 1);
+  if (nextMoon < nextSr) {
+    for (const [ah, , at] of ulm) {
+      if (cbGood.includes(countRasis(ah, (moon + 1) % 12)) && at < nextSr) cb.push(ah);
     }
   }
   return cb;
@@ -4331,10 +4344,18 @@ export async function panchakaRahithaAsync(
  * @returns [[planet_id, [rasi, long_in_sign]], ...]
  */
 // @parity: py=planetary_positions
-export function planetaryPositions(jd: number, place: Place): Array<[number, [number, number]]> {
-  const pp = getAllPlanetPositionsSync(jd, place);
+export function planetaryPositions(jd: number, place: Place): Array<[number, number, number]> {
+  // Python returns [planet_index, longitude_in_sign, constellation]. The default
+  // drik.planet_list has 9 entries (Sun..Ketu); outers are added only after
+  // set_sideral_planets(), which the default/harness path does not call.
+  const jdUtc = jd - place.timezone / 24;
   const planets = [SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN, RAHU, KETU];
-  return planets.map((p, i) => [p, pp[i]!]);
+  return planets.map((p) => {
+    const long = siderealLongitude(jdUtc, p);
+    const constellation = Math.floor(long / 30);
+    const longInSign = long - constellation * 30;
+    return [p, longInSign, constellation] as [number, number, number];
+  });
 }
 
 // ============================================================================
@@ -4815,7 +4836,7 @@ function buildD1Positions(jd: number, place: Place): PlanetPosition[] {
   const positions: PlanetPosition[] = [
     { planet: -1, rasi: asc[0], longitude: asc[1] }, // Ascendant as planet -1
   ];
-  for (const [pid, [rasi, long]] of pp) {
+  for (const [pid, long, rasi] of pp) {
     positions.push({ planet: pid, rasi, longitude: long });
   }
   return positions;
@@ -5777,24 +5798,24 @@ export async function nishekaTime1Async(jd: number, place: Place): Promise<numbe
 /** nakshatra_new — newer algorithm using planet speed */
 // @parity: py=nakshatra_new
 export function nakshatraNew(jd: number, place: Place): number[] {
-  const jdUtc = jd - place.timezone / 24;
   const oneStar = 360 / 27;
-  const moonLong = lunarLongitude(jdUtc);
-  const [nakNo, padamNo] = nakshatraPada(moonLong);
-  const degreesLeft = nakNo * oneStar - moonLong;
-  const sr = sunrise(jd, place);
-  const jdHours = (jd - Math.floor(jd)) * 24;
-  const moonSpeed = dailyMoonSpeed(jd, place);
-  const endTime = jdHours + (degreesLeft / moonSpeed) * 24;
+  // Python captures jd_hours from the ORIGINAL jd and reuses it for both the jd and
+  // jd-1 calls (closure over jd_hours), so prev's end_time uses the same jd_hours.
+  const jdHours = julianDayToGregorian(jd).time.hour
+    + julianDayToGregorian(jd).time.minute / 60
+    + julianDayToGregorian(jd).time.second / 3600;
 
-  // Previous day
-  const prevJdUtc = (jd - 1) - place.timezone / 24;
-  const prevMoonLong = lunarLongitude(prevJdUtc);
-  const [prevNakNo, prevPadamNo] = nakshatraPada(prevMoonLong);
-  const prevDegreesLeft = prevNakNo * oneStar - prevMoonLong;
-  const prevMoonSpeed = dailyMoonSpeed(jd - 1, place);
-  const prevJdHours = ((jd - 1) - Math.floor(jd - 1)) * 24;
-  let prevEndTime = prevJdHours + (prevDegreesLeft / prevMoonSpeed) * 24;
+  const getNak = (j: number): [number, number, number] => {
+    const jUtc = j - place.timezone / 24;
+    const ml = lunarLongitude(jUtc);
+    const [nn, pn] = nakshatraPada(ml);
+    const degLeft = nn * oneStar - ml;
+    const endT = jdHours + (degLeft / dailyMoonSpeed(j, place)) * 24;
+    return [nn, pn, endT];
+  };
+
+  const [nakNo, padamNo, endTime] = getNak(jd);
+  const prevEndTime = getNak(jd - 1)[2];
 
   let nakStart = prevEndTime;
   if (nakStart < 24.0) {

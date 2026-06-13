@@ -21,6 +21,12 @@ sys.path.insert(0, str(_HARNESS_DIR.parent.parent / "src"))
 
 from coercion import coerce  # noqa: E402
 
+# Populate language-dependent module globals (e.g. NAKSHATRA_LIST) the same
+# way pvr_tests does. Without this, targets that read those globals raise
+# NameError. TS parity side runs with English resources, so use 'en'.
+from jhora import utils as _utils  # noqa: E402
+_utils.set_language("en")
+
 
 def _resolve_target(python_target: str):
     """'math.sqrt' -> math.sqrt (callable)."""

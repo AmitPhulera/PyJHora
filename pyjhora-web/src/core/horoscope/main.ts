@@ -204,7 +204,7 @@ function buildD1Positions(jd: number, place: Place): PlanetPosition[] {
   const positions: PlanetPosition[] = [
     { planet: -1, rasi: asc[0], longitude: asc[1] },
   ];
-  for (const [pid, [rasi, long]] of pp) {
+  for (const [pid, long, rasi] of pp) {
     positions.push({ planet: pid, rasi, longitude: long });
   }
   return positions;

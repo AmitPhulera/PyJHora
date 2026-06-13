@@ -277,28 +277,28 @@ describe('Extended drik.ts Tests', () => {
   // ==========================================================================
 
   describe('planetaryPositions', () => {
-    it('should return 9 planet positions', () => {
+    it('should return 9 planet positions (Python [p, long_in_sign, rasi] shape)', () => {
       const pp = planetaryPositions(jd1, bangalore);
       expect(pp.length).toBe(9);
-      // Each entry: [planetId, [rasi, longitude]]
+      // Each entry: [planetId, longitudeInSign, rasi]
       for (let i = 0; i < 9; i++) {
         expect(pp[i]![0]).toBe(i);
-        expect(pp[i]![1][0]).toBeGreaterThanOrEqual(0);
-        expect(pp[i]![1][0]).toBeLessThan(12);
-        expect(pp[i]![1][1]).toBeGreaterThanOrEqual(0);
-        expect(pp[i]![1][1]).toBeLessThan(30);
+        expect(pp[i]![1]).toBeGreaterThanOrEqual(0);
+        expect(pp[i]![1]).toBeLessThan(30);
+        expect(pp[i]![2]).toBeGreaterThanOrEqual(0);
+        expect(pp[i]![2]).toBeLessThan(12);
       }
-      // Sun in December should be in Sagittarius (7) or Scorpio (7±1)
-      expect(pp[0]![1][0]).toBeGreaterThanOrEqual(6);
-      expect(pp[0]![1][0]).toBeLessThanOrEqual(8);
+      // Sun in December should be in Sagittarius (8) or Scorpio (7)
+      expect(pp[0]![2]).toBeGreaterThanOrEqual(6);
+      expect(pp[0]![2]).toBeLessThanOrEqual(8);
     });
 
     it('should return 9 positions for second date', () => {
       const pp = planetaryPositions(jd2, bangalore);
       expect(pp.length).toBe(9);
       // Ketu should be 180° from Rahu
-      const rahuLong = pp[7]![1][0] * 30 + pp[7]![1][1];
-      const ketuLong = pp[8]![1][0] * 30 + pp[8]![1][1];
+      const rahuLong = pp[7]![2] * 30 + pp[7]![1];
+      const ketuLong = pp[8]![2] * 30 + pp[8]![1];
       const diff = Math.abs(rahuLong - ketuLong);
       expect(Math.abs(diff - 180)).toBeLessThan(1);
     });
@@ -404,7 +404,8 @@ describe('Extended drik.ts Tests', () => {
   describe('triguna', () => {
     it('should return 0, 1, or 2', () => {
       const tg = triguna(jd1, bangalore);
-      expect([0, 1, 2]).toContain(tg);
+      // Python returns [guna, period_start_key, period_next_key]
+      expect([0, 1, 2]).toContain(tg[0]);
     });
   });
 
