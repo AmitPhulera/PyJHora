@@ -40,6 +40,23 @@ def _apply_ayanamsa(ayanamsa: str):
     set_ayanamsa_mode(ayanamsa)
 
 
+# Snapshot the default (9-planet) planet_list at import. set_sideral_planets()/
+# set_tropical_planets() mutate this module global; since the harness batch-runs
+# many fixtures in one process, that state would leak into later fixtures
+# (e.g. planetary_positions returning 12 planets). Restore it per case.
+try:
+    from jhora.panchanga import drik as _drik
+    _DEFAULT_PLANET_LIST = list(_drik.planet_list)
+except Exception:
+    _drik = None
+    _DEFAULT_PLANET_LIST = None
+
+
+def _reset_planet_list():
+    if _drik is not None and _DEFAULT_PLANET_LIST is not None:
+        _drik.planet_list = list(_DEFAULT_PLANET_LIST)
+
+
 def run_fixture(fixture_path: Path, output_root: Path = None):
     fixture_path = Path(fixture_path)
     fixture = json.loads(fixture_path.read_text())
@@ -50,7 +67,8 @@ def run_fixture(fixture_path: Path, output_root: Path = None):
 
     cases_out = []
     for case in fixture["cases"]:
-        # Reset ayanamsa per case to isolate state.
+        # Reset mutable drik module state per case to isolate fixtures.
+        _reset_planet_list()
         try:
             _apply_ayanamsa(ayanamsa)
         except Exception:
