@@ -6,6 +6,7 @@
  */
 
 import SwissEph from 'swisseph-wasm';
+import { createSwissEph } from './swiss-eph-loader';
 import { AYANAMSA_MODES, DEFAULT_AYANAMSA_MODE } from '../constants';
 import type { Place } from '../types';
 import { normalizeDegrees } from '../utils/angle';
@@ -84,8 +85,7 @@ export async function initializeEphemeris(): Promise<void> {
   }
 
   try {
-    _sweInstance = new SwissEph();
-    await _sweInstance.initSwissEph();
+    _sweInstance = await createSwissEph();
     _isInitialized = true;
   } catch (error) {
     console.error('Failed to initialize Swiss Ephemeris:', error);
