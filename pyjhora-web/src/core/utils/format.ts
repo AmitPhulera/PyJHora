@@ -139,7 +139,8 @@ export function toDmsString(longitude: number, isLatLong: 'lat' | 'long' | 'plon
   }
 
   // Use special Unicode characters matching Python output
-  return `${dms.degrees}° ${dms.minutes}' ${dms.seconds}"${direction}`;
+  // (Python const._minute_symbol is a right single quote U+2019)
+  return `${dms.degrees}° ${dms.minutes}’ ${dms.seconds}"${direction}`;
 }
 
 // ============================================================================

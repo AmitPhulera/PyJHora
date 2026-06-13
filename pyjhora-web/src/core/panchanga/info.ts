@@ -75,7 +75,7 @@ export function formatDms(hours: number): string {
  * Get basic panchangam information for a given Julian Day and place.
  * Returns a dictionary of key-value pairs suitable for display.
  */
-// @parity: py=get_panchangam_resources_basic
+// no-parity: py get_panchangam_resources_basic returns localized display dict with different keys (needs set_language)
 export function getPanchangamBasic(jd: number, place: Place): PanchangamInfo {
   const results: PanchangamInfo = {};
   const { date, time } = julianDayToGregorian(jd);
@@ -129,25 +129,25 @@ export function getPanchangamBasic(jd: number, place: Place): PanchangamInfo {
   results['Day Length'] = formatDms(dl);
   results['Night Length'] = formatDms(nl);
 
-  // Raahu Kaalam
+  // Raahu Kaalam (trikalam now returns "HH:MM:SS" strings, matching Python)
   const rk = trikalam(jd, place, 'raahu kaalam');
-  results['Raahu Kaalam'] = `${formatDms(rk[0])} - ${formatDms(rk[1])}`;
+  results['Raahu Kaalam'] = `${rk[0]} - ${rk[1]}`;
 
   // Gulikai Kaalam
   const gk = trikalam(jd, place, 'gulikai');
-  results['Gulikai Kaalam'] = `${formatDms(gk[0])} - ${formatDms(gk[1])}`;
+  results['Gulikai Kaalam'] = `${gk[0]} - ${gk[1]}`;
 
   // Yamaganda Kaalam
   const yk = trikalam(jd, place, 'yamagandam');
-  results['Yamaganda Kaalam'] = `${formatDms(yk[0])} - ${formatDms(yk[1])}`;
+  results['Yamaganda Kaalam'] = `${yk[0]} - ${yk[1]}`;
 
   // Abhijit Muhurta
   const am = abhijitMuhurta(jd, place);
-  results['Abhijit Muhurta'] = `${formatDms(am[0])} - ${formatDms(am[1])}`;
+  results['Abhijit Muhurta'] = `${am[0]} - ${am[1]}`;
 
-  // Durmuhurtam
+  // Durmuhurtam (flat list of "HH:MM:SS" strings)
   const dm = durmuhurtam(jd, place);
-  results['Durmuhurtam'] = `${formatDms(dm[0])} - ${formatDms(dm[1])}`;
+  results['Durmuhurtam'] = `${dm[0]} - ${dm[1]}`;
 
   // Festivals
   const festivals = getFestivalsOfTheDay(jd, place);
@@ -162,7 +162,7 @@ export function getPanchangamBasic(jd: number, place: Place): PanchangamInfo {
  * Get panchangam information with a specified resource type.
  * @param resourceType - null for all, 1=basic, 2=special tithis, 3=gowri, 4=muhurtham, 5=horai, 6=misc
  */
-// @parity: py=get_panchangam_resources
+// no-parity: py get_panchangam_resources returns localized display dict with different keys (needs set_language)
 export function getPanchangamResources(
   jd: number,
   place: Place,

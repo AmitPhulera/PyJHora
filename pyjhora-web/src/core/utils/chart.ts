@@ -330,20 +330,24 @@ export function convertTo2dChart(
 // DEEPTAAMSA RANGE
 // ============================================================================
 
+/** Deeptaamsa of planets: Sun..Saturn (Python const.deeptaamsa_of_planets). */
+export const DEEPTAAMSA_OF_PLANETS = [15, 12, 8, 7, 9, 7, 9] as const;
+
 /**
  * Get deeptaamsa range of a planet.
  *
  * Python: deeptaamsa_range_of_planet(planet, planet_longitude_within_raasi)
  *
- * @param deeptaamsa - Deeptaamsa value for the planet (from const.deeptaamsa_of_planets)
+ * @param planet - Planet index (0=Sun .. 6=Saturn)
  * @param longitudeInRasi - Planet longitude within the rasi (0-30)
  * @returns [minimum, maximum] of deeptaamsa range
  */
 // @parity: py=deeptaamsa_range_of_planet
 export function deeptaamsaRange(
-  deeptaamsa: number,
+  planet: number,
   longitudeInRasi: number,
 ): [number, number] {
+  const deeptaamsa = DEEPTAAMSA_OF_PLANETS[planet] ?? 0;
   return [longitudeInRasi - deeptaamsa, longitudeInRasi + deeptaamsa];
 }
 

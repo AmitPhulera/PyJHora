@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.strength.pancha_vargeeya_bala",
-  "typescript_target": "@/core/horoscope/strength::calculatePanchaVargeeyaBala",
+  "typescript_target": "@/core/horoscope/strength::panchaVargeeyaBalaFromJd",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

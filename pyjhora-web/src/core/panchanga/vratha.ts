@@ -17,6 +17,7 @@ import {
   calculateTithi,
   calculateNakshatra,
   calculateYoga,
+  tamilSolarMonthAndDate,
 } from './drik';
 import {
   lookupFestivals,
@@ -141,7 +142,7 @@ function tupleToDate(t: [number, number, number]): JhoraDate {
  * Find dates when given tithis occur between start and end dates.
  * If endDate is null, finds the next occurrence only.
  */
-// @parity: py=tithi_dates
+// no-parity: py tithi_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function tithiDates(
   place: Place,
   startDate: JhoraDate,
@@ -189,7 +190,7 @@ export function tithiDates(
 /**
  * Find dates when given nakshatras occur between start and end dates.
  */
-// @parity: py=nakshathra_dates
+// no-parity: py nakshathra_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function nakshatraDates(
   place: Place,
   startDate: JhoraDate,
@@ -231,7 +232,7 @@ export function nakshatraDates(
 /**
  * Find dates when given yogas occur between start and end dates.
  */
-// @parity: py=yoga_dates
+// no-parity: py yoga_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function yogaDates(
   place: Place,
   startDate: JhoraDate,
@@ -314,7 +315,7 @@ export function srarthaYogaDates(place: Place, start: JhoraDate, end: JhoraDate 
  * Find pradosham dates between start and end dates.
  * Pradosham occurs on Trayodashi (13th tithi of each paksha).
  */
-// @parity: py=pradosham_dates
+// no-parity: py pradosham_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function pradoshamDates(
   place: Place,
   startDate: JhoraDate,
@@ -361,12 +362,12 @@ export interface ConjunctionResult {
 // DURGASHTAMI / KAALASHTAMI
 // ============================================================================
 
-// @parity: py=durgashtami_dates
+// no-parity: py durgashtami_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function durgashtamiDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, [SUKLA_ASHTAMI], 'Durgashtami');
 }
 
-// @parity: py=kaalashtami_dates
+// no-parity: py kaalashtami_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function kaalashtamiDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, [KRISHNA_ASHTAMI], 'Kaalashtami');
 }
@@ -375,7 +376,7 @@ export function kaalashtamiDates(place: Place, start: JhoraDate, end: JhoraDate 
 // SATHYANARAYANA PUJA
 // ============================================================================
 
-// @parity: py=sathyanarayana_puja_dates
+// no-parity: py sathyanarayana_puja_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function sathyanarayanaPujaDates(place: Place, start: JhoraDate, end: JhoraDate | null): VrathaDate[] {
   return tithiDates(place, start, end, POURNAMI_TITHI, 'Sathyanarayana Puja');
 }
@@ -388,7 +389,7 @@ export function sathyanarayanaPujaDates(place: Place, start: JhoraDate, end: Jho
  * Find special vratha dates by type.
  * @param vrathaType - One of the keys in SPECIAL_VRATHA_MAP
  */
-// @parity: py=special_vratha_dates
+// no-parity: py special_vratha_dates returns localized tuples (needs set_language); shapes diverge intentionally
 export function specialVrathaDates(
   place: Place,
   startDate: JhoraDate,
@@ -443,8 +444,6 @@ export function getFestivalsOfTheDay(
   place: Place,
   festivalNameContains?: string,
 ): FestivalEntry[] {
-  const { date } = julianDayToGregorian(jd);
-
   // Get tithi(s) for the day
   const tithiResult = calculateTithi(jd, place);
   const tithis: number[] = [tithiResult.number];
@@ -465,16 +464,13 @@ export function getFestivalsOfTheDay(
   // Vaara (Python uses 1-based with Sun=1; our vaara() returns 0-based with Sun=0)
   const dayOfWeek = vaara(jd) + 1;
 
-  // Tamil solar month approximation: use Gregorian month mapped to Tamil month.
-  // In the full Python code, tamil_solar_month_and_date is used. For now, we use
-  // a rough mapping where Tamil month 1 (Chithirai) starts mid-April.
-  // This is a simplification; exact solar month requires sankranti calculations.
-  // We use the month from the Gregorian date offset by 3 months:
-  // Tamil month 1 ~ April(4), month 2 ~ May(5), ..., month 9 ~ Dec(12),
-  // month 10 ~ Jan(1), month 11 ~ Feb(2), month 12 ~ Mar(3)
-  const gregorianMonth = date.month;
-  const tamilMonth = ((gregorianMonth + 8) % 12) + 1;
-  const tamilDay = date.day;
+  // Tamil solar month/day via sankranti calculation, matching Python's
+  // tamil_solar_month_and_date (0-based month -> +1 for festival data).
+  // Note: Python uses lunar_month_date for calendar types 1/2; the solar
+  // month/day is used here for all types until lunar month is available sync.
+  const [tm0, td] = tamilSolarMonthAndDate(jd, place);
+  const tamilMonth = tm0 + 1;
+  const tamilDay = td;
 
   // Look up festivals for each calendar type
   const results: FestivalEntry[] = [];

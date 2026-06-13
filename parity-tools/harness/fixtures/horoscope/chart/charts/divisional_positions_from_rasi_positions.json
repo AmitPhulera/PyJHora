@@ -1,15 +1,15 @@
 {
-  "python_target": "jhora.horoscope.chart.raja_yoga.dharma_karmadhipati_raja_yoga_from_planet_positions",
-  "typescript_target": "@/core/horoscope/raja-yoga::dharmaKarmadhipatiRajaYogaFromPlanetPositions",
+  "python_target": "jhora.horoscope.chart.charts.divisional_positions_from_rasi_positions",
+  "typescript_target": "@/core/horoscope/charts::getDivisionalChart",
   "setup": {
     "ayanamsa": "LAHIRI"
   },
   "cases": [
     {
       "id": "ref_chart_1996_chennai",
-      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "description": "pvr_tests reference chart D1 positions -> D9 navamsa (retargeted from jd-based divisional_chart, which has no TS counterpart)",
       "inputs": {
-        "planet_positions": [
+        "planet_positions_in_rasi": [
           [
             "L",
             [
@@ -81,8 +81,7 @@
             ]
           ]
         ],
-        "raja_yoga_planet1": 4,
-        "raja_yoga_planet2": 5
+        "divisional_chart_factor": 9
       }
     }
   ]

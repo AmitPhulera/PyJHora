@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.raja_yoga.check_other_raja_yoga_3",
-  "typescript_target": "@/core/horoscope/raja-yoga::checkOtherRajaYoga3",
+  "typescript_target": "@/core/horoscope/raja-yoga::checkOtherRajaYoga3FromJd",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

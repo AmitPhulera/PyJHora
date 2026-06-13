@@ -79,7 +79,7 @@ def get_matching_pancha_pakshi_data_from_db(bird_index,weekday_index,paksha_inde
     search_results = pp_db[search_criteria]
     result_list = search_results.values.tolist()
     return result_list
-# @parity: ts=@/core/panchanga/pancha-paksha::constructPanchaPakshiInformation
+# no-parity: TS constructPanchaPakshiInformation returns structured objects; Python returns localized UI lists with image names (needs set_language)
 def construct_pancha_pakshi_information(dob=None,tob=None,place=None,nakshathra_bird_index=None):
     jd = utils.julian_day_number(dob,tob)
     sunrise_jd = drik.sunrise(jd, place)[-1]

@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Start/end derive from nakshatra boundary times found by inverse Lagrange interpolation over Moshier (TS) vs JPL (Python) lunar longitudes; observed drift ~8e-5 h (~0.3s)."
 }

@@ -58,7 +58,6 @@ def get_raja_yoga_resources(language='en'):
     msgs = json.load(f)
     #print('json msgs collected')
     return msgs
-# @parity: ts=@/core/horoscope/raja-yoga::getRajaYogaDetailsForAllCharts
 def get_raja_yoga_details_for_all_charts(jd,place,language='en',divisional_chart_factor=None):
     """
         Get all the raja yoga information that are present in the divisional charts for a given julian day and place
@@ -87,7 +86,6 @@ def get_raja_yoga_details_for_all_charts(jd,place,language='en',divisional_chart
         raja_yoga_results_combined = raja_yoga_results
     #print('Found',len(yoga_results_combined),'out of',len(msgs)*len(division_chart_factors),'yogas')
     return raja_yoga_results_combined,len(raja_yoga_results_combined),len(msgs)*len(division_chart_factors)
-# @parity: ts=@/core/horoscope/raja-yoga::getRajaYogaDetails
 def get_raja_yoga_details(jd,place,divisional_chart_factor=1,language='en'):
     """
         Get all the raja yoga information that are present in the requested divisional charts for a given julian day and place
@@ -461,7 +459,7 @@ def neecha_bhanga_raja_yoga_from_planet_positions(planet_positions,raja_yoga_pla
              (str(raja_yoga_planet1) in house.graha_drishti_of_the_planet(house_to_planet_list, rp2_lord))
     chk3 = chk3_1 or chk3_2
     return chk3
-# @parity: ts=@/core/horoscope/raja-yoga::checkOtherRajaYoga1
+# @parity: ts=@/core/horoscope/raja-yoga::checkOtherRajaYoga1FromJd
 def check_other_raja_yoga_1(jd,place,divisional_chart_factor=1):
     planet_positions = charts.divisional_chart(jd, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, divisional_chart_factor=divisional_chart_factor)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -479,7 +477,6 @@ def check_other_raja_yoga_1(jd,place,divisional_chart_factor=1):
     chk1 = p_to_h[ak] == p_to_h[pk]
     chk2 = p_to_h[lagna_lord] == p_to_h[fifth_lord]
     return chk1 and chk2
-# @parity: ts=@/core/horoscope/raja-yoga::checkOtherRajaYoga2
 def check_other_raja_yoga_2(jd,place,divisional_chart_factor=1):
     planet_positions = charts.divisional_chart(jd, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, divisional_chart_factor=divisional_chart_factor)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)
@@ -517,7 +514,7 @@ def check_other_raja_yoga_2(jd,place,divisional_chart_factor=1):
     chk4_4 = any([fp in charts.benefics(jd, place) for fp in pk_lord_aspects])
     chk4 = chk4_1 and chk4_2 and chk4_3 and chk4_4
     return chk1 and chk2 and (chk3 or chk4)
-# @parity: ts=@/core/horoscope/raja-yoga::checkOtherRajaYoga3
+# @parity: ts=@/core/horoscope/raja-yoga::checkOtherRajaYoga3FromJd
 def check_other_raja_yoga_3(jd,place,divisional_chart_factor=1):
     planet_positions = charts.divisional_chart(jd, place, ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE, divisional_chart_factor=divisional_chart_factor)
     h_to_p = utils.get_house_planet_list_from_planet_positions(planet_positions)

@@ -7,7 +7,7 @@
   "cases": [
     {
       "id": "ref_chart_1996_chennai",
-      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai; years=25 (years=1 raises KeyError in Python: str(0) digit has no acsp key)",
       "inputs": {
         "dob": {
           "__type": "Date",
@@ -22,7 +22,7 @@
           34,
           0
         ],
-        "years": 1
+        "years": 25
       }
     }
   ]

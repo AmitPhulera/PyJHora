@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.charts.benefics_and_malefics",
-  "typescript_target": "@/core/horoscope/charts::beneficsAndMalefics",
+  "typescript_target": "@/core/horoscope/charts::beneficsAndMaleficsFromJd",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

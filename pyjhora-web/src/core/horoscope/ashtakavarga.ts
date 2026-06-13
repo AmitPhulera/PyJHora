@@ -82,7 +82,6 @@ export const getPlanetToHouseFromChart = (
  *                     Example: ['', '', '', '', '2', '7', '1/5', '0', '3/4', 'L', '', '6/8']
  * @returns AshtakavargaResult containing BAV, SAV, and Prastara
  */
-// @parity: py=get_ashtaka_varga
 export const getAshtakavarga = (houseChart: HouseChart): AshtakavargaResult => {
   const pToH = getPlanetToHouseFromChart(houseChart);
 

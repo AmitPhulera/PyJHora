@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.strength.harsha_bala",
-  "typescript_target": "@/core/horoscope/strength::calculateHarshaBala",
+  "typescript_target": "@/core/horoscope/strength::harshaBalaFromDob",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

@@ -239,7 +239,7 @@ function formatJdToDateTime(jd: number): string {
  * @param nakshatraBirdIndex - The nakshatra bird index (1-indexed)
  * @returns Full pancha pakshi analysis with periods and sub-periods
  */
-// @parity: py=construct_pancha_pakshi_information
+// no-parity: py construct_pancha_pakshi_information returns localized UI lists with image filenames (needs set_language)
 export function constructPanchaPakshiInformation(
   dob: JhoraDate,
   tob: JhoraTime,

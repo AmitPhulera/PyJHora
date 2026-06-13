@@ -411,7 +411,9 @@ describe('Divisional Chart Calculations', () => {
     });
 
     it('should produce valid rasi values for D-2 Hora', () => {
-      const d2 = getDivisionalChart(chennaiD1, 2);
+      // Method 2 = Traditional Parasara (Cancer/Leo only).
+      // The default (method 1, matching Python divisional_chart) is Parivritti Even Reverse.
+      const d2 = getDivisionalChart(chennaiD1, 2, 2);
       d2.forEach(pos => {
         // D-2 Hora should only produce Cancer (3) or Leo (4)
         expect([3, 4]).toContain(pos.rasi);
@@ -1259,8 +1261,9 @@ describe('get64thNavamsa', () => {
       { planet: MOON, rasi: SAGITTARIUS, longitude: 5 }, // 64th = (8+3)%12 = 11 = Pisces
     ];
     const result = get64thNavamsa(navamsaPositions);
-    expect(result[-1][0]).toBe(LIBRA);
-    expect(result[-1][1]).toBe(HOUSE_OWNERS[LIBRA]); // Venus(5)
+    const lagna64 = (result as unknown as Record<string, [number, number]>)['L'];
+    expect(lagna64[0]).toBe(LIBRA);
+    expect(lagna64[1]).toBe(HOUSE_OWNERS[LIBRA]); // Venus(5)
     expect(result[SUN][0]).toBe(ARIES);
     expect(result[SUN][1]).toBe(HOUSE_OWNERS[ARIES]); // Mars(2)
     expect(result[MOON][0]).toBe(PISCES);
@@ -1285,8 +1288,9 @@ describe('get22ndDrekkana', () => {
       { planet: MOON, rasi: LIBRA, longitude: 5 },     // 22nd = (6+7)%12 = 1 = Taurus
     ];
     const result = get22ndDrekkana(drekkanaPositions);
-    expect(result[-1][0]).toBe(ARIES);
-    expect(result[-1][1]).toBe(HOUSE_OWNERS[ARIES]); // Mars(2)
+    const lagna22 = (result as unknown as Record<string, [number, number]>)['L'];
+    expect(lagna22[0]).toBe(ARIES);
+    expect(lagna22[1]).toBe(HOUSE_OWNERS[ARIES]); // Mars(2)
     expect(result[SUN][0]).toBe(AQUARIUS);
     expect(result[SUN][1]).toBe(HOUSE_OWNERS[AQUARIUS]); // Saturn(6)
     expect(result[MOON][0]).toBe(TAURUS);
@@ -1573,8 +1577,10 @@ describe('Integration: 64th Navamsa and 22nd Drekkana with divisional charts', (
     // Each entry should be a valid [rasi, lord] pair
     for (const pos of d9) {
       const expected64 = (pos.rasi + 3) % 12;
-      expect(result[pos.planet][0]).toBe(expected64);
-      expect(result[pos.planet][1]).toBe(HOUSE_OWNERS[expected64]);
+      const key = pos.planet === -1 ? 'L' : pos.planet;
+      const entry = (result as unknown as Record<string | number, [number, number]>)[key];
+      expect(entry[0]).toBe(expected64);
+      expect(entry[1]).toBe(HOUSE_OWNERS[expected64]);
     }
   });
 
@@ -1583,8 +1589,10 @@ describe('Integration: 64th Navamsa and 22nd Drekkana with divisional charts', (
     const result = get22ndDrekkana(d3);
     for (const pos of d3) {
       const expected22 = (pos.rasi + 7) % 12;
-      expect(result[pos.planet][0]).toBe(expected22);
-      expect(result[pos.planet][1]).toBe(HOUSE_OWNERS[expected22]);
+      const key = pos.planet === -1 ? 'L' : pos.planet;
+      const entry = (result as unknown as Record<string | number, [number, number]>)[key];
+      expect(entry[0]).toBe(expected22);
+      expect(entry[1]).toBe(HOUSE_OWNERS[expected22]);
     }
   });
 });

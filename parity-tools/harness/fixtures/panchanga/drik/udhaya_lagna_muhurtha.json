@@ -21,5 +21,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.001
+  },
+  "tolerance_rationale": "Ascendant entry times found by iterative search with 1.0s precision; TS converts jd to hours via whole-second time parts while Python keeps float hours. Sub-second drift only."
 }

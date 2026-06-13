@@ -3,7 +3,28 @@
  * Handles date conversions including BC dates
  */
 
-import type { JhoraDate, JhoraTime } from '../types';
+import type { JhoraDate, JhoraTime, Place } from '../types';
+
+// ============================================================================
+// INPUT NORMALIZATION (accept Python-style tuples as well as objects)
+// ============================================================================
+
+/** A JhoraDate object or Python-style [year, month, day] tuple. */
+export type DateLike = JhoraDate | [number, number, number];
+/** A JhoraTime object or Python-style [hour, minute, second] tuple. */
+export type TimeLike = JhoraTime | [number, number, number];
+
+/** Normalize a DateLike to a JhoraDate (Python passes dates as tuples). */
+export function asJhoraDate(date: DateLike): JhoraDate {
+  if (Array.isArray(date)) return { year: date[0], month: date[1], day: date[2] };
+  return date;
+}
+
+/** Normalize a TimeLike to a JhoraTime (Python passes times as tuples). */
+export function asJhoraTime(time: TimeLike): JhoraTime {
+  if (Array.isArray(time)) return { hour: time[0], minute: time[1], second: time[2] };
+  return time;
+}
 
 // ============================================================================
 // JULIAN DAY CONVERSIONS
@@ -98,8 +119,8 @@ export function julianDayToGregorian(jd: number): { date: JhoraDate; time: Jhora
  * @returns Julian Day Number
  */
 // @parity: py=julian_day_number
-export function julianDayNumber(date: JhoraDate, time: JhoraTime): number {
-  return gregorianToJulianDay(date, time);
+export function julianDayNumber(date: DateLike, time: TimeLike): number {
+  return gregorianToJulianDay(asJhoraDate(date), asJhoraTime(time));
 }
 
 /**
@@ -109,8 +130,10 @@ export function julianDayNumber(date: JhoraDate, time: JhoraTime): number {
  * @returns UTC Julian Day Number
  */
 // @parity: py=julian_day_utc
-export function toUtc(jd: number, timezoneOffset: number): number {
-  return jd - timezoneOffset / 24;
+export function toUtc(jd: number, timezoneOffset: number | Place): number {
+  // Python's julian_day_utc(julian_day, place) takes a Place; accept both.
+  const tz = typeof timezoneOffset === 'number' ? timezoneOffset : timezoneOffset.timezone;
+  return jd - tz / 24;
 }
 
 /**

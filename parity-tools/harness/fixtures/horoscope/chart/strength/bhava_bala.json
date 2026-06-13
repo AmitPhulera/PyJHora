@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.strength.bhava_bala",
-  "typescript_target": "@/core/horoscope/strength::calculateBhavaBala",
+  "typescript_target": "@/core/horoscope/strength::bhavaBalaFromJd",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

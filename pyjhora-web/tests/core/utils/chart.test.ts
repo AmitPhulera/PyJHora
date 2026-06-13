@@ -193,7 +193,8 @@ describe('convertTo2dChart', () => {
 
 describe('deeptaamsaRange', () => {
   it('should return correct range', () => {
-    const [min, max] = deeptaamsaRange(7, 15);
+    // Mercury (planet 3) has deeptaamsa 7
+    const [min, max] = deeptaamsaRange(3, 15);
     expect(min).toBe(8);
     expect(max).toBe(22);
   });

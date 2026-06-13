@@ -147,7 +147,8 @@ def _validate_data(place,latitude,longitude,time_zone_offset,dob,tob,division_ch
         warnings.warn(w_msg)
         divisional_chart_factor = 1
     return place,latitude,longitude,time_zone_offset,dob,tob,division_chart_factor
-# @parity: ts=@/core/utils/cities::getLocation
+# no @parity pair: get_location() falls back to IP-based geolocation (environment-dependent);
+# TS getLocation(cityName) is a pure city-database lookup with a different return shape.
 def get_location(place_name=None):
     """
         function to get place's latitude, longitude and timezone

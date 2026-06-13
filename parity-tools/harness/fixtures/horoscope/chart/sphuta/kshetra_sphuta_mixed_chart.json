@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.sphuta.kshetra_sphuta_mixed_chart",
-  "typescript_target": "@/core/horoscope/sphuta::kshetraSphotaMixedChart",
+  "typescript_target": "@/core/horoscope/sphuta::kshetraSphutaMixedChartFromDob",
   "setup": {
     "ayanamsa": "LAHIRI"
   },
@@ -33,5 +33,9 @@
         }
       }
     }
-  ]
+  ],
+  "tolerance": {
+    "float_abs": 0.002
+  },
+  "tolerance_rationale": "Sphuta longitudes are linear combinations of planet/ascendant/gulika longitudes (coefficients up to x8). Python uses JPL ephemeris files, TS uses Moshier via swisseph-wasm; per-body drift is ~0.1-0.3 arcsec, amplified by formula coefficients and the sunrise-derived gulika time to <=2e-3 deg. Rasi (sign) values must still match exactly."
 }

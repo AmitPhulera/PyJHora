@@ -1,13 +1,13 @@
 {
   "python_target": "jhora.horoscope.chart.charts.mixed_chart_from_rasi_positions",
-  "typescript_target": "@/core/horoscope/charts::mixedChartFromRasiPositions",
+  "typescript_target": "@/core/horoscope/charts::getMixedDivisionalChart",
   "setup": {
     "ayanamsa": "LAHIRI"
   },
   "cases": [
     {
       "id": "ref_chart_1996_chennai",
-      "description": "pvr_tests reference chart: 1996-12-07 10:34, Chennai",
+      "description": "pvr_tests reference chart D1 positions -> D9 then D12 mixed chart (varga factors added; Python raises KeyError(None) without them)",
       "inputs": {
         "planet_positions_in_rasi": [
           [
@@ -80,7 +80,11 @@
               10.553787374473814
             ]
           ]
-        ]
+        ],
+        "varga_factor_1": 9,
+        "chart_method_1": 1,
+        "varga_factor_2": 12,
+        "chart_method_2": 1
       }
     }
   ]

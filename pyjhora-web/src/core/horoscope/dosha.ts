@@ -6,7 +6,7 @@
  * Kala Sarpa, Manglik, Pitru, Guru Chandala, Kalathra, Ganda Moola, Ghata, Shrapit
  */
 
-import type { HouseChart } from '@core/types';
+import type { HouseChart } from '../types';
 import type { PlanetPosition } from './charts';
 import {
   getHouseToPlanetList,
@@ -41,7 +41,7 @@ import {
   PISCES,
   TAURUS,
   LIBRA,
-} from '@core/constants';
+} from '../constants';
 
 // ============================================================================
 // GANDA MOOLA STARS (1-indexed nakshatra numbers)
@@ -96,6 +96,25 @@ const parsePlanetToHouseFromChart = (
  * @returns true if Kala Sarpa Dosha is present
  */
 // @parity: py=kala_sarpa
+
+/**
+ * Accept either object-style positions ({planet, rasi, longitude}) or
+ * Python tuple-style positions ([planet|'L', [rasi, longitude]]) and
+ * return object-style. Parity fixtures pass the Python tuple convention.
+ */
+const normalizePlanetPositions = (positions: any[]): PlanetPosition[] => {
+  if (positions.length > 0 && Array.isArray(positions[0])) {
+    return (positions as Array<[number | string, [number, number]]>).map(
+      ([p, [rasi, longitude]]) => ({
+        planet: p === 'L' ? -1 : Number(p),
+        rasi,
+        longitude,
+      }) as PlanetPosition
+    );
+  }
+  return positions as PlanetPosition[];
+};
+
 export const kalaSarpa = (chart: HouseChart): boolean => {
   const pToH = parsePlanetToHouseFromChart(chart);
 
@@ -173,6 +192,7 @@ export const manglik = (
   include2ndHouse: boolean = true,
   applyExceptions: boolean = true
 ): [boolean, boolean, number[]] => {
+  positions = normalizePlanetPositions(positions);
   let manglikHouses = [4, 7, 8, 12];
   if (include2ndHouse) manglikHouses = [2, ...manglikHouses];
   if (includeLagnaHouse) manglikHouses = [1, ...manglikHouses];
@@ -315,6 +335,7 @@ export const manglik = (
 export const pitruDosha = (
   positions: PlanetPosition[]
 ): [boolean, number[]] => {
+  positions = normalizePlanetPositions(positions);
   const pToH = getPlanetToHouseDict(
     positions.map((p) => ({
       planet: p.planet,
@@ -399,6 +420,7 @@ export const pitruDosha = (
 export const guruChandalaDosha = (
   positions: PlanetPosition[]
 ): [boolean, boolean] => {
+  positions = normalizePlanetPositions(positions);
   const jupiterPos = positions.find((p) => p.planet === JUPITER);
   const rahuPos = positions.find((p) => p.planet === RAHU);
   const ketuPos = positions.find((p) => p.planet === KETU);
@@ -441,6 +463,7 @@ export const kalathra = (
   positions: PlanetPosition[],
   referencePlanet: number | 'L' = 'L'
 ): boolean => {
+  positions = normalizePlanetPositions(positions);
   // Determine the reference house (7th from Lagna or 7th from Moon)
   let referenceHouse: number;
   if (referencePlanet === 'L') {
@@ -500,6 +523,7 @@ export const gandaMoola = (moonStar: number): boolean => {
  */
 // @parity: py=ghata
 export const ghata = (positions: PlanetPosition[]): boolean => {
+  positions = normalizePlanetPositions(positions);
   const marsPos = positions.find((p) => p.planet === MARS);
   const saturnPos = positions.find((p) => p.planet === SATURN);
 
@@ -523,6 +547,7 @@ export const ghata = (positions: PlanetPosition[]): boolean => {
  */
 // @parity: py=shrapit
 export const shrapit = (positions: PlanetPosition[]): boolean => {
+  positions = normalizePlanetPositions(positions);
   const rahuPos = positions.find((p) => p.planet === RAHU);
   const saturnPos = positions.find((p) => p.planet === SATURN);
 

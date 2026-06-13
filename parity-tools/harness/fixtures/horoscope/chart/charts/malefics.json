@@ -1,6 +1,6 @@
 {
   "python_target": "jhora.horoscope.chart.charts.malefics",
-  "typescript_target": "@/core/horoscope/charts::getMalefics",
+  "typescript_target": "@/core/horoscope/charts::getMaleficsFromJd",
   "setup": {
     "ayanamsa": "LAHIRI"
   },

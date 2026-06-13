@@ -129,7 +129,7 @@ kendras = lambda asc_house:[(asc_house+h-1)%12 for h in [1,4,7,10] ]
 panapharas = lambda asc_house:[(asc_house+h-1)%12 for h in [2,5,8,11] ]
 apoklimas = lambda asc_house:[(asc_house+h-1)%12 for h in [3,6,9,12] ]
 
-# @parity: ts=@/core/horoscope/strength::calculateHarshaBala
+# @parity: ts=@/core/horoscope/strength::harshaBalaFromDob
 def harsha_bala(dob,tob,place,divisional_factor=1):
     """
         computes the harsha bala score of the planets
@@ -366,7 +366,7 @@ def _navamsa_bala(p_to_h_navamsa_chart):
         elif const.house_strengths_of_planets[p][h_p]==const._ENEMY:
             kb[p] = 1.25
     return kb
-# @parity: ts=@/core/horoscope/strength::calculatePanchaVargeeyaBala
+# @parity: ts=@/core/horoscope/strength::panchaVargeeyaBalaFromJd
 def pancha_vargeeya_bala(jd,place):
     """
         computes the Pancha Vargeeya bala score of the planets
@@ -408,7 +408,7 @@ def pancha_vargeeya_bala(jd,place):
     pvb = [round(sum(x)/4.0,2) for x in zip(*pvb)]
     pvbd = {k:pvb[k] for k in range(7)}
     return pvbd
-# @parity: ts=@/core/horoscope/strength::calculateDwadhasaVargeeyaBala
+# @parity: ts=@/core/horoscope/strength::dwadhasaVargeeyaBalaFromJd
 def dwadhasa_vargeeya_bala(jd,place):
     """
         Calculates dwadhasa_vargeeya_bala score of the planets
@@ -805,7 +805,7 @@ def _drik_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
             dk_final[col] = round((dkp[col] - dkm[col])/4,2) 
     #print('drik bala values',dk_final)
     return dk_final
-# @parity: ts=@/core/horoscope/strength::calculateShadBala
+# @parity: ts=@/core/horoscope/strength::shadBalaFromJd
 def shad_bala(jd,place,ayanamsa_mode=const._DEFAULT_AYANAMSA_MODE):
     sb = []
     stb = _sthana_bala(jd, place,ayanamsa_mode=ayanamsa_mode)
@@ -887,7 +887,7 @@ def __bhava_drik_bala_calc_1(dk_p1_p2,p1):
     if p1 not in [3,4]:
         dk_p1_p2_new = round(dk_p1_p2_new*0.25,2)
     return dk_p1_p2_new
-# @parity: ts=@/core/horoscope/strength::bhavaDrishtiBala
+# @parity: ts=@/core/horoscope/strength::bhavaDrishtiBalaFromJd
 def bhava_drishti_bala(jd,place):
     """ TODO: Check if Bhava Drishi bala is same as Aspect Relationship Table??? """
     return _bhava_drik_bala(jd, place)
@@ -936,7 +936,7 @@ def _bhava_drik_bala(jd,place):
                 dkm[row] += dk[row][col]
             dk_final[row] = round((dkp[row] - dkm[row])/4,2) 
     return dk_final
-# @parity: ts=@/core/horoscope/strength::calculateBhavaBala
+# @parity: ts=@/core/horoscope/strength::bhavaBalaFromJd
 def bhava_bala(jd,place):
     """
         Computes bhava bala

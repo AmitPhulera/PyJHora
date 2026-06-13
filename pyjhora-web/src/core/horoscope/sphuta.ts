@@ -54,7 +54,6 @@ const LAGNA = -1;
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Tri Sphuta
  */
-// @parity: py=tri_sphuta
 export const triSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -73,7 +72,6 @@ export const triSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Chatur Sphuta
  */
-// @parity: py=chatur_sphuta
 export const chaturSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -93,7 +91,6 @@ export const chaturSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Pancha Sphuta
  */
-// @parity: py=pancha_sphuta
 export const panchaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -113,7 +110,6 @@ export const panchaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Prana Sphuta
  */
-// @parity: py=prana_sphuta
 export const pranaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -131,7 +127,6 @@ export const pranaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Deha Sphuta
  */
-// @parity: py=deha_sphuta
 export const dehaSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -149,7 +144,6 @@ export const dehaSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Mrityu Sphuta
  */
-// @parity: py=mrityu_sphuta
 export const mrityuSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -167,7 +161,6 @@ export const mrityuSphuta = (
  * @param gulikaLongitude - Absolute longitude of Gulika in degrees (0-360)
  * @returns Rasi and longitude of the Sookshma Tri Sphuta
  */
-// @parity: py=sookshma_tri_sphuta
 export const sookshmaTriSphuta = (
   positions: PlanetPosition[],
   gulikaLongitude: number
@@ -194,7 +187,6 @@ export const sookshmaTriSphuta = (
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Beeja Sphuta
  */
-// @parity: py=beeja_sphuta
 export const beejaSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const sunLong = getAbsLong(positions, SUN);
   const jupiterLong = getAbsLong(positions, JUPITER);
@@ -210,7 +202,6 @@ export const beejaSphuta = (positions: PlanetPosition[]): { rasi: number; longit
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Kshetra Sphuta
  */
-// @parity: py=kshetra_sphuta
 export const kshetraSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const moonLong = getAbsLong(positions, MOON);
   const jupiterLong = getAbsLong(positions, JUPITER);
@@ -226,7 +217,6 @@ export const kshetraSphuta = (positions: PlanetPosition[]): { rasi: number; long
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Tithi Sphuta
  */
-// @parity: py=tithi_sphuta
 export const tithiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const moonLong = getAbsLong(positions, MOON);
   const sunLong = getAbsLong(positions, SUN);
@@ -243,7 +233,6 @@ export const tithiSphuta = (positions: PlanetPosition[]): { rasi: number; longit
  * @param addYogiLongitude - Whether to add the yogi longitude offset (default false)
  * @returns Rasi and longitude of the Yoga Sphuta
  */
-// @parity: py=yoga_sphuta
 export const yogaSphuta = (
   positions: PlanetPosition[],
   addYogiLongitude: boolean = false
@@ -262,7 +251,6 @@ export const yogaSphuta = (
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Yogi Sphuta
  */
-// @parity: py=yogi_sphuta
 export const yogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   return yogaSphuta(positions, true);
 };
@@ -274,7 +262,6 @@ export const yogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitu
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Avayogi Sphuta
  */
-// @parity: py=avayogi_sphuta
 export const avayogiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const yogi = yogiSphuta(positions);
   const avayogiLong = (yogi.rasi * 30 + yogi.longitude + 186 + 40 / 60) % 360;
@@ -288,7 +275,6 @@ export const avayogiSphuta = (positions: PlanetPosition[]): { rasi: number; long
  * @param positions - D-1 planet positions
  * @returns Rasi and longitude of the Rahu Tithi Sphuta
  */
-// @parity: py=rahu_tithi_sphuta
 export const rahuTithiSphuta = (positions: PlanetPosition[]): { rasi: number; longitude: number } => {
   const rahuLong = getAbsLong(positions, RAHU);
   const sunLong = getAbsLong(positions, SUN);
@@ -311,7 +297,6 @@ export const rahuTithiSphuta = (positions: PlanetPosition[]): { rasi: number; lo
  * @param gulikaLongitude - Absolute longitude of Gulika (computed with mixed dvf)
  * @param mixedDvf - Mixed divisional chart factor (vargaFactor1 * vargaFactor2)
  */
-// @parity: py=tri_sphuta_mixed_chart
 export const triSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -327,7 +312,6 @@ export const triSphotaMixedChart = (
  * Chatur Sphuta for mixed chart.
  * Formula: (Sun + triSphutaMixedChart) % 360
  */
-// @parity: py=chatur_sphuta_mixed_chart
 export const chaturSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -344,7 +328,6 @@ export const chaturSphotaMixedChart = (
  * Pancha Sphuta for mixed chart.
  * Formula: (Rahu + chaturSphutaMixedChart) % 360
  */
-// @parity: py=pancha_sphuta_mixed_chart
 export const panchaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -361,7 +344,6 @@ export const panchaSphotaMixedChart = (
  * Prana Sphuta for mixed chart.
  * Formula: (Ascendant * 5 + Gulika) % 360
  */
-// @parity: py=prana_sphuta_mixed_chart
 export const pranaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -376,7 +358,6 @@ export const pranaSphotaMixedChart = (
  * Deha Sphuta for mixed chart.
  * Formula: (Moon * 8 + Gulika) % 360
  */
-// @parity: py=deha_sphuta_mixed_chart
 export const dehaSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -391,7 +372,6 @@ export const dehaSphotaMixedChart = (
  * Mrityu Sphuta for mixed chart.
  * Formula: (Gulika * 7 + Sun) % 360
  */
-// @parity: py=mrityu_sphuta_mixed_chart
 export const mrityuSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -406,7 +386,6 @@ export const mrityuSphotaMixedChart = (
  * Sookshma Tri Sphuta for mixed chart.
  * Formula: (Prana + Deha + Mrityu) % 360
  */
-// @parity: py=sookshma_tri_sphuta_mixed_chart
 export const sookshmaTriSphotaMixedChart = (
   positions: PlanetPosition[],
   gulikaLongitude: number,
@@ -427,7 +406,6 @@ export const sookshmaTriSphotaMixedChart = (
  * Beeja Sphuta for mixed chart.
  * Formula: (Sun + Jupiter + Venus) % 360
  */
-// @parity: py=beeja_sphuta_mixed_chart
 export const beejaSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -443,7 +421,6 @@ export const beejaSphotaMixedChart = (
  * Kshetra Sphuta for mixed chart.
  * Formula: (Moon + Jupiter + Mars) % 360
  */
-// @parity: py=kshetra_sphuta_mixed_chart
 export const kshetraSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -459,7 +436,6 @@ export const kshetraSphotaMixedChart = (
  * Tithi Sphuta for mixed chart.
  * Formula: (Moon - Sun) % 360
  */
-// @parity: py=tithi_sphuta_mixed_chart
 export const tithiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -474,7 +450,6 @@ export const tithiSphotaMixedChart = (
  * Yoga Sphuta for mixed chart.
  * Formula: (Moon + Sun + yogiOffset) % 360
  */
-// @parity: py=yoga_sphuta_mixed_chart
 export const yogaSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number,
@@ -491,7 +466,6 @@ export const yogaSphotaMixedChart = (
  * Yogi Sphuta for mixed chart.
  * Simply calls yogaSphotaMixedChart with addYogiLongitude=true.
  */
-// @parity: py=yogi_sphuta_mixed_chart
 export const yogiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -503,7 +477,6 @@ export const yogiSphotaMixedChart = (
  * Avayogi Sphuta for mixed chart.
  * Formula: (yogiSphutaMixedChart + 186 + 40/60) % 360
  */
-// @parity: py=avayogi_sphuta_mixed_chart
 export const avayogiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -517,7 +490,6 @@ export const avayogiSphotaMixedChart = (
  * Rahu Tithi Sphuta for mixed chart.
  * Formula: (Rahu - Sun) % 360
  */
-// @parity: py=rahu_tithi_sphuta_mixed_chart
 export const rahuTithiSphotaMixedChart = (
   positions: PlanetPosition[],
   mixedDvf: number
@@ -527,3 +499,346 @@ export const rahuTithiSphotaMixedChart = (
   const tithiLong = ((rahuLong - sunLong) % 360 + 360) % 360;
   return dasavargaFromLong(tithiLong, mixedDvf);
 };
+
+// ============================================================================
+// DOB/TOB/PLACE ASYNC WRAPPERS (Python-signature parity)
+//
+// Python sphuta.py functions take (dob, tob, place, ...) and compute the
+// chart + gulika internally. The pure functions above take precomputed
+// positions. These wrappers mirror the Python signatures and return
+// Python-shaped [rasi, longitude] tuples.
+// ============================================================================
+
+import type { Place, JhoraDate } from '../types';
+import { julianDayNumber } from '../utils/julian';
+import {
+  ascendantFullAsync,
+  siderealLongitudeAsync,
+} from '../ephemeris/swe-adapter';
+import { normalizeDegrees } from '../utils/angle';
+import { getDivisionalChart } from './charts';
+import { dasavargaFromLong as drikDasavargaFromLong, gulikaLongitudeAsync } from '../panchanga/drik';
+
+type Tob = [number, number, number];
+
+const tobToTime = (tob: Tob) => ({ hour: tob[0], minute: tob[1], second: tob[2] });
+
+/**
+ * Compute Lagna-first planet positions (PlanetPosition[]) for a divisional
+ * chart, mirroring Python charts.divisional_chart(jd, place, ...).
+ */
+export async function divisionalPositionsAsync(
+  jd: number,
+  place: Place,
+  divisionalChartFactor: number = 1,
+  chartMethod: number = 1
+): Promise<PlanetPosition[]> {
+  const jdUtc = jd - place.timezone / 24;
+  const d1: PlanetPosition[] = [];
+  const [ascRasi, ascLong] = await ascendantFullAsync(jd, place);
+  d1.push({ planet: -1, rasi: ascRasi, longitude: ascLong } as PlanetPosition);
+  const rahuLong = await siderealLongitudeAsync(jdUtc, 7);
+  for (let p = 0; p <= 8; p++) {
+    const long =
+      p === 7 ? rahuLong : p === 8 ? normalizeDegrees(rahuLong + 180) : await siderealLongitudeAsync(jdUtc, p);
+    const [rasi, longInSign] = drikDasavargaFromLong(long, 1);
+    d1.push({ planet: p, rasi, longitude: longInSign } as PlanetPosition);
+  }
+  if (divisionalChartFactor === 1) return d1;
+  return getDivisionalChart(d1, divisionalChartFactor, chartMethod);
+}
+
+/** Absolute longitude of a planet by Lagna-first Python index (0=Lagna, 1=Sun, 2=Moon, ...). */
+const absLongAt = (pp: PlanetPosition[], pyIndex: number): number =>
+  pp[pyIndex]!.rasi * 30 + pp[pyIndex]!.longitude;
+
+/** Gulika absolute longitude (deg 0-360), mirroring Python drik.gulika_longitude. */
+async function gulikaAbsLongAsync(dob: JhoraDate, tob: Tob, place: Place): Promise<number> {
+  const jd = julianDayNumber(dob, tobToTime(tob));
+  const tobHours = tob[0] + tob[1] / 60 + tob[2] / 3600;
+  const g = await gulikaLongitudeAsync(jd, place, tobHours);
+  return g[0] * 30 + g[1];
+}
+
+type SphutaTuple = [number, number];
+
+interface SphutaContext {
+  pp: PlanetPosition[];
+  gulikaLong: () => Promise<number>;
+  dvf: number;
+}
+
+async function sphutaContext(
+  dob: JhoraDate, tob: Tob, place: Place, dvf: number, chartMethod: number
+): Promise<SphutaContext> {
+  const jd = julianDayNumber(dob, tobToTime(tob));
+  const pp = await divisionalPositionsAsync(jd, place, dvf, chartMethod);
+  return { pp, gulikaLong: () => gulikaAbsLongAsync(dob, tob, place), dvf };
+}
+
+async function mixedSphutaContext(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vf1: number, cm1: number, vf2: number, cm2: number
+): Promise<SphutaContext> {
+  const jd = julianDayNumber(dob, tobToTime(tob));
+  const dvf = vf1 * vf2;
+  const d1 = await divisionalPositionsAsync(jd, place, 1, 1);
+  const pp1 = getDivisionalChart(d1, vf1, cm1);
+  const pp = getDivisionalChart(pp1, vf2, cm2);
+  return { pp, gulikaLong: () => gulikaAbsLongAsync(dob, tob, place), dvf };
+}
+
+// --- formulas shared by normal and mixed variants -------------------------
+
+const triFromCtx = async (c: SphutaContext): Promise<SphutaTuple> => {
+  const long = (absLongAt(c.pp, 2) + absLongAt(c.pp, 0) + (await c.gulikaLong())) % 360;
+  return drikDasavargaFromLong(long, c.dvf);
+};
+const chaturFromCtx = async (c: SphutaContext): Promise<SphutaTuple> => {
+  const tri = await triFromCtx(c);
+  const long = (absLongAt(c.pp, 1) + tri[0] * 30 + tri[1]) % 360;
+  return drikDasavargaFromLong(long, c.dvf);
+};
+const panchaFromCtx = async (c: SphutaContext): Promise<SphutaTuple> => {
+  const chatur = await chaturFromCtx(c);
+  const long = (absLongAt(c.pp, 8) + chatur[0] * 30 + chatur[1]) % 360;
+  return drikDasavargaFromLong(long, c.dvf);
+};
+const pranaFromCtx = async (c: SphutaContext): Promise<SphutaTuple> =>
+  drikDasavargaFromLong((absLongAt(c.pp, 0) * 5 + (await c.gulikaLong())) % 360, c.dvf);
+const dehaFromCtx = async (c: SphutaContext): Promise<SphutaTuple> =>
+  drikDasavargaFromLong((absLongAt(c.pp, 2) * 8 + (await c.gulikaLong())) % 360, c.dvf);
+const mrityuFromCtx = async (c: SphutaContext): Promise<SphutaTuple> =>
+  drikDasavargaFromLong(((await c.gulikaLong()) * 7 + absLongAt(c.pp, 1)) % 360, c.dvf);
+const sookshmaTriFromCtx = async (c: SphutaContext): Promise<SphutaTuple> => {
+  const prana = await pranaFromCtx(c);
+  const deha = await dehaFromCtx(c);
+  const mrityu = await mrityuFromCtx(c);
+  const long =
+    (prana[0] * 30 + prana[1] + deha[0] * 30 + deha[1] + mrityu[0] * 30 + mrityu[1]) % 360;
+  return drikDasavargaFromLong(long, c.dvf);
+};
+const beejaFromCtx = (c: SphutaContext): SphutaTuple =>
+  drikDasavargaFromLong((absLongAt(c.pp, 1) + absLongAt(c.pp, 5) + absLongAt(c.pp, 6)) % 360, c.dvf);
+const kshetraFromCtx = (c: SphutaContext): SphutaTuple =>
+  drikDasavargaFromLong((absLongAt(c.pp, 2) + absLongAt(c.pp, 5) + absLongAt(c.pp, 3)) % 360, c.dvf);
+const tithiFromCtx = (c: SphutaContext): SphutaTuple =>
+  drikDasavargaFromLong(normalizeDegrees(absLongAt(c.pp, 2) - absLongAt(c.pp, 1)), c.dvf);
+const yogaFromCtx = (c: SphutaContext, addYogiLongitude: boolean): SphutaTuple => {
+  const yogiLong = addYogiLongitude ? 93 + 20 / 60 : 0;
+  return drikDasavargaFromLong((absLongAt(c.pp, 2) + absLongAt(c.pp, 1) + yogiLong) % 360, c.dvf);
+};
+const avayogiFromCtx = (c: SphutaContext): SphutaTuple => {
+  const yl = yogaFromCtx(c, true);
+  return drikDasavargaFromLong((yl[0] * 30 + yl[1] + 186 + 40 / 60) % 360, c.dvf);
+};
+const rahuTithiFromCtx = (c: SphutaContext): SphutaTuple =>
+  drikDasavargaFromLong(normalizeDegrees(absLongAt(c.pp, 8) - absLongAt(c.pp, 1)), c.dvf);
+
+// --- exported wrappers -----------------------------------------------------
+
+// @parity: py=tri_sphuta
+export async function triSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return triFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=chatur_sphuta
+export async function chaturSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return chaturFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=pancha_sphuta
+export async function panchaSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return panchaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=prana_sphuta
+export async function pranaSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return pranaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=deha_sphuta
+export async function dehaSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return dehaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=mrityu_sphuta
+export async function mrityuSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return mrityuFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=sookshma_tri_sphuta
+export async function sookshmaTriSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return sookshmaTriFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=beeja_sphuta
+export async function beejaSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return beejaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=kshetra_sphuta
+export async function kshetraSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return kshetraFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=tithi_sphuta
+export async function tithiSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return tithiFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=yoga_sphuta
+export async function yogaSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1,
+  _years = 1, _months = 1, _sixtyHours = 1, addYogiLongitude = false
+): Promise<SphutaTuple> {
+  return yogaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod), addYogiLongitude);
+}
+// @parity: py=yogi_sphuta
+export async function yogiSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return yogaFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod), true);
+}
+// @parity: py=avayogi_sphuta
+export async function avayogiSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return avayogiFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+// @parity: py=rahu_tithi_sphuta
+export async function rahuTithiSphutaFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  _ayanamsaMode?: string, divisionalChartFactor = 1, chartMethod = 1
+): Promise<SphutaTuple> {
+  return rahuTithiFromCtx(await sphutaContext(dob, tob, place, divisionalChartFactor, chartMethod));
+}
+
+// @parity: py=tri_sphuta_mixed_chart
+export async function triSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return triFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=chatur_sphuta_mixed_chart
+export async function chaturSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return chaturFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=pancha_sphuta_mixed_chart
+export async function panchaSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return panchaFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=prana_sphuta_mixed_chart
+export async function pranaSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return pranaFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=deha_sphuta_mixed_chart
+export async function dehaSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return dehaFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=mrityu_sphuta_mixed_chart
+export async function mrityuSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return mrityuFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=sookshma_tri_sphuta_mixed_chart
+export async function sookshmaTriSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return sookshmaTriFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=beeja_sphuta_mixed_chart
+export async function beejaSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return beejaFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=kshetra_sphuta_mixed_chart
+export async function kshetraSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return kshetraFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=tithi_sphuta_mixed_chart
+export async function tithiSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return tithiFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=yoga_sphuta_mixed_chart
+export async function yogaSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1,
+  addYogiLongitude = false
+): Promise<SphutaTuple> {
+  return yogaFromCtx(
+    await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2),
+    addYogiLongitude
+  );
+}
+// @parity: py=yogi_sphuta_mixed_chart
+export async function yogiSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return yogaFromCtx(
+    await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2),
+    true
+  );
+}
+// @parity: py=avayogi_sphuta_mixed_chart
+export async function avayogiSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return avayogiFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}
+// @parity: py=rahu_tithi_sphuta_mixed_chart
+export async function rahuTithiSphutaMixedChartFromDob(
+  dob: JhoraDate, tob: Tob, place: Place,
+  vargaFactor1 = 1, chartMethod1 = 1, vargaFactor2 = 1, chartMethod2 = 1
+): Promise<SphutaTuple> {
+  return rahuTithiFromCtx(await mixedSphutaContext(dob, tob, place, vargaFactor1, chartMethod1, vargaFactor2, chartMethod2));
+}

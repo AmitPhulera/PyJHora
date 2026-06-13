@@ -351,7 +351,6 @@ def planets_in_graha_yudh(jd,place):
     return _graha_yudh_pairs
 solar_longitude = lambda jd: sidereal_longitude(jd, const._SUN)
 lunar_longitude = lambda jd: sidereal_longitude(jd, const._MOON)
-# @parity: ts=@/core/panchanga/drik::sunrise
 def sunrise(jd, place):
     """
         Sunrise when centre of disc is at horizon for given date and place
@@ -426,7 +425,6 @@ def night_length(jd, place):
         @return: night length in float hours. e.g. 12.125
     """
     return (24.0 + sunrise(jd+1, place)[0] - sunset(jd, place)[0])
-# @parity: ts=@/core/panchanga/drik::sunset
 def sunset(jd, place,gauri_choghadiya_setting=False):
     """
         Sunset when centre of disc is at horizon for given date and place
@@ -449,7 +447,6 @@ def sunset(jd, place,gauri_choghadiya_setting=False):
         tob = tuple(utils.to_dms(set_local_time, as_string=False))
         set_jd = utils.julian_day_number(dob, tob)
     return [set_local_time, utils.to_dms(set_local_time),set_jd]
-# @parity: ts=@/core/panchanga/drik::moonrise
 def moonrise(jd, place):
     """
         Return local moonrise time
@@ -468,7 +465,6 @@ def moonrise(jd, place):
     local_time = (rise - jd_utc) * 24 + tz
     return [local_time,utils.to_dms(local_time),rise]
 
-# @parity: ts=@/core/panchanga/drik::moonset
 def moonset(jd, place):
     """
         Return local moonset time
@@ -2689,7 +2685,9 @@ def previous_conjunction_of_planet_pair(jd,panchanga_place:Place,p1,p2,separatio
 # @parity: ts=@/core/panchanga/drik::previousPlanetEntryDateAsync
 def previous_planet_entry_date(planet,jd,place,increment_days=0.01,precision=0.1,raasi=None):
     return next_planet_entry_date(planet,jd,place,direction=-1,increment_days=increment_days,precision=precision,raasi=raasi)
-# @parity: ts=@/core/panchanga/drik::previousAscendantEntryDateAsync
+# no @parity: previous_ascendant_entry_date is broken in Python (it forwards
+# increment_days to next_ascendant_entry_date, which has no such kwarg -> always
+# TypeError), so it cannot be exercised by the parity harness.
 def previous_ascendant_entry_date(jd,place,increment_days=0.01,precision=0.1,raasi=None,divisional_chart_factor=1):
     return next_ascendant_entry_date(jd, place, direction=-1, increment_days=increment_days, precision=precision, raasi=raasi,divisional_chart_factor=divisional_chart_factor)
 # @parity: ts=@/core/panchanga/drik::nextAscendantEntryDateAsync
@@ -2876,7 +2874,8 @@ def _nisheka_time_1(jd,place):
 def graha_drekkana(jd,place,use_bv_raman_table=False):
     return [const.drekkana_table_bvraman[h][int(long//10)] for _,(h,long) in dhasavarga(jd, place)] if use_bv_raman_table \
         else [const.drekkana_table[h][int(long//10)] for _,(h,long) in dhasavarga(jd, place)]
-# @parity: ts=@/core/panchanga/drik::sahasraChandrodayamOld
+# no @parity: sahasra_chandrodayam_old needs the Python `ephem` library; the TS
+# counterpart is an intentional stub (returns [-1,-1,-1]), so no parity is possible.
 def sahasra_chandrodayam_old(dob,tob,place):
     """
         TODO: Does not support BCE dates as ephem supports only datetime

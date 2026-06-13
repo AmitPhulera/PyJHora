@@ -47,13 +47,14 @@ import {
   siderealLongitude,
   getAllPlanetPositionsAsync
 } from '../ephemeris/swe-adapter';
-import { calculateTithi, calculateVara, dayLength, nightLength, declinationOfPlanets, midnight } from '../panchanga/drik';
+import { calculateTithi, calculateVara, dayLength, nightLength, declinationOfPlanets, midnight, bhaavaMadhyaKP } from '../panchanga/drik';
 import {
   getHouseOwnerFromPlanetPositions,
   getHouseToPlanetList,
   getPlanetToHouseDict,
   getGrahaDrishtiFromChart,
-  getRaasiDrishtiFromChart
+  getRaasiDrishtiFromChart,
+  getCompoundRelationshipsOfPlanets
 } from './house';
 
 // ============================================================================
@@ -297,10 +298,28 @@ const planetLongitudeCorrection = (planetIndex: number, yearsSinceEpoch: number)
  * Python: get_planet_mean_longitude_using_epoch_table(jd, place, planet_index)
  */
 // @parity: py=get_planet_mean_longitude_using_epoch_table
+
+/**
+ * Accept either object-style positions or Python tuple-style positions
+ * ([planet|'L', [rasi, longitude]]) and return object-style.
+ */
+const normalizePlanetPositions = (positions: any[]): PlanetPosition[] => {
+  if (positions.length > 0 && Array.isArray(positions[0])) {
+    return (positions as Array<[number | string, [number, number]]>).map(
+      ([p, [rasi, longitude]]) => ({
+        planet: p === 'L' ? -1 : Number(p),
+        rasi,
+        longitude,
+      }) as PlanetPosition
+    );
+  }
+  return positions as PlanetPosition[];
+};
+
 export const getPlanetMeanLongitudeUsingEpochTable = (
   jd: number,
   place: Place,
-  planetIndex: number
+  planetIndex: number = 0
 ): number => {
   if (planetIndex === 1) return 0; // Moon not supported
 
@@ -362,7 +381,7 @@ export const getPlanetMeanLongitudeUsingEpochTable = (
  * Python: get_planet_mean_longitude(jd, place, planet_index)
  */
 // @parity: py=get_planet_mean_longitude
-export const getPlanetMeanLongitude = (jd: number, place: Place, planetIndex: number): number => {
+export const getPlanetMeanLongitude = (jd: number, place: Place, planetIndex: number = 0): number => {
   if (planetIndex === 1) return 0;
 
   const dfe = daysFromEpoch(jd, place.longitude);
@@ -463,12 +482,12 @@ export const calculateSaptavargajaBala = (
     charts[dcf] = getDivisionalChart(d1Positions, dcf);
   }
 
-  // Get compound relationships
-  const hToP = getHouseToPlanetList(d1Positions);
+  // Get compound relationships from the D1 chart (Python: house._get_compound_relationships_of_planets)
+  const cr = getCompoundRelationshipsOfPlanets(positionsToChartStrings(d1Positions));
 
   const svb: number[][] = [];
   for (const dcf of sv) {
-    const svbc = calculateSaptavargajaBalaForChart(charts[dcf], dcf);
+    const svbc = calculateSaptavargajaBalaForChart(charts[dcf], dcf, cr);
     svb.push(svbc);
   }
 
@@ -488,7 +507,8 @@ export const calculateSaptavargajaBala = (
  */
 const calculateSaptavargajaBalaForChart = (
   planetPositions: PlanetPosition[],
-  dcf: number
+  dcf: number,
+  compoundRelations: number[][]
 ): number[] => {
   const sb: number[] = new Array(8).fill(0);
 
@@ -512,8 +532,8 @@ const calculateSaptavargajaBalaForChart = (
     } else if (HOUSE_STRENGTHS_OF_PLANETS[p]?.[h] === STRENGTH_OWN_SIGN) {
       sb[p] = 30;
     } else {
-      const relation = COMPOUND_PLANET_RELATIONS[p]?.[owner] ?? SAMAM_NEUTRAL;
-      sb[p] = sbFac[relation - 1] ?? 7.5;
+      // Python: sb[p] = sb_fac[cr[p][owner]] where cr values are already 0-indexed
+      sb[p] = sbFac[compoundRelations[p]![owner]!] ?? 7.5;
     }
   }
 
@@ -780,7 +800,7 @@ export const calculateAbdadhipathiBala = (jd: number, place: Place): number[] =>
   const { date } = julianDayToGregorian(jd);
   const year = date.year;
 
-  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 });
+  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 }, { hour: 0, minute: 0, second: 0 });
   const elapsedDays = Math.floor(jd - jan1Jd + 1);
   const ahargana = daysElapsedSinceBase(year - 1) + elapsedDays;
 
@@ -801,7 +821,7 @@ export const calculateMasadhipathiBala = (jd: number, place: Place): number[] =>
   const { date } = julianDayToGregorian(jd);
   const year = date.year;
 
-  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 });
+  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 }, { hour: 0, minute: 0, second: 0 });
   const elapsedDays = Math.floor(jd - jan1Jd + 1);
   const ahargana = daysElapsedSinceBase(year - 1) + elapsedDays;
 
@@ -823,7 +843,7 @@ export const calculateVaaradhipathiBala = (jd: number, place: Place): number[] =
   const bth = time.hour + time.minute / 60;
   const year = date.year;
 
-  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 });
+  const jan1Jd = gregorianToJulianDay({ year, month: 1, day: 1 }, { hour: 0, minute: 0, second: 0 });
   const elapsedDays = Math.floor(jd - jan1Jd + 1);
   let ahargana = daysElapsedSinceBase(year - 1, 1827, 244) + elapsedDays;
 
@@ -975,18 +995,24 @@ export const calculateKaalaBala = (
 export const calculateDigBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): number[] => {
   // Powerless houses for each planet (0-indexed)
   const powerlessHouses = [3, 9, 3, 6, 6, 9, 0];
 
-  // Simplified bhava madhya (house cusp midpoints)
-  const ascPos = d1Positions.find(p => p.planet === -1);
-  const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
-
-  const bm: number[] = [];
-  for (let h = 0; h < 12; h++) {
-    bm.push((ascLong + h * 30) % 360);
+  // Bhava madhya cusps. Python uses drik.bhaava_madhya (Placidus/KP by
+  // default); callers can pass real cusps. Fallback: equal-house from Lagna.
+  let bm: number[];
+  if (bhavaMadhya) {
+    bm = bhavaMadhya;
+  } else {
+    const ascPos = d1Positions.find(p => p.planet === -1);
+    const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
+    bm = [];
+    for (let h = 0; h < 12; h++) {
+      bm.push((ascLong + h * 30) % 360);
+    }
   }
 
   const dbf = powerlessHouses.map(h => bm[h]);
@@ -1186,15 +1212,15 @@ export interface ShadBalaResult {
 /**
  * Calculate Shadbala (six-fold strength)
  */
-// @parity: py=shad_bala
 export const calculateShadBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): ShadBalaResult => {
   const stb = calculateSthanaBala(d1Positions, jd, place);
   const kb = calculateKaalaBala(jd, place, d1Positions);
-  const dgb = calculateDigBala(jd, place, d1Positions);
+  const dgb = calculateDigBala(jd, place, d1Positions, bhavaMadhya);
   const cb = calculateCheshtaBala(jd, place, d1Positions, true);
   const nb = calculateNaisargikaBala();
   const dkb = calculateDrikBala(jd, place, d1Positions);
@@ -1236,12 +1262,13 @@ export const calculateShadBala = (
 export const calculateBhavaAdhipathiBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): number[] => {
   const ascPos = d1Positions.find(p => p.planet === -1);
   const ascRasi = ascPos?.rasi ?? 0;
 
-  const shadBala = calculateShadBala(jd, place, d1Positions);
+  const shadBala = calculateShadBala(jd, place, d1Positions, bhavaMadhya);
   const sbSum = shadBala.total;
 
   const bb: number[] = [];
@@ -1261,17 +1288,21 @@ export const calculateBhavaAdhipathiBala = (
 export const calculateBhavaDigBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): number[] => {
   const bdb: number[] = new Array(12).fill(0);
 
-  const ascPos = d1Positions.find(p => p.planet === -1);
-  const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
-
-  // Simplified bhava madhya
-  const bm: number[] = [];
-  for (let h = 0; h < 12; h++) {
-    bm.push((ascLong + h * 30) % 360);
+  let bm: number[];
+  if (bhavaMadhya) {
+    bm = bhavaMadhya;
+  } else {
+    const ascPos = d1Positions.find(p => p.planet === -1);
+    const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
+    bm = [];
+    for (let h = 0; h < 12; h++) {
+      bm.push((ascLong + h * 30) % 360);
+    }
   }
 
   // Nara (human), Jalachara (aquatic), Chatushpada (quadruped), Keeta (insect) rasis
@@ -1374,7 +1405,8 @@ const positionsToChartStrings = (d1Positions: PlanetPosition[]): string[] => {
 export const calculateBhavaDrikBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): number[] => {
   const dk: number[][] = Array.from({ length: 12 }, () => new Array(7).fill(0));
 
@@ -1409,12 +1441,17 @@ export const calculateBhavaDrikBala = (
     ).map(h => Math.floor(h));
   }
 
-  // Simplified bhava madhya (house cusp midpoints)
-  const ascPos = d1Positions.find(p => p.planet === -1);
-  const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
-  const bm: number[] = [];
-  for (let h = 0; h < 12; h++) {
-    bm.push((ascLong + h * 30) % 360);
+  // Bhava madhya cusps (Python: drik.bhaava_madhya); fallback equal-house.
+  let bm: number[];
+  if (bhavaMadhya) {
+    bm = bhavaMadhya;
+  } else {
+    const ascPos = d1Positions.find(p => p.planet === -1);
+    const ascLong = ascPos ? ascPos.rasi * 30 + ascPos.longitude : 0;
+    bm = [];
+    for (let h = 0; h < 12; h++) {
+      bm.push((ascLong + h * 30) % 360);
+    }
   }
 
   // Calculate aspect strengths for each house from each planet
@@ -1455,13 +1492,13 @@ export const calculateBhavaDrikBala = (
 /**
  * Bhava Drishti Bala (public wrapper matching Python's bhava_drishti_bala)
  */
-// @parity: py=bhava_drishti_bala
 export const bhavaDrishtiBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): number[] => {
-  return calculateBhavaDrikBala(jd, place, d1Positions);
+  return calculateBhavaDrikBala(jd, place, d1Positions, bhavaMadhya);
 };
 
 /**
@@ -1482,15 +1519,15 @@ export interface BhavaBalaResult {
  * - Bhava Dig Bala (directional strength of houses)
  * - Bhava Drik Bala (aspectual strength on houses)
  */
-// @parity: py=bhava_bala
 export const calculateBhavaBala = (
   jd: number,
   place: Place,
-  d1Positions: PlanetPosition[]
+  d1Positions: PlanetPosition[],
+  bhavaMadhya?: number[]
 ): BhavaBalaResult => {
-  const bab = calculateBhavaAdhipathiBala(jd, place, d1Positions);
-  const bdb = calculateBhavaDigBala(jd, place, d1Positions);
-  const bdrb = calculateBhavaDrikBala(jd, place, d1Positions);
+  const bab = calculateBhavaAdhipathiBala(jd, place, d1Positions, bhavaMadhya);
+  const bdb = calculateBhavaDigBala(jd, place, d1Positions, bhavaMadhya);
+  const bdrb = calculateBhavaDrikBala(jd, place, d1Positions, bhavaMadhya);
 
   // Sum all components
   const bb = bab.map((v, i) => roundTo(v + bdb[i] + bdrb[i], 2));
@@ -1512,7 +1549,6 @@ export type HarshaBalaResult = Record<number, number>;
 /**
  * Calculate Harsha Bala
  */
-// @parity: py=harsha_bala
 export const calculateHarshaBala = (
   jd: number,
   place: Place,
@@ -1695,7 +1731,6 @@ export type PanchaVargeeyaBalaResult = Record<number, number>;
 /**
  * Calculate Pancha Vargeeya Bala (five-fold varga strength)
  */
-// @parity: py=pancha_vargeeya_bala
 export const calculatePanchaVargeeyaBala = (
   jd: number,
   place: Place,
@@ -1732,7 +1767,6 @@ export type DwadhasaVargeeyaBalaResult = Record<number, number>;
 /**
  * Calculate Dwadhasa Vargeeya Bala (twelve-fold strength)
  */
-// @parity: py=dwadhasa_vargeeya_bala
 export const calculateDwadhasaVargeeyaBala = (
   jd: number,
   place: Place,
@@ -1771,6 +1805,7 @@ export const calculatePlanetAspectRelationshipTable = (
   d1Positions: PlanetPosition[],
   includeHouses = false
 ): number[][] => {
+  d1Positions = normalizePlanetPositions(d1Positions);
   const rows = includeHouses ? 21 : 9;
   const dk: number[][] = Array.from({ length: rows }, () => new Array(9).fill(0));
 
@@ -1784,7 +1819,8 @@ export const calculatePlanetAspectRelationshipTable = (
       if (!pos2) continue;
       const p2Long = pos2.rasi * 30 + pos2.longitude;
 
-      const dkAngle = normalizeDegrees(p1Long - p2Long);
+      // Python rounds the drishti angle to 2 decimals before evaluating
+      const dkAngle = roundTo(normalizeDegrees(p1Long - p2Long), 2);
       dk[p1][p2] = roundTo(calculateDrikBalaValue(dkAngle, p2), 2);
     }
   }
@@ -1803,7 +1839,7 @@ export const calculatePlanetAspectRelationshipTable = (
         if (!pos2) continue;
         const p2Long = pos2.rasi * 30 + pos2.longitude;
 
-        const dkAngle = normalizeDegrees(p1Long - p2Long);
+        const dkAngle = roundTo(normalizeDegrees(p1Long - p2Long), 2);
         dk[9 + h][p2] = roundTo(calculateDrikBalaValue(dkAngle, p2), 2);
       }
     }
@@ -1967,3 +2003,69 @@ export const calculateIshtaPhala = (d1Positions: PlanetPosition[]): number[] => 
 
   return ip;
 };
+
+// ============================================================================
+// JD/PLACE ASYNC WRAPPERS (Python-signature parity)
+//
+// Python strength.py top-level functions take (jd, place) and compute the
+// rasi chart internally; the calculate* functions above require precomputed
+// d1Positions. These wrappers mirror the Python signatures and return
+// Python-shaped lists/dicts.
+// ============================================================================
+
+import { divisionalPositionsAsync } from './sphuta';
+import type { JhoraDate, JhoraTime } from '../types';
+
+// @parity: py=shad_bala
+export async function shadBalaFromJd(
+  jd: number, place: Place, _ayanamsaMode?: string
+): Promise<number[][]> {
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  const bm = await bhaavaMadhyaKP(jd, place);
+  const r = calculateShadBala(jd, place, pp, bm);
+  return [
+    r.sthanaBala, r.kaalaBala, r.digBala, r.cheshtaBala,
+    r.naisargikaBala, r.drikBala, r.total, r.rupas, r.strength,
+  ];
+}
+
+// @parity: py=bhava_bala
+export async function bhavaBalaFromJd(jd: number, place: Place): Promise<number[][]> {
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  const bm = await bhaavaMadhyaKP(jd, place);
+  const r = calculateBhavaBala(jd, place, pp, bm);
+  return [r.total, r.rupas, r.strength];
+}
+
+// @parity: py=bhava_drishti_bala
+export async function bhavaDrishtiBalaFromJd(jd: number, place: Place): Promise<number[]> {
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  const bm = await bhaavaMadhyaKP(jd, place);
+  return bhavaDrishtiBala(jd, place, pp, bm);
+}
+
+// @parity: py=pancha_vargeeya_bala
+export async function panchaVargeeyaBalaFromJd(
+  jd: number, place: Place
+): Promise<PanchaVargeeyaBalaResult> {
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  return calculatePanchaVargeeyaBala(jd, place, pp);
+}
+
+// @parity: py=dwadhasa_vargeeya_bala
+export async function dwadhasaVargeeyaBalaFromJd(
+  jd: number, place: Place
+): Promise<DwadhasaVargeeyaBalaResult> {
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  return calculateDwadhasaVargeeyaBala(jd, place, pp);
+}
+
+// @parity: py=harsha_bala
+export async function harshaBalaFromDob(
+  dob: JhoraDate, tob: [number, number, number], place: Place, divisionalFactor = 1
+): Promise<HarshaBalaResult> {
+  const time: JhoraTime = { hour: tob[0], minute: tob[1], second: tob[2] };
+  const jd = gregorianToJulianDay(dob, time);
+  const pp = await divisionalPositionsAsync(jd, place, 1);
+  return calculateHarshaBala(jd, place, pp, divisionalFactor);
+}
