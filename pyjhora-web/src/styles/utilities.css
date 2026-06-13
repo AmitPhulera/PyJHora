@@ -87,6 +87,40 @@
   box-shadow: 0 0 0 3px rgba(201, 161, 78, 0.15);
 }
 
+/* Native <select> used by chart/varga pickers. Without theming the browser
+   renders a default (light) control + popup, which is unreadable in dark mode. */
+.form-select {
+  padding: var(--space-sm) 2.25rem var(--space-sm) var(--space-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0aec0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right var(--space-sm) center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  transition: all var(--transition-fast);
+}
+
+.form-select:hover {
+  border-color: var(--color-accent-gold);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 3px rgba(201, 161, 78, 0.15);
+}
+
+.form-select option {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
 .input::placeholder {
   color: var(--color-text-muted);
 }

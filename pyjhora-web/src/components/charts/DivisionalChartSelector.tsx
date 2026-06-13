@@ -23,7 +23,7 @@ export const DivisionalChartSelector: React.FC<DivisionalChartSelectorProps> = (
       <label htmlFor="varga-select" className="text-sm font-medium">Chart:</label>
       <select
         id="varga-select"
-        className="form-select text-sm p-1 border rounded"
+        className="form-select"
         value={selectedVarga}
         onChange={(e) => onSelect(Number(e.target.value))}
       >

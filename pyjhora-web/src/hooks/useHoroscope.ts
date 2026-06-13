@@ -66,6 +66,7 @@ import { gregorianToJulianDay } from '../core/utils/julian';
 // ============================================================================
 
 export interface BirthData {
+  name?: string;      // optional person label
   date: string;       // "YYYY-MM-DD"
   time: string;       // "HH:MM"
   placeName: string;

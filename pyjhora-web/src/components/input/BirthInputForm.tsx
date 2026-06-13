@@ -4,9 +4,13 @@
  */
 
 import { useState } from 'react';
+import { offsetHoursForCoordsAtDate } from '../../core/utils/timezone';
+import type { GeocodeResult } from '../../services/geocode';
+import { PlaceAutocomplete } from './PlaceAutocomplete';
 import './BirthInputForm.css';
 
 interface BirthData {
+  name?: string;
   date: string;
   time: string;
   placeName: string;
@@ -21,30 +25,6 @@ interface BirthInputFormProps {
   isCalculating?: boolean;
 }
 
-// Preset places for quick selection — global coverage across time zones
-const PRESET_PLACES = [
-  { name: 'Pithoragarh, India', lat: 29.5829, lon: 80.2182, tz: 5.5 },
-  { name: 'Bangalore, India', lat: 12.972, lon: 77.594, tz: 5.5 },
-  { name: 'Delhi, India', lat: 28.679, lon: 77.217, tz: 5.5 },
-  { name: 'Mumbai, India', lat: 19.076, lon: 72.878, tz: 5.5 },
-  { name: 'Chennai, India', lat: 13.083, lon: 80.27, tz: 5.5 },
-  { name: 'Kolkata, India', lat: 22.573, lon: 88.364, tz: 5.5 },
-  { name: 'Hyderabad, India', lat: 17.385, lon: 78.487, tz: 5.5 },
-  { name: 'London, UK', lat: 51.507, lon: -0.127, tz: 0 },
-  { name: 'New York, USA', lat: 40.714, lon: -74.006, tz: -5 },
-  { name: 'Los Angeles, USA', lat: 34.052, lon: -118.244, tz: -8 },
-  { name: 'Chicago, USA', lat: 41.878, lon: -87.630, tz: -6 },
-  { name: 'Toronto, Canada', lat: 43.653, lon: -79.383, tz: -5 },
-  { name: 'Dubai, UAE', lat: 25.204, lon: 55.271, tz: 4 },
-  { name: 'Singapore', lat: 1.352, lon: 103.820, tz: 8 },
-  { name: 'Sydney, Australia', lat: -33.869, lon: 151.209, tz: 11 },
-  { name: 'Tokyo, Japan', lat: 35.682, lon: 139.692, tz: 9 },
-  { name: 'Kathmandu, Nepal', lat: 27.717, lon: 85.324, tz: 5.75 },
-  { name: 'Colombo, Sri Lanka', lat: 6.927, lon: 79.861, tz: 5.5 },
-  { name: 'Nairobi, Kenya', lat: -1.286, lon: 36.817, tz: 3 },
-  { name: 'São Paulo, Brazil', lat: -23.550, lon: -46.633, tz: -3 },
-];
-
 function formatTimezoneUTC(tz: number): string {
   const sign = tz >= 0 ? '+' : '-';
   const abs = Math.abs(tz);
@@ -54,6 +34,7 @@ function formatTimezoneUTC(tz: number): string {
 }
 
 export function BirthInputForm({ onSubmit, initialData, isCalculating = false }: BirthInputFormProps) {
+  const [name, setName] = useState(initialData?.name ?? '');
   const [date, setDate] = useState(initialData?.date ?? '2025-05-26');
   const [time, setTime] = useState(initialData?.time ?? '04:15');
   const [placeName, setPlaceName] = useState(initialData?.placeName ?? 'Bangalore, India');
@@ -61,16 +42,19 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
   const [longitude, setLongitude] = useState(initialData?.longitude ?? 77.594);
   const [timezone, setTimezone] = useState(initialData?.timezone ?? 5.5);
 
-  const handlePresetSelect = (preset: typeof PRESET_PLACES[0]) => {
-    setPlaceName(preset.name);
-    setLatitude(preset.lat);
-    setLongitude(preset.lon);
-    setTimezone(preset.tz);
+  const handlePlaceSelect = (result: GeocodeResult) => {
+    setPlaceName(result.displayName);
+    setLatitude(result.latitude);
+    setLongitude(result.longitude);
+    // Derive the date-specific UTC offset (handles DST historically).
+    const tz = offsetHoursForCoordsAtDate(result.latitude, result.longitude, date, time);
+    setTimezone(tz);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
+      name: name.trim() || undefined,
       date,
       time,
       placeName,
@@ -83,6 +67,19 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
   return (
     <form className="birth-input-form card" onSubmit={handleSubmit} aria-label="Birth details">
       <h3 className="form-title">Birth Details</h3>
+
+      {/* Name — optional label */}
+      <div className="form-group">
+        <label className="label" htmlFor="birth-name">Name <span className="text-muted">(optional)</span></label>
+        <input
+          id="birth-name"
+          type="text"
+          className="input"
+          placeholder="e.g. Amit"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
 
       {/* Date & Time — prominent row */}
       <div className="form-row">
@@ -111,24 +108,15 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
         </div>
       </div>
 
-      {/* Place */}
+      {/* Place — live search */}
       <div className="form-group">
-        <label className="label" htmlFor="place-select">Place (Preset)</label>
-        <select
-          id="place-select"
-          className="select"
+        <label className="label" htmlFor="place-search">Place</label>
+        <PlaceAutocomplete
+          id="place-search"
           value={placeName}
-          onChange={(e) => {
-            const preset = PRESET_PLACES.find(p => p.name === e.target.value);
-            if (preset) {
-              handlePresetSelect(preset);
-            }
-          }}
-        >
-          {PRESET_PLACES.map(place => (
-            <option key={place.name} value={place.name}>{place.name}</option>
-          ))}
-        </select>
+          onSelect={handlePlaceSelect}
+          onTextChange={setPlaceName}
+        />
       </div>
 
       {/* Coordinates — always visible */}

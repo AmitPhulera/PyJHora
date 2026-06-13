@@ -1,0 +1,75 @@
+.saved-profiles {
+  padding: var(--space-lg);
+  align-self: start;
+}
+
+.saved-profiles-title {
+  margin: 0 0 var(--space-md);
+  font-size: 1.05rem;
+}
+
+.saved-profiles-empty {
+  margin: 0;
+}
+
+.saved-profiles-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.saved-profiles-item {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-xs);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.saved-profiles-item:hover {
+  background: var(--color-surface-hover, rgba(201, 161, 78, 0.1));
+}
+
+.saved-profiles-load {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+}
+
+.saved-profiles-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.saved-profiles-sub {
+  font-size: 0.8rem;
+}
+
+.saved-profiles-delete {
+  flex: 0 0 auto;
+  width: 32px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.saved-profiles-delete:hover {
+  color: var(--color-error, #e5484d);
+  background: var(--color-surface-hover, rgba(229, 72, 77, 0.12));
+}

@@ -10,6 +10,7 @@ import {
   type DashaSystemId,
   type HoroscopeData,
 } from '../hooks/useHoroscope';
+import { useProfiles, type Profile } from '../hooks/useProfiles';
 
 // ---------------------------------------------------------------------------
 // Re-export types for consumer convenience
@@ -38,6 +39,11 @@ interface HoroscopeContextValue {
   /* Birth input */
   birthData: BirthData | null;
   setBirthData: (data: BirthData | null) => void;
+
+  /* Saved profiles */
+  profiles: Profile[];
+  loadProfile: (profile: Profile) => void;
+  deleteProfile: (id: string) => void;
 
   /* Core horoscope */
   horoscope: HoroscopeData | null;
@@ -74,6 +80,9 @@ export function HoroscopeProvider({ children }: { children: ReactNode }) {
   // Core calculation
   const { horoscope, isCalculating, error } = useHoroscope(birthData);
 
+  // Saved profiles (localStorage-backed)
+  const { profiles, saveProfile, deleteProfile } = useProfiles();
+
   // Stable setter that also clears horoscope-dependent state
   const setBirthData = useCallback((data: BirthData | null) => {
     setBirthDataRaw(data);
@@ -83,6 +92,31 @@ export function HoroscopeProvider({ children }: { children: ReactNode }) {
       setSelectedDasha(undefined);
     }
   }, []);
+
+  // Loading a saved profile is just setting birth data from it.
+  const loadProfile = useCallback(
+    (profile: Profile) => {
+      setBirthData({
+        name: profile.name,
+        date: profile.date,
+        time: profile.time,
+        placeName: profile.placeName,
+        latitude: profile.latitude,
+        longitude: profile.longitude,
+        timezone: profile.timezone,
+      });
+    },
+    [setBirthData],
+  );
+
+  // Auto-save: every successful calculation upserts a profile (deduped by
+  // composite id, so re-viewing the same chart just bumps lastViewedAt).
+  useEffect(() => {
+    if (horoscope && birthData && !error) {
+      saveProfile(birthData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [horoscope]);
 
   // ---- Divisional chart data ----
   const chartData = useMemo<ChartData | null>(() => {
@@ -136,6 +170,9 @@ export function HoroscopeProvider({ children }: { children: ReactNode }) {
     () => ({
       birthData,
       setBirthData,
+      profiles,
+      loadProfile,
+      deleteProfile,
       horoscope,
       isCalculating,
       error,
@@ -150,6 +187,7 @@ export function HoroscopeProvider({ children }: { children: ReactNode }) {
     }),
     [
       birthData, setBirthData,
+      profiles, loadProfile, deleteProfile,
       horoscope, isCalculating, error,
       selectedVarga,
       chartData,

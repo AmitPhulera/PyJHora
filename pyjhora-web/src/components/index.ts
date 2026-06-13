@@ -30,6 +30,7 @@ export { YogaList } from './yogas/YogaList';
 // Input
 export { BirthInputForm } from './input/BirthInputForm';
 export { BirthInfoSummary } from './input/BirthInfoSummary';
+export { SavedProfilesPanel } from './input/SavedProfilesPanel';
 
 // Match / Compatibility
 export { MatchUI } from './match/MatchUI';
