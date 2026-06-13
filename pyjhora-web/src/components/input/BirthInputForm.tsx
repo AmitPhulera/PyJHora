@@ -78,7 +78,7 @@ export function BirthInputForm({ onSubmit, initialData, isCalculating = false }:
           id="birth-name"
           type="text"
           className="input"
-          placeholder="e.g. Amit"
+          placeholder="e.g. John Doe"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
