@@ -3,7 +3,12 @@
  * extracted from App.tsx.
  */
 import { useEffect, useState } from 'react';
-import SwissEph from 'swisseph-wasm';
+
+import {
+  ascendantAsync,
+  getAllPlanetPositionsAsync,
+  setAyanamsaMode,
+} from '../core/ephemeris/swe-adapter';
 
 import { getAshtottariDashaBhukti } from '../core/dhasa/graha/ashtottari';
 import { getBuddhiGathiDashaBhukti } from '../core/dhasa/graha/buddhi-gathi';
@@ -172,111 +177,32 @@ export const DASHA_SYSTEMS = [
 export type DashaSystemId = (typeof DASHA_SYSTEMS)[number]['id'];
 
 // ============================================================================
-// Swiss Ephemeris helpers (module-scoped singleton)
+// Swiss Ephemeris helpers
+//
+// These delegate to the parity-validated `swe-adapter` so the UI shares the
+// SAME ephemeris path as the rest of the codebase (and the parity harness).
+// They previously maintained a SECOND SwissEph singleton that called the
+// `swisseph-wasm` `swe.calc_ut()` JS wrapper directly — that wrapper
+// intermittently returns zeroed/garbage longitudes (e.g. Venus -> Pisces),
+// which the adapter avoids via a direct `ccall('swe_calc_ut', ...)`. Never
+// reintroduce a separate ephemeris path here.
 // ============================================================================
-
-const PYJHORA_TO_SWE: Record<number, number> = {
-  0: 0, 1: 1, 2: 4, 3: 2, 4: 5, 5: 3, 6: 6, 7: 10, 8: -1,
-};
-
-let sweInstance: SwissEph | null = null;
-
-async function initSwissEph(): Promise<SwissEph> {
-  if (!sweInstance) {
-    sweInstance = new SwissEph();
-    await sweInstance.initSwissEph();
-  }
-  return sweInstance;
-}
 
 async function calculateRealPlanetPositions(
   jdUtc: number,
 ): Promise<Array<{ planet: number; rasi: number; longitude: number; isRetrograde: boolean }>> {
-  const swe = await initSwissEph();
-
-  swe.set_sid_mode(1, 0, 0); // Lahiri
-  const ayanamsa = swe.get_ayanamsa(jdUtc);
-  const flags = 4 | 256; // SEFLG_MOSEPH | SEFLG_SPEED
-
-  const positions: Array<{ planet: number; rasi: number; longitude: number; isRetrograde: boolean }> = [];
-  let rahuLong = 0;
-
-  for (let p = 0; p <= 8; p++) {
-    const sweP = PYJHORA_TO_SWE[p];
-    let long: number, speed: number;
-
-    if (sweP === -1) {
-      long = (rahuLong + 180) % 360;
-      speed = 0;
-    } else {
-      try {
-        const r = swe.calc_ut(jdUtc, sweP ?? 0, flags);
-        if (!r || typeof r[0] !== 'number') {
-          long = 0;
-          speed = 0;
-        } else {
-          const tropical = ((r[0] % 360) + 360) % 360;
-          long = ((tropical - ayanamsa) % 360 + 360) % 360;
-          speed = r[3] ?? 0;
-        }
-        if (p === 7) rahuLong = long;
-      } catch (err) {
-        console.error(`Error calculating planet ${p} (sweP=${sweP}):`, err);
-        long = 0;
-        speed = 0;
-      }
-    }
-
-    positions.push({
-      planet: p,
-      rasi: Math.floor(long / 30),
-      longitude: long % 30,
-      isRetrograde: p < 7 && speed < 0,
-    });
-  }
-
-  return positions;
+  setAyanamsaMode('LAHIRI');
+  return getAllPlanetPositionsAsync(jdUtc);
 }
 
 async function calculateRealAscendant(
   jd: number,
   place: Place,
 ): Promise<{ rasi: number; longitude: number }> {
-  const swe = await initSwissEph();
-  swe.set_sid_mode(1, 0, 0); // Lahiri
-  const jdUtc = jd - place.timezone / 24;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const SweModule = (swe as any).SweModule;
-  const cuspsPtr = SweModule._malloc(13 * Float64Array.BYTES_PER_ELEMENT);
-  const ascmcPtr = SweModule._malloc(10 * Float64Array.BYTES_PER_ELEMENT);
-  const SEFLG_SIDEREAL = 65536;
-
-  try {
-    const retCode = SweModule.ccall(
-      'swe_houses_ex',
-      'number',
-      ['number', 'number', 'number', 'number', 'number', 'pointer', 'pointer'],
-      [jdUtc, SEFLG_SIDEREAL, place.latitude, place.longitude, 'P'.charCodeAt(0), cuspsPtr, ascmcPtr],
-    );
-
-    const ascmcArray = new Float64Array(SweModule.HEAPF64.buffer, ascmcPtr, 10);
-    const siderealAsc = ascmcArray[0];
-
-    if (retCode < 0 || !isFinite(siderealAsc) || siderealAsc === 0) {
-      const ayanamsa = swe.get_ayanamsa(jdUtc);
-      const cuspsArray = new Float64Array(SweModule.HEAPF64.buffer, cuspsPtr, 13);
-      const tropicalAsc = cuspsArray[1];
-      const fallbackAsc = ((tropicalAsc - ayanamsa) % 360 + 360) % 360;
-      return { rasi: Math.floor(fallbackAsc / 30), longitude: fallbackAsc % 30 };
-    }
-
-    const normalizedAsc = ((siderealAsc % 360) + 360) % 360;
-    return { rasi: Math.floor(normalizedAsc / 30), longitude: normalizedAsc % 30 };
-  } finally {
-    SweModule._free(cuspsPtr);
-    SweModule._free(ascmcPtr);
-  }
+  setAyanamsaMode('LAHIRI');
+  const asc = await ascendantAsync(jd, place);
+  const normalized = ((asc % 360) + 360) % 360;
+  return { rasi: Math.floor(normalized / 30), longitude: normalized % 30 };
 }
 
 // ============================================================================
