@@ -224,24 +224,17 @@ export const getRaasiDrishtiMap = (): Record<number, number[]> => {
  * @returns Objects containing aspect data
  */
 export const getRaasiDrishtiFromChart = (
-  planetToHouse: Record<number, number>
+  planetToHouse: Record<number, number>,
+  ascendantRasi?: number
 ): {
   arp: Record<number, number[]>; // Aspects on Rasis
   ahp: Record<number, number[]>; // Aspects on Houses (relative to Asc)
   app: Record<number, number[]>; // Aspects on Planets
 } => {
-  const ascRaasi = planetToHouse[ASCENDANT_SYMBOL as unknown as number] || 0; // Assuming ASCENDANT_SYMBOL handled carefully or separate
-  // Note: planetToHouse usually uses numbers for planets. We need to handle Ascendant separately or agree on ID.
-  // In our types, we might use a special ID or just pass ascendant rasi separately.
-  // For this function, let's assume we can pass the Ascendant Rasi directly or look it up if included.
-  
-  // Actually, let's refine the input. Usually we receive planet positions.
-  // planetToHouse: Record<number, number> (Planet ID -> Rasi Index)
-  // We need to know where Ascendant is too.
-  
-  // Let's refactor to take planetPositions array to be safe, or just planetToHouse and ascendantRasi.
-  // I'll stick to planetToHouse and explicit Ascendant Rasi for clarity.
-  
+  // Python derives asc_house from p_to_h['L']. Callers that need the ahp
+  // (houses relative to ascendant) must pass ascendantRasi explicitly, since the
+  // planetToHouse map only contains numeric planet ids.
+  const ascRaasi = ascendantRasi ?? 0;
   const raasiDrishtiMap = getRaasiDrishtiMap();
   const arp: Record<number, number[]> = {};
   const ahp: Record<number, number[]> = {};
@@ -270,10 +263,11 @@ export const getRaasiDrishtiFromChart = (
     // Rasis aspected by the planet's rasi
     const aspectedRasis = raasiDrishtiMap[pRaasi] || [];
     arp[p] = aspectedRasis;
-    
-    // Houses aspected (relative to Ascendant which needs to be passed, but let's calc relative later if needed)
-    // house.py uses Ascendant to calc ahp. Let's return raw rasi lists and let caller derive houses.
-    
+
+    // Houses aspected, relative to the ascendant rasi.
+    // Python: ahp[p] = [(h - asc_house) % 12 + 1 for h in arp[p]]
+    ahp[p] = aspectedRasis.map(h => ((h - ascRaasi + 12) % 12) + 1);
+
     // Planets aspected
     app[p] = [];
     aspectedRasis.forEach(r => {
@@ -437,6 +431,62 @@ export const normalizePlanetPositions = (
             }
             : item
     );
+};
+
+/**
+ * Replicate CPython's `list(set(values))` iteration order for small non-negative
+ * integers (the planet-index domain, 0-11). Several Python functions return
+ * `list(set(...))`, whose element order is an implementation artifact of CPython's
+ * open-addressed hash table rather than insertion or sorted order. To achieve
+ * byte-for-byte parity with the Python source of truth, we emulate that table:
+ * size starts at 8 and grows (fill*5 >= mask*3 -> resize) using the same probe
+ * sequence (i = (i*5 + 1 + perturb) & mask; perturb >>= 5). hash(int) == int for
+ * small ints. Iteration yields occupied slots in ascending index order.
+ */
+const pythonIntSetOrder = (values: number[]): number[] => {
+  const seen = new Set<number>();
+  const items: number[] = [];
+  for (const v of values) {
+    if (!seen.has(v)) {
+      seen.add(v);
+      items.push(v);
+    }
+  }
+  let size = 8;
+  let table: (number | null)[] = new Array(size).fill(null);
+  let fill = 0;
+  let used = 0;
+  const insert = (val: number): void => {
+    const mask = size - 1;
+    let perturb = val >>> 0;
+    let i = (val & mask) >>> 0;
+    while (table[i] !== null) {
+      if (table[i] === val) return;
+      perturb = Math.floor(perturb / 32); // perturb >>= 5
+      i = ((i * 5 + 1 + perturb) & mask) >>> 0;
+    }
+    table[i] = val;
+    fill++;
+    used++;
+  };
+  const maybeResize = (): void => {
+    if (fill * 5 >= (size - 1) * 3) {
+      const target = used > 50000 ? used * 2 : used * 4;
+      let s = 8;
+      while (s <= target) s <<= 1;
+      size = s;
+      const old = table.filter((x): x is number => x !== null);
+      table = new Array(size).fill(null);
+      fill = 0;
+      used = 0;
+      for (const v of old) insert(v);
+    }
+  };
+  for (const v of items) {
+    insert(v);
+    maybeResize();
+  }
+  return table.filter((x): x is number => x !== null);
 };
 
 /**
@@ -1199,8 +1249,8 @@ export const getMarakasFromPlanetPositions = (
     marakaPlanets.push(...mpls);
   }
 
-  // Deduplicate
-  return [...new Set(marakaPlanets)];
+  // Deduplicate. Python returns list(set(...)); match CPython set iteration order.
+  return pythonIntSetOrder(marakaPlanets);
 };
 
 // ============================================================================
@@ -2242,8 +2292,14 @@ export const getAspectedHousesOfRaasi = (chart: string[], raasi: number): number
     if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
   }
   const { ahp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  // Parity note: Python's aspected_houses_of_the_raasi filters with `str(raasi) in value`,
+  // but `value` (ahp[p]) is a list of integer house numbers. In Python a str is never equal
+  // to an int, so the membership test is ALWAYS False and the function ALWAYS returns [].
+  // We replicate that source-of-truth behavior (string vs int never matches).
   return Object.entries(ahp)
-    .filter(([, aspectedHouses]) => aspectedHouses.includes(raasi))
+    .filter(([, aspectedHouses]) =>
+      aspectedHouses.some((h) => (h as unknown as string) === String(raasi))
+    )
     .map(([key]) => parseInt(key, 10));
 };
 
@@ -2264,8 +2320,15 @@ export const getAspectedRasisOfRaasi = (chart: string[], raasi: number): number[
     if (pToH[p] !== undefined) planetToHouseMap[p] = pToH[p];
   }
   const { arp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  // Parity note: Python's aspected_raasis_of_the_raasi filters with `str(raasi) in value`,
+  // but `value` (arp[p]) is a list of integer rasi numbers. In Python a str is never equal
+  // to an int, so the membership test is ALWAYS False and the function ALWAYS returns [].
+  // We replicate that source-of-truth behavior (string vs int never matches) rather than
+  // the "intended" integer comparison.
   return Object.entries(arp)
-    .filter(([, aspectedRasis]) => aspectedRasis.includes(raasi))
+    .filter(([, aspectedRasis]) =>
+      aspectedRasis.some((r) => (r as unknown as string) === String(raasi))
+    )
     .map(([key]) => parseInt(key, 10));
 };
 
@@ -2311,7 +2374,8 @@ export const getMarakas = (chart: string[]): number[] => {
     marakaPlanets.push(...mpls);
   }
 
-  return [...new Set(marakaPlanets)];
+  // Python returns list(set(...)); match CPython set iteration order.
+  return pythonIntSetOrder(marakaPlanets);
 };
 
 // ============================================================================

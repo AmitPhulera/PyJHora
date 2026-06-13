@@ -479,7 +479,12 @@ export const calculateSaptavargajaBala = (
   const charts: Record<number, PlanetPosition[]> = {};
 
   for (const dcf of sv) {
-    charts[dcf] = getDivisionalChart(d1Positions, dcf);
+    // Python _sapthavargaja_bala1 builds the D-2 chart via hora_chart(chart_method=2)
+    // (Traditional Parasara, Leo/Cancer only), NOT the default divisional_chart(dcf=2)
+    // which uses chart_method=1 (Parivritti Even Reverse). All other dcf use the default.
+    charts[dcf] = dcf === 2
+      ? getDivisionalChart(d1Positions, 2, 2)
+      : getDivisionalChart(d1Positions, dcf);
   }
 
   // Get compound relationships from the D1 chart (Python: house._get_compound_relationships_of_planets)
@@ -1425,8 +1430,10 @@ export const calculateBhavaDrikBala = (
   const asubhaGrahas = [SUN, MARS, SATURN]; // [0, 2, 6]
 
   // Get graha and raasi drishti aspects
+  const ascPosForDrishti = d1Positions.find(p => p.planet === -1);
+  const ascRasiForDrishti = ascPosForDrishti ? ascPosForDrishti.rasi : 0;
   const { ahp: ghp } = getGrahaDrishtiFromChart(chartStrings);
-  const { ahp: rhp } = getRaasiDrishtiFromChart(planetToHouseMap);
+  const { ahp: rhp } = getRaasiDrishtiFromChart(planetToHouseMap, ascRasiForDrishti);
 
   // Build planet house aspects (combined graha + raasi drishti)
   const planetHouseAspects: Record<number, number[]> = {};
@@ -1740,15 +1747,21 @@ export const calculatePanchaVargeeyaBala = (
   const ub = calculateUchchaBala(d1Positions);
   const hb = calculateHaddaBala(d1Positions);
 
-  const d3Positions = getDivisionalChart(d1Positions, 3);
-  const db = calculateDrekkanaBala(d3Positions);
+  // Drekkana (D-3) and Navamsa (D-9) balas are computed by Python but, due to the
+  // zip-over-dict bug documented below, their VALUES never reach the final sum.
+  // We still compute them to mirror the call structure / side-effect-free intent.
+  void calculateDrekkanaBala(getDivisionalChart(d1Positions, 3));
+  void calculateNavamsaBala(getDivisionalChart(d1Positions, 9));
 
-  const d9Positions = getDivisionalChart(d1Positions, 9);
-  const nb = calculateNavamsaBala(d9Positions);
-
+  // Parity note (Python bug we must replicate): pancha_vargeeya_bala builds
+  //   pvb = [kb, ub, hb, db, nb]; [round(sum(x)/4.0,2) for x in zip(*pvb)]
+  // kb is dict_values and ub/hb are lists, but db (_drekkana_bala) and nb
+  // (_navamsa_bala) are DICTS keyed 0..6. `zip(*<dict>)` iterates the dict's KEYS,
+  // so the drekkana/navamsa contributions are the planet INDEX (0..6), NOT the
+  // computed bala values. We deliberately mirror that here for source-of-truth parity.
   const pvb: PanchaVargeeyaBalaResult = {};
   for (let k = 0; k < 7; k++) {
-    const sum = kb[k] + ub[k] + hb[k] + (db[k] ?? 0) + (nb[k] ?? 0);
+    const sum = kb[k] + ub[k] + hb[k] + k + k;
     pvb[k] = roundTo(sum / 4, 2);
   }
 
